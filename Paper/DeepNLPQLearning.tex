@@ -1,0 +1,47 @@
+\documentclass[12pt]{article}
+\usepackage{geometry}
+%\geometry{letterpaper}
+\usepackage{graphicx}
+\usepackage{amssymb}
+\usepackage{ bm }
+\usepackage{amsmath }
+\usepackage{hyperref}
+
+\title{Deep Q-Learning for NLP}
+
+\author{
+	Chris Kedzie \\ \href{mailto: kedzie@cs.columbia.edu}{\small kedzie@cs.columbia.edu} 
+		\and  
+	Francisco Javier Arceo \\ \href{mailto: fja2114@columbia.edu}{\small fja2114@columbia.edu} 
+	}
+	
+\begin{document}
+\maketitle
+
+\bibliographystyle{alpha}
+
+%\begin{abstract}
+%\end{abstract}
+
+\section{Brain Dump}
+
+Input Data: Streaming Queries from the time of query until an hour before the time of query. 
+
+Step 1:  ?
+
+Step 2:  ?
+
+Output: Summarization of relevant Queries.
+
+Last hidden layer of an LSTM-RNN will be a k-dimensional embedding of a given sentence. 
+
+Use Deep Q Learning framework based on \cite{MnihKSGAWR13} and \cite{DBLP:journals/corr/MnihBMGLHSK16}.
+
+\section{Useful Links}
+
+http://trec.nist.gov/
+
+
+\bibliography{DeepNLPQLearning}
+
+\end{document}
