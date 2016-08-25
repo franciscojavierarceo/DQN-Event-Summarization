@@ -1,5 +1,10 @@
 \begin{thebibliography}{1}
 
+\bibitem{chen2012marginalized}
+Minmin Chen, Zhixiang Xu, Kilian Weinberger, and Fei Sha.
+\newblock Marginalized denoising autoencoders for domain adaptation.
+\newblock {\em arXiv preprint arXiv:1206.4683}, 2012.
+
 \bibitem{DBLP:journals/corr/MnihBMGLHSK16}
 Volodymyr Mnih, Adri{\`{a}}~Puigdom{\`{e}}nech Badia, Mehdi Mirza, Alex Graves,
   Timothy~P. Lillicrap, Tim Harley, David Silver, and Koray Kavukcuoglu.
