@@ -36,6 +36,136 @@ Last hidden layer of an LSTM-RNN will be a k-dimensional embedding of a given se
 
 Use Deep Q Learning framework based on \cite{MnihKSGAWR13} and \cite{DBLP:journals/corr/MnihBMGLHSK16}.
 
+
+\section{Extractive Streaming Summarization}
+
+  In the extractive streaming summarization task, we are given as input
+  a query, e.g. a short text description of a topic or an event, and 
+  document stream, a time ordered set of sentences 
+  relevant to the query. Starting with an initially empty summary,  
+  an extractive, streaming summarization algorithm is intended to 
+  examine each sentence in order and when new and important (relative to the 
+  query) information is identified, add that sentence to the summary. 
+
+  Implicit to this problem is the notion of system time -- the 
+  summarization algorithm can only examine sentences that occur in the stream
+  before the current system time. Advancing the system time gives the algorithm
+  access to more sentences, although in practice the stream is sufficiently 
+  large enough that choices have to be made about how much history can be 
+  kept in memory. For many domains, e.g. crisis informatics, it is preferable
+  for a summarization algorithm to identify important information as early as 
+  possible, and so the objective function should penalize a large disparity
+  between the time a piece of information is first available to the algorithm
+  and the system time at which that information is actually added to the 
+  summary.
+
+  Previous work in this area has either incremented the system time in fixed
+  increments (e.g. an hour) 
+  \cite{mccreadie2014incremental,kedzie2015predicting} or operated in
+  a fully online setting \cite{guo2013updating,kedzie2016real}. In both cases 
+  explicitly 
+  modeling the current state of the summary, the stream, and their relationship
+  with the query is quite complicated and exhibits non-linear dynamics that 
+  are difficult characterize in traditional feature based models.
+
+  Additionaly, the structured nature of the sentence selection task 
+  (sentence selection is
+  highly dependent on the current summary state) suggests that imitation 
+  or reinforcement learning are necessary to obtain parity between training
+  and testing feature distributions. 
+
+  This leads us to explore deep Q networks (DQN) for two reasons. 
+  First, both the 
+  representation and mode of interaction between the stream, summary, and 
+  query can be learned. 
+  Second, the learned Q function (plus random noise) controls the state 
+  space that is explored, ensuring more consistancy between train and test 
+  distribtuions than for example naive imitation learning 
+  (possibly -- I'm not totally happy with this sentence).
+
+  \subsection{Problem Definition}
+   
+    DQN learn by using an a $\epsilon$-greedy search policy to generate a 
+    sequence of state, action, next state, reward 4-tuples using the current
+    learned Q-network to evaluate candidate actions. These tuples are sampled
+    from and used to estimate the true Q function.
+
+    \textbf{States} 
+    In our setup a state $s(X_{\le t},\tilde{Y}_{\le t}, q)$ is a function
+    of the stream $X$ observed up to the current system time $t$, the state
+    of the current summary $\tilde{Y}$ at system time $t$, and the query $q$.
+    For brevity we will use $s(t,q)$ where the dependence on 
+    $X_{\le t},\tilde{Y}_{\le t}$ is assumed.
+    $s(t,q)$ is itself three recurrent neural networks, one for encoding 
+    the summary, the stream, and the query respectively.
+
+    \textbf{Actions} 
+    The set of possible actions at each time step is 
+    $\mathcal{A} = \{select, skip\}$ where $select$ corresponds to adding the 
+    current sentence $x_t$ to the summary and incrementing the current system
+    time, 
+    \begin{align*}
+        \tilde{Y}_{\le t + 1} &= \tilde{Y}_{\le t} \cup \{ x_t \} \\
+        t &= t + 1    
+    \end{align*}
+    or $skip$ where only $t$ is incremented without changing the current 
+    summary
+    \begin{align*}
+        \tilde{Y}_{\le t + 1} &= \tilde{Y}_{\le t}  \\
+        t &= t + 1.
+    \end{align*}
+
+
+    \textbf{Reward} 
+    The reward for a given action will be measured by relative gain in 
+    ROUGE-2 F1 score of the predicted summary $\tilde{Y}_{\le t}$ measured
+    against a gold standard summary $Y$.
+
+
+     
+    When only one gold summary reference is used, ROUGE-N Recall is calculated
+    as 
+
+    \[ \textrm{ROUGE-NR}(\tilde{Y}, Y) = 
+        \frac{\sum_{g \in \textrm{ngrams}(Y,N)} 
+        \min \left(\textrm{count}(g, \tilde{Y}), \textrm{count}(g, Y)\right)}{
+        \sum_{g \in \textrm{ngrams}(Y,N)} 
+        \textrm{count}(g, Y)
+        }
+    \]
+
+    where $\textrm{ngrams}(Y, N)$ returns the set of ngrams of order $N$ in 
+    the summary $Y$ and $\textrm{count}(g, Y)$ is the count of occurences of
+    ngram $g$ in $Y.$
+
+    Similarly, ROUGE-N Precision is calculated as 
+    \[ \textrm{ROUGE-NP}(\tilde{Y}, Y) = 
+        \frac{\sum_{g \in \textrm{ngrams}(Y,N)} 
+        \min \left(\textrm{count}(g, \tilde{Y}), \textrm{count}(g, Y)\right)}{
+            \sum_{g \in \textrm{ngrams}(\tilde{Y},N)} 
+            \textrm{count}(g, \tilde{Y})
+        }
+    \]
+
+    and the $F_1$ is simply the harmonic mean of the two:
+    \[ \textrm{ROUGE-NF1}(\tilde{Y}, Y) = \frac{ 2 \times 
+    \textrm{ROUGE-NP}(\tilde{Y}, Y) \times \textrm{ROUGE-NR}(\tilde{Y}, Y)
+    }{ \textrm{ROUGE-NP}(\tilde{Y}, Y) + \textrm{ROUGE-NR}(\tilde{Y}, Y) } \]
+              %\textrm{ROUGE-NP}(\tilde{Y}, Y) \times 
+              %\textrm{ROUGE-NR}(\tilde{Y}, Y)
+             %   }{
+             % \textrm{ROUGE-NP}(\tilde{Y}, Y) +
+             % \textrm{ROUGE-NR}(\tilde{Y}, Y)
+        
+       % }
+
+
+    The reward $r$ at time $t$ is then:
+    \[ r_t = \textrm{ROUGE-NF1}(\tilde{Y}_{\le t+1}, Y) - 
+    \textrm{ROUGE-NF1}(\tilde{Y}_{\le t}, Y) \]
+
+    TODO: Think about how to incorporate a time penalty into the reward.
+
 \section{Useful Links}
 
 Just adding some links to useful things 
