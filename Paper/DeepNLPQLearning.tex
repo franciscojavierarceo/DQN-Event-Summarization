@@ -6,7 +6,11 @@
 \usepackage{amsmath }
 \usepackage{hyperref}
 
-\title{Deep Q-Learning for NLP}
+\usepackage{algorithm,algorithmic,amsmath}
+%\usepackage[linesnumbered,ruled]{algorithm2e}
+
+
+\title{DQN-LSTM for Event Summarization}
 
 \author{
 	Chris Kedzie \\ \href{mailto: kedzie@cs.columbia.edu}{\small kedzie@cs.columbia.edu} 
@@ -22,19 +26,8 @@
 %\begin{abstract}
 %\end{abstract}
 
-\section{Brain Dump}
+\section{Notes}
 
-Input Data: Streaming Queries from the time of query until an hour before the time of query. 
-
-Step 1:  ?
-
-Step 2:  ?
-
-Output: Summarization of relevant Queries.
-
-Last hidden layer of an LSTM-RNN will be a k-dimensional embedding of a given sentence. 
-
-Use Deep Q Learning framework based on \cite{MnihKSGAWR13} and \cite{DBLP:journals/corr/MnihBMGLHSK16}.
 
 
 \section{Extractive Streaming Summarization}
@@ -83,9 +76,40 @@ Use Deep Q Learning framework based on \cite{MnihKSGAWR13} and \cite{DBLP:journa
   distribtuions than for example naive imitation learning 
   (possibly -- I'm not totally happy with this sentence).
 
-  \subsection{Problem Definition}
+\subsection{Problem Definition - FJA}
+We specify our DQN architecture by estimating the Q function, $Q^*$, with 3 separate RNN-LSTMs representing the query, $t^{th}$ stream, and current predicted summary, which is then fed into a feedforward Multilayer Perceptron. After evaluation of our current state in our DQN, the model is backpropagated in the standard way, we refer to our architecture as a DQN-LSTM.
+
+\subsection{Algorithm}
+
+
+\begin{algorithm}
+    \bf{Input:} { \rm $\{ x_q, \pi^{*}_q \}_{\forall q \in \mathcal{Q} }$, number of iterations $N$, mixture parameter $\epsilon$  } \\
+    \underline{\bf{Output:}  $\hat{\pi}$ }
+  \begin{algorithmic}[1]
+  \STATE \rm Initialize $\pi_0$ 
+    \STATE \rm $i \leftarrow \emptyset$ 
+    \FOR{$n \in \{0,1,.., N-1\} $}
+      \FOR{$q \in \mathcal{Q}$}
+      	\FOR{$t \in \{0, 1, ..., T-1\}$ }
+        \STATE \rm Execute $\pi_i$ $t$ times and reach $s_t$
+        \FOR{ $a \in \mathcal{A}(s_t) $}
+        		\STATE \rm Let $\pi^0 = \pi^{*}_q$ with probability $\epsilon$, else $\pi_i$
+		\STATE Compute $c_t(a)$ by executing $\pi^0$
+		\STATE $\Gamma \leftarrow \Gamma \cup \{ [\Phi(s_t), a, c_t(a)]\}$
+		\ENDFOR
+        \ENDFOR
+        \STATE $\pi_{i+1} \leftarrow$ Backpropagate LSTM-MLP
+        \STATE $i \leftarrow i + 1$
+      \ENDFOR
+    \ENDFOR
+  \end{algorithmic}
+    \caption{Streaming DQN-LSTM}
+\end{algorithm}
+
+
+\subsection{Problem Definition}
    
-    DQN learn by using an a $\epsilon$-greedy search policy to generate a 
+    DQN learns by using an a $\epsilon$-greedy search policy to generate a 
     sequence of state, action, next state, reward 4-tuples using the current
     learned Q-network to evaluate candidate actions. These tuples are sampled
     from and used to estimate the true Q function.
@@ -180,13 +204,15 @@ Just adding some links to useful things
 	\hline
 	Task  & Status  & Person\\ \hline
   	Read DQN Paper \cite{MnihKSGAWR13}  & Complete  & Francisco \\
-	Read Asynchronous RL Paper \cite{DBLP:journals/corr/MnihBMGLHSK16} & Incomplete  & Francisco \\
-	Read  Regularization Paper \cite{chen2012marginalized} & Incomplete  & Francisco \\
+	Read Asynchronous RL Paper \cite{DBLP:journals/corr/MnihBMGLHSK16} & Briefed  & Francisco \\
+	Read  Regularization Paper \cite{chen2012marginalized} & Complete  & Francisco \\
+	Read  Disaster Summarization Paper \cite{kedzie2015predicting} & Complete  & Francisco \\
+	Read  Sequential Decision Making Paper \cite{kedzie2016real} & Complete  & Francisco \\
 	Install Torch & Complete  & Francisco \\
-	Small simulation of MLP in Torch & Incomplete  & Francisco \\
+	Small simulation of MLP in Torch & Complete  & Francisco \\
 	Small simulation of DQN in Torch & Incomplete  & Francisco \\
 	Download data & Incomplete  & Francisco \\
-	Explore data & Incomplete  & Francisco \\
+	Explore data & In-Progress  & Francisco \\
 	\hline
 \end{tabular}
 
