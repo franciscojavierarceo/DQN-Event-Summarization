@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015) (preloaded format=pdflatex 2015.5.24)  8 SEP 2016 21:41
+This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015) (preloaded format=pdflatex 2015.5.24)  9 SEP 2016 11:23
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -418,7 +418,7 @@ LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <12> not available
 
 {/usr/local/texlive/2015/texmf-var/fonts/map/pdftex/updmap/pdftex.map}]
 Package hyperref Info: bookmark level for unknown algorithm defaults to 0 on in
-put line 119.
+put line 120.
  [2] [3] [4] [5]
 (./DeepNLPQLearning.bbl
 Underfull \hbox (badness 1460) in paragraph at lines 15--19
@@ -427,20 +427,20 @@ time web
  []
 
 [6])
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 264.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 265.
  [7]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 264.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 265.
  (./DeepNLPQLearning.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 264.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 264.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 265.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 265.
 Package rerunfilecheck Info: File `DeepNLPQLearning.out' has not changed.
 (rerunfilecheck)             Checksum: 274E7445B757AA866F33989CA8C93D01;406.
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 264.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 265.
  ) 
 Here is how much of TeX's memory you used:
  6847 strings out of 493089
  98218 string characters out of 6134842
- 201444 words of memory out of 5000000
+ 200444 words of memory out of 5000000
  10171 multiletter control sequences out of 15000+600000
  18135 words of font info for 67 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
@@ -458,7 +458,7 @@ exlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/local/te
 xlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/local/texl
 ive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmti12.pfb></usr/local/texli
 ve/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt12.pfb>
-Output written on DeepNLPQLearning.pdf (7 pages, 171059 bytes).
+Output written on DeepNLPQLearning.pdf (7 pages, 171612 bytes).
 PDF statistics:
  199 PDF objects out of 1000 (max. 8388607)
  175 compressed objects within 2 object streams
