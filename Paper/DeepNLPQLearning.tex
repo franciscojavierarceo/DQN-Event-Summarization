@@ -37,7 +37,14 @@
 		\item Maybe do a mixture of exponential decay and L1
 		\item We'll probably want a threshold penalty at some point
 	\end{itemize}
-\item Did you just use the $pyrouge$ package?
+\item Did you (Chris) just use the $pyrouge$ package?
+\item Okay, so we have 3 separate LSTMs
+	\begin{enumerate}
+		\item Query level  (we have 44 queries)
+		\item Input Stream/Sentence (each query has ~200k)
+		\item Current Summary (initially empty)
+	\end{enumerate}
+\item From there it gets interesting...because they're different sizes
 \end{itemize}
 
 \section{Extractive Streaming Summarization}
