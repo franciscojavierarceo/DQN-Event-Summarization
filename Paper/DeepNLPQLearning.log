@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015) (preloaded format=pdflatex 2015.5.24)  8 SEP 2016 08:48
+This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015) (preloaded format=pdflatex 2015.5.24)  8 SEP 2016 21:41
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -418,33 +418,33 @@ LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <12> not available
 
 {/usr/local/texlive/2015/texmf-var/fonts/map/pdftex/updmap/pdftex.map}]
 Package hyperref Info: bookmark level for unknown algorithm defaults to 0 on in
-put line 118.
- [2] [3] [4]
+put line 119.
+ [2] [3] [4] [5]
 (./DeepNLPQLearning.bbl
 Underfull \hbox (badness 1460) in paragraph at lines 15--19
 []\OT1/cmr/m/n/12 Chris Kedzie, Fer-nando Diaz, and Kath-leen McK-e-own.  Real-
 time web
  []
 
-[5])
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 233.
- [6]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 233.
+[6])
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 264.
+ [7]
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 264.
  (./DeepNLPQLearning.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 233.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 233.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 264.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 264.
 Package rerunfilecheck Info: File `DeepNLPQLearning.out' has not changed.
 (rerunfilecheck)             Checksum: 274E7445B757AA866F33989CA8C93D01;406.
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 233.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 264.
  ) 
 Here is how much of TeX's memory you used:
- 6823 strings out of 493089
- 97890 string characters out of 6134842
- 195400 words of memory out of 5000000
- 10170 multiletter control sequences out of 15000+600000
+ 6847 strings out of 493089
+ 98218 string characters out of 6134842
+ 201444 words of memory out of 5000000
+ 10171 multiletter control sequences out of 15000+600000
  18135 words of font info for 67 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 29i,9n,28p,408b,764s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 29i,9n,28p,475b,764s stack positions out of 5000i,500n,10000p,200000b,80000s
 </usr/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb
 ></usr/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb>
 </usr/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb><
@@ -458,10 +458,10 @@ exlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/local/te
 xlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/local/texl
 ive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmti12.pfb></usr/local/texli
 ve/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt12.pfb>
-Output written on DeepNLPQLearning.pdf (6 pages, 168224 bytes).
+Output written on DeepNLPQLearning.pdf (7 pages, 171059 bytes).
 PDF statistics:
- 167 PDF objects out of 1000 (max. 8388607)
- 144 compressed objects within 2 object streams
- 43 named destinations out of 1000 (max. 500000)
+ 199 PDF objects out of 1000 (max. 8388607)
+ 175 compressed objects within 2 object streams
+ 66 named destinations out of 1000 (max. 500000)
  57 words of extra memory for PDF output out of 10000 (max. 10000000)
 

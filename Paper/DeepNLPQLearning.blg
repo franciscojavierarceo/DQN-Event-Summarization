@@ -3,44 +3,44 @@ Capacity: max_strings=35307, hash_size=35307, hash_prime=30011
 The top-level auxiliary file: DeepNLPQLearning.aux
 The style file: plain.bst
 Database file #1: DeepNLPQLearning.bib
-You've used 7 entries,
+You've used 8 entries,
             2118 wiz_defined-function locations,
-            537 strings with 5589 characters,
-and the built_in function-call counts, 2934 in all, are:
-= -- 284
-> -- 176
+            542 strings with 5841 characters,
+and the built_in function-call counts, 3251 in all, are:
+= -- 314
+> -- 194
 < -- 3
-+ -- 69
-- -- 62
-* -- 203
-:= -- 485
-add.period$ -- 23
-call.type$ -- 7
-change.case$ -- 52
++ -- 76
+- -- 68
+* -- 222
+:= -- 539
+add.period$ -- 27
+call.type$ -- 8
+change.case$ -- 58
 chr.to.int$ -- 0
-cite$ -- 7
-duplicate$ -- 111
-empty$ -- 195
-format.name$ -- 62
-if$ -- 618
+cite$ -- 8
+duplicate$ -- 125
+empty$ -- 223
+format.name$ -- 68
+if$ -- 687
 int.to.chr$ -- 0
-int.to.str$ -- 7
-missing$ -- 7
-newline$ -- 38
-num.names$ -- 14
-pop$ -- 57
+int.to.str$ -- 8
+missing$ -- 8
+newline$ -- 43
+num.names$ -- 16
+pop$ -- 67
 preamble$ -- 1
-purify$ -- 45
+purify$ -- 50
 quote$ -- 0
-skip$ -- 89
+skip$ -- 94
 stack$ -- 0
-substring$ -- 139
-swap$ -- 39
+substring$ -- 144
+swap$ -- 41
 text.length$ -- 3
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 28
+type$ -- 32
 warning$ -- 0
-while$ -- 23
-width$ -- 8
-write$ -- 79
+while$ -- 25
+width$ -- 9
+write$ -- 90

@@ -44,4 +44,11 @@ Volodymyr Mnih, Koray Kavukcuoglu, David Silver, Alex Graves, Ioannis
 \newblock Playing atari with deep reinforcement learning.
 \newblock {\em CoRR}, abs/1312.5602, 2013.
 
+\bibitem{narasimhan2015language}
+Karthik Narasimhan, Tejas~D Kulkarni, and Regina Barzilay.
+\newblock Language understanding for textbased games using deep reinforcement
+  learning.
+\newblock In {\em In Proceedings of the Conference on Empirical Methods in
+  Natural Language Processing}. Citeseer, 2015.
+
 \end{thebibliography}
