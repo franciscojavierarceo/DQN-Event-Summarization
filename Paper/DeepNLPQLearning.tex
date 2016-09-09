@@ -26,9 +26,17 @@
 %\begin{abstract}
 %\end{abstract}
 
-\section{Notes}
-
-
+\section{Notes/Questions}
+\begin{itemize}
+\item Should we do our RNNs at the character, word, or query level?
+\item Think the character and word are the only ones that make sense
+\item I think we can test a variety of different penalty metrics with respect to time
+	\begin{itemize}
+		\item We could penalize exponentially by time since first release
+		\item Maybe do a mixture of exponential decay and L1
+		\item We'll probably want a threshold penalty at some point
+	\end{itemize}
+\end{itemize}
 
 \section{Extractive Streaming Summarization}
 
@@ -81,24 +89,28 @@ We specify our DQN architecture by estimating the Q function, $Q^*$, with 3 sepa
 
 \subsection{Algorithm}
 
-
+% Notation here is not very clear, need to clean it up
 \begin{algorithm}
     \bf{Input:} { \rm $\{ x_q, \pi^{*}_q \}_{\forall q \in \mathcal{Q} }$, number of iterations $N$, mixture parameter $\epsilon$  } \\
     \underline{\bf{Output:}  $\hat{\pi}$ }
   \begin{algorithmic}[1]
-  \STATE \rm Initialize $\pi_0$ 
+  \STATE The notation is not very clear -- WORK IN PROGRESS
+  \STATE \rm Initialize $\pi_0$, $\Gamma$
+  \STATE \rm Initialize action-value function $\mathcal{Q}$ with random weights
     \STATE \rm $i \leftarrow \emptyset$ 
     \FOR{$n \in \{0,1,.., N-1\} $}
       \FOR{$q \in \mathcal{Q}$}
       	\FOR{$t \in \{0, 1, ..., T-1\}$ }
         \STATE \rm Execute $\pi_i$ $t$ times and reach $s_t$
         \FOR{ $a \in \mathcal{A}(s_t) $}
-        		\STATE \rm Let $\pi^0 = \pi^{*}_q$ with probability $\epsilon$, else $\pi_i$
+        		\STATE \rm With probability $\epsilon$ set $\pi^0 = \pi^{*}_q$, else $\pi_i$
 		\STATE Compute $c_t(a)$ by executing $\pi^0$
-		\STATE $\Gamma \leftarrow \Gamma \cup \{ [\Phi(s_t), a, c_t(a)]\}$
+		\STATE $\Gamma \leftarrow \Gamma \cup \{ [\phi(s_t), a, c_t(a)]\}$
 		\ENDFOR
         \ENDFOR
-        \STATE $\pi_{i+1} \leftarrow$ Backpropagate LSTM-MLP
+        \STATE Sample random minibatches of transitions $\gamma_j$ from $\Gamma$
+        \STATE Set $y_j = r_j$ for terminal $\phi_{j+1}$
+        \STATE Perform gradient step on $(y_j - Q(\phi_j, a_j; \theta))^2$
         \STATE $i \leftarrow i + 1$
       \ENDFOR
     \ENDFOR
