@@ -31,11 +31,12 @@
 \item Should we do our RNNs at the character, word, or query level?
 \item Think the character and word are the only ones that make sense
 \item Is hour the only time index we have? We don't have timestamp for the article?
+\item The \cite{kedzie2016real} paper used a time penalty, need to find out which one
 \item I think we can test a variety of different penalty metrics with respect to time
 	\begin{itemize}
 		\item We could penalize exponentially by time since first release
-		\item Maybe do a mixture of exponential decay and L1
-		\item We'll probably want a threshold penalty at some point
+		\item Maybe do a mixture of exponential decay and L1 to do the thresholding
+		\item It'll be a neat exercise to modify l1 regularization to do this
 	\end{itemize}
 \item Did you (Chris) just use the $pyrouge$ package?
 \item Okay, so we have 3 separate LSTMs
