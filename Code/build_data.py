@@ -34,12 +34,19 @@ def BuildIndexFiles(infile_list, qfilename):
     all_tokens = []
     frequency = defaultdict(int)
     for idx, infilename in enumerate(infile_list):
-        if qfilename not in infilename:
+        if (qfilename not in infilename) and 'nuggets' not in infilename:
             print('Loading %s %i of %i' % (infilename, idx, len(infile_list)) )
             df = pd.read_csv(infilename, sep='\t', encoding='latin-1')
             df['text'] = df['text'].str.replace('[^A-Za-z0-9]+', ' ').str.strip()
             texts = [ t.split(" ") for t in df['text'] ]
-        else:
+
+        if 'nuggets' in infilename:
+            print('Loading and tokenizing %s (%i of %i)' % (infilename, idx, len(infile_list)) )
+            df = pd.read_csv(infilename, sep='\t', encoding='latin-1')
+            df['nugget_text'] = df['nugget_text'].str.replace('[^A-Za-z0-9]+', ' ').str.strip()
+            texts = [ t.split(" ") for t in df['nugget_text'] ]
+
+        if qfilename in infilename:
             texts = loadQuery(infilename)
 
         for text in texts:
@@ -48,7 +55,6 @@ def BuildIndexFiles(infile_list, qfilename):
         texts = [ [token for token in text ]  for text in texts]
         # Collecting all the list of tokens
         all_tokens.append(texts)
-
 
     texts = sum(all_tokens, [])
 
@@ -80,7 +86,7 @@ def BuildIndexFiles(infile_list, qfilename):
     odf = odf[['id','token', 'frequency']]
     # Exporting data
     odf.to_csv('./0-output/total_corpus_smry.csv')
-    
+
     return dictionary
     
 def TokenizeData(infile_list, qfilename, outfile_list, word2idx):
@@ -98,13 +104,19 @@ def TokenizeData(infile_list, qfilename, outfile_list, word2idx):
     :param word2idx:     Dictionary of token 2 ids
     """
     for idx, (infilename, outfilename) in enumerate(zip(infile_list, outfile_list)):
-        if qfilename not in infilename:
-            print('Loading and tokenizing %s (%i of %i)' % (infilename, idx, len(infile_list)) )
+        if (qfilename not in infilename) and 'nuggets' not in infilename:
+            print('Loading %s %i of %i' % (infilename, idx, len(infile_list)) )
             df = pd.read_csv(infilename, sep='\t', encoding='latin-1')
             df['text'] = df['text'].str.replace('[^A-Za-z0-9]+', ' ').str.strip()
             texts = [ t.split(" ") for t in df['text'] ]
 
-        else:
+        if 'nuggets' in infilename:
+            print('Loading and tokenizing %s (%i of %i)' % (infilename, idx, len(infile_list)) )
+            df = pd.read_csv(infilename, sep='\t', encoding='latin-1')
+            df['nugget_text'] = df['nugget_text'].str.replace('[^A-Za-z0-9]+', ' ').str.strip()
+            texts = [ t.split(" ") for t in df['nugget_text'] ]
+
+        if qfilename in infilename:
             texts = loadQuery(infilename)
 
         frequency = defaultdict(int)
@@ -129,20 +141,22 @@ def TokenizeData(infile_list, qfilename, outfile_list, word2idx):
     print('...Exporting of tokenized data complete')
 
 if __name__ == '__main__':
-    os.chdir('/Users/franciscojavierarceo/GitHub/DeepNLPQLearning/DO_NOT_UPLOAD_THIS_DATA/corpus-data/')
+    os.chdir('/Users/franciscojavierarceo/GitHub/DeepNLPQLearning/DO_NOT_UPLOAD_THIS_DATA/')
 
     infilelist = [
-            './2012_aurora_shooting.tsv.gz', 
-            './2012_pakistan_garment_factory_fires.tsv.gz',
-            './hurricane_sandy.tsv.gz',
-            './wisconsin_sikh_temple_shooting.tsv.gz',
-            '/Users/franciscojavierarceo/GitHub/DeepNLPQLearning/DO_NOT_UPLOAD_THIS_DATA/trec-2013-data/trec2013-ts-topics-test.xml'
+            './corpus-data/2012_aurora_shooting.tsv.gz', 
+            './corpus-data/2012_pakistan_garment_factory_fires.tsv.gz',
+            './corpus-data/hurricane_sandy.tsv.gz',
+            './corpus-data/wisconsin_sikh_temple_shooting.tsv.gz',
+            './trec-2013-data/nuggets.tsv.gz',
+            './trec-2013-data/trec2013-ts-topics-test.xml'
     ]
     outfilelist = [
             './0-output/2012_aurora_shooting',
             './0-output/2012_pakistan_garment_factory_fires',
             './0-output/hurricane_sandy',
             './0-output/wisconsin_sikh_temple_shooting',
+            './0-output/nuggets',
             './0-output/queries'
     ]
 

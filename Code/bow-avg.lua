@@ -13,6 +13,7 @@ input = torch.LongTensor{{1,4,2,0},{1,3,3,2}}
 --   (batch size x max sequence length x embedding dim size)
 --   In this example ouptut O[1][4] is a vector of zeros because 
 --   of the zero pad.
+
 net = nn.Sequential()
 net:add(nn.LookupTableMaskZero(vocab_size, embeddings_dim))
 print("Dimensions of lookup table layer:")
