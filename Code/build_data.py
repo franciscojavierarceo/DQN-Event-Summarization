@@ -3,25 +3,44 @@ import re
 import sys
 import pickle
 import csv
+from bs4 import BeautifulSoup
 import pandas as pd
 from gensim import corpora
 from collections import defaultdict    
 
-def BuildIndexFiles(infile_list):
+def loadQuery(qfilename):
+    """
+    :type   qfilename: str
+    :param  qfilename: String indicating query file name
+    """
+    f = open(qfilename, 'rb')
+    out = f.readlines()
+    ox = BeautifulSoup(''.join(out),'lxml').contents[1]
+    qs = []
+    for i in ox.findAll('event'):
+        qs.append(i.findAll('query')[0].text)
+    return [t.split(" ") for t in qs]
+
+def BuildIndexFiles(infile_list, qfilename):
     """
     :type  infile_list:  list
     :param infile_list:  List of file names to import
+
+    :type   qfilename:    str
+    :param  qfilename:    String indicating query file name
     """
     reload(sys)
     sys.setdefaultencoding('utf-8')
     all_tokens = []
     frequency = defaultdict(int)
     for idx, infilename in enumerate(infile_list):
-        print('Loading %s %i of %i' % (infilename, idx, len(infile_list)) )
-
-        df = pd.read_csv(infilename, sep='\t', encoding='latin-1')
-        df['text'] = df['text'].str.replace('[^A-Za-z0-9]+', ' ').str.strip()
-        texts = [ t.split(" ") for t in df['text'] ]
+        if qfilename not in infilename:
+            print('Loading %s %i of %i' % (infilename, idx, len(infile_list)) )
+            df = pd.read_csv(infilename, sep='\t', encoding='latin-1')
+            df['text'] = df['text'].str.replace('[^A-Za-z0-9]+', ' ').str.strip()
+            texts = [ t.split(" ") for t in df['text'] ]
+        else:
+            texts = loadQuery(infilename)
 
         for text in texts:
             for token in text:
@@ -29,6 +48,7 @@ def BuildIndexFiles(infile_list):
         texts = [ [token for token in text ]  for text in texts]
         # Collecting all the list of tokens
         all_tokens.append(texts)
+
 
     texts = sum(all_tokens, [])
 
@@ -63,10 +83,13 @@ def BuildIndexFiles(infile_list):
     
     return dictionary
     
-def TokenizeData(infile_list, outfile_list, word2idx):
+def TokenizeData(infile_list, qfilename, outfile_list, word2idx):
     """
     :type  infile_list:  list
     :param infile_list:  List of file names to import
+
+    :type   qfilename:    str
+    :param  qfilename:    String indicating query file name
 
     :type  outfile_list: list
     :param outfile_list: List of file names to export, without the '.csv'
@@ -74,11 +97,15 @@ def TokenizeData(infile_list, outfile_list, word2idx):
     :type  word2idx:     dic
     :param word2idx:     Dictionary of token 2 ids
     """
-
     for idx, (infilename, outfilename) in enumerate(zip(infile_list, outfile_list)):
-        df = pd.read_csv(infilename, sep='\t', encoding='latin-1')
-        df['text'] = df['text'].str.replace('[^A-Za-z0-9]+', ' ').str.strip()
-        texts = [ t.split(" ") for t in df['text'] ]
+        if qfilename not in infilename:
+            print('Loading and tokenizing %s (%i of %i)' % (infilename, idx, len(infile_list)) )
+            df = pd.read_csv(infilename, sep='\t', encoding='latin-1')
+            df['text'] = df['text'].str.replace('[^A-Za-z0-9]+', ' ').str.strip()
+            texts = [ t.split(" ") for t in df['text'] ]
+
+        else:
+            texts = loadQuery(infilename)
 
         frequency = defaultdict(int)
         for text in texts:
@@ -88,35 +115,40 @@ def TokenizeData(infile_list, outfile_list, word2idx):
         
         text_numindex = [ [word2idx[i] for i in t] for t in texts]
         # Exporting files
-        print('...file export to %s.csv' % outfilename)
+        print('...file exported to %s.csv' % outfilename)
 
-        with open(outfilename+'_numtext.csv', 'wb') as csvfile:
+        with open(outfilename + '_numtext.csv', 'wb') as csvfile:
             data = csv.writer(csvfile, delimiter=' ', quotechar='|', quoting=csv.QUOTE_MINIMAL)
-            data.writerow(['Text'])
+            if outfilename == './0-output/queries':
+                data.writerow(['Query'])
+            else:
+                data.writerow(['Text'])
             data.writerows(text_numindex)
-
         csvfile.close()
+
     print('...Exporting of tokenized data complete')
 
 if __name__ == '__main__':
-
     os.chdir('/Users/franciscojavierarceo/GitHub/DeepNLPQLearning/DO_NOT_UPLOAD_THIS_DATA/corpus-data/')
 
     infilelist = [
             './2012_aurora_shooting.tsv.gz', 
             './2012_pakistan_garment_factory_fires.tsv.gz',
             './hurricane_sandy.tsv.gz',
-            './wisconsin_sikh_temple_shooting.tsv.gz'
+            './wisconsin_sikh_temple_shooting.tsv.gz',
+            '/Users/franciscojavierarceo/GitHub/DeepNLPQLearning/DO_NOT_UPLOAD_THIS_DATA/trec-2013-data/trec2013-ts-topics-test.xml'
     ]
     outfilelist = [
             './0-output/2012_aurora_shooting',
             './0-output/2012_pakistan_garment_factory_fires',
             './0-output/hurricane_sandy',
-            './0-output/wisconsin_sikh_temple_shooting'
+            './0-output/wisconsin_sikh_temple_shooting',
+            './0-output/queries'
     ]
 
-    mycorpora = BuildIndexFiles(infilelist)
-    
-    TokenizeData(infilelist, outfilelist, word2idx=mycorpora.token2id)
+    qfilename = 'trec2013-ts-topics-test.xml'
+
+    mycorpora = BuildIndexFiles(infilelist, qfilename)
+    TokenizeData(infilelist, qfilename, outfilelist, mycorpora.token2id)
 
     print("----- END ------")

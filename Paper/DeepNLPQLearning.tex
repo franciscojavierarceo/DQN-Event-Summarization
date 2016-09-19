@@ -28,17 +28,8 @@
 
 \section{Notes/Questions}
 \begin{itemize}
-\item Should we do our RNNs at the character, word, or query level?
-\item Think the character and word are the only ones that make sense
-\item Is hour the only time index we have? We don't have timestamp for the article?
-\item The \cite{kedzie2016real} paper used a time penalty, need to find out which one
-\item I think we can test a variety of different penalty metrics with respect to time
-	\begin{itemize}
-		\item We could penalize exponentially by time since first release
-		\item Maybe do a mixture of exponential decay and L1 to do the thresholding
-		\item It'll be a neat exercise to modify l1 regularization to do this
-	\end{itemize}
-\item Did you (Chris) just use the $pyrouge$ package?
+\item Word-level RNN
+\item for first part we will ignore time
 \item Okay, so we have 3 separate LSTMs
 	\begin{enumerate}
 		\item Query level  (we have 44 queries)
@@ -46,8 +37,31 @@
 		\item Current Summary (initially empty)
 	\end{enumerate}
 \item From there it gets interesting...because they're different sizes
+\item For all of the DQN games we have a terminal iteration and observed outcome, what about for us?
+	\begin{enumerate}
+		\item We will process all queries
+	\end{enumerate}
+\item We process all of the embeddings
 \end{itemize}
 
+\subsection{Thoughts}
+
+Here's a stupidly worded brain dump of how I think this should go
+\begin{itemize}
+\item Randomly initialize the Query and Stream word vectors
+\item Initialize the updated summary with 0s
+\item Set estimated current summary to empty
+\item Sample $T$ streams from data (in mini-batches) by randomly choosing to select or skip streams (for a single query)
+	\begin{enumerate}
+		\item Probably makes sense to sample from streams by weight exponentially as a function of time (older streams will be penalized directly)
+		\item Use epsilon-greedy strategy that decays to a small percent for random sampling  actions
+		\item If improvement in $ROUGE>0$ then 1, if not 0
+		\item Sum $ROUGE$ for all sentences, make that label
+	\end{enumerate}
+\item Employ pooling Feedforward ReLU network to learn $E[Total ROUGE]$
+\item Now given current summary, evaluate summary on current metrics
+\item Back prop
+\end{itemize}
 \section{Extractive Streaming Summarization}
 
   In the extractive streaming summarization task, we are given as input
