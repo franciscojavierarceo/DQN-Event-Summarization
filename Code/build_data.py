@@ -30,18 +30,18 @@ def BuildIndexFiles(infile_list, qfilename):
     :param  qfilename:    String indicating query file name
     """
     reload(sys)
+    maxlen = 0
     sys.setdefaultencoding('utf-8')
     all_tokens = []
     frequency = defaultdict(int)
     for idx, infilename in enumerate(infile_list):
+        print('Loading and tokenizing %s (%i of %i)' % (infilename, idx, len(infile_list)) )
         if (qfilename not in infilename) and 'nuggets' not in infilename:
-            print('Loading %s %i of %i' % (infilename, idx, len(infile_list)) )
             df = pd.read_csv(infilename, sep='\t', encoding='latin-1')
             df['text'] = df['text'].str.replace('[^A-Za-z0-9]+', ' ').str.strip()
             texts = [ t.split(" ") for t in df['text'] ]
 
         if 'nuggets' in infilename:
-            print('Loading and tokenizing %s (%i of %i)' % (infilename, idx, len(infile_list)) )
             df = pd.read_csv(infilename, sep='\t', encoding='latin-1')
             df['nugget_text'] = df['nugget_text'].str.replace('[^A-Za-z0-9]+', ' ').str.strip()
             texts = [ t.split(" ") for t in df['nugget_text'] ]
@@ -50,6 +50,7 @@ def BuildIndexFiles(infile_list, qfilename):
             texts = loadQuery(infilename)
 
         for text in texts:
+            maxlen = max(maxlen, len(text))
             for token in text:
                 frequency[token] += 1
         texts = [ [token for token in text ]  for text in texts]
@@ -87,9 +88,9 @@ def BuildIndexFiles(infile_list, qfilename):
     # Exporting data
     odf.to_csv('./0-output/total_corpus_smry.csv')
 
-    return dictionary
+    return dictionary, maxlen
     
-def TokenizeData(infile_list, qfilename, outfile_list, word2idx):
+def TokenizeData(maxlen, infile_list, qfilename, outfile_list, word2idx):
     """
     :type  infile_list:  list
     :param infile_list:  List of file names to import
@@ -104,14 +105,13 @@ def TokenizeData(infile_list, qfilename, outfile_list, word2idx):
     :param word2idx:     Dictionary of token 2 ids
     """
     for idx, (infilename, outfilename) in enumerate(zip(infile_list, outfile_list)):
+        print('Loading and tokenizing %s (%i of %i)' % (infilename, idx, len(infile_list)) )
         if (qfilename not in infilename) and 'nuggets' not in infilename:
-            print('Loading %s %i of %i' % (infilename, idx, len(infile_list)) )
             df = pd.read_csv(infilename, sep='\t', encoding='latin-1')
             df['text'] = df['text'].str.replace('[^A-Za-z0-9]+', ' ').str.strip()
             texts = [ t.split(" ") for t in df['text'] ]
 
         if 'nuggets' in infilename:
-            print('Loading and tokenizing %s (%i of %i)' % (infilename, idx, len(infile_list)) )
             df = pd.read_csv(infilename, sep='\t', encoding='latin-1')
             df['nugget_text'] = df['nugget_text'].str.replace('[^A-Za-z0-9]+', ' ').str.strip()
             texts = [ t.split(" ") for t in df['nugget_text'] ]
@@ -124,8 +124,20 @@ def TokenizeData(infile_list, qfilename, outfile_list, word2idx):
             for token in text:
                 frequency[token] += 1
         texts = [ [token for token in text ]  for text in texts]
+
+        # Have to modify this so it doesn't process this for queries and nuggets        
+        text_numindex = []
+        for text in texts:
+            out = []
+            if len(text) < maxlen:
+                text = text + [-1] * (maxlen - len(text)) # Zero padding
+            for word in text:
+                if word == -1:
+                    out.append(-1)     
+                else:
+                    out.append(word2idx[word]) 
+            text_numindex.append(out)
         
-        text_numindex = [ [word2idx[i] for i in t] for t in texts]
         # Exporting files
         print('...file exported to %s.csv' % outfilename)
 
@@ -162,7 +174,8 @@ if __name__ == '__main__':
 
     qfilename = 'trec2013-ts-topics-test.xml'
 
-    mycorpora = BuildIndexFiles(infilelist, qfilename)
-    TokenizeData(infilelist, qfilename, outfilelist, mycorpora.token2id)
+    mycorpora, maxlen = BuildIndexFiles(infilelist, qfilename)
+    print(min(mycorpora.token2id))
+    TokenizeData(maxlen, infilelist, qfilename, outfilelist, mycorpora.token2id)
 
     print("----- END ------")

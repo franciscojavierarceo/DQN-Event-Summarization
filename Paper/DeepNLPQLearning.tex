@@ -46,11 +46,15 @@
 
 \subsection{Thoughts}
 
-Here's a stupidly worded brain dump of how I think this should go
+Here's a poorly worded brain dump of how I think this should go
 \begin{itemize}
 \item Randomly initialize the Query and Stream word vectors
-\item Initialize the updated summary with 0s
-\item Set estimated current summary to empty
+\item Initialize the action for each stream (p=0.5 to select or skip)
+%\item Initialize the updated summary with 0s
+%	\begin{enumerate}
+%		\item Actually, we can probably just pull from the initial random choices
+%	\end{enumerate}
+% \item Set estimated current summary to empty
 \item Sample $T$ streams from data (in mini-batches) by randomly choosing to select or skip streams (for a single query)
 	\begin{enumerate}
 		\item Probably makes sense to sample from streams by weight exponentially as a function of time (older streams will be penalized directly)

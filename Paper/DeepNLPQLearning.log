@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015) (preloaded format=pdflatex 2015.5.24)  18 SEP 2016 16:55
+This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015) (preloaded format=pdflatex 2015.5.24)  19 SEP 2016 08:07
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -418,7 +418,7 @@ LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <12> not available
 
 {/usr/local/texlive/2015/texmf-var/fonts/map/pdftex/updmap/pdftex.map}] [2]
 Package hyperref Info: bookmark level for unknown algorithm defaults to 0 on in
-put line 142.
+put line 146.
  [3] [4] [5]
 (./DeepNLPQLearning.bbl [6]
 Underfull \hbox (badness 1460) in paragraph at lines 15--19
@@ -427,15 +427,15 @@ time web
  []
 
 [7])
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 287.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 291.
  [8]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 287.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 291.
  (./DeepNLPQLearning.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 287.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 287.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 291.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 291.
 Package rerunfilecheck Info: File `DeepNLPQLearning.out' has not changed.
 (rerunfilecheck)             Checksum: C42E35AB0557505E8710832F07C3BAB0;463.
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 287.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 291.
  ) 
 Here is how much of TeX's memory you used:
  6858 strings out of 493089
@@ -458,7 +458,7 @@ exlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/local/te
 xlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/local/texl
 ive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmti12.pfb></usr/local/texli
 ve/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt12.pfb>
-Output written on DeepNLPQLearning.pdf (8 pages, 174038 bytes).
+Output written on DeepNLPQLearning.pdf (8 pages, 174037 bytes).
 PDF statistics:
  218 PDF objects out of 1000 (max. 8388607)
  193 compressed objects within 2 object streams
