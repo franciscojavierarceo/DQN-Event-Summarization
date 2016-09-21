@@ -34,7 +34,7 @@ def BuildIndexFiles(infile_list, qfilename):
     sys.setdefaultencoding('utf-8')
     all_tokens = []
     frequency = defaultdict(int)
-    for idx, infilename in enumerate(infile_list):
+    for idx, infilename in enumerate(infile_list):        
         print('Loading and tokenizing %s (%i of %i)' % (infilename, idx, len(infile_list)) )
         if (qfilename not in infilename) and 'nuggets' not in infilename:
             df = pd.read_csv(infilename, sep='\t', encoding='latin-1')
@@ -61,7 +61,8 @@ def BuildIndexFiles(infile_list, qfilename):
 
     # Getting the dictionary with token info
     dictionary = corpora.Dictionary(texts)
-    # Mapping to numeric list
+    # Mapping to numeric list -- adding plus one to tokens
+    dictionary.token2id = {k: v+1 for k,v in dictionary.token2id.items()}
     word2idx = dictionary.token2id
     dictionary.id2token = {v:k for k,v in dictionary.token2id.items()}
     idx2word = dictionary.id2token
@@ -126,18 +127,18 @@ def TokenizeData(maxlen, infile_list, qfilename, outfile_list, word2idx):
         texts = [ [token for token in text ]  for text in texts]
 
         # Have to modify this so it doesn't process this for queries and nuggets        
-        text_numindex = []
-        for text in texts:
-            out = []
-            if len(text) < maxlen:
-                text = text + [-1] * (maxlen - len(text)) # Zero padding
-            for word in text:
-                if word == -1:
-                    out.append(-1)     
-                else:
-                    out.append(word2idx[word]) 
-            text_numindex.append(out)
-        
+        # text_numindex = []
+        # for text in texts:
+        #     out = []
+        #     if len(text) < maxlen:
+        #         text = text + [0] * (maxlen - len(text)) # Zero padding
+        #     for word in text:
+        #         if word == 0:
+        #             out.append(0)
+        #         else:
+        #             out.append(word2idx[word]) 
+        #     text_numindex.append(out)
+        text_numindex = [ [word2idx[i] for i in t] for t in texts]
         # Exporting files
         print('...file exported to %s.csv' % outfilename)
 
