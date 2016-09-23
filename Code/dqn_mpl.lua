@@ -19,39 +19,8 @@ q = csvigo.load({path = queryfile, mode = "large"})
 N = 1000
 K = 100
 embed_dim = 6
-
-function split(pString)
-   local pPattern = " "
-   local Table = {}  -- NOTE: use {n = 0} in Lua-5.0
-   local fpat = "(.-)" .. pPattern
-   local last_end = 1
-   local s, e, cap = pString:find(fpat, 1)
-   while s do
-      if s ~= 1 or cap ~= "" then
-     table.insert(Table, cap)
-      end
-      last_end = e + 1
-      s, e, cap = pString:find(fpat, last_end)
-   end
-   if last_end <= #pString then
-      cap = pString:sub(last_end)
-      table.insert(Table, cap)
-   end
-   return Table
-end
-
-function grabKtokens(x, K)
-    local tmp = {}
-    for k, v in pairs(x) do
-        if k <= K then
-            tmp[k] = v
-        end
-        if k > K then
-            return tmp
-        end
-    end
-    return tmp
-end
+ 
+dofile("utils.lua")
 
 out = {}
 for k,v in pairs(m) do
