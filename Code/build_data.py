@@ -30,7 +30,6 @@ def BuildIndexFiles(infile_list, qfilename):
     :param  qfilename:    String indicating query file name
     """
     reload(sys)
-    maxlen = 0
     sys.setdefaultencoding('utf-8')
     all_tokens = []
     frequency = defaultdict(int)
@@ -50,7 +49,6 @@ def BuildIndexFiles(infile_list, qfilename):
             texts = loadQuery(infilename)
 
         for text in texts:
-            maxlen = max(maxlen, len(text))
             for token in text:
                 frequency[token] += 1
         texts = [ [token for token in text ]  for text in texts]
@@ -87,11 +85,37 @@ def BuildIndexFiles(infile_list, qfilename):
     odf = pd.merge(left=odf0, right=odf1, on='id')
     odf = odf[['id','token', 'frequency']]
     # Exporting data
-    odf.to_csv('./0-output/total_corpus_smry.csv')
+    odf.to_csv('./0-output/total_corpus_smry.csv', index=False)
 
-    return dictionary, maxlen
+    return dictionary
+
+def padzeros(texts, token_ss, word2idx, maxlen):
+    '''
+    :type   texts:  list
+    :param  texts:  List of text indices
+
+    :type   token_ss:   dict
+    :param  token_ss:   Dictionary of tokens to subset data
+
+    :type  word2idx:     dic
+    :param word2idx:     Dictionary of token 2 ids
+    '''
+    text_numindex = []
+    for text in texts:
+        out = []
+        if len(text) < maxlen:
+            text = text + [0] * (maxlen - len(text)) # Zero padding
+        for word in text:
+            if word in (token_ss, 0):
+                if word == 0:
+                    out.append(0)
+                else:
+                    out.append(word2idx[word]) 
+        text_numindex.append(out)
+
+    return text_numindex
     
-def TokenizeData(maxlen, infile_list, qfilename, outfile_list, word2idx):
+def TokenizeData( infile_list, qfilename, outfile_list, word2idx, top_n, zeropad):
     """
     :type  infile_list:  list
     :param infile_list:  List of file names to import
@@ -104,6 +128,12 @@ def TokenizeData(maxlen, infile_list, qfilename, outfile_list, word2idx):
 
     :type  word2idx:     dic
     :param word2idx:     Dictionary of token 2 ids
+
+    :type   top_n:      int
+    :param  top_n:      Number of tokens to limit data to
+
+    :type   zeropad:     bool
+    :param  zeropad:     Indicates whether to zero-pad matrix 
     """
     for idx, (infilename, outfilename) in enumerate(zip(infile_list, outfile_list)):
         print('Loading and tokenizing %s (%i of %i)' % (infilename, idx, len(infile_list)) )
@@ -120,25 +150,33 @@ def TokenizeData(maxlen, infile_list, qfilename, outfile_list, word2idx):
         if qfilename in infilename:
             texts = loadQuery(infilename)
 
-        frequency = defaultdict(int)
-        for text in texts:
-            for token in text:
-                frequency[token] += 1
+        # Loading the token frequencies
+        tfdf = pd.read_csv('./0-output/total_corpus_smry.csv')
+        tfdf.sort_values(by='frequency', ascending=False, inplace=True)
+        tfdf = tfdf.iloc[0:top_n,:]
+        token_ss = dict(zip(tfdf['token'], tfdf['id']))
+
+        if zeropad:
+            frequency = defaultdict(int)
+            maxlen = 0
+            for text in texts:
+                c= 0 
+                for token in text:
+                    if token in token_ss:
+                        c+=1            # Counting number of words
+                    maxlen = max(maxlen, c)
+
         texts = [ [token for token in text ]  for text in texts]
 
-        # Have to modify this so it doesn't process this for queries and nuggets        
-        # text_numindex = []
-        # for text in texts:
-        #     out = []
-        #     if len(text) < maxlen:
-        #         text = text + [0] * (maxlen - len(text)) # Zero padding
-        #     for word in text:
-        #         if word == 0:
-        #             out.append(0)
-        #         else:
-        #             out.append(word2idx[word]) 
-        #     text_numindex.append(out)
-        text_numindex = [ [word2idx[i] for i in t] for t in texts]
+
+        if (qfilename not in infilename) and 'nuggets' not in infilename:
+            if zeropad:
+                text_numindex = padzeros(texts, token_ss, word2idx, maxlen)
+            else:
+                text_numindex = [ [word2idx[i] for i in t if i in token_ss] for t in texts]
+        else:
+            text_numindex = [ [word2idx[i] for i in t if i in token_ss] for t in texts]
+
         # Exporting files
         print('...file exported to %s.csv' % outfilename)
 
@@ -155,7 +193,7 @@ def TokenizeData(maxlen, infile_list, qfilename, outfile_list, word2idx):
 
 if __name__ == '__main__':
     os.chdir('/Users/franciscojavierarceo/GitHub/DeepNLPQLearning/DO_NOT_UPLOAD_THIS_DATA/')
-
+    # Original
     infilelist = [
             './corpus-data/2012_aurora_shooting.tsv.gz', 
             './corpus-data/2012_pakistan_garment_factory_fires.tsv.gz',
@@ -174,9 +212,57 @@ if __name__ == '__main__':
     ]
 
     qfilename = 'trec2013-ts-topics-test.xml'
+    # Exporting the raw files
+    mycorpora = BuildIndexFiles(infilelist, qfilename)
+    TokenizeData(infile_list = infilelist, 
+                qfilename = qfilename, 
+                outfile_list = outfilelist, 
+                word2idx = mycorpora.token2id, 
+                top_n = 1000, 
+                zeropad=False)
+    
+    # Exporting the first setence files -- corpora based on the total list
+    infilelist_fs = [
+            './corpus-data/2012_aurora_shooting_first_sentence.tsv.gz', 
+            './corpus-data/2012_pakistan_garment_factory_fires_first_sentence.tsv.gz',
+            './corpus-data/hurricane_sandy_first_sentence.tsv.gz',
+            './corpus-data/wisconsin_sikh_temple_shooting_first_sentence.tsv.gz',
+            './trec-2013-data/nuggets.tsv.gz',
+            './trec-2013-data/trec2013-ts-topics-test.xml'
+    ]
+    outfilelist_fs = [
+            './0-output/2012_aurora_shooting_first_sentence',
+            './0-output/2012_pakistan_garment_factory_fires_first_sentence',
+            './0-output/hurricane_sandy_first_sentence',
+            './0-output/wisconsin_sikh_temple_shooting_first_sentence',
+            './0-output/nuggets_first_sentence',
+            './0-output/queries_first_sentence'
+    ]
+    TokenizeData(infile_list = infilelist_fs, 
+                qfilename = qfilename, 
+                outfile_list = outfilelist_fs, 
+                word2idx = mycorpora.token2id, 
+                top_n = 1000, 
+                zeropad=False)
 
-    mycorpora, maxlen = BuildIndexFiles(infilelist, qfilename)
-    print(min(mycorpora.token2id))
-    TokenizeData(maxlen, infilelist, qfilename, outfilelist, mycorpora.token2id)
+    # Exporting the nuggets only -- corpora based on the total list
+    infile_nuggets = [
+            './trec-2013-data/aurora_nuggets.tsv.gz',
+            './trec-2013-data/pakistan_nuggets.tsv.gz',
+            './trec-2013-data/sandy_nuggets.tsv.gz',
+            './trec-2013-data/wisconsin_nuggets.tsv.gz'
+    ]
+    outfile_nuggets = [
+            './0-output/aurora_nuggets',
+            './0-output/pakistan_nuggets',
+            './0-output/sandy_nuggets',
+            './0-output/wisconsin_nuggets'
+    ]
+    TokenizeData(infile_list = infile_nuggets, 
+                qfilename = qfilename, 
+                outfile_list = outfile_nuggets, 
+                word2idx = mycorpora.token2id, 
+                top_n = 1000, 
+                zeropad=False)
 
     print("----- END ------")
