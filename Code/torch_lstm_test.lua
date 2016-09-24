@@ -11,13 +11,16 @@ m = csvigo.load({path = aroraname, mode = "large"})
 w = csvigo.load({path = wordfile, mode = "large"})
 q = csvigo.load({path = nuggets, mode = "large"})
 
+
+
 N = 1000 --- Breaks at 35
 K = 100
 embed_dim = 3
  
- dofile("utils.lua")
+dofile("utils.lua")
 --- Extracting N samples
 out = grabNsamples(m, N, K)
+nuggs = grabNsamples(q, #q-1, nil)
 
 mxl = 0
 for k,v in pairs(out) do
@@ -42,12 +45,10 @@ labels = torch.Tensor(torch.round(torch.rand(#out))):reshape(#out,1)
 --- This is the correct format to input it
 input = torch.LongTensor(xs)
 
-LT = nn.LookupTableMaskZero(vocab_size, embed_dim)
-
 -- For batch inputs, it's a little easier to start with sequence-length x batch-size tensor, so we transpose songData
 myDataT = input:t()
 batchLSTM = nn.Sequential()
-batchLSTM:add(LT) -- will return a sequence-length x batch-size x embedDim tensor
+batchLSTM:add(nn.LookupTableMaskZero(vocab_size, embed_dim)) -- will return a sequence-length x batch-size x embedDim tensor
 batchLSTM:add(nn.SplitTable(1, embed_dim)) -- splits into a sequence-length table with batch-size x embedDim entries
 -- print(batchLSTM:forward(myDataT)) -- sanity check
 -- now let's add the LSTM stuff
@@ -72,4 +73,13 @@ for i=1, myPreds:size()[1] do
     preds[i] = (myPreds[i][1] > 0.5) and 1 or 0 --- lua is stupid
 end
 
-print(preds)
+print(#preds)
+
+ys = unpackZeros(preds)
+
+predsummary = buildPredSummary(ys, xs)
+
+print(#predsummary)
+print('Rouge Recall =', rougeRecall(predsummary, nuggs))
+print('Rouge Precision =', rougePrecision(predsummary, nuggs))
+print('Rouge F1 =', rougeF1(predsummary, nuggs))

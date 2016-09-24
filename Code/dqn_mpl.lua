@@ -43,49 +43,26 @@ for k,v in pairs(out) do
     end
 end
 
-local opt = {}
-
-opt.hiddenSize = 10
-opt.vocabSize = 8
 
 x = torch.Tensor{{1, 2, 3, 4},
                 {0, 5, 8, 3}}
 
-local enc = nn.Sequential()
-enc:add(nn.LookupTableMaskZero(opt.vocabSize, opt.hiddenSize))
+hiddenSize = 10
+vocabSize = 8
 
-layer1 = nn.SeqLSTM(opt.hiddenSize, opt.hiddenSize)
+--- NN model
+enc = nn.Sequential()
+enc:add(nn.LookupTableMaskZero(vocabSize, hiddenSize))
+layer1 = nn.SeqLSTM(hiddenSize, hiddenSize)
 layer1:maskZero()
 enc:add(layer1)
-
-
-criterion = nn.SequencerCriterion(nn.MaskZeroCriterion(nn.ClassNLLCriterion(),1))
 --- Embedding layer
-
 enc:add(nn.Select(1, -1))
 --- Add mlp
 
 print(enc:forward(x:t()))
 
+cr = nn.ClassNLLCriterion()
+criterion = nn.SequencerCriterion(nn.MaskZeroCriterion(cr,1))
+
 ---batch by embedding size is output
-opt.learningRate = 0.01
-opt.niter = 4 
-
-
-for i=1,opt.niter do
-   enc:zeroGradParameters()
-   -- Forward pass
-    encOut = enc:forward(x)
-   --print(decOut)
-    err = criterion:forward(encOut)
-   
-   print(string.format("Iteration %d ; NLL err = %f ", i, err))
-   -- Backward pass
-   gradOutput = criterion:backward(encOut)
-   zeroTensor = torch.Tensor(encOut):zero()
-   enc:backward(x, zeroTensor)
-
-   dec:updateParameters(opt.learningRate)
-   enc:updateParameters(opt.learningRate)
-end
-

@@ -20,6 +20,9 @@ end
 
 function grabKtokens(x, K)
     local tmp = {}
+    if K == nil then 
+        return x
+    end
     for k, v in pairs(x) do
         if k <= K then
             tmp[k] = v
@@ -33,6 +36,9 @@ end
 
 function grabNsamples(x, N, K)
     local out = {}
+    if N == nil then 
+        N = #x 
+    end
     for k,v in pairs(m) do
         if k > 1 then
             out[k-1] = grabKtokens(split(x[k][1]), K)
@@ -170,3 +176,5 @@ function build_network(inputSize, hiddenSize, outputSize)
   end
    return model
 end
+
+print("...Utils file loaded")
