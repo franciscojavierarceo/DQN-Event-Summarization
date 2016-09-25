@@ -12,7 +12,7 @@ function build_data()
       -- populate both tables to get ready for training
       -- local input = torch.randn(batchSize, inputSize)
         local input = torch.Tensor({{1, 2, 3, 4}, {0, 1, 1, 3}})
-        local target = torch.randn(batchSize)
+        local target = torch.randn(2)
         if cuda then
             input = input:float():cuda()
             target = target:float():cuda()
@@ -43,23 +43,22 @@ end
 
 inputSize = 6
 -- Larger numbers here mean more complex problems can be solved, but can also over-fit. 256 works well for now
-hiddenSize = 8
+hiddenSize = 3
 -- We want the network to classify the inputs using a one-hot representation of the outputs
-outputSize = 2
-
+outputSize = 1
 -- the dataset size is the total number of examples we want to present to the LSTM 
 dsSize=10
 
 -- We present the dataset to the network in batches where batchSize << dsSize
-batchSize=2
+batchSize=1
 
 -- And seqLength is the length of each sequence, i.e. the number of "events" we want to pass to the LSTM
 -- to make up a single example. I'd like this to be dynamic ideally for the YOOCHOOSE dataset..
-seqLength=8
+seqLength=6
 
 -- number of target classes or labels, needs to be the same as outputSize above
 -- or we get the dreaded "ClassNLLCriterion.lua:46: Assertion `cur_target >= 0 && cur_target < n_classes' failed. "
-nClass = 2
+nClass = 1
 
 -- two tables to hold the *full* dataset input and target tensors
 
@@ -67,10 +66,9 @@ inputs, targets = build_data()
 rnn = build_network(inputSize, hiddenSize, outputSize)
 
 print('Example of inputs and outputs for a batch of data:')
-print(inputs[1], targets[2])
+print(inputs[1], targets[1])
 
 crit = nn.MSECriterion()
---- crit = nn.ClassNLLCriterion()
 seqC = nn.SequencerCriterion(crit)
 if cuda then
    crit:cuda()
@@ -84,7 +82,7 @@ print('Start training')
 loss = {}
 for iter=0, 100, 1 do
    local err = 0
-   local start =torch.tic() 
+   local start = torch.tic() 
 
    for offset=1, dsSize, batchSize+seqLength do
       local batchInputs = {}
@@ -101,10 +99,7 @@ for iter=0, 100, 1 do
 
       local out = rnn:forward(batchInputs)
 
-      print('pass 1')
-      print(batchInputs, batchTargets)
       err = err + seqC:forward(out, batchTargets)
-      print('pass 2')
       gradOut = seqC:backward(out, batchTargets)
       rnn:backward(batchInputs, gradOut)
       --We update params at the end of each batch

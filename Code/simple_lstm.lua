@@ -40,21 +40,20 @@ end
 
 
 
-inputSize = 6
+inputSize = 3
 -- Larger numbers here mean more complex problems can be solved, but can also over-fit. 256 works well for now
-hiddenSize = 8
--- We want the network to classify the inputs using a one-hot representation of the outputs
-outputSize = 2
+
+hiddenSize = 1
 
 -- the dataset size is the total number of examples we want to present to the LSTM 
 dsSize=10
 
 -- We present the dataset to the network in batches where batchSize << dsSize
-batchSize=2
+batchSize=3
 
 -- And seqLength is the length of each sequence, i.e. the number of "events" we want to pass to the LSTM
 -- to make up a single example. I'd like this to be dynamic ideally for the YOOCHOOSE dataset..
-seqLength=4
+seqLength = 4
 
 -- number of target classes or labels, needs to be the same as outputSize above
 -- or we get the dreaded "ClassNLLCriterion.lua:46: Assertion `cur_target >= 0 && cur_target < n_classes' failed. "
@@ -62,7 +61,7 @@ nClass = 2
 -- two tables to hold the *full* dataset input and target tensors
 
 inputs, targets = build_data()
-rnn = build_network(inputSize, hiddenSize, outputSize)
+rnn = build_network(inputSize, hiddenSize, nClass)
 
 print('Example of inputs and outputs for a batch of data:')
 print(inputs[1], targets[2])
@@ -95,6 +94,10 @@ for iter=0, 100, 1 do
       for i = 2, batchSize+seqLength-1,1 do
          table.insert(batchInputs, inputs[offset+i])
          table.insert(batchTargets, targets[offset+i])
+      end
+      if iter==0 then 
+         print("This is what the seqLenght expands")
+         print(batchInputs, batchTargets)
       end
       local out = rnn:forward(batchInputs)
       err = err + seqC:forward(out, batchTargets)

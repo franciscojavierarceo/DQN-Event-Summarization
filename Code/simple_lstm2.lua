@@ -26,15 +26,15 @@ end
 
 function build_network(inputSize, hiddenSize, outputSize)
     -- This works for the discrete
-    rnn = nn.Sequential()
-    rnn:add(nn.LookupTableMaskZero(4, hiddenSize))
-    rnn:add(nn.SeqLSTM(hiddenSize, hiddenSize))
-    rnn:add(nn.Select(1, -1))                       --- Embedding layer
-    rnn:add(nn.Linear(hiddenSize, outputSize))
-    rnn:add(nn.LogSoftMax())
+    model = nn.Sequential()
+    :add(nn.LookupTableMaskZero(8, hiddenSize))
+    :add(nn.SeqLSTM(hiddenSize, hiddenSize))
+    :add(nn.Select(1, -1))                       --- Embedding layer
+    :add(nn.Linear(hiddenSize, outputSize))
+    :add(nn.LogSoftMax())
    -- wrap this in a Sequencer such that we can forward/backward 
    -- entire sequences of length seqLength at once
-   rnn = nn.Sequencer(rnn)
+   rnn = nn.Sequencer(model)
    if cuda then
       rnn:cuda()
    end
@@ -43,27 +43,19 @@ end
 
 
 
-inputSize = 6
--- Larger numbers here mean more complex problems can be solved, but can also over-fit. 256 works well for now
-hiddenSize = 8
--- We want the network to classify the inputs using a one-hot representation of the outputs
-outputSize = 2
-
--- the dataset size is the total number of examples we want to present to the LSTM 
-dsSize=10
-
--- We present the dataset to the network in batches where batchSize << dsSize
-batchSize=2
+inputSize = 6   -- Larger numbers here mean more complex problems can be solved, but can also over-fit. 256 works well for now
+hiddenSize = 8 
+outputSize = 2  -- We want the network to classify the inputs using a one-hot representation of the outputs
+dsSize=10       -- the dataset size is the total number of examples we want to present to the LSTM 
+batchSize=2     -- We present the dataset to the network in batches where batchSize << dsSize
 
 -- And seqLength is the length of each sequence, i.e. the number of "events" we want to pass to the LSTM
 -- to make up a single example. I'd like this to be dynamic ideally for the YOOCHOOSE dataset..
-seqLength=4
 
+seqLength = 6
 -- number of target classes or labels, needs to be the same as outputSize above
 -- or we get the dreaded "ClassNLLCriterion.lua:46: Assertion `cur_target >= 0 && cur_target < n_classes' failed. "
-nClass = 2
-
--- two tables to hold the *full* dataset input and target tensors
+nClass = 2      -- two tables to hold the *full* dataset input and target tensors
 
 inputs, targets = build_data()
 rnn = build_network(inputSize, hiddenSize, outputSize)
@@ -71,7 +63,6 @@ rnn = build_network(inputSize, hiddenSize, outputSize)
 print('Example of inputs and outputs for a batch of data:')
 print(inputs[1], targets[2])
 
---- crit = nn.MSECriterion()
 crit = nn.ClassNLLCriterion()
 seqC = nn.SequencerCriterion(crit)
 if cuda then
@@ -91,8 +82,8 @@ for iter=0, 100, 1 do
    for offset=1, dsSize, batchSize+seqLength do
       local batchInputs = {}
       local batchTargets = {}
-      -- We need to get a subset (of size batchSize) of the inputs and targets tables
 
+      -- We need to get a subset (of size batchSize) of the inputs and targets tables
       -- start needs to be "2" and end "batchSize-1" to correctly index
       -- all of the examples in the "inputs" and "targets" tables
 
@@ -101,8 +92,12 @@ for iter=0, 100, 1 do
          table.insert(batchTargets, targets[offset+i])
       end
 
-      local out = rnn:forward(batchInputs)
+      if iter==0 then 
+         print("This is what the seqLenght expands")
+         print(batchInputs, batchTargets)
+      end
 
+      local out = rnn:forward(batchInputs)
       err = err + seqC:forward(out, batchTargets)
       gradOut = seqC:backward(out, batchTargets)
       rnn:backward(batchInputs, gradOut)

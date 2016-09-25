@@ -4,20 +4,19 @@ require 'rnn'
 require 'csvigo'
 
 aroraname = '~/GitHub/DeepNLPQLearning/DO_NOT_UPLOAD_THIS_DATA/0-output/2012_aurora_shooting_first_sentence_numtext.csv'
-wordfile = '~/GitHub/DeepNLPQLearning/DO_NOT_UPLOAD_THIS_DATA/0-output/total_corpus_smry.csv'
 nuggets = '~/GitHub/DeepNLPQLearning/DO_NOT_UPLOAD_THIS_DATA/0-output/aurora_nuggets_numtext.csv'
 
 m = csvigo.load({path = aroraname, mode = "large"})
-w = csvigo.load({path = wordfile, mode = "large"})
 q = csvigo.load({path = nuggets, mode = "large"})
-
-
 
 N = 1000 --- Breaks at 35
 K = 100
-embed_dim = 3
- 
+embed_dim = 6
+cuda = true
+torch.manualSeed(420)
+
 dofile("utils.lua")
+
 --- Extracting N samples
 out = grabNsamples(m, N, K)
 nuggs = grabNsamples(q, #q-1, nil)
@@ -37,49 +36,50 @@ for k,v in pairs(out) do
     end
 end
 
---- Padding the data by the maximum length
-xs = padZeros(out, mxl)
+function build_network(vocab_size, embed_dim, outputSize, cuda)
+    batchLSTM = nn.Sequential()
+    :add(nn.LookupTableMaskZero(vocab_size, embed_dim)) -- will return a sequence-length x batch-size x embedDim tensor
+    :add(nn.SplitTable(1, embed_dim)) -- splits into a sequence-length table with batch-size x embedDim entries
+    :add(nn.Sequencer(nn.LSTM(embed_dim, embed_dim)))
+    :add(nn.SelectTable(-1)) -- selects last state of the LSTM
+    :add(nn.Linear(embed_dim, outputSize)) -- map last state to a score for classification
+    :add(nn.ReLU())
+   
+   return batchLSTM
+end
 
-labels = torch.Tensor(torch.round(torch.rand(#out))):reshape(#out,1)
-
---- This is the correct format to input it
-input = torch.LongTensor(xs)
+xs = padZeros(out, mxl)             --- Padding the data by the maximum length
+input = torch.LongTensor(xs)        --- This is the correct format to input it
+labels = torch.rand(#out)
 
 -- For batch inputs, it's a little easier to start with sequence-length x batch-size tensor, so we transpose songData
 myDataT = input:t()
-batchLSTM = nn.Sequential()
-batchLSTM:add(nn.LookupTableMaskZero(vocab_size, embed_dim)) -- will return a sequence-length x batch-size x embedDim tensor
-batchLSTM:add(nn.SplitTable(1, embed_dim)) -- splits into a sequence-length table with batch-size x embedDim entries
--- print(batchLSTM:forward(myDataT)) -- sanity check
--- now let's add the LSTM stuff
-batchLSTM:add(nn.Sequencer(nn.LSTM(embed_dim, embed_dim)))
-batchLSTM:add(nn.SelectTable(-1)) -- selects last state of the LSTM
-batchLSTM:add(nn.Linear(embed_dim, 1)) -- map last state to a score for classification
-batchLSTM:add(nn.Sigmoid()) -- convert score to a probability
-myPreds = batchLSTM:forward(myDataT)
-print(#myPreds)
+batchLSTM = build_network(vocab_size, embed_dim, 1, true)
+crit = nn.MSECriterion()
 
--- we can now call :backward() as follows
-bceCrit = nn.BCECriterion()
-loss = bceCrit:forward(myPreds, labels)
-dLdPreds = bceCrit:backward(myPreds, labels)
-batchLSTM:backward(myDataT, dLdPreds)
+loss = 0 
+for i=1, 100, 1 do
+    myPreds = batchLSTM:forward(myDataT)
+    loss = loss + crit:forward(myPreds, labels)
+    grads = crit:backward(myPreds, labels)
+    batchLSTM:backward(myDataT, grads)
+    
+    --We update params at the end of each batch
+    batchLSTM:updateParameters(0.1)
+    batchLSTM:zeroGradParameters()
+    
+    preds = {}
+    for i=1, myPreds:size()[1] do
+        preds[i] = (myPreds[i][1] > 0) and 1 or 0 --- lua is stupid
+    end
 
-print(loss)
+    ys = unpackZeros(preds)
+    predsummary = buildPredSummary(ys, xs)
 
-
-preds = {}
-for i=1, myPreds:size()[1] do
-    preds[i] = (myPreds[i][1] > 0.5) and 1 or 0 --- lua is stupid
+    rscore = rougeRecall(predsummary, nuggs)
+    pscore = rougePrecision(predsummary, nuggs)
+    fscore = rougeF1(predsummary, nuggs)
+    print(string.format("Iteration %i, Rouge \t {Recall = %.6f, Precision = %6.f, F1 = %.6f}", i, rscore, pscore, fscore))
 end
 
-print(#preds)
-
-ys = unpackZeros(preds)
-
-predsummary = buildPredSummary(ys, xs)
-
-print(#predsummary)
-print('Rouge Recall =', rougeRecall(predsummary, nuggs))
-print('Rouge Precision =', rougePrecision(predsummary, nuggs))
-print('Rouge F1 =', rougeF1(predsummary, nuggs))
+--- Unpacking predictions and concatenating predictions into a summary
