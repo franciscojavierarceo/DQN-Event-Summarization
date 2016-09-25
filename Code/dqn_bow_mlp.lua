@@ -9,8 +9,10 @@ nugget_fn = '~/GitHub/DeepNLPQLearning/DO_NOT_UPLOAD_THIS_DATA/0-output/aurora_n
 m = csvigo.load({path = aurora_fn, mode = "large"})
 q = csvigo.load({path = nugget_fn, mode = "large"})
 
-N = 1000 --- Breaks at 35
-K = 100
+N = 2
+K = 4
+-- N = 1000
+-- K = 100
 print_every = 10
 nepochs = 100
 embed_dim = 6
@@ -37,15 +39,13 @@ for k,v in pairs(out) do
 end
 
 function build_network(vocab_size, embed_dim, outputSize, cuda)
-    batchLSTM = nn.Sequential()
+    bowMLP = nn.Sequential()
     :add(nn.LookupTableMaskZero(vocab_size, embed_dim)) -- will return a sequence-length x batch-size x embedDim tensor
-    :add(nn.SplitTable(1, embed_dim)) -- splits into a sequence-length table with batch-size x embedDim entries
-    :add(nn.Sequencer(nn.LSTM(embed_dim, embed_dim)))
-    :add(nn.SelectTable(-1)) -- selects last state of the LSTM
+    :add(nn.Sum(1, embed_dim, true)) -- splits into a sequence-length table with batch-size x embedDim entries
     :add(nn.Linear(embed_dim, outputSize)) -- map last state to a score for classification
-    :add(nn.ReLU())
+    :add(nn.Tanh())                  ---     :add(nn.ReLU()) <- this one did worse
 
-   return batchLSTM
+   return bowMLP
 
 end
 
@@ -82,7 +82,7 @@ for epoch=1, nepochs, 1 do
     rscore = rougeRecall(predsummary, nggs)
     pscore = rougePrecision(predsummary, nggs)
     fscore = rougeF1(predsummary, nggs)
-
+    
     if (epoch%print_every)==0 then
         print(string.format("Epoch %i, Rouge \t {Recall = %.6f, Precision = %6.f, F1 = %.6f}", epoch, rscore, pscore, fscore))
     end

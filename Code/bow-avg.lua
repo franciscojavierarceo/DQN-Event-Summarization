@@ -27,9 +27,11 @@ print(input)
 
 net = nn.Sequential()
 net:add(nn.LookupTableMaskZero(vocab_size, embeddings_dim))
+
 print("Dimensions of lookup table layer:")
 print(#net:forward(input))
-
+print("Lookup table layer output")
+print(net:forward(input))
 -- Now add the summation layer. The arguments are which dimension to
 -- sum over, the total number of input dimensions, and a boolean flag
 -- indicating whether or not to average the sum.
@@ -45,9 +47,9 @@ print(#net:forward(input))
 
 net:add(nn.Sum(2, 3, true))
 print("Dimensions after lookup table layer and averaging layer:")
-print(net:forward(input))
-print('Original nnsum...')
 print(#net:forward(input))
+print("nn.sum(2,3,true) output")
+print(net:forward(input))
 
 print("**********************************************************************")
 print("                                 Example 2                            ")
