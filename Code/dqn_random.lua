@@ -1,0 +1,54 @@
+require 'torch'
+require 'nn'
+require 'rnn'
+require 'csvigo'
+
+--- Loading utility script
+dofile("utils.lua")
+
+aurora_fn = '~/GitHub/DeepNLPQLearning/DO_NOT_UPLOAD_THIS_DATA/0-output/2012_aurora_shooting_first_sentence_numtext.csv'
+nugget_fn = '~/GitHub/DeepNLPQLearning/DO_NOT_UPLOAD_THIS_DATA/0-output/aurora_nuggets_numtext.csv'
+
+m = csvigo.load({path = aurora_fn, mode = "large"})
+q = csvigo.load({path = nugget_fn, mode = "large"})
+
+N = #m-1
+K = 100
+torch.manualSeed(69)
+
+
+out = grabNsamples(m, N, K)             --- Extracting N samples
+nggs = grabNsamples(q, #q-1, nil)       --- Extracting all samples
+
+mxl = 0
+for k,v in pairs(out) do
+    mxl = math.max(mxl, #v)
+end
+
+vocab_size = 0                  --- getting the length of the dictionary
+for k,v in pairs(out) do
+    vocab_size = math.max(vocab_size, math.max(table.unpack(v)))
+    if (k % N)==0 then
+        print(k,'elements read out of ', #m-1)
+    end
+end
+
+xs = padZeros(out, mxl)             --- Padding the data by the maximum length
+input = torch.LongTensor(xs)        --- This is the correct format to input it
+labels = torch.round(torch.rand(#out))
+preds = {}
+for i=1,labels:size()[1] do
+    preds[i] = labels[i]
+end
+
+predsummary = buildPredSummary(preds, xs)
+
+rscore = rougeRecall(predsummary, nggs)
+pscore = rougePrecision(predsummary, nggs)
+fscore = rougeF1(predsummary, nggs)
+
+print(string.format("Rouge \t {Recall = %.6f, Precision = %6.f, F1 = %.6f}", rscore, pscore, fscore))
+
+print("------------------")
+print("  Model complete  ")
+print("------------------")

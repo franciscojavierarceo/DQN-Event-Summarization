@@ -37,7 +37,7 @@ end
 function grabNsamples(x, N, K)
     local out = {}
     if N == nil then 
-        N = #x 
+        N = #x[1] 
     end
     for k,v in pairs(m) do
         if k > 1 then

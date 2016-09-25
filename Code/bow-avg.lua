@@ -3,6 +3,7 @@ require 'rnn'
 
 vocab_size = 4
 embeddings_dim = 3
+torch.manualSeed(420)
 
 print("**********************************************************************")
 print("                                 Example 1                            ")
@@ -45,31 +46,17 @@ print(net:forward(input))
 -- What is it? (You can ignore it for now and throw the output of this
 -- into an mlp. We can discuss how to fix it on Tuesday.)
 
-net:add(nn.Sum(2, 3, true))
+net:add(nn.Sum(2, 3, false))
 print("Dimensions after lookup table layer and averaging layer:")
 print(#net:forward(input))
 print("nn.sum(2,3,true) output")
 print(net:forward(input))
 
 print("**********************************************************************")
-print("                                 Example 2                            ")
+print("                                 Example 1  -- Modified               ")
 print("**********************************************************************")
-
-input = torch.LongTensor{
-                        {1, 4, 2, 1}, 
-                        {1, 3, 3, 2}
-                     }
-print("Format of data in Example 2 is")
-print(input)
-
-net = nn.Sequential()
-net:add(nn.LookupTableMaskZero(vocab_size, embeddings_dim))
-print("Dimensions of lookup table layer:")
-print(#net:forward(input))
-
-net:add(nn.Sum(2, 3, true))
-
-print("Dimensions after lookup table layer and averaging layer:")
-print(net:forward(input))
-print('Original nnsum...')
-print(#net:forward(input))
+net2 = nn.Sequential()
+net2:add(nn.LookupTableMaskZero(vocab_size, embeddings_dim))
+net2:add(nn.Sum(2, 3, false))
+net:add(nn.Identity())
+print(#net2:forward(input))
