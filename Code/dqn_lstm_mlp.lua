@@ -83,10 +83,10 @@ for epoch=1, nepochs, 1 do
     --- TO DO add the epsilon greedy strategy
     ---  to randomly choose based some epsilon% of the time
     preds = {}
-    if 1 == 0 then
-    --- if torch.rand(1)[1] <= epsilon then
+    -- if 1 == 0 then
+    if torch.rand(1)[1] <= epsilon then
         for i=1, N do
-            preds[i] = torch.round(torch.rand(1))[1]
+            preds[i] = (torch.rand(1)[1] > 0.5 ) and 1 or 0
         end
     else 
         --- This is the action choice 1 select, 0 skip
@@ -94,17 +94,15 @@ for epoch=1, nepochs, 1 do
             preds[i] = (myPreds[i][1] > 0) and 1 or 0
         end
     end
+
     --- Concatenating predictions into a summary
     predsummary = buildPredSummary(preds, xs)
-    --- Calculating rouge scores
-    rscores = {}
-    pscores = {}
-    fscores = {}
-    out = {}
-    r_t1 = 0
-    p_t1 = 0
-    f_t1 = 0
-    for i=1, #predsummary do
+    
+    --- Initializing rouge metrics at time {t-1} and save scores
+    rscores, pscores, fscores = {}, {}, {}
+    r_t1 , p_t1, f_t1 = 0., 0., 0.      
+    for i=1, N do
+        --- Calculating rouge scores; Call get_i_n() to cumulatively computing rouge
         rscores[i] = rougeRecall(geti_n(predsummary, i), nggs) - r_t1
         pscores[i] = rougePrecision(geti_n(predsummary, i), nggs) - p_t1
         fscores[i] = rougeF1(geti_n(predsummary, i), nggs) - f_t1
@@ -115,9 +113,6 @@ for epoch=1, nepochs, 1 do
     rscore = table.unpack(rscores) / #rscores
     pscore = table.unpack(pscores) / #pscores
     fscore = table.unpack(fscores) / #fscores
-    -- rscore = rougeRecall(predsummary, nggs)
-    -- pscore = rougePrecision(predsummary, nggs)
-    -- fscore = rougeF1(predsummary, nggs)
 
     if (epoch%print_every)==0 then
         print(string.format("Epoch %i, {Recall = %.6f, Precision = %6.f, F1 = %.6f}", epoch, rscore, pscore, fscore))
