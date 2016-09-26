@@ -160,7 +160,7 @@ function rougeF1(pred_summary, ref_summaries)
     return (2. * rnp * rnr ) / (rnp + rnr)
 end
 
-
+--- Meant to cumuatively extract the elements of a table for the rouge scoring
 function geti_n(x, n)
     local out = {}
     for k,v in pairs(x) do
@@ -171,5 +171,14 @@ function geti_n(x, n)
         end
     end
     return out
+end
+
+function sumTable(x)
+    local o = 0
+    for k,v in pairs(x) do
+        o = o + v
+    end
+
+    return o
 end
 print("...Utils file loaded")

@@ -63,28 +63,19 @@ labels = torch.randn(#out)          --- randn is from a normal whie rand() is un
 -- For batch inputs, it's a little easier to start with 
 -- (sequence-length x batch-size) tensor so we transpose the data
 
---- TO DO:
---- Need to modify the rouge scoring so that we are calcuating everything cumulatively
---- Then we know for each sentence whether or not it improves rouge
---- then we can start to map that as our label
-
 myDataT = input:t()
 loss = 0
 for epoch=1, nepochs, 1 do
     myPreds = batchLSTM:forward(myDataT)
     loss = loss + crit:forward(myPreds, labels)
     grads = crit:backward(myPreds, labels)
-    batchLSTM:backward(myDataT, grads)
-    
+    batchLSTM:backward(myDataT, grads)    
     --We update params at the end of each batch
     batchLSTM:updateParameters(0.1)
     batchLSTM:zeroGradParameters()
     
-    --- TO DO add the epsilon greedy strategy
-    ---  to randomly choose based some epsilon% of the time
     preds = {}
-    -- if 1 == 0 then
-    if torch.rand(1)[1] <= epsilon then
+    if torch.rand(1)[1] <= epsilon then  -- This is the epsilon greedy strategy
         for i=1, N do
             preds[i] = (torch.rand(1)[1] > 0.5 ) and 1 or 0
         end
@@ -97,7 +88,6 @@ for epoch=1, nepochs, 1 do
 
     --- Concatenating predictions into a summary
     predsummary = buildPredSummary(preds, xs)
-    
     --- Initializing rouge metrics at time {t-1} and save scores
     rscores, pscores, fscores = {}, {}, {}
     r_t1 , p_t1, f_t1 = 0., 0., 0.      
@@ -109,10 +99,11 @@ for epoch=1, nepochs, 1 do
         r_t1 = rscores[i]
         p_t1 = pscores[i]
         f_t1 = fscores[i]
+        -- print(string.format("Epoch %i, {Recall = %.6f, Precision = %6.f, F1 = %.6f}", epoch, r_t1, p_t1, f_t1))
     end
-    rscore = table.unpack(rscores) / #rscores
-    pscore = table.unpack(pscores) / #pscores
-    fscore = table.unpack(fscores) / #fscores
+    rscore = sumTable(rscores) / #rscores
+    pscore = sumTable(pscores) / #pscores
+    fscore = sumTable(fscores) / #fscores
 
     if (epoch%print_every)==0 then
         print(string.format("Epoch %i, {Recall = %.6f, Precision = %6.f, F1 = %.6f}", epoch, rscore, pscore, fscore))
