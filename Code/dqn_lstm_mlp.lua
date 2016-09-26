@@ -18,6 +18,8 @@ nepochs = 100
 embed_dim = 6
 cuda = true
 torch.manualSeed(69)
+epsilon = 1.0
+delta = 1./(nepochs/4.)
 
 if N== nil then
     N = #m-1
@@ -56,10 +58,16 @@ crit = nn.MSECriterion()
 
 xs = padZeros(out, mxl)             --- Padding the data by the maximum length
 input = torch.LongTensor(xs)        --- This is the correct format to input it
-labels = torch.rand(#out)
+labels = torch.randn(#out)          --- randn is from a normal whie rand() is uniform
 
 -- For batch inputs, it's a little easier to start with 
 -- (sequence-length x batch-size) tensor so we transpose the data
+
+--- TO DO:
+--- Need to modify the rouge scoring so that we are calcuating everything cumulatively
+--- Then we know for each sentence whether or not it improves rouge
+--- then we can start to map that as our label
+
 myDataT = input:t()
 loss = 0
 for epoch=1, nepochs, 1 do
@@ -72,20 +80,51 @@ for epoch=1, nepochs, 1 do
     batchLSTM:updateParameters(0.1)
     batchLSTM:zeroGradParameters()
     
+    --- TO DO add the epsilon greedy strategy
+    ---  to randomly choose based some epsilon% of the time
     preds = {}
-    for i=1, myPreds:size()[1] do
-        preds[i] = (myPreds[i][1] > 0) and 1 or 0 --- lua is stupid
+    if 1 == 0 then
+    --- if torch.rand(1)[1] <= epsilon then
+        for i=1, N do
+            preds[i] = torch.round(torch.rand(1))[1]
+        end
+    else 
+        --- This is the action choice 1 select, 0 skip
+        for i=1, N do
+            preds[i] = (myPreds[i][1] > 0) and 1 or 0
+        end
     end
     --- Concatenating predictions into a summary
     predsummary = buildPredSummary(preds, xs)
     --- Calculating rouge scores
-    rscore = rougeRecall(predsummary, nggs)
-    pscore = rougePrecision(predsummary, nggs)
-    fscore = rougeF1(predsummary, nggs)
+    rscores = {}
+    pscores = {}
+    fscores = {}
+    out = {}
+    r_t1 = 0
+    p_t1 = 0
+    f_t1 = 0
+    for i=1, #predsummary do
+        rscores[i] = rougeRecall(geti_n(predsummary, i), nggs) - r_t1
+        pscores[i] = rougePrecision(geti_n(predsummary, i), nggs) - p_t1
+        fscores[i] = rougeF1(geti_n(predsummary, i), nggs) - f_t1
+        r_t1 = rscores[i]
+        p_t1 = pscores[i]
+        f_t1 = fscores[i]
+    end
+    rscore = table.unpack(rscores) / #rscores
+    pscore = table.unpack(pscores) / #pscores
+    fscore = table.unpack(fscores) / #fscores
+    -- rscore = rougeRecall(predsummary, nggs)
+    -- pscore = rougePrecision(predsummary, nggs)
+    -- fscore = rougeF1(predsummary, nggs)
 
     if (epoch%print_every)==0 then
-        print(string.format("Epoch %i, Rouge \t {Recall = %.6f, Precision = %6.f, F1 = %.6f}", epoch, rscore, pscore, fscore))
+        print(string.format("Epoch %i, {Recall = %.6f, Precision = %6.f, F1 = %.6f}", epoch, rscore, pscore, fscore))
     end
+    --- Updating the inputs
+    labels = torch.Tensor(fscores)
+    epsilon = epsilon - delta
 end
 
 print("------------------")

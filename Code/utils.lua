@@ -161,20 +161,15 @@ function rougeF1(pred_summary, ref_summaries)
 end
 
 
-function build_network(inputSize, hiddenSize, outputSize)
-  model = nn.Sequential() 
-  :add(nn.Linear(inputSize, hiddenSize))
-  :add(nn.LSTM(hiddenSize, hiddenSize))
-  :add(nn.LSTM(hiddenSize, hiddenSize))
-  :add(nn.Linear(hiddenSize, outputSize))
-  :add(nn.LogSoftMax())
-  -- wrap this in a Sequencer such that we can forward/backward 
-  -- entire sequences of length seqLength at once
-  model = nn.Sequencer(rnn)
-  if opt.cuda then
-     model:cuda()
-  end
-   return model
+function geti_n(x, n)
+    local out = {}
+    for k,v in pairs(x) do
+        if k <= n then
+        out[k] = v
+        else
+            break
+        end
+    end
+    return out
 end
-
 print("...Utils file loaded")
