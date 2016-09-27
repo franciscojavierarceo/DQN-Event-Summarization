@@ -20,8 +20,8 @@ nggs = grabNsamples(q, #q-1, nil)       --- Extracting all samples
 mxl  = getMaxseq(m)                     --- Extracting maximum sequence length
 vocab_size = getVocabSize(out, N)       --- getting the length of the dictionary
 
-xs = padZeros(out, mxl)             --- Padding the data by the maximum length
-input = torch.LongTensor(xs)        --- This is the correct format to input it
+xs = padZeros(out, mxl)                 --- Padding the data by the maximum length
+input = torch.LongTensor(xs)            --- This is the correct format to input it
 labels = torch.round(torch.rand(#out))
 
 preds = {}
