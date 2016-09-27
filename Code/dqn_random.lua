@@ -23,6 +23,7 @@ vocab_size = getVocabSize(out, N)       --- getting the length of the dictionary
 xs = padZeros(out, mxl)             --- Padding the data by the maximum length
 input = torch.LongTensor(xs)        --- This is the correct format to input it
 labels = torch.round(torch.rand(#out))
+
 preds = {}
 for i=1,labels:size()[1] do
     preds[i] = labels[i]
