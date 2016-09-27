@@ -51,6 +51,28 @@ function grabNsamples(x, N, K)
     return out
 end
 
+function getMaxseq(x)
+    local maxval = 0
+    for k, v in pairs(x) do
+        if k > 1 then 
+            seq = split(v[1])
+            maxval = math.max(maxval, #seq)
+        end
+    end
+    return maxval
+end
+
+function getVocabSize(x, N)
+    local vocab_size = 0
+    for k,v in pairs(x) do
+        vocab_size = math.max(vocab_size, math.max(table.unpack(v)))
+        if (k % N)==0 then
+            break
+        end
+    end
+    return vocab_size
+end
+
 
 function padZeros(x, maxlen)
     local out = {}

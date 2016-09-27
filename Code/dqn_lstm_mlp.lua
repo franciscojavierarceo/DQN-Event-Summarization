@@ -38,17 +38,10 @@ function build_network(vocab_size, embed_dim, outputSize, cuda)
    return batchLSTM
 end
 
-out = grabNsamples(m, N, K)             --- Extracting N samples
+out  = grabNsamples(m, N, K)            --- Extracting N samples
 nggs = grabNsamples(q, #q-1, nil)       --- Extracting all samples
-
-vocab_size = 0                          --- getting max length of vocab
-for k,v in pairs(out) do
-    vocab_size = math.max(vocab_size, math.max(table.unpack(v)))
-    if (k % N)==0 then
-        print(k,'elements read out of ', #m)
-        break
-    end
-end
+mxl  = getMaxseq(m)                     --- Extracting maximum sequence length
+vocab_size = getVocabSize(out, N)       --- getting the length of the dictionary
 
 mxl = 0
 for k,v in pairs(out) do
@@ -83,7 +76,7 @@ for epoch=0, nepochs, 1 do
         for i=1, N do
             preds[i] = (torch.rand(1)[1] > 0.5 ) and 1 or 0
         end
-    else 
+    else
         --- This is the action choice 1 select, 0 skip
         for i=1, N do
             preds[i] = (myPreds[i][1] > 0) and 1 or 0

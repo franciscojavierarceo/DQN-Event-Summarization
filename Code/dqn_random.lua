@@ -15,21 +15,10 @@ N = 1000   --- #m-1
 K = 100
 torch.manualSeed(69)
 
-out = grabNsamples(m, N, K)             --- Extracting N samples
+out  = grabNsamples(m, N, K)            --- Extracting N samples
 nggs = grabNsamples(q, #q-1, nil)       --- Extracting all samples
-
-mxl = 0
-for k,v in pairs(out) do
-    mxl = math.max(mxl, #v)
-end
-
-vocab_size = 0                  --- getting the length of the dictionary
-for k,v in pairs(out) do
-    vocab_size = math.max(vocab_size, math.max(table.unpack(v)))
-    if (k % N)==0 then
-        print(k,'elements read out of ', #m-1)
-    end
-end
+mxl  = getMaxseq(m)                     --- Extracting maximum sequence length
+vocab_size = getVocabSize(out, N)       --- getting the length of the dictionary
 
 xs = padZeros(out, mxl)             --- Padding the data by the maximum length
 input = torch.LongTensor(xs)        --- This is the correct format to input it

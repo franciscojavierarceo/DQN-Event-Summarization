@@ -36,22 +36,10 @@ function build_network(vocab_size, embed_dim, outputSize, cuda)
    return bowMLP
 end
 
-out = grabNsamples(m, N, K)             --- Extracting N samples
+out  = grabNsamples(m, N, K)            --- Extracting N samples
 nggs = grabNsamples(q, #q-1, nil)       --- Extracting all samples
-
-vocab_size = 0                          --- getting max length of vocab
-for k,v in pairs(out) do
-    vocab_size = math.max(vocab_size, math.max(table.unpack(v)))
-    if (k % N)==0 then
-        print(k,'elements read out of ', #m)
-        break
-    end
-end
-
-mxl = 0
-for k,v in pairs(out) do
-    mxl = math.max(mxl, #v)
-end
+mxl  = getMaxseq(m)                     --- Extracting maximum sequence length
+vocab_size = getVocabSize(out, N)       --- getting the length of the dictionary
 
 batchMLP = build_network(vocab_size, embed_dim, 1, true)
 crit = nn.MSECriterion()
