@@ -85,16 +85,18 @@ function unpackZeros(x)
 end
 function buildPredSummary(preds, xs) 
     local predsummary = {}
-    c = 1
     for i=1, #xs do
+        tmp = unpackZeros(xs[i])
+        tmp1 = {0}
         if preds[i]== 1 then
-            predsummary[c] = unpackZeros(xs[i])
-            c = c + 1
+            predsummary[i] = tmp
+            tmp1 = tmp
+        else
+            predsummary[i] = tmp1
         end
     end
     return predsummary
 end
-
 
 function Tokenize(inputdic)
     local out = {}
@@ -157,7 +159,9 @@ end
 function rougeF1(pred_summary, ref_summaries) 
     rnp = rougeRecall(pred_summary, ref_summaries)
     rnr = rougePrecision(pred_summary, ref_summaries)
-    return (2. * rnp * rnr ) / (rnp + rnr)
+    --- Had to add this line b/c f1 starts out at 0
+    f1 = (rnr > 0) and (2. * rnp * rnr ) / (rnp + rnr) or 0
+    return f1
 end
 
 --- Meant to cumuatively extract the elements of a table for the rouge scoring
@@ -165,7 +169,7 @@ function geti_n(x, n)
     local out = {}
     for k,v in pairs(x) do
         if k <= n then
-        out[k] = v
+            out[k] = v
         else
             break
         end

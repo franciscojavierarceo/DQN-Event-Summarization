@@ -8,14 +8,12 @@ dofile("utils.lua")
 
 aurora_fn = '~/GitHub/DeepNLPQLearning/DO_NOT_UPLOAD_THIS_DATA/0-output/2012_aurora_shooting_first_sentence_numtext.csv'
 nugget_fn = '~/GitHub/DeepNLPQLearning/DO_NOT_UPLOAD_THIS_DATA/0-output/aurora_nuggets_numtext.csv'
-
 m = csvigo.load({path = aurora_fn, mode = "large"})
 q = csvigo.load({path = nugget_fn, mode = "large"})
 
-N = #m-1
+N = 1000   --- #m-1
 K = 100
 torch.manualSeed(69)
-
 
 out = grabNsamples(m, N, K)             --- Extracting N samples
 nggs = grabNsamples(q, #q-1, nil)       --- Extracting all samples
@@ -42,12 +40,13 @@ for i=1,labels:size()[1] do
 end
 
 predsummary = buildPredSummary(preds, xs)
-
 rscore = rougeRecall(predsummary, nggs)
 pscore = rougePrecision(predsummary, nggs)
 fscore = rougeF1(predsummary, nggs)
+--- Outputting the last rouge
+perf_string = string.format("{Recall = %.6f, Precision = %.6f, F1 = %.6f}", rscore, pscore, fscore)
+print(perf_string)
 
-print(string.format("Rouge \t {Recall = %.6f, Precision = %6.f, F1 = %.6f}", rscore, pscore, fscore))
 
 print("------------------")
 print("  Model complete  ")
