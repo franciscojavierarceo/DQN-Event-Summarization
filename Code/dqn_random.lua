@@ -32,6 +32,7 @@ predsummary = buildPredSummary(preds, xs)
 rscore = rougeRecall(predsummary, nggs)
 pscore = rougePrecision(predsummary, nggs)
 fscore = rougeF1(predsummary, nggs)
+
 --- Outputting the last rouge
 perf_string = string.format("{Recall = %.6f, Precision = %.6f, F1 = %.6f}", rscore, pscore, fscore)
 print(perf_string)
