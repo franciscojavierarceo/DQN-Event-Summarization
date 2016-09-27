@@ -49,7 +49,6 @@ crit = nn.MSECriterion()
 xs = padZeros(out, mxl)             --- Padding the data by the maximum length
 input = torch.LongTensor(xs)        --- This is the correct format to input it
 labels = torch.randn(#out, 0, 2)          --- randn is from a normal whie rand() is uniform
-print(labels:min(), labels:max(), labels:median(), labels:mean())
 
 -- For batch inputs, it's a little easier to start with 
 -- (sequence-length x batch-size) tensor so we transpose the data
