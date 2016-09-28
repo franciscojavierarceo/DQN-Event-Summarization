@@ -37,15 +37,11 @@ end
 function grabNsamples(x, N, K)
     local out = {}
     if N == nil then 
-        N = #x[1] 
+        N = #x
     end
-    for k,v in pairs(m) do
+    for k,v in pairs(x) do
         if k > 1 then
             out[k-1] = grabKtokens(split(x[k][1]), K)
-        end
-        if (k % (N+1))==0 then
-            print(N,'elements read out of ', #x)
-            break
         end
     end
     return out
@@ -62,17 +58,40 @@ function getMaxseq(x)
     return maxval
 end
 
-function getVocabSize(x, N)
+function sampleData(x, K, mxl)
+    local nbatches = torch.round( #x / K)
+    for i = 1, K do
+        if i == 1 then
+            nstart = 2
+            nend = torch.round(nbatches * i)
+        end
+        if i == #x then 
+            nstart = nend + 1
+            nend = #x
+        end
+        if i > 1 and i < #x then 
+            nstart = nend + 1
+            nend = torch.round(nbatches * i)
+        end
+        x_ss  = geti_n(x, nstart, nend)
+        out  = grabNsamples(x_ss, 1, #x_ss)        --- Extracting N samples
+        xs = padZeros(out, mxl)             --- Padding the data by the maximum length
+        input = torch.LongTensor(xs)        --- This is the correct format to input it
+    end
+    return out
+end    
+
+function getVocabSize(x)
     local vocab_size = 0
-    for k,v in pairs(x) do
-        vocab_size = math.max(vocab_size, math.max(table.unpack(v)))
-        if (k % N)==0 then
-            break
+    for k, v in pairs(x) do
+        if k > 1 then
+            if k== nil then k = '0' end
+            seq = split(v[1])
+            vocab_size = math.max(vocab_size, math.max(table.unpack(seq)) )
         end
     end
     return vocab_size
 end
-
 
 function padZeros(x, maxlen)
     local out = {}
@@ -105,6 +124,7 @@ function unpackZeros(x)
     end
     return out
 end
+
 function buildPredSummary(preds, xs) 
     local predsummary = {}
     for i=1, #xs do
@@ -132,8 +152,22 @@ function Tokenize(inputdic)
         end
     end
     return out
-end--- Now we can calculate ROUGE
-function rougeRecall(pred_summary, ref_summaries)
+end
+--- Necessary for the Rouge calculation for last K streams
+function getLastK(x, K)
+    out = {} 
+    for i=0, #x-1 do
+        if i <= K-1 then
+            out[#x-i-1] = x[#x - i]
+        else
+            return out
+        end
+    end
+    return out
+end
+--- Now we can calculate ROUGE
+function rougeRecall(pred_summary, ref_summaries, K)
+    pred_summary = getLastK(pred_summary, K)
     rsd = Tokenize(ref_summaries)
     sws = Tokenize(pred_summary)
     for k,v in pairs(rsd) do
@@ -156,7 +190,8 @@ function rougeRecall(pred_summary, ref_summaries)
     return num/den
 end
 ---- Precision
-function rougePrecision(pred_summary, ref_summaries)
+function rougePrecision(pred_summary, ref_summaries, K)
+    pred_summary = getLastK(pred_summary, K)
     rsd = Tokenize(ref_summaries)
     sws = Tokenize(pred_summary)
     for k,v in pairs(rsd) do
@@ -178,22 +213,22 @@ function rougePrecision(pred_summary, ref_summaries)
     return num/den
 end
 ---- F1
-function rougeF1(pred_summary, ref_summaries) 
-    rnp = rougeRecall(pred_summary, ref_summaries)
-    rnr = rougePrecision(pred_summary, ref_summaries)
+function rougeF1(pred_summary, ref_summaries, K) 
+    rnp = rougeRecall(pred_summary, ref_summaries, K)
+    rnr = rougePrecision(pred_summary, ref_summaries, K)
     --- Had to add this line b/c f1 starts out at 0
     f1 = (rnr > 0) and (2. * rnp * rnr ) / (rnp + rnr) or 0
     return f1
 end
 
 --- Meant to cumuatively extract the elements of a table for the rouge scoring
-function geti_n(x, n)
+function geti_n(x, i, n)
     local out = {}
+    local c = 0
     for k,v in pairs(x) do
-        if k <= n then
-            out[k] = v
-        else
-            break
+        if k >= i and k <= n then
+            c = c + 1
+            out[c] = v
         end
     end
     return out

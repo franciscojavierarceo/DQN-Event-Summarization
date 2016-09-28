@@ -14,16 +14,21 @@ q = csvigo.load({path = nugget_fn, mode = "large"})
 
 N = 1000
 K = 100
-print_every = 10
+rK = 100
+
+nbatches = 10
 nepochs = 100
+print_every = 10
 embed_dim = 6
+learning_rate = 0.1
+
+cuts = 4.                  --- This is the number of cuts we want
+epsilon = 1.
+base_explore_rate = 0.1
+delta = 1./(nepochs/cuts) --- Only using epsilon greedy strategy for (nepochs/cuts)% of the epochs
+
 cuda = true
 torch.manualSeed(420)
-epsilon = 1.
-cuts = 4.                  --- This is the number of cuts we want
-delta = 1./(nepochs/cuts) --- Only using epsilon greedy strategy for (nepochs/cuts)% of the epochs
-base_explore_rate = 0.1
-learning_rate = 0.1
 
 if N == nil then
     N = #m-1
@@ -41,21 +46,15 @@ end
 out  = grabNsamples(m, N, K)            --- Extracting N samples
 nggs = grabNsamples(q, #q-1, nil)       --- Extracting all samples
 mxl  = getMaxseq(m)                     --- Extracting maximum sequence length
-vocab_size = getVocabSize(out, N)       --- getting the length of the dictionary
+vocab_size = getVocabSize(m)            --- getting the length of the dictionary
 
 batchMLP = build_network(vocab_size, embed_dim, 1, true)
 crit = nn.MSECriterion()
+-- mse = nn.MSECriterion()
+-- crit = nn.SequencerCriterion(mse)
 
-xs = padZeros(out, mxl)             --- Padding the data by the maximum length
-input = torch.LongTensor(xs)        --- This is the correct format to input it
-labels = torch.randn(#out, 0, 2)          --- randn is from a normal whie rand() is uniform
-
--- For batch inputs, it's a little easier to start with 
--- (sequence-length x batch-size) tensor so we transpose the data
-iterateModel(nepochs, batchMLP, crit, input, 
-                    xs, labels, epsilon, delta, 
-                    base_explore_rate, print_every,
-                    nggs, learning_rate)
+iterateModel(nbatches, nepochs, m, batchMLP, crit, epsilon, delta, mxl,
+                    base_explore_rate, print_every, nggs, learning_rate, rK)
 
 print("------------------")
 print("  Model complete  ")

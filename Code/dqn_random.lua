@@ -13,6 +13,7 @@ q = csvigo.load({path = nugget_fn, mode = "large"})
 
 N = 1000   --- #m-1
 K = 100
+rK = 100
 torch.manualSeed(69)
 
 out  = grabNsamples(m, N, K)            --- Extracting N samples
@@ -30,14 +31,13 @@ for i=1,labels:size()[1] do
 end
 
 predsummary = buildPredSummary(preds, xs)
-rscore = rougeRecall(predsummary, nggs)
-pscore = rougePrecision(predsummary, nggs)
-fscore = rougeF1(predsummary, nggs)
+rscore = rougeRecall(predsummary, nggs, rK)
+pscore = rougePrecision(predsummary, nggs, rK)
+fscore = rougeF1(predsummary, nggs, rK)
 
 --- Outputting the last rouge
 perf_string = string.format("{Recall = %.6f, Precision = %.6f, F1 = %.6f}", rscore, pscore, fscore)
 print(perf_string)
-
 
 print("------------------")
 print("  Model complete  ")

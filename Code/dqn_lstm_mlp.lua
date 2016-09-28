@@ -14,6 +14,7 @@ q = csvigo.load({path = nugget_fn, mode = "large"})
 
 N = 1000
 K = 100
+rK = 100
 print_every = 10
 nepochs = 100
 embed_dim = 6
@@ -47,6 +48,8 @@ vocab_size = getVocabSize(out, N)       --- getting the length of the dictionary
 
 batchLSTM = build_network(vocab_size, embed_dim, 1, true)
 crit = nn.MSECriterion()
+-- mse = nn.MSECriterion()
+-- crit = nn.SequencerCriterion(mse)
 
 xs = padZeros(out, mxl)             --- Padding the data by the maximum length
 input = torch.LongTensor(xs)        --- This is the correct format to input it
@@ -54,10 +57,8 @@ labels = torch.randn(#out)          --- randn is from a normal whie rand() is un
 
 -- For batch inputs, it's a little easier to start with 
 -- (sequence-length x batch-size) tensor so we transpose the data
-iterateModel(nepochs, batchLSTM, crit, input, 
-                    xs, labels, epsilon, delta, 
-                    base_explore_rate, print_every,
-                    nggs, learning_rate)
+iterateModel(nepochs, batchLSTM, crit, input, xs, labels, epsilon, delta, 
+                    base_explore_rate, print_every, nggs, learning_rate, rK)
 
 print("------------------")
 print("  Model complete  ")
