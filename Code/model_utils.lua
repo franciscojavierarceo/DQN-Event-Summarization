@@ -12,10 +12,22 @@ function policy(nnpreds, epsilon, N)
     end
     return pred
 end
+function updateTable(orig_table, insert_table, n_i)
+    local out_table = {}
+    for k, v in pairs(orig_table) do
+        out_table[k] = v 
+    end
+    for k, v in pairs(insert_table) do
+        out_table[n_i + k] = v 
+    end
+    return out_table
+end
 
 function iterateModel(nbatches, nepochs, x, model, crit, epsilon, delta, mxl,
                     base_explore_rate, print_every, nuggets, learning_rate, K)
     local r_t1 , p_t1, f_t1 = 0., 0., 0. 
+    local rscores, pscores, fscores = {}, {}, {}
+    local ys = torch.totable(torch.rand(#x))
     for epoch=0, nepochs, 1 do
         loss = 0                    --- Compute a new MSE loss each time
         local batch_size = torch.round( #x / nbatches)
@@ -39,50 +51,48 @@ function iterateModel(nbatches, nepochs, x, model, crit, epsilon, delta, mxl,
             local inputs = torch.LongTensor(xs)           --- This is the correct format to input it
             local xsT = inputs:t()
 
-            if epoch > 0 then
-                myPreds = model:forward(xsT)
-                loss = loss + crit:forward(myPreds, ys)
-                grads = crit:backward(myPreds, ys)
-                model:backward(xsT, grads)
-                --We update parameters at the end of each batch
-                model:updateParameters(learning_rate)
-                model:zeroGradParameters()
-            end
+            ys_ss = geti_n(ys, nstart, nend)
+            labels = torch.Tensor(ys_ss)
+            myPreds = model:forward(xsT)
+            loss = loss + crit:forward(myPreds, labels)
+            grads = crit:backward(myPreds, labels)
+            model:backward(xsT, grads)
+            --We update parameters at the end of each batch
+            model:updateParameters(learning_rate)
+            model:zeroGradParameters()
 
             preds = policy(myPreds, epsilon, #xs)
             --- Concatenating predictions into a summary
             predsummary = buildPredSummary(preds, xs)
             --- Initializing rouge metrics at time {t-1} and save scores
-            local rscores, pscores, fscores = {}, {}, {}
-            for i=1, N do
+            for i=1, #predsummary do
                 --- Calculating rouge scores; Call get_i_n() to cumulatively compute rouge
                 rscores[i] = rougeRecall(geti_n(predsummary, 1, i), nuggets, K) - r_t1
                 pscores[i] = rougePrecision(geti_n(predsummary, 1, i), nuggets, K) - p_t1
                 fscores[i] = rougeF1(geti_n(predsummary, 1, i), nuggets, K) - f_t1
                 r_t1, p_t1, f_t1 = rscores[i], pscores[i], fscores[i]
             end
-            --- Calculating last one to see actual last rouge
+            --- Updating labels
+            ys = updateTable(ys, fscores, nstart)
+            --- Calculating last one to see actual last rouge, without delta
             rscore = rougeRecall(predsummary, nuggets, K)
             pscore = rougePrecision(predsummary, nuggets, K)
             fscore = rougeF1(predsummary, nuggets, K)
 
             if (epoch % print_every)==0 then
                  -- This line is useful to view the min and max of the predctions
-                -- if epoch> 0 then 
-                --     print(myPreds:min(), myPreds:max())
-                -- end
+                if epoch > 0 then  print(myPreds:min(), myPreds:max()) end
                 perf_string = string.format(
-                    "Epoch %i, sumy = %i, loss = %.6f, {Recall = %.6f, Precision = %.6f, F1 = %.6f}", 
-                    epoch, sumTable(preds), loss, rscore, pscore, fscore
+                    "Epoch %i, sum(y)/len(y) = %i/%i, loss = %.6f, {Recall = %.6f, Precision = %.6f, F1 = %.6f}", 
+                    epoch, sumTable(preds), #preds, loss, rscore, pscore, fscore
                     )
                 print(perf_string)
             end
-            --- Updating the labels
-            ys = torch.Tensor(fscores)         
-            epsilon = epsilon - delta           --- Decreasing the epsilon greedy strategy
-            if epsilon <= 0 then                --- leave a random exploration rate
-                epsilon = base_explore_rate
-            end
+            -- Building list of predictions
+        end
+        epsilon = epsilon - delta           --- Decreasing the epsilon greedy strategy
+        if epsilon <= 0 then                --- leave a random exploration rate
+            epsilon = base_explore_rate
         end
     end
     return model
