@@ -12,7 +12,6 @@ nugget_fn = '~/GitHub/DeepNLPQLearning/DO_NOT_UPLOAD_THIS_DATA/0-output/aurora_n
 m = csvigo.load({path = aurora_fn, mode = "large"})
 q = csvigo.load({path = nugget_fn, mode = "large"})
 
-N = 1000
 K = 100
 rK = 100
 
@@ -30,10 +29,6 @@ delta = 1./(nepochs/cuts) --- Only using epsilon greedy strategy for (nepochs/cu
 cuda = true
 torch.manualSeed(420)
 
-if N == nil then
-    N = #m-1
-end
-
 function build_network(vocab_size, embed_dim, outputSize, cuda)
     bowMLP = nn.Sequential()
     :add(nn.LookupTableMaskZero(vocab_size, embed_dim)) -- returns a sequence-length x batch-size x embedDim tensor
@@ -43,10 +38,9 @@ function build_network(vocab_size, embed_dim, outputSize, cuda)
    return bowMLP
 end
 
-out  = grabNsamples(m, N, K)            --- Extracting N samples
+vocab_size = getVocabSize(m)            --- getting the length of the dictionary
 nggs = grabNsamples(q, #q-1, nil)       --- Extracting all samples
 mxl  = getMaxseq(m)                     --- Extracting maximum sequence length
-vocab_size = getVocabSize(m)            --- getting the length of the dictionary
 
 batchMLP = build_network(vocab_size, embed_dim, 1, true)
 crit = nn.MSECriterion()

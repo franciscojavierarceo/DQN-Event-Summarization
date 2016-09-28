@@ -40,7 +40,7 @@ function grabNsamples(x, N, K)
         N = #x
     end
     for k,v in pairs(x) do
-            out[k] = grabKtokens(split(x[k][1]), K)
+        out[k] = grabKtokens(split(x[k][1]), K)
     end
     return out
 end
