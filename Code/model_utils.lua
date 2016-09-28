@@ -57,8 +57,7 @@ function iterateModel(nbatches, nepochs, x, model, crit, epsilon, delta, mxl,
             loss = loss + crit:forward(myPreds, labels)
             grads = crit:backward(myPreds, labels)
             model:backward(xsT, grads)
-            --We update parameters at the end of each batch
-            model:updateParameters(learning_rate)
+            model:updateParameters(learning_rate)        -- Update parameters after each minibatch
             model:zeroGradParameters()
 
             preds = policy(myPreds, epsilon, #xs)
@@ -78,17 +77,16 @@ function iterateModel(nbatches, nepochs, x, model, crit, epsilon, delta, mxl,
             rscore = rougeRecall(predsummary, nuggets, K)
             pscore = rougePrecision(predsummary, nuggets, K)
             fscore = rougeF1(predsummary, nuggets, K)
-
-            if (epoch % print_every)==0 then
-                 -- This line is useful to view the min and max of the predctions
-                if epoch > 0 then  print(myPreds:min(), myPreds:max()) end
-                perf_string = string.format(
-                    "Epoch %i, sum(y)/len(y) = %i/%i, loss = %.6f, {Recall = %.6f, Precision = %.6f, F1 = %.6f}", 
-                    epoch, sumTable(preds), #preds, loss, rscore, pscore, fscore
-                    )
-                print(perf_string)
-            end
-            -- Building list of predictions
+            print(string.format('\t Mini-batch %i/%i', minibatch, nbatches) )
+        end
+        if (epoch % print_every)==0 then
+             -- This line is useful to view the min and max of the predctions
+            -- if epoch > 0 then  print(myPreds:min(), myPreds:max()) end
+            perf_string = string.format(
+                "Epoch %i, sum(y)/len(y) = %i/%i, loss = %.6f, {Recall = %.6f, Precision = %.6f, F1 = %.6f}", 
+                epoch, sumTable(preds), #preds, loss, rscore, pscore, fscore
+                )
+            print(perf_string)
         end
         epsilon = epsilon - delta           --- Decreasing the epsilon greedy strategy
         if epsilon <= 0 then                --- leave a random exploration rate

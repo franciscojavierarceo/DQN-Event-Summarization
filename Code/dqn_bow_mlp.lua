@@ -53,7 +53,7 @@ crit = nn.MSECriterion()
 -- mse = nn.MSECriterion()
 -- crit = nn.SequencerCriterion(mse)
 
-iterateModel(nbatches, nepochs, m, batchMLP, crit, epsilon, delta, mxl,
+out = iterateModel(nbatches, nepochs, m, batchMLP, crit, epsilon, delta, mxl,
                     base_explore_rate, print_every, nggs, learning_rate, rK)
 
 print("------------------")
