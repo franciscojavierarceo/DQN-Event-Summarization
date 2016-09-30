@@ -12,7 +12,6 @@ nugget_fn = '~/GitHub/DeepNLPQLearning/DO_NOT_UPLOAD_THIS_DATA/0-output/aurora_n
 m = csvigo.load({path = aurora_fn, mode = "large"})
 q = csvigo.load({path = nugget_fn, mode = "large"})
 
-K = 100
 rK = 100
 
 nbatches = 10
@@ -44,8 +43,6 @@ mxl  = getMaxseq(m)                     --- Extracting maximum sequence length
 
 batchMLP = build_network(vocab_size, embed_dim, 1, true)
 crit = nn.MSECriterion()
--- mse = nn.MSECriterion()
--- crit = nn.SequencerCriterion(mse)
 
 out = iterateModel(nbatches, nepochs, m, batchMLP, crit, epsilon, delta, mxl,
                     base_explore_rate, print_every, nggs, learning_rate, rK)

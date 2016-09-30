@@ -12,6 +12,7 @@ function policy(nnpreds, epsilon, N)
     end
     return pred
 end
+
 function updateTable(orig_table, insert_table, n_i)
     local out_table = {}
     for k, v in pairs(orig_table) do
@@ -25,11 +26,11 @@ end
 
 function iterateModel(nbatches, nepochs, x, model, crit, epsilon, delta, mxl,
                     base_explore_rate, print_every, nuggets, learning_rate, K)
-    local r_t1 , p_t1, f_t1 = 0., 0., 0. 
     local rscores, pscores, fscores = {}, {}, {}
     local ys = torch.totable(torch.rand(#x))
     for epoch=0, nepochs, 1 do
         loss = 0                    --- Compute a new MSE loss each time
+        local r_t1 , p_t1, f_t1 = 0., 0., 0. 
         local batch_size = torch.round( #x / nbatches)
         for minibatch = 1, nbatches do
             if minibatch == 1 then     -- Need +1 skip the first row

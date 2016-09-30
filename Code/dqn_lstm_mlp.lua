@@ -46,8 +46,6 @@ mxl  = getMaxseq(m)                     --- Extracting maximum sequence length
 
 batchLSTM = build_network(vocab_size, embed_dim, 1, true)
 crit = nn.MSECriterion()
--- mse = nn.MSECriterion()
--- crit = nn.SequencerCriterion(mse)
 
 out = iterateModel(nbatches, nepochs, m, batchLSTM, crit, epsilon, delta, mxl,
                     base_explore_rate, print_every, nggs, learning_rate, rK)
