@@ -13,7 +13,6 @@ def loadQuery(qfilename):
     :type   qfilename: str
     :param  qfilename: String indicating query file name
     """
-    print('yes')
     f = open(qfilename, 'rb')
     out = f.readlines()
     ox = BeautifulSoup(''.join(out),'lxml').contents[1]
@@ -66,12 +65,11 @@ def BuildIndexFiles(infile_list, qfilename):
 
     # Getting the dictionary with token info
     dictionary = corpora.Dictionary(texts)
+    
     # Mapping to numeric list -- adding plus one to tokens
     dictionary.token2id = {k: v+1 for k,v in dictionary.token2id.items()}
     word2idx = dictionary.token2id
-    # Have to add 1 because I shit the dictionary by one in the line before
-    qtexts = [qt + 1 for qt in qtexts]
-
+    
     dictionary.id2token = {v:k for k,v in dictionary.token2id.items()}
     idx2word = dictionary.id2token
     
@@ -124,7 +122,7 @@ def TokenizeData(infile_list, qfilename, outfile_list, word2idx, top_n, qtexts):
         qtexts = []
     # Loading the token frequencies
     tfdf = pd.read_csv('./0-output/total_corpus_smry.csv')
-    tfdf['qfile'] = tfdf['id'].isin(qtexts)
+    tfdf['qfile'] = tfdf['token'].isin(qtexts)
     tfdf.sort_values(by='frequency', ascending=False, inplace=True)
     tfdf = pd.concat([tfdf.iloc[0:top_n,:], tfdf[tfdf['qfile']==True]])
     token_ss = dict(zip(tfdf['token'], tfdf['id']))
