@@ -24,7 +24,7 @@ function updateTable(orig_table, insert_table, n_i)
     return out_table
 end
 
-function iterateModel(nbatches, nepochs, x, model, crit, epsilon, delta, mxl,
+function iterateModel(nbatches, nepochs, qs, x, model, crit, epsilon, delta, mxl,
                     base_explore_rate, print_every, nuggets, learning_rate, K)
     local rscores, pscores, fscores = {}, {}, {}
     local ys = torch.totable(torch.rand(#x))
@@ -54,7 +54,8 @@ function iterateModel(nbatches, nepochs, x, model, crit, epsilon, delta, mxl,
 
             ys_ss = geti_n(ys, nstart, nend)
             labels = torch.Tensor(ys_ss)
-            myPreds = model:forward(xsT)
+            myPreds = model:forward({sentences, summary, query, actions})
+            -- myPreds = model:forward(xsT)
             loss = loss + crit:forward(myPreds, labels)
             grads = crit:backward(myPreds, labels)
             model:backward(xsT, grads)

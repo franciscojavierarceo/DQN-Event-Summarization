@@ -9,11 +9,13 @@ dofile("model_utils.lua")
 
 aurora_fn = '~/GitHub/DeepNLPQLearning/DO_NOT_UPLOAD_THIS_DATA/0-output/2012_aurora_shooting_first_sentence_numtext.csv'
 nugget_fn = '~/GitHub/DeepNLPQLearning/DO_NOT_UPLOAD_THIS_DATA/0-output/aurora_nuggets_numtext.csv'
-m = csvigo.load({path = aurora_fn, mode = "large"})
-q = csvigo.load({path = nugget_fn, mode = "large"})
+query_fn = '~/GitHub/DeepNLPQLearning/DO_NOT_UPLOAD_THIS_DATA/0-output/queries_numtext.csv'
+
+data_file = csvigo.load({path = aurora_fn, mode = "large"})
+nugget_file = csvigo.load({path = nugget_fn, mode = "large"})
+query_file =  csvigo.load({path = query_fn, mode = "large"})
 
 rK = 100
-
 nbatches = 10
 nepochs = 100
 print_every = 10
@@ -37,15 +39,16 @@ function build_network(vocab_size, embed_dim, outputSize, cuda)
    return bowMLP
 end
 
-vocab_size = getVocabSize(m)            --- getting the length of the dictionary
-nggs = grabNsamples(q, #q-1, nil)       --- Extracting all samples
-mxl  = getMaxseq(m)                     --- Extracting maximum sequence length
+vocab_size = getVocabSize(data_file)                        --- getting length of dictionary
+queries = grabNsamples(query_file, #query_file-1, nil)      --- Extracting all queries
+nuggets = grabNsamples(nugget_file, #nugget_file-1, nil)    --- Extracting all samples
+maxlen  = getMaxseq(data_file)                              --- Extracting maximum sequence length
 
 batchMLP = build_network(vocab_size, embed_dim, 1, true)
 crit = nn.MSECriterion()
 
-out = iterateModel(nbatches, nepochs, m, batchMLP, crit, epsilon, delta, mxl,
-                    base_explore_rate, print_every, nggs, learning_rate, rK)
+out = iterateModel(nbatches, nepochs, m, batchMLP, crit, epsilon, delta, maxlen,
+                    base_explore_rate, print_every, nuggets, learning_rate, rK)
 
 print("------------------")
 print("  Model complete  ")
