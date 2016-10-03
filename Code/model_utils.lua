@@ -58,30 +58,31 @@ function iterateModel(nbatches, nepochs, qs, x, model, crit, epsilon, delta, mxl
             local xs = padZeros(xout, mxl)                 --- Padding the data by the maximum length
             local inputs = torch.LongTensor(xs)           --- This is the correct format to input it
             local sentences = inputs:t()
-            local summary = torch.LongTensor(sumry_ss):t()
-            local qs2 = padZeros({qs}, mxl)
-            local query = torch.LongTensor(qs2):t()
+            local preds = torch.round(torch.rand(#xs))
+            local sumry_ss = buildPredSummary(preds, xs)
+            local sumry_ss2 = padZeros(sumry_ss, mxl)
+            local summary = torch.LongTensor(sumry_ss2):t()
+            local qs2 = padZeros({qs}, 4)
+            local query = torch.LongTensor(qs2):t()         --- Query doesn't need transpose
+            local yr_ss = geti_n(yrouge, nstart, nend)
+            local as_ss = geti_n(action_list, nstart, nend)
+            local actions = torch.Tensor(as_ss)
+            local labels = torch.Tensor(yr_ss)
 
-            yr_ss = geti_n(yrouge, nstart, nend)
-            as_ss = geti_n(action_list, nstart, nend)
-            actions = torch.Tensor(as_ss)
-            labels = torch.Tensor(yr_ss)
-            print('sentence # ' , #sentences)
-            print('summary # ', #summary)
-            print('query # ', #query)
-            print('actions # ', #actions)
-            print('labels # ', #labels)
-            myPreds = model:forward({sentences, summary, actions})
+            print('Scoring model...')
+            myPreds = model:forward({sentences, summary, query})
             -- myPreds = model:forward({sentences, summary, query, actions})
-            print('success')
+            print('Forward pass a success')
             loss = loss + crit:forward(myPreds, labels)
             grads = crit:backward(myPreds, labels)
-            model:backward({sentences, summary, query, actions}, grads)
+            print('grads calculated')
+            model:backward({sentences, summary, query}, grads)
             model:updateParameters(learning_rate)        -- Update parameters after each minibatch
             model:zeroGradParameters()
-            print('success')
+            print('Backprop a success')
 
             preds = policy(myPreds, epsilon, #xs)
+            print('Policy a success')
             --- Concatenating predictions into a summary
             predsummary = buildPredSummary(preds, xs)
             --- Initializing rouge metrics at time {t-1} and save scores

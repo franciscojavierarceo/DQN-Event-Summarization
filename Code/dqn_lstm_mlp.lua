@@ -16,7 +16,7 @@ nugget_file = csvigo.load({path = nugget_fn, mode = "large"})
 query_file =  csvigo.load({path = query_fn, mode = "large"})
 
 rK = 100
-nbatches = 10
+nbatches = 50
 nepochs = 100
 print_every = 10
 embed_dim = 10
@@ -30,21 +30,21 @@ delta = 1./(nepochs/cuts) --- Only using epsilon greedy strategy for (nepochs/cu
 cuda = true
 torch.manualSeed(420)
 
-function build_network(vocab_size, embed_dim, outputSize)
+function build_network(vocab_size, embed_dim)
     model = nn.Sequential()
     :add(nn.LookupTableMaskZero(vocab_size, embed_dim)) -- will return a sequence-length x batch-size x embedDim tensor
     :add(nn.SplitTable(1, embed_dim)) -- splits into a sequence-length table with batch-size x embedDim entries
     :add(nn.Sequencer(nn.LSTM(embed_dim, embed_dim)))
     :add(nn.SelectTable(-1)) -- selects last state of the LSTM
-    :add(nn.Linear(embed_dim, outputSize)) -- map last state to a score for classification
+    :add(nn.Linear(embed_dim, embed_dim)) -- map last state to a score for classification
     :add(nn.ReLU())
    return model
 end
 
 function build_model(vocab_size, embed_dim, outputSize)
-    lstm1 = build_network(vocab_size, embed_dim, outputSize)
-    lstm2 = build_network(vocab_size, embed_dim, outputSize)
-    lstm3 = build_network(vocab_size, embed_dim, outputSize)
+    lstm1 = build_network(vocab_size, embed_dim)
+    lstm2 = build_network(vocab_size, embed_dim)
+    lstm3 = build_network(vocab_size, embed_dim)
 
     mlp1 = nn.Sequential()
     mlp1:add(nn.Linear(1, embed_dim))
@@ -54,12 +54,12 @@ function build_model(vocab_size, embed_dim, outputSize)
     ParallelModel:add(lstm1)
     ParallelModel:add(lstm2)
     ParallelModel:add(lstm3)
-    ParallelModel:add(mlp1)
+    -- ParallelModel:add(mlp1)
 
     FinalMLP = nn.Sequential()
     FinalMLP:add(ParallelModel)
     FinalMLP:add(nn.JoinTable(2))
-    FinalMLP:add( nn.Linear(embed_dim * 4, 1) )
+    FinalMLP:add( nn.Linear(embed_dim * 3, outputSize) )
     return FinalMLP
 end
 
@@ -68,7 +68,7 @@ queries = grabNsamples(query_file, #query_file-1, nil)      --- Extracting all q
 nuggets = grabNsamples(nugget_file, #nugget_file-1, nil)    --- Extracting all samples
 maxlen  = getMaxseq(data_file)                              --- Extracting maximum sequence length
 
-batchLSTM = build_network(vocab_size, embed_dim, 1, true)
+batchLSTM = build_model(vocab_size, embed_dim, 1)
 crit = nn.MSECriterion()
 
 out = iterateModel( nbatches, nepochs, queries[3], data_file, batchLSTM, crit, epsilon, delta, 
