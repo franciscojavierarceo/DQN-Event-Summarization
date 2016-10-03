@@ -27,18 +27,19 @@ end
 --- This will loop over queries
 --- then iteratere over minibatches
 --- then iterate over epochs
-function iterateModel(nbatches, nepochs, queries, x, model, crit, epsilon, delta, mxl,
+function iterateModel(nbatches, nepochs, qs, x, model, crit, epsilon, delta, mxl,
                     base_explore_rate, print_every, nuggets, learning_rate, K)
     local rscores, pscores, fscores = {}, {}, {}
-    local ys = torch.totable(torch.rand(#x))
-    local summary = torch.totable(torch.zeros(K))
+    local yrouge = torch.totable(torch.randn(#x, 1))
+    local summary_list = populateOnes(#x, K)
+    local action_list = torch.totable(torch.round(torch.randn(#x, 1)))
     for epoch=0, nepochs, 1 do
         loss = 0                    --- Compute a new MSE loss each time
-        local r_t1 , p_t1, f_t1 = 0., 0., 0. 
+        local r_t1 , p_t1, f_t1 = 0., 0., 0.
         --- Looping over each bach of sentences for a given query
         local batch_size = torch.round( #x / nbatches)
         for minibatch = 1, nbatches do
-            if minibatch == 1 then     -- Need +1 skip the first row
+            if minibatch == 1 then     -- Need +1 to skip the first row
                 nstart = 2
                 nend = torch.round(batch_size * minibatch)
             end
@@ -52,20 +53,33 @@ function iterateModel(nbatches, nepochs, queries, x, model, crit, epsilon, delta
             end
             --- This step is processing the data
             local x_ss  = geti_n(x, nstart, nend)
-            local out  = grabNsamples(x_ss, 1, #x_ss)     --- Extracting N samples
-            local xs = padZeros(out, mxl)                 --- Padding the data by the maximum length
+            local sumry_ss = geti_n(summary_list, nstart, nend)
+            local xout  = grabNsamples(x_ss, 1, #x_ss)     --- Extracting N samples
+            local xs = padZeros(xout, mxl)                 --- Padding the data by the maximum length
             local inputs = torch.LongTensor(xs)           --- This is the correct format to input it
-            local xsT = inputs:t()
+            local sentences = inputs:t()
+            local summary = torch.LongTensor(sumry_ss):t()
+            local qs2 = padZeros({qs}, mxl)
+            local query = torch.LongTensor(qs2):t()
 
-            ys_ss = geti_n(ys, nstart, nend)
-            labels = torch.Tensor(ys_ss)
-            myPreds = model:forward({sentences, summary, query, actions})
-            -- myPreds = model:forward(xsT)
+            yr_ss = geti_n(yrouge, nstart, nend)
+            as_ss = geti_n(action_list, nstart, nend)
+            actions = torch.Tensor(as_ss)
+            labels = torch.Tensor(yr_ss)
+            print('sentence # ' , #sentences)
+            print('summary # ', #summary)
+            print('query # ', #query)
+            print('actions # ', #actions)
+            print('labels # ', #labels)
+            myPreds = model:forward({sentences, summary, actions})
+            -- myPreds = model:forward({sentences, summary, query, actions})
+            print('success')
             loss = loss + crit:forward(myPreds, labels)
             grads = crit:backward(myPreds, labels)
-            model:backward(xsT, grads)
+            model:backward({sentences, summary, query, actions}, grads)
             model:updateParameters(learning_rate)        -- Update parameters after each minibatch
             model:zeroGradParameters()
+            print('success')
 
             preds = policy(myPreds, epsilon, #xs)
             --- Concatenating predictions into a summary
@@ -78,8 +92,8 @@ function iterateModel(nbatches, nepochs, queries, x, model, crit, epsilon, delta
                 fscores[i] = rougeF1(geti_n(predsummary, 1, i), nuggets, K) - f_t1
                 r_t1, p_t1, f_t1 = rscores[i], pscores[i], fscores[i]
             end
-            --- Updating labels
-            ys = updateTable(ys, fscores, nstart)
+            --- Updating change in rouge
+            yrouge = updateTable(yrouge, fscores, nstart)
             --- Calculating last one to see actual last rouge, without delta
             rscore = rougeRecall(predsummary, nuggets, K)
             pscore = rougePrecision(predsummary, nuggets, K)

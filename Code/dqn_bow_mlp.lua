@@ -19,7 +19,7 @@ rK = 100
 nbatches = 10
 nepochs = 100
 print_every = 10
-embed_dim = 6
+embed_dim = 10
 learning_rate = 0.1
 
 cuts = 4.                  --- This is the number of cuts we want
@@ -30,13 +30,35 @@ delta = 1./(nepochs/cuts) --- Only using epsilon greedy strategy for (nepochs/cu
 cuda = true
 torch.manualSeed(420)
 
-function build_network(vocab_size, embed_dim, outputSize, cuda)
-    bowMLP = nn.Sequential()
+function build_network(vocab_size, embed_dim, outputSize)
+    model = nn.Sequential()
     :add(nn.LookupTableMaskZero(vocab_size, embed_dim)) -- returns a sequence-length x batch-size x embedDim tensor
     :add(nn.Sum(1, embed_dim, true)) -- splits into a sequence-length table with batch-size x embedDim entries
     :add(nn.Linear(embed_dim, outputSize)) -- map last state to a score for classification
     :add(nn.Tanh())                     ---     :add(nn.ReLU()) <- this one did worse
-   return bowMLP
+   return model
+end
+
+function build_model(vocab_size, embed_dim, outputSize)
+    mod1 = build_network(vocab_size, embed_dim, outputSize)
+    mod2 = build_network(vocab_size, embed_dim, outputSize)
+    -- mod3 = build_network(vocab_size, embed_dim, outputSize)
+
+    mlp1 = nn.Sequential()
+    mlp1:add(nn.Linear(1, embed_dim))
+    mlp1::add(nn.ReLU())
+
+    ParallelModel = nn.ParallelTable()
+    ParallelModel:add(mod1)
+    ParallelModel:add(mod2)
+    ParallelModel:add(mod3)
+    ParallelModel:add(mlp1)
+
+    FinalMLP = nn.Sequential()
+    FinalMLP:add(ParallelModel)
+    FinalMLP:add(nn.JoinTable(2))
+    FinalMLP:add( nn.Linear(embed_dim * 4, 1) )
+    return FinalMLP
 end
 
 vocab_size = getVocabSize(data_file)                        --- getting length of dictionary
@@ -47,8 +69,8 @@ maxlen  = getMaxseq(data_file)                              --- Extracting maxim
 batchMLP = build_network(vocab_size, embed_dim, 1, true)
 crit = nn.MSECriterion()
 
-out = iterateModel(nbatches, nepochs, m, batchMLP, crit, epsilon, delta, maxlen,
-                    base_explore_rate, print_every, nuggets, learning_rate, rK)
+out = iterateModel( nbatches, nepochs, queries[3], data_file, batchMLP, crit, epsilon, delta, 
+                    maxlen, base_explore_rate, print_every, nuggets, learning_rate, rK)
 
 print("------------------")
 print("  Model complete  ")

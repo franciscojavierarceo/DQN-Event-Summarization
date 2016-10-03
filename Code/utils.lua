@@ -91,6 +91,30 @@ function getVocabSize(x)
     return vocab_size
 end
 
+function populateOnes(n, ml)
+    local out = {}
+    local tmp = {}
+    for j=1, ml do
+        tmp[j] = 1
+    end
+    for i=1, n do
+        out[i] = tmp
+    end
+    return out
+end
+
+function populateZeros(n, ml)
+    local out = {}
+    local tmp = {}
+    for j=1, ml do
+        tmp[j] = 0
+    end
+    for i=1, n do
+        out[i] = tmp
+    end
+    return out
+end
+
 function padZeros(x, maxlen)
     local out = {}
     for k, v in pairs(x) do
