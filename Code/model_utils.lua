@@ -24,13 +24,18 @@ function updateTable(orig_table, insert_table, n_i)
     return out_table
 end
 
-function iterateModel(nbatches, nepochs, qs, x, model, crit, epsilon, delta, mxl,
+--- This will loop over queries
+--- then iteratere over minibatches
+--- then iterate over epochs
+function iterateModel(nbatches, nepochs, queries, x, model, crit, epsilon, delta, mxl,
                     base_explore_rate, print_every, nuggets, learning_rate, K)
     local rscores, pscores, fscores = {}, {}, {}
     local ys = torch.totable(torch.rand(#x))
+    local summary = torch.totable(torch.zeros(K))
     for epoch=0, nepochs, 1 do
         loss = 0                    --- Compute a new MSE loss each time
         local r_t1 , p_t1, f_t1 = 0., 0., 0. 
+        --- Looping over each bach of sentences for a given query
         local batch_size = torch.round( #x / nbatches)
         for minibatch = 1, nbatches do
             if minibatch == 1 then     -- Need +1 skip the first row

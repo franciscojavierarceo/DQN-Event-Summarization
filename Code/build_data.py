@@ -125,6 +125,7 @@ def TokenizeData(infile_list, qfilename, outfile_list, word2idx, top_n, qtexts):
     tfdf['qfile'] = tfdf['token'].isin(qtexts)
     tfdf.sort_values(by='frequency', ascending=False, inplace=True)
     tfdf = pd.concat([tfdf.iloc[0:top_n,:], tfdf[tfdf['qfile']==True]])
+    tfdf.drop_duplicates(inplace=True)
     token_ss = dict(zip(tfdf['token'], tfdf['id']))
 
     for idx, (infilename, outfilename) in enumerate(zip(infile_list, outfile_list)):

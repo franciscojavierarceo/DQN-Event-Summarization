@@ -140,7 +140,7 @@ end
 
 function Tokenize(inputdic)
     local out = {}
-    for k,v in pairs(inputdic) do
+    for k, v in pairs(inputdic) do
         for j, l in pairs(v) do
            if out[l] == nil then
                 out[l] = 1
@@ -168,20 +168,20 @@ function rougeRecall(pred_summary, ref_summaries, K)
     pred_summary = getLastK(pred_summary, K)
     rsd = Tokenize(ref_summaries)
     sws = Tokenize(pred_summary)
-    for k,v in pairs(rsd) do
+    for k, v in pairs(rsd) do
         if sws[k] == nil then
             sws[k] = 0
         end
     end
 
-    for k,v in pairs(sws) do
+    for k, v in pairs(sws) do
         if rsd[k] == nil then
             rsd[k] = 0 
         end
     end
     num = 0.
     den = 0.
-    for k,v in pairs(rsd) do
+    for k, v in pairs(rsd) do
         num = num + math.min(rsd[k], sws[k])
         den = den + rsd[k]
     end
@@ -192,19 +192,19 @@ function rougePrecision(pred_summary, ref_summaries, K)
     pred_summary = getLastK(pred_summary, K)
     rsd = Tokenize(ref_summaries)
     sws = Tokenize(pred_summary)
-    for k,v in pairs(rsd) do
+    for k, v in pairs(rsd) do
         if sws[k] == nil then
             sws[k] = 0
         end
     end
-    for k,v in pairs(sws) do
+    for k, v in pairs(sws) do
         if rsd[k] == nil then
             rsd[k] = 0
         end
     end
     num = 0.
     den = 0.
-    for k,v in pairs(rsd) do
+    for k, v in pairs(rsd) do
         num = num + math.min(rsd[k], sws[k])
         den = den + sws[k]
     end
@@ -234,7 +234,7 @@ end
 
 function sumTable(x)
     local o = 0
-    for k,v in pairs(x) do
+    for k, v in pairs(x) do
         o = o + v
     end
 

@@ -5,40 +5,38 @@ require 'csvigo'
 
 --- Loading utility script
 dofile("utils.lua")
+dofile("model_utils.lua")
 
 aurora_fn = '~/GitHub/DeepNLPQLearning/DO_NOT_UPLOAD_THIS_DATA/0-output/2012_aurora_shooting_first_sentence_numtext.csv'
 nugget_fn = '~/GitHub/DeepNLPQLearning/DO_NOT_UPLOAD_THIS_DATA/0-output/aurora_nuggets_numtext.csv'
-m = csvigo.load({path = aurora_fn, mode = "large"})
-q = csvigo.load({path = nugget_fn, mode = "large"})
 
-N = 1000   --- #m-1
-K = 100
-rK = 10
-torch.manualSeed(69)
+x = csvigo.load({path = aurora_fn, mode = "large"})
+nugget_file = csvigo.load({path = nugget_fn, mode = "large"})
 
-out  = grabNsamples(m, N, K)            --- Extracting N samples
-nggs = grabNsamples(q, #q-1, nil)       --- Extracting all samples
-mxl  = getMaxseq(m)                     --- Extracting maximum sequence length
-vocab_size = getVocabSize(out, N)       --- getting the length of the dictionary
+rK = 200
+K = 200
 
-xs = padZeros(out, mxl)                 --- Padding the data by the maximum length
-input = torch.LongTensor(xs)            --- This is the correct format to input it
-labels = torch.round(torch.rand(#out))
+for i = 1, 10 do
+    torch.manualSeed(690 + i)
 
-preds = {}
-for i=1,labels:size()[1] do
-    preds[i] = labels[i]
+    nuggets = grabNsamples(nugget_file, #nugget_file-1, nil)
+    xs  = grabNsamples(x, 1, #x)
+
+    preds = torch.round(torch.rand(#xs))
+    predsummary = buildPredSummary(preds, xs)
+
+    rscore = rougeRecall(predsummary, nuggets, K)
+    pscore = rougePrecision(predsummary, nuggets, K)
+    fscore = rougeF1(predsummary, nuggets, K)
+
+    --- Outputting the last rougue
+    perf_string = string.format(
+        "{Recall = %.6f, Precision = %.6f, F1 = %.6f}", 
+                    rscore, pscore, fscore
+    )
+
+    print(perf_string)
 end
-
-predsummary = buildPredSummary(preds, xs)
-rscore = rougeRecall(predsummary, nggs, rK)
-pscore = rougePrecision(predsummary, nggs, rK)
-fscore = rougeF1(predsummary, nggs, rK)
-
---- Outputting the last rouge
-perf_string = string.format("{Recall = %.6f, Precision = %.6f, F1 = %.6f}", rscore, pscore, fscore)
-print(perf_string)
-
 
 print("------------------")
 print("  Model complete  ")
