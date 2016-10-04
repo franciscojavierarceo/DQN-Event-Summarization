@@ -54,19 +54,24 @@ function build_model(vocab_size, embed_dim, outputSize)
     ParallelModel:add(lstm1)
     ParallelModel:add(lstm2)
     ParallelModel:add(lstm3)
-    -- ParallelModel:add(mlp1)
+    ParallelModel:add(mlp1)
 
     FinalMLP = nn.Sequential()
     FinalMLP:add(ParallelModel)
     FinalMLP:add(nn.JoinTable(2))
-    FinalMLP:add( nn.Linear(embed_dim * 3, outputSize) )
+    FinalMLP:add( nn.Linear(embed_dim * 4, outputSize) )
     return FinalMLP
 end
 
-vocab_size = getVocabSize(data_file)                        --- getting length of dictionary
+vocab_sized = getVocabSize(data_file)                       --- getting length of dictionary
+vocab_sizeq = getVocabSize(query_file)                      --- getting length of dictionary
+vocab_size = math.max(vocab_sized, vocab_sizeq)
+
 queries = grabNsamples(query_file, #query_file-1, nil)      --- Extracting all queries
 nuggets = grabNsamples(nugget_file, #nugget_file-1, nil)    --- Extracting all samples
-maxlen  = getMaxseq(data_file)                              --- Extracting maximum sequence length
+maxlend = getMaxseq(data_file)                             --- Extracting maximum sequence length
+maxlenq = getMaxseq(query_file)                            --- Extracting maximum sequence length
+maxlen = math.max(maxlenq, maxlend)
 
 batchLSTM = build_model(vocab_size, embed_dim, 1)
 crit = nn.MSECriterion()

@@ -16,7 +16,7 @@ nugget_file = csvigo.load({path = nugget_fn, mode = "large"})
 query_file =  csvigo.load({path = query_fn, mode = "large"})
 
 rK = 100
-nbatches = 10
+batch_size = 10
 nepochs = 100
 print_every = 10
 embed_dim = 10

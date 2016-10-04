@@ -10,9 +10,14 @@ function buildLSTM(vsize, edim, odim)
     return lstm
 end
 
-sentences = torch.LongTensor{{0, 1, 3, 4}, {2, 1, 4, 3}}:t()
+sentences = torch.LongTensor{{0, 1, 3, 4}, {0, 2, 4, 3}}:t()
 summary = torch.LongTensor{{0, 0, 1, 4}, {0, 2, 3, 1}}:t()
-query = torch.LongTensor{{0, 0, 4, 3}, {0, 1, 3, 2}}:t()
+query = torch.LongTensor{{0, 0, 4, 3}, {0, 0, 0, 0}}:t()
+
+-- sentences = torch.LongTensor{{0, 1, 3, 4}, {0, 2, 4, 3}, {0, 0, 4, 3}}:t()
+-- summary = torch.LongTensor{{0, 0, 1, 4}, {0, 2, 3, 1}, {0, 0, 0, 1}}:t()
+-- query = torch.LongTensor({0, 0, 4, 3})
+
 actions = torch.round(torch.rand(2, 1))
 yrouge = torch.rand(2, 1)
 
@@ -42,12 +47,23 @@ FinalMLP:add( nn.Linear(embed_dim * 4, 1) )
 
 criterion = nn.MSECriterion()
 
+print(sentences)
+print(summary)
+print(query)
+print(actions)
+
+print('sumval =', sentences[1]:sum())
+
 for epoch=1, 100 do
+    -- preds = FinalMLP:forward({query})
     preds = FinalMLP:forward({sentences, summary, query, actions})
     loss = criterion:forward(preds, yrouge)
     grads = criterion:backward(preds, yrouge)
     FinalMLP:backward({sentences, summary, query, actions}, grads)
+    -- FinalMLP:backward({query}, grads)
     FinalMLP:updateParameters(learning_rate)
     FinalMLP:zeroGradParameters()
-    print(string.format("Epoch %i, loss =%6f", epoch, loss))
+    if (epoch % 10)==0 then 
+        print(string.format("Epoch %i, loss =%6f", epoch, loss))
+    end
 end
