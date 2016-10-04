@@ -16,9 +16,9 @@ nugget_file = csvigo.load({path = nugget_fn, mode = "large"})
 query_file =  csvigo.load({path = query_fn, mode = "large"})
 
 rK = 100
-nbatches = 50
-nepochs = 100
-print_every = 10
+batch_size = 1000
+nepochs = 10
+print_every = 1
 embed_dim = 10
 learning_rate = 0.1
 
@@ -76,7 +76,7 @@ maxlen = math.max(maxlenq, maxlend)
 batchLSTM = build_model(vocab_size, embed_dim, 1)
 crit = nn.MSECriterion()
 
-out = iterateModel( nbatches, nepochs, queries[3], data_file, batchLSTM, crit, epsilon, delta, 
+out = iterateModel( batch_size, nepochs, queries[3], data_file, batchLSTM, crit, epsilon, delta, 
                     maxlen, base_explore_rate, print_every, nuggets, learning_rate, rK)
 
 

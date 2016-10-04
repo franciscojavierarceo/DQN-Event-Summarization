@@ -47,7 +47,7 @@ function iterateModel(batch_size, nepochs, qs, x, model, crit, epsilon, delta, m
         loss = 0                    --- Compute a new MSE loss each time
         local r_t1 , p_t1, f_t1 = 0., 0., 0.
         --- Looping over each bach of sentences for a given query
-        local nbatches = torch.floor( #x / nbatches)
+        local nbatches = torch.floor( #x / batch_size)
         for minibatch = 1, nbatches do
             if minibatch == 1 then          -- Need +1 to skip the first row
                 nstart = 2
