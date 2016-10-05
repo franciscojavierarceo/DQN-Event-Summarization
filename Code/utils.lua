@@ -147,14 +147,33 @@ function unpackZeros(x)
     return out
 end
 
-function buildPredSummary(preds, xs) 
+function initializePredSummary(pred_action, xs, mxl) 
     local predsummary = {}
+    --- TODO:
+        --- NEED TO FIX THIS TO KEEP THE LAST K SENTENCES AND CONCATENATE THEM
+        --- INTO A LOGICAL SEQUENCE
+    local tmp1 = {}
+    for i=1, #xs do
+        tmp = padZeros(unpackZeros(xs[i]), mxl)
+        if pred_action[i]== 1 then
+            table.insert(tmp1, tmp)
+            predsummary[i] = tmp1
+        else
+            predsummary[i] = tmp1
+        end
+    end
+    return predsummary
+end
+function buildPredSummary(pred_action, xs) 
+    local predsummary = {}
+    --- This looks stupid but it's right because we have to retain
+    --- the tmp1 when it's not 1, so it's a running total
+    local tmp1 = {}
     for i=1, #xs do
         tmp = unpackZeros(xs[i])
-        tmp1 = {0}
-        if preds[i]== 1 then
-            predsummary[i] = tmp
-            tmp1 = tmp
+        if pred_action[i]== 1 then
+            table.insert(tmp1, tmp)
+            predsummary[i] = tmp1
         else
             predsummary[i] = tmp1
         end
@@ -178,6 +197,9 @@ end
 --- Necessary for the Rouge calculation for last K streams
 function getLastK(x, K)
     --- Note: need to use K-1 bc we start at 0
+    if K == nil then
+        return x
+    end
     out = {}
     k = 0
     for i=0, #x-1 do
@@ -252,11 +274,11 @@ end
 --- Meant to cumuatively extract the elements of a table for the rouge scoring
 function geti_n(x, i, n)
     local out = {}
-    local c = 0
+    local c = 1
     for k,v in pairs(x) do
         if k >= i and k <= n then
-            c = c + 1
             out[c] = v
+            c = c + 1
         end
     end
     return out

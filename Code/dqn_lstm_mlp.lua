@@ -69,15 +69,15 @@ vocab_size = math.max(vocab_sized, vocab_sizeq)
 
 queries = grabNsamples(query_file, #query_file-1, nil)      --- Extracting all queries
 nuggets = grabNsamples(nugget_file, #nugget_file-1, nil)    --- Extracting all samples
-maxlend = getMaxseq(data_file)                             --- Extracting maximum sequence length
-maxlenq = getMaxseq(query_file)                            --- Extracting maximum sequence length
-maxlen = math.max(maxlenq, maxlend)
+maxseqlend = getMaxseq(data_file)                             --- Extracting maximum sequence length
+maxseqlenq = getMaxseq(query_file)                            --- Extracting maximum sequence length
+maxseqlen = math.max(maxseqlenq, maxseqlend)
 
 batchLSTM = build_model(vocab_size, embed_dim, 1)
 crit = nn.MSECriterion()
 
 out = iterateModel( batch_size, nepochs, queries[3], data_file, batchLSTM, crit, epsilon, delta, 
-                    maxlen, base_explore_rate, print_every, nuggets, learning_rate, rK)
+                    maxseqlen, base_explore_rate, print_every, nuggets, learning_rate, rK)
 
 print("------------------")
 print("  Model complete  ")
