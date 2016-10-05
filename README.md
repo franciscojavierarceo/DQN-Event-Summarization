@@ -12,7 +12,7 @@ The code has  main files, to run the code simply enter in the command line:
 
     source run_models.sh
 
-The relevant code files in the *Code* folder are
+The 6 relevant code files in the **Code** folder are
 
 1. build_data.py
 2. utils.lua
@@ -21,6 +21,6 @@ The relevant code files in the *Code* folder are
 5. dqn_lstm_mlp.lua
 6. dqn_random.lua
 
-The files in the *Paper* folder are related to the TeX document to publish the paper.
+The files in the **Paper** folder are related to the TeX document to create the paper.
 
 
