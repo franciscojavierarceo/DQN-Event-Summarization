@@ -1,4 +1,4 @@
-# Deep Q Learning for NLP
+# Deep Q Learning for Event Summarization
 
 Repo currently has 2 folders
 
