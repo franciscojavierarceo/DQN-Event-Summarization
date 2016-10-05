@@ -10,7 +10,7 @@ dofile("model_utils.lua")
 aurora_fn = '~/GitHub/DeepNLPQLearning/DO_NOT_UPLOAD_THIS_DATA/0-output/2012_aurora_shooting_first_sentence_numtext.csv'
 nugget_fn = '~/GitHub/DeepNLPQLearning/DO_NOT_UPLOAD_THIS_DATA/0-output/aurora_nuggets_numtext.csv'
 
-rK = 200
+rK = 500
 x = csvigo.load({path = aurora_fn, mode = "large"})
 nugget_file = csvigo.load({path = nugget_fn, mode = "large"})
 

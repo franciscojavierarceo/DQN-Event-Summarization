@@ -1,7 +1,19 @@
 require 'nn'
 require 'rnn'
+require 'cutorch'
 
-function buildLSTM(vsize, edim, odim)
+function build_mlp(vocab_size, embed_dim)
+    local model = nn.Sequential()
+    :add(nn.LookupTableMaskZero(vocab_size, embed_dim)) -- will return a sequence-length x batch-size x embedDim tensor
+    :add(nn.SplitTable(1, embed_dim)) -- splits into a sequence-length table with batch-size x embedDim entries
+    :add(nn.Sequencer(nn.LSTM(embed_dim, embed_dim)))
+    :add(nn.SelectTable(-1)) -- selects last state of the LSTM
+    :add(nn.Linear(embed_dim, embed_dim)) -- map last state to a score for classification
+    :add(nn.ReLU())
+   return model
+end
+
+function buildLSTM(vsize, edim)
     local lstm = nn.Sequential()
     lstm:add(nn.LookupTableMaskZero(vsize, edim))
     lstm:add(nn.SplitTable(1, edim))
@@ -27,9 +39,13 @@ embed_dim = 10
 outputSize = 1
 learning_rate = 0.1
 
-lstm1 = buildLSTM(vocab_size, embed_dim, outputSize)
-lstm2 = buildLSTM(vocab_size, embed_dim, outputSize)
-lstm3 = buildLSTM(vocab_size, embed_dim, outputSize)
+lstm1 = build_mlp(vocab_size, embed_dim)
+lstm2 = build_mlp(vocab_size, embed_dim)
+lstm3 = build_mlp(vocab_size, embed_dim)
+
+-- lstm1 = buildLSTM(vocab_size, embed_dim)
+-- lstm2 = buildLSTM(vocab_size, embed_dim)
+-- lstm3 = buildLSTM(vocab_size, embed_dim)
 
 mlp1 = nn.Sequential()
 mlp1:add(nn.Linear(1, embed_dim))
@@ -44,6 +60,7 @@ FinalMLP = nn.Sequential()
 FinalMLP:add(ParallelModel)
 FinalMLP:add(nn.JoinTable(2))
 FinalMLP:add( nn.Linear(embed_dim * 4, 1) )
+FinalMLP = FinalMLP
 
 criterion = nn.MSECriterion()
 

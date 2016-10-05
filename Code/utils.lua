@@ -177,12 +177,18 @@ function Tokenize(inputdic)
 end
 --- Necessary for the Rouge calculation for last K streams
 function getLastK(x, K)
-    out = {} 
+    --- Note: need to use K-1 bc we start at 0
+    out = {}
+    k = 0
     for i=0, #x-1 do
-        if i <= K-1 then
-            out[#x-i-1] = x[#x - i]
-        else
-            return out
+        if sumTable(x[#x - i])  ~= 0 then
+            if k <= K-1 then
+                --- 10 - 0 - 1 = 9..., 8, 7 ..., 1
+                out[#x-i-1] = x[#x - i]
+                k = k + 1
+            else
+                return out
+            end
         end
     end
     return out
@@ -209,7 +215,7 @@ function rougeRecall(pred_summary, ref_summaries, K)
         num = num + math.min(rsd[k], sws[k])
         den = den + rsd[k]
     end
-    return num/den
+    return (den > 0) and num/den or 0
 end
 ---- Precision
 function rougePrecision(pred_summary, ref_summaries, K)
@@ -232,7 +238,7 @@ function rougePrecision(pred_summary, ref_summaries, K)
         num = num + math.min(rsd[k], sws[k])
         den = den + sws[k]
     end
-    return num/den
+    return (den > 0) and num/den or 0
 end
 ---- F1
 function rougeF1(pred_summary, ref_summaries, K) 

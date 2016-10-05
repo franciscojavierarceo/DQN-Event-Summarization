@@ -15,7 +15,7 @@ data_file = csvigo.load({path = aurora_fn, mode = "large"})
 nugget_file = csvigo.load({path = nugget_fn, mode = "large"})
 query_file =  csvigo.load({path = query_fn, mode = "large"})
 
-rK = 100
+rK = 500
 batch_size = 1000
 nepochs = 10
 print_every = 1
@@ -31,33 +31,35 @@ cuda = true
 torch.manualSeed(420)
 
 function build_network(vocab_size, embed_dim)
-    model = nn.Sequential()
+    local model = nn.Sequential()
     :add(nn.LookupTableMaskZero(vocab_size, embed_dim)) -- returns a sequence-length x batch-size x embedDim tensor
     :add(nn.Sum(1, embed_dim, true)) -- splits into a sequence-length table with batch-size x embedDim entries
-    -- :add(nn.Linear(embed_dim, embed_dim)) -- map last state to a score for classification
+    :add(nn.Linear(embed_dim, embed_dim)) -- map last state to a score for classification
     :add(nn.Tanh())                     ---     :add(nn.ReLU()) <- this one did worse
+
+
    return model
 end
 
 function build_model(vocab_size, embed_dim, outputSize)
-    mod1 = build_network(vocab_size, embed_dim)
-    mod2 = build_network(vocab_size, embed_dim)
-    mod3 = build_network(vocab_size, embed_dim)
+    local mod1 = build_network(vocab_size, embed_dim)
+    local mod2 = build_network(vocab_size, embed_dim)
+    local mod3 = build_network(vocab_size, embed_dim)
 
-    mlp1 = nn.Sequential()
+    local mlp1 = nn.Sequential()
     mlp1:add(nn.Linear(1, embed_dim))
     mlp1:add(nn.ReLU())
 
-    ParallelModel = nn.ParallelTable()
+    local ParallelModel = nn.ParallelTable()
     ParallelModel:add(mod1)
     ParallelModel:add(mod2)
     ParallelModel:add(mod3)
     ParallelModel:add(mlp1)
 
-    FinalMLP = nn.Sequential()
+    local FinalMLP = nn.Sequential()
     FinalMLP:add(ParallelModel)
     FinalMLP:add(nn.JoinTable(2))
-    FinalMLP:add( nn.Linear(embed_dim * 4, 1) )
+    FinalMLP:add( nn.Linear(embed_dim * 4, outputSize) )
     return FinalMLP
 end
 
@@ -71,7 +73,7 @@ maxlend = getMaxseq(data_file)                             --- Extracting maximu
 maxlenq = getMaxseq(query_file)                            --- Extracting maximum sequence length
 maxlen = math.max(maxlenq, maxlend)
 
-batchMLP = build_network(vocab_size, embed_dim, 1)
+batchMLP = build_model(vocab_size, embed_dim, 1)
 crit = nn.MSECriterion()
 
 out = iterateModel( batch_size, nepochs, queries[3], data_file, batchMLP, crit, epsilon, delta, 

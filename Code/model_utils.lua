@@ -45,6 +45,7 @@ function iterateModel(batch_size, nepochs, qs, x, model, crit, epsilon, delta, m
     local preds_list = torch.totable(torch.round(torch.rand(#x)))
     for epoch=0, nepochs, 1 do
         loss = 0                    --- Compute a new MSE loss each time
+        --- Reset the rougue each time
         local r_t1 , p_t1, f_t1 = 0., 0., 0.
         --- Looping over each bach of sentences for a given query
         local nbatches = torch.floor( #x / batch_size)
@@ -71,13 +72,11 @@ function iterateModel(batch_size, nepochs, qs, x, model, crit, epsilon, delta, m
             local preds = geti_n(preds_list, nstart, nend)
             local sumry_ss = buildPredSummary(preds, xs)
             local sumry_ss2 = padZeros(sumry_ss, mxl)
-            local yr_ss = geti_n(yrouge, nstart, nend)
-            local as_ss = geti_n(action_list, nstart, nend)
             local sentences = torch.LongTensor(xs):t()
             local summary = torch.LongTensor(sumry_ss2):t()
             local query = torch.LongTensor(qrep):t()
-            local actions = torch.Tensor(as_ss):resize(#xs, 1)
-            local labels = torch.Tensor(yr_ss)
+            local actions = torch.Tensor(geti_n(action_list, nstart, nend)):resize(#xs, 1)
+            local labels = torch.Tensor(geti_n(yrouge, nstart, nend))
 
             myPreds = model:forward({sentences, summary, query, actions})
 
