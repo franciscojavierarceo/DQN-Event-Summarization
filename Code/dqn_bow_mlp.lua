@@ -18,8 +18,8 @@ data_file = csvigo.load({path = aurora_fn, mode = "large"})
 nugget_file = csvigo.load({path = nugget_fn, mode = "large"})
 query_file =  csvigo.load({path = query_fn, mode = "large"})
 
-rK = 500
-batch_size = 500
+rK = 100
+batch_size = 50
 nepochs = 10
 print_every = 1
 embed_dim = 10
