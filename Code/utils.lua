@@ -189,39 +189,35 @@ function buildSummary(preds, xs, maxlen)
     return outpadded
 end
 
-function initializePredSummary(pred_action, xs, mxl) 
-    local predsummary = {}
-    --- TODO:
-        --- NEED TO FIX THIS TO KEEP THE LAST K SENTENCES AND CONCATENATE THEM
-        --- INTO A LOGICAL SEQUENCE
-    local tmp1 = {}
+function buildPredSummary(preds, xs)
+    local out = {}
     for i=1, #xs do
-        tmp = padZeros(unpackZeros(xs[i]), mxl)
-        if pred_action[i]== 1 then
-            table.insert(tmp1, tmp)
-            predsummary[i] = tmp1
-        else
-            predsummary[i] = tmp1
+        if i == 1 then 
+            out[i] = zero_or_x(preds[i], unpackZeros(xs[i]))
+        else 
+            --- Update it by adding xs_i and out_{i-1}
+            out[i] =  zero_or_x(preds[i], unpackZeros(xs[i]))
         end
     end
-    return predsummary
+    return out
 end
-function buildPredSummary(pred_action, xs) 
-    local predsummary = {}
-    --- This looks stupid but it's right because we have to retain
-    --- the tmp1 when it's not 1, so it's a running total
-    local tmp1 = {}
-    for i=1, #xs do
-        tmp = unpackZeros(xs[i])
-        if pred_action[i]== 1 then
-            table.insert(tmp1, tmp)
-            predsummary[i] = tmp1
-        else
-            predsummary[i] = tmp1
-        end
-    end
-    return predsummary
-end
+
+-- function buildPredSummary(pred_action, xs) 
+--     local predsummary = {}
+--     --- This looks stupid but it's right because we have to retain
+--     --- the tmp1 when it's not 1, so it's a running total
+--     local tmp1 = {}
+--     for i=1, #xs do
+--         tmp = unpackZeros(xs[i])
+--         if pred_action[i]== 1 then
+--             table.insert(tmp1, tmp)
+--             predsummary[i] = tmp1
+--         else
+--             predsummary[i] = tmp1
+--         end
+--     end
+--     return predsummary
+-- end
 
 function Tokenize(inputdic)
     local out = {}

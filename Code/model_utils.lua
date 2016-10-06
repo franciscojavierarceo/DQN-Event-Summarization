@@ -52,7 +52,7 @@ function iterateModel(batch_size, nepochs, qs, x, model, crit, epsilon, delta, m
     local rscores, pscores, fscores = {}, {}, {}
     local yrouge = torch.totable(torch.randn(#x))
     local summary_list = populateOnes(#x, K)
-    local action_list = torch.totable(torch.round(torch.randn(#x)))
+    local action_list = torch.totable(torch.round(torch.rand(#x)))
     local preds_list = torch.totable(torch.round(torch.rand(#x)))
     print("training model...")
     for epoch=0, nepochs, 1 do
@@ -82,36 +82,48 @@ function iterateModel(batch_size, nepochs, qs, x, model, crit, epsilon, delta, m
             local qrep = repeatQuery(qs2[1], #xs)
             local preds = geti_n(preds_list, nstart, nend)
             local sumry_ss = buildSummary(preds, xs, 0)
+
             local sentences = LongTensor(xs):t()
             local summary = LongTensor(sumry_ss):t()
             local query = LongTensor(qrep):t()
-            local actions = Tensor(geti_n(action_list, nstart, nend)):resize(#xs, 1)
-            local labels = Tensor(geti_n(yrouge, nstart, nend))
-            
+            local actions = torch.Tensor(geti_n(action_list, nstart, nend)):resize(#xs, 1)
+            local labels = torch.Tensor(geti_n(yrouge, nstart, nend))
+
+            print(actions:sum(), actions:mean(), actions:min(), actions:max())
+
+            if use_cuda then
+                 actions =  actions:cuda()
+                 labels = labels:cuda()
+            end
             myPreds = model:forward({sentences, summary, query, actions})
             loss = loss + crit:forward(myPreds, labels)
             grads = crit:backward(myPreds, labels)
             model:backward({sentences, summary, query, actions}, grads)
             model:updateParameters(learning_rate)        -- Update parameters after each minibatch
             model:zeroGradParameters()
-            
+
             if use_cuda then
                 myPreds = myPreds:double()
             end
+
             preds = policy(myPreds, epsilon, #xs)
             --- Concatenating predictions into a summary
             predsummary = buildPredSummary(preds, xs, K)
             --- Initializing rouge metrics at time {t-1} and save scores
             for i=1, #predsummary do
                 --- Calculating rouge scores; Call get_i_n() to cumulatively compute rouge
-                rscores[i] = rougeRecall(geti_n(predsummary, 1, i), nuggets, K) - r_t1
-                pscores[i] = rougePrecision(geti_n(predsummary, 1, i), nuggets, K) - p_t1
-                fscores[i] = rougeF1(geti_n(predsummary, 1, i), nuggets, K) - f_t1
+                rscores[i] = rougeRecall(buildPredSummary(geti_n(preds, 1, i), geti_n(xout, 1, i)), nuggets) - r_t1
+                pscores[i] = rougePrecision(buildPredSummary(geti_n(preds, 1, i), geti_n(xout, 1, i)), nuggets) - r_t1
+                fscores[i] = rougeF1(buildPredSummary(geti_n(preds, 1, i), geti_n(xout, 1, i)), nuggets) - r_t1
                 r_t1, p_t1, f_t1 = rscores[i], pscores[i], fscores[i]
+                -- rscores[i] = rougeRecall(geti_n(predsummary, 1, i), nuggets, K) - r_t1
+                -- pscores[i] = rougePrecision(geti_n(predsummary, 1, i), nuggets, K) - p_t1
+                -- fscores[i] = rougeF1(geti_n(predsummary, 1, i), nuggets, K) - f_t1
             end
             --- Updating change in rouge
             yrouge = updateTable(yrouge, fscores, nstart)
             preds_list = updateTable(preds_list, preds, nstart)
+            action_list = updateTable(action_list, torch.totable(actions:double()), nstart)
             --- Calculating last one to see actual last rouge, without delta
             rscore = rougeRecall(predsummary, nuggets, K)
             pscore = rougePrecision(predsummary, nuggets, K)

@@ -18,8 +18,8 @@ data_file = csvigo.load({path = aurora_fn, mode = "large"})
 nugget_file = csvigo.load({path = nugget_fn, mode = "large"})
 query_file =  csvigo.load({path = query_fn, mode = "large"})
 
-rK = 100
-batch_size = 150
+rK = 200
+batch_size = 500
 nepochs = 10
 print_every = 1
 embed_dim = 10
@@ -44,7 +44,7 @@ function build_network(vocab_size, embed_dim)
    return model
 end
 
-function build_model(vocab_size, embed_dim, outputSize)
+function build_model(vocab_size, embed_dim, outputSize, use_cuda)
     local mod1 = build_network(vocab_size, embed_dim)
     local mod2 = build_network(vocab_size, embed_dim)
     local mod3 = build_network(vocab_size, embed_dim)
@@ -81,7 +81,7 @@ maxseqlend = getMaxseq(data_file)                             --- Extracting max
 maxseqlenq = getMaxseq(query_file)                            --- Extracting maximum sequence length
 maxseqlen = math.max(maxseqlenq, maxseqlend)
 
-batchLSTM = build_model(vocab_size, embed_dim, 1)
+batchLSTM = build_model(vocab_size, embed_dim, 1, usecuda)
 crit = nn.MSECriterion()
 
 out = iterateModel( batch_size, nepochs, queries[3], data_file, batchLSTM, crit, epsilon, delta, 
