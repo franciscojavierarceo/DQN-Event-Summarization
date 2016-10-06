@@ -147,6 +147,48 @@ function unpackZeros(x)
     return out
 end
 
+function tableConcat(input_t1, input_t2)
+    local out_table = {}
+    c = 1 
+    for k,v in pairs(input_t1) do
+        out_table[c] = v
+        c = c + 1
+    end 
+    for k,v in pairs(input_t2) do
+        out_table[c] = v
+        c = c + 1
+    end
+    return out_table
+end
+
+function zero_or_x(pred_action, xs)
+    if pred_action==1 then
+        return xs
+    else 
+        return {0}
+    end
+end
+
+function buildSummary(preds, xs, maxlen)
+    local out = {}
+    for i=1, #xs do
+        if i == 1 then 
+            out[i] = zero_or_x(preds[i], unpackZeros(xs[i]))
+        else 
+            --- Update it by adding xs_i and out_{i-1}
+            out[i] = tableConcat(zero_or_x(preds[i], unpackZeros(xs[i])), out[i-1])
+        end
+    end
+    if maxlen == 0 then
+        maxlen = 0
+        for k,v in pairs(out) do
+            maxlen = math.max(maxlen, #v)
+        end
+    end
+    outpadded = padZeros(out, maxlen)
+    return outpadded
+end
+
 function initializePredSummary(pred_action, xs, mxl) 
     local predsummary = {}
     --- TODO:
@@ -217,7 +259,7 @@ function getLastK(x, K)
 end
 --- Now we can calculate ROUGE
 function rougeRecall(pred_summary, ref_summaries, K)
-    pred_summary = getLastK(pred_summary, K)
+    -- pred_summary = getLastK(pred_summary, K)
     rsd = Tokenize(ref_summaries)
     sws = Tokenize(pred_summary)
     for k, v in pairs(rsd) do
@@ -241,7 +283,7 @@ function rougeRecall(pred_summary, ref_summaries, K)
 end
 ---- Precision
 function rougePrecision(pred_summary, ref_summaries, K)
-    pred_summary = getLastK(pred_summary, K)
+    -- pred_summary = getLastK(pred_summary, K)
     rsd = Tokenize(ref_summaries)
     sws = Tokenize(pred_summary)
     for k, v in pairs(rsd) do
@@ -289,7 +331,6 @@ function sumTable(x)
     for k, v in pairs(x) do
         o = o + v
     end
-
     return o
 end
 print("...Utils file loaded")

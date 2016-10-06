@@ -1,6 +1,8 @@
 require 'nn'
 require 'rnn'
 require 'cutorch'
+require 'cunn'
+require 'cunnx'
 
 function build_mlp(vocab_size, embed_dim)
     local model = nn.Sequential()
@@ -13,7 +15,7 @@ function build_mlp(vocab_size, embed_dim)
    return model
 end
 
-function buildLSTM(vsize, edim)
+function buildLSTM(vocab_size, embed_dim)
     local lstm = nn.Sequential()
     lstm:add(nn.LookupTableMaskZero(vsize, edim))
     lstm:add(nn.SplitTable(1, edim))
@@ -22,16 +24,41 @@ function buildLSTM(vsize, edim)
     return lstm
 end
 
-sentences = torch.LongTensor{{0, 1, 3, 4}, {0, 2, 4, 3}}:t()
-summary = torch.LongTensor{{0, 0, 1, 4}, {0, 2, 3, 1}}:t()
-query = torch.LongTensor{{0, 0, 4, 3}, {0, 0, 0, 0}}:t()
+function buildFullModel(vocab_size, embed_dim, model, use_cuda)
+    if model == 'lstm' then
+        mod1 = build_mlp(vocab_size, embed_dim, usecuda)
+        mod2 = build_mlp(vocab_size, embed_dim, usecuda)
+        mod3 = build_mlp(vocab_size, embed_dim, usecuda)
+    else         
+        mod1 = buildLSTM(vocab_size, embed_dim, usecuda)
+        mod2 = buildLSTM(vocab_size, embed_dim, usecuda)
+        mod3 = buildLSTM(vocab_size, embed_dim, usecuda)
+    end
 
--- sentences = torch.LongTensor{{0, 1, 3, 4}, {0, 2, 4, 3}, {0, 0, 4, 3}}:t()
--- summary = torch.LongTensor{{0, 0, 1, 4}, {0, 2, 3, 1}, {0, 0, 0, 1}}:t()
--- query = torch.LongTensor({0, 0, 4, 3})
+    mod4 = nn.Sequential()
+    mod4:add(nn.Linear(1, embed_dim))
 
-actions = torch.round(torch.rand(2, 1))
-yrouge = torch.rand(2, 1)
+    ParallelModel = nn.ParallelTable()
+    ParallelModel:add(mod1)
+    ParallelModel:add(mod2)
+    ParallelModel:add(mod3)
+    ParallelModel:add(mod4)
+
+    FinalMLP = nn.Sequential()
+    FinalMLP:add(ParallelModel)
+    FinalMLP:add(nn.JoinTable(2))
+    FinalMLP:add( nn.Linear(embed_dim * 4, 1) )
+    FinalMLP = FinalMLP
+    if use_cuda then
+        return FinalMLP:cuda()
+    else
+        return FinalMLP
+    end 
+
+end
+
+usecuda = true
+model = 'lstm'
 
 batch_size = 2
 vocab_size = 4
@@ -39,48 +66,50 @@ embed_dim = 10
 outputSize = 1
 learning_rate = 0.1
 
-lstm1 = build_mlp(vocab_size, embed_dim)
-lstm2 = build_mlp(vocab_size, embed_dim)
-lstm3 = build_mlp(vocab_size, embed_dim)
+function build_data(use_cuda)    
+    if use_cuda then
+      Tensor = torch.CudaTensor
+      LongTensor = torch.CudaLongTensor
+    else
+      Tensor = torch.Tensor
+      LongTensor = torch.LongTensor
+    end
+    sentences = LongTensor{{0, 1, 3, 4}, {0, 2, 4, 3}}:t()
+    summary = LongTensor{{0, 0, 1, 4}, {0, 2, 3, 1}}:t()
+    query = LongTensor{{0, 0, 4, 3}, {0, 0, 0, 0}}:t()
+    actions = torch.round(torch.rand(2, 1))
+    yrouge = torch.rand(2)
+    if use_cuda then
+        return sentences, summary, query, actions:cuda(), yrouge:cuda()
+    else
+        return sentences, summary, query, actions, yrouge
+    end 
+end    
 
--- lstm1 = buildLSTM(vocab_size, embed_dim)
--- lstm2 = buildLSTM(vocab_size, embed_dim)
--- lstm3 = buildLSTM(vocab_size, embed_dim)
+sentences, summary, query, actions, yrouge = build_data(usecuda)
+FinalMLP  = buildFullModel(vocab_size, embed_dim, model, usecuda)
 
-mlp1 = nn.Sequential()
-mlp1:add(nn.Linear(1, embed_dim))
-
-ParallelModel = nn.ParallelTable()
-ParallelModel:add(lstm1)
-ParallelModel:add(lstm2)
-ParallelModel:add(lstm3)
-ParallelModel:add(mlp1)
-
-FinalMLP = nn.Sequential()
-FinalMLP:add(ParallelModel)
-FinalMLP:add(nn.JoinTable(2))
-FinalMLP:add( nn.Linear(embed_dim * 4, 1) )
-FinalMLP = FinalMLP
-
-criterion = nn.MSECriterion()
+criterion = nn.MSECriterion():cuda()
 
 print(sentences)
 print(summary)
 print(query)
+-- actions:resize(2,1)
 print(actions)
 
 print('sumval =', sentences[1]:sum())
 
 for epoch=1, 100 do
-    -- preds = FinalMLP:forward({query})
     preds = FinalMLP:forward({sentences, summary, query, actions})
     loss = criterion:forward(preds, yrouge)
+    -- This is where it fails
     grads = criterion:backward(preds, yrouge)
     FinalMLP:backward({sentences, summary, query, actions}, grads)
-    -- FinalMLP:backward({query}, grads)
     FinalMLP:updateParameters(learning_rate)
     FinalMLP:zeroGradParameters()
     if (epoch % 10)==0 then 
         print(string.format("Epoch %i, loss =%6f", epoch, loss))
     end
 end
+
+print(sentences)

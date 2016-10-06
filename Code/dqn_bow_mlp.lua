@@ -2,6 +2,9 @@ require 'torch'
 require 'nn'
 require 'rnn'
 require 'csvigo'
+require 'cutorch'
+require 'cunn'
+require 'cunnx'
 
 --- Loading utility script
 dofile("utils.lua")
@@ -16,18 +19,18 @@ nugget_file = csvigo.load({path = nugget_fn, mode = "large"})
 query_file =  csvigo.load({path = query_fn, mode = "large"})
 
 rK = 500
-batch_size = 1000
+batch_size = 500
 nepochs = 10
 print_every = 1
 embed_dim = 10
 learning_rate = 0.1
+usecuda = true
 
 cuts = 4.                  --- This is the number of cuts we want
 epsilon = 1.
 base_explore_rate = 0.1
 delta = 1./(nepochs/cuts) --- Only using epsilon greedy strategy for (nepochs/cuts)% of the epochs
 
-cuda = true
 torch.manualSeed(420)
 
 function build_network(vocab_size, embed_dim)
@@ -41,7 +44,7 @@ function build_network(vocab_size, embed_dim)
    return model
 end
 
-function build_model(vocab_size, embed_dim, outputSize)
+function build_model(vocab_size, embed_dim, outputSize, use_cuda)
     local mod1 = build_network(vocab_size, embed_dim)
     local mod2 = build_network(vocab_size, embed_dim)
     local mod3 = build_network(vocab_size, embed_dim)
@@ -60,7 +63,12 @@ function build_model(vocab_size, embed_dim, outputSize)
     FinalMLP:add(ParallelModel)
     FinalMLP:add(nn.JoinTable(2))
     FinalMLP:add( nn.Linear(embed_dim * 4, outputSize) )
-    return FinalMLP
+    
+    if use_cuda then
+        return FinalMLP:cuda()
+    else
+        return FinalMLP
+    end
 end
 
 vocab_sized = getVocabSize(data_file)                       --- getting length of dictionary
@@ -73,11 +81,11 @@ maxlend = getMaxseq(data_file)                             --- Extracting maximu
 maxlenq = getMaxseq(query_file)                            --- Extracting maximum sequence length
 maxlen = math.max(maxlenq, maxlend)
 
-batchMLP = build_model(vocab_size, embed_dim, 1)
+batchMLP = build_model(vocab_size, embed_dim, 1, usecuda)
 crit = nn.MSECriterion()
 
 out = iterateModel( batch_size, nepochs, queries[3], data_file, batchMLP, crit, epsilon, delta, 
-                    maxlen, base_explore_rate, print_every, nuggets, learning_rate, rK)
+                    maxlen, base_explore_rate, print_every, nuggets, learning_rate, rK, usecuda)
 
 print("------------------")
 print("  Model complete  ")

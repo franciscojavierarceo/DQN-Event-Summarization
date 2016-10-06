@@ -38,12 +38,23 @@ end
 --- then iterate over epochs
 
 function iterateModel(batch_size, nepochs, qs, x, model, crit, epsilon, delta, mxl,
-                    base_explore_rate, print_every, nuggets, learning_rate, K)
+                    base_explore_rate, print_every, nuggets, learning_rate, K, use_cuda)
+    if use_cuda then
+      Tensor = torch.CudaTensor
+      LongTensor = torch.CudaLongTensor
+      crit = crit:cuda()
+      print("Running DQN-LSTM with the GPU")
+    else
+      Tensor = torch.Tensor
+      LongTensor = torch.LongTensor
+      print("Running DQN-LSTM with the CPU")
+    end
     local rscores, pscores, fscores = {}, {}, {}
     local yrouge = torch.totable(torch.randn(#x))
     local summary_list = populateOnes(#x, K)
     local action_list = torch.totable(torch.round(torch.randn(#x)))
     local preds_list = torch.totable(torch.round(torch.rand(#x)))
+    print("training model...")
     for epoch=0, nepochs, 1 do
         loss = 0                    --- Compute a new MSE loss each time
         --- Reset the rougue each time
@@ -70,28 +81,26 @@ function iterateModel(batch_size, nepochs, qs, x, model, crit, epsilon, delta, m
             local qs2 = padZeros({qs}, 5)
             local qrep = repeatQuery(qs2[1], #xs)
             local preds = geti_n(preds_list, nstart, nend)
-            -- Not efficient but who cares
-            local sumry_ss = buildPredSummary(preds, xs, mxl)
-            local sentences = torch.LongTensor(xs):t()
-            print(xs[1])
-            print(sumry_ss[1][1])
-            -- print(sumry_ss2[1])
-            print(#sumry_ss2)
-            local summary = torch.LongTensor(sumry_ss2):t()
-            print('pass')
-            local query = torch.LongTensor(qrep):t()
-            local actions = torch.Tensor(geti_n(action_list, nstart, nend)):resize(#xs, 1)
-            local labels = torch.Tensor(geti_n(yrouge, nstart, nend))
-
+            local sumry_ss = buildSummary(preds, xs, 0)
+            local sentences = LongTensor(xs):t()
+            local summary = LongTensor(sumry_ss):t()
+            local query = LongTensor(qrep):t()
+            local actions = Tensor(geti_n(action_list, nstart, nend)):resize(#xs, 1)
+            local labels = Tensor(geti_n(yrouge, nstart, nend))
+            
             myPreds = model:forward({sentences, summary, query, actions})
             loss = loss + crit:forward(myPreds, labels)
             grads = crit:backward(myPreds, labels)
             model:backward({sentences, summary, query, actions}, grads)
             model:updateParameters(learning_rate)        -- Update parameters after each minibatch
             model:zeroGradParameters()
+            
+            if use_cuda then
+                myPreds = myPreds:double()
+            end
             preds = policy(myPreds, epsilon, #xs)
             --- Concatenating predictions into a summary
-            predsummary = buildPredSummary(preds, xs)
+            predsummary = buildPredSummary(preds, xs, K)
             --- Initializing rouge metrics at time {t-1} and save scores
             for i=1, #predsummary do
                 --- Calculating rouge scores; Call get_i_n() to cumulatively compute rouge
@@ -112,9 +121,13 @@ function iterateModel(batch_size, nepochs, qs, x, model, crit, epsilon, delta, m
                  -- This line is useful to view the min and max of the predctions
                 -- if epoch > 0 then  print(myPreds:min(), myPreds:max()) end
                 perf_string = string.format(
-                    "Epoch %i, sum(y)/len(y) = %i/%i, {Recall = %.6f, Precision = %.6f, F1 = %.6f}", 
-                    epoch, sumTable(preds_list), #preds_list, rscore, pscore, fscore
+                    "Epoch %i, {Recall = %.6f, Precision = %.6f, F1 = %.6f}", 
+                    epoch, rscore, pscore, fscore
                     )
+                -- perf_string = string.format(
+                --     "Epoch %i, sum(y)/len(y) = %i/%i, {Recall = %.6f, Precision = %.6f, F1 = %.6f}", 
+                --     epoch, sumTable(preds_list), #preds_list, rscore, pscore, fscore
+                --     )
                 print(perf_string)
             end
         end
