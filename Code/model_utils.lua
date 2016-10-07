@@ -37,7 +37,7 @@ end
 --- then iteratere over minibatches
 --- then iterate over epochs
 
-function iterateModel(batch_size, nepochs, qs, x, model, crit, epsilon, delta, mxl,
+function iterateModel(batch_size, nepochs, qs, x, sent_file, model, crit, epsilon, delta, mxl,
                     base_explore_rate, print_every, nuggets, learning_rate, K, use_cuda)
     if use_cuda then
       Tensor = torch.CudaTensor
@@ -51,10 +51,12 @@ function iterateModel(batch_size, nepochs, qs, x, model, crit, epsilon, delta, m
     end
     local rscores, pscores, fscores = {}, {}, {}
     local yrouge = torch.totable(torch.randn(#x))
-    local summary_list = populateOnes(#x, K)
     local action_list = torch.totable(torch.round(torch.rand(#x)))
     local preds_list = torch.totable(torch.round(torch.rand(#x)))
+    local ss_list = grabNsamples(sent_file, 1, #sent_file)
+
     print("training model...")
+
     for epoch=0, nepochs, 1 do
         loss = 0                    --- Compute a new MSE loss each time
         --- Reset the rougue each time
@@ -81,15 +83,15 @@ function iterateModel(batch_size, nepochs, qs, x, model, crit, epsilon, delta, m
             local qs2 = padZeros({qs}, 5)
             local qrep = repeatQuery(qs2[1], #xs)
             local preds = geti_n(preds_list, nstart, nend)
-            local sumry_ss = buildSummary(preds, xs, 0)
+            --- Update the summary every mini-batch
+            local sumry_list = buildKSummary(preds_list, ss_list, 50)
+            local sumry_ss = geti_n(sumry_list, nstart, nend)
+            local summary = LongTensor(sumry_ss):t()
 
             local sentences = LongTensor(xs):t()
-            local summary = LongTensor(sumry_ss):t()
             local query = LongTensor(qrep):t()
             local actions = torch.Tensor(geti_n(action_list, nstart, nend)):resize(#xs, 1)
             local labels = torch.Tensor(geti_n(yrouge, nstart, nend))
-
-            print(actions:sum(), actions:mean(), actions:min(), actions:max())
 
             if use_cuda then
                  actions =  actions:cuda()
@@ -116,9 +118,6 @@ function iterateModel(batch_size, nepochs, qs, x, model, crit, epsilon, delta, m
                 pscores[i] = rougePrecision(buildPredSummary(geti_n(preds, 1, i), geti_n(xout, 1, i)), nuggets) - r_t1
                 fscores[i] = rougeF1(buildPredSummary(geti_n(preds, 1, i), geti_n(xout, 1, i)), nuggets) - r_t1
                 r_t1, p_t1, f_t1 = rscores[i], pscores[i], fscores[i]
-                -- rscores[i] = rougeRecall(geti_n(predsummary, 1, i), nuggets, K) - r_t1
-                -- pscores[i] = rougePrecision(geti_n(predsummary, 1, i), nuggets, K) - p_t1
-                -- fscores[i] = rougeF1(geti_n(predsummary, 1, i), nuggets, K) - f_t1
             end
             --- Updating change in rouge
             yrouge = updateTable(yrouge, fscores, nstart)
@@ -130,16 +129,10 @@ function iterateModel(batch_size, nepochs, qs, x, model, crit, epsilon, delta, m
             fscore = rougeF1(predsummary, nuggets, K)
             -- print(string.format('\t Mini-batch %i/%i', minibatch, nbatches) )
             if (epoch % print_every)==0 then
-                 -- This line is useful to view the min and max of the predctions
-                -- if epoch > 0 then  print(myPreds:min(), myPreds:max()) end
                 perf_string = string.format(
-                    "Epoch %i, {Recall = %.6f, Precision = %.6f, F1 = %.6f}", 
-                    epoch, rscore, pscore, fscore
+                    "Epoch %i, minibatch %i/%i, sum(y)/len(y) = %i/%i, {Recall = %.6f, Precision = %.6f, F1 = %.6f}", 
+                    epoch, minibatch, nbatches, sumTable(preds_list), #preds_list, rscore, pscore, fscore
                     )
-                -- perf_string = string.format(
-                --     "Epoch %i, sum(y)/len(y) = %i/%i, {Recall = %.6f, Precision = %.6f, F1 = %.6f}", 
-                --     epoch, sumTable(preds_list), #preds_list, rscore, pscore, fscore
-                --     )
                 print(perf_string)
             end
         end

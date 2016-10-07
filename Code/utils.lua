@@ -169,6 +169,33 @@ function zero_or_x(pred_action, xs)
     end
 end
 
+function getLastKTokens(x, K)
+    local out = {}
+    for i=0, K-1 do
+        out[i+1] = x[#x-i]
+    end 
+    return out
+end
+
+function buildKSummary(preds, xs, K)
+    local out = {}
+    local out2 = {}
+    for i=1, #xs do
+        if i == 1 then 
+            out[i] = zero_or_x(preds[i], {0} )
+        else 
+            --- Update it by adding xs_i and out_{i-1}
+            out[i] = tableConcat( out[i-1], zero_or_x(preds[i], xs[i]) )
+        end
+    end
+    local maxlen = 0
+    for i=1, #out do
+        out2[i] = getLastKTokens(out[i], K)
+        maxlen = math.max(maxlen, #out2[i])
+    end    
+    return padZeros(out2, maxlen)
+end
+
 function buildSummary(preds, xs, maxlen)
     local out = {}
     for i=1, #xs do
