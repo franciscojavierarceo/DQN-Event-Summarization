@@ -191,7 +191,7 @@ function iterateModel(batch_size, nepochs, qs, x, sent_file, model, crit, epsilo
             model:backward({sentences, summary, query, actions}, grads)
             model:updateParameters(learning_rate)        -- Update parameters after each minibatch
 
-            yrouge = updateTable(yrouge, rscores, nstart)
+            yrouge = updateTable(yrouge, pscores, nstart)
             preds_list = updateTable(preds_list, preds, nstart)
             predsummary2 = buildPredSummary(preds_list, xs, K)
 

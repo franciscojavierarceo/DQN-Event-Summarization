@@ -10,3 +10,21 @@
 Running LSTM model	
 ...running on GPU	
 training model with learning rate = 0.010, K = 200, and minibatch size = 500...	
+Epoch 0, epsilon = 1.000, minibatch 1/16, sum(y)/len(y) = 242/499, {Recall = 0.749296, Precision = 0.259893, F1 = 0.385927}	
+Epoch 0, epsilon = 1.000, minibatch 2/16, sum(y)/len(y) = 260/500, {Recall = 0.760563, Precision = 0.259324, F1 = 0.386773}	
+Epoch 0, epsilon = 1.000, minibatch 3/16, sum(y)/len(y) = 248/500, {Recall = 0.747887, Precision = 0.312905, F1 = 0.441213}	
+Epoch 0, epsilon = 1.000, minibatch 4/16, sum(y)/len(y) = 238/500, {Recall = 0.766667, Precision = 0.307128, F1 = 0.438566}	
+Epoch 0, epsilon = 1.000, minibatch 5/16, sum(y)/len(y) = 240/500, {Recall = 0.746479, Precision = 0.284793, F1 = 0.412291}	
+Epoch 0, epsilon = 1.000, minibatch 6/16, sum(y)/len(y) = 245/500, {Recall = 0.731925, Precision = 0.309387, F1 = 0.434928}	
+Epoch 0, epsilon = 1.000, minibatch 7/16, sum(y)/len(y) = 258/500, {Recall = 0.762911, Precision = 0.259460, F1 = 0.387227}	
+Epoch 0, epsilon = 1.000, minibatch 8/16, sum(y)/len(y) = 242/500, {Recall = 0.746009, Precision = 0.297621, F1 = 0.425492}	
+Epoch 0, epsilon = 1.000, minibatch 9/16, sum(y)/len(y) = 253/500, {Recall = 0.753991, Precision = 0.276515, F1 = 0.404636}	
+Epoch 0, epsilon = 1.000, minibatch 10/16, sum(y)/len(y) = 239/500, {Recall = 0.749765, Precision = 0.302577, F1 = 0.431156}	
+Epoch 0, epsilon = 1.000, minibatch 11/16, sum(y)/len(y) = 241/500, {Recall = 0.749765, Precision = 0.300810, F1 = 0.429359}	
+Epoch 0, epsilon = 1.000, minibatch 12/16, sum(y)/len(y) = 253/500, {Recall = 0.748826, Precision = 0.289789, F1 = 0.417867}	
+Epoch 0, epsilon = 1.000, minibatch 13/16, sum(y)/len(y) = 235/500, {Recall = 0.739437, Precision = 0.309978, F1 = 0.436833}	
+Epoch 0, epsilon = 1.000, minibatch 14/16, sum(y)/len(y) = 271/500, {Recall = 0.743662, Precision = 0.305261, F1 = 0.432846}	
+Epoch 0, epsilon = 1.000, minibatch 15/16, sum(y)/len(y) = 244/500, {Recall = 0.754460, Precision = 0.286300, F1 = 0.415085}	
+Epoch 0, epsilon = 1.000, minibatch 16/16, sum(y)/len(y) = 247/500, {Recall = 0.738028, Precision = 0.309388, F1 = 0.436001}	
+Epoch 1, epsilon = 0.920, minibatch 1/16, sum(y)/len(y) = 239/499, {Recall = 0.750235, Precision = 0.264526, F1 = 0.391139}	
+Epoch 1, epsilon = 0.920, minibatch 2/16, sum(y)/len(y) = 233/500, {Recall = 0.763380, Precision = 0.252406, F1 = 0.379375}	
