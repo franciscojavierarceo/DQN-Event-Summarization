@@ -20,7 +20,11 @@ nugget_file = csvigo.load({path = nugget_fn, mode = "large"})
 query_file =  csvigo.load({path = query_fn, mode = "large"})
 sent_file =  csvigo.load({path = sent_fn, mode = "large"})
 
+-- cmd:text()
+-- local opt = cmd:parse(arg or {})
+-- model = opt.model
 model = 'lstm'
+
 rK = 200
 batch_size = 500
 nepochs = 50
@@ -31,7 +35,7 @@ usecuda = true
 
 epsilon = 1
 cuts = 4.                  --- This is the number of cuts we want
-base_explore_rate = 0.1
+base_explore_rate = 0.25
 delta = 1./(nepochs/cuts) --- Only using epsilon greedy strategy for (nepochs/cuts)% of the epochs
 
 torch.manualSeed(420)
