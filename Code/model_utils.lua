@@ -159,6 +159,7 @@ function iterateModel(batch_size, nepochs, qs, x, sent_file, model, crit, epsilo
                  actions =  actions:cuda()
             end
 
+            --- Run forward pass to evaluate our data 
             myPreds = model:forward({sentences, summary, query, actions})
             -- print(geti_n(torch.totable(myPreds), 1 , 5) )
 
@@ -166,11 +167,16 @@ function iterateModel(batch_size, nepochs, qs, x, sent_file, model, crit, epsilo
                 myPreds = myPreds:double()
             end
 
+            --- Execute policy based on our E[ROUGUE]
+                --- Notice that myPreds gives us our action by returning
+                    ---  select if E[ROUGUE] > 0 or skip if E[ROUGUE] <= 0
             preds = policy(myPreds, epsilon, #xs)
             --- Concatenating predictions into a summary
             predsummary = buildPredSummary(preds, xs, K)
+
             --- Initializing rouge metrics at time {t-1} and save scores
             local rscores, pscores, fscores = {}, {}, {}
+            -- Now we evaluate our action through the critic/Oracle
             for i=1, #predsummary do
                 --- Calculating rouge scores; Call get_i_n() to cumulatively compute rouge
                 rscores[i] = rougeRecall(buildPredSummary(geti_n(preds, 1, i), geti_n(xout, 1, i)), nuggets) - r_t1
@@ -179,18 +185,20 @@ function iterateModel(batch_size, nepochs, qs, x, sent_file, model, crit, epsilo
                 r_t1, p_t1, f_t1 = rscores[i], pscores[i], fscores[i]
             end
 
-            local labels = torch.Tensor(fscores)
+            local labels = torch.Tensor(pscores)
             if use_cuda then
                  labels = labels:cuda()
                  myPreds = myPreds:cuda()
             end
 
+            -- Now we backpropagate our observed outcomes
             loss = loss + crit:forward(myPreds, labels)
             grads = crit:backward(myPreds, labels)
             model:zeroGradParameters()
             model:backward({sentences, summary, query, actions}, grads)
-            model:updateParameters(learning_rate)        -- Update parameters after each minibatch
+            model:updateParameters(learning_rate)        
 
+            -- Updating our bookkeeping arrays
             yrouge = updateTable(yrouge, pscores, nstart)
             preds_list = updateTable(preds_list, preds, nstart)
             predsummary2 = buildPredSummary(preds_list, xs, K)
@@ -199,6 +207,7 @@ function iterateModel(batch_size, nepochs, qs, x, sent_file, model, crit, epsilo
             rscore = rougeRecall(predsummary2, nuggets, K)
             pscore = rougePrecision(predsummary2, nuggets, K)
             fscore = rougeF1(predsummary2, nuggets, K)
+
             if (epoch % print_every)==0 then
                 perf_string = string.format(
                     "Epoch %i, epsilon = %.3f, minibatch %i/%i, sum(y)/len(y) = %i/%i, {Recall = %.6f, Precision = %.6f, F1 = %.6f}", 
