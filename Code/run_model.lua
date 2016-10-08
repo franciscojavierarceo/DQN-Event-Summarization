@@ -6,6 +6,24 @@ require 'cutorch'
 require 'cunn'
 require 'cunnx'
 
+cmd = torch.CmdLine()
+--- setting the parameter defaults
+cmd:option('--model', 'lstm', 'using LSTM instead of BOW')                       
+cmd:option('--rK', 200, 'using last 200 sentences to calculate rougue')
+cmd:option('--nepochs', 50, 'running for 50 epochs')
+cmd:option('--print_every', 1, 'printing every 1 epoch')
+cmd:option('--embed_dim', 10, 'using an embedding dimension of 10')
+cmd:option('--learning_rate', 0.01, 'using a learning rate of 0.01')
+cmd:option('--usecuda', true, 'running on cuda')
+cmd:option('--epsilon', 1, 'starting with epsilon = 1')
+cmd:option('--cuts', 4, 'using epsilon-greedy strategy 1/4 of the time')
+cmd:option('--base_explore_rate', 0.25, 'base exploration rate of 0.25')
+cmd:option('--batch_size', 500, 'batch size of 500')
+cmd:text()
+
+--- this retrieves the commands and stores them in opt.variable (e.g., opt.model)
+local opt = cmd:parse(arg or {})
+
 --- Loading utility script
 dofile("utils.lua")
 dofile("model_utils.lua")
@@ -20,23 +38,7 @@ nugget_file = csvigo.load({path = nugget_fn, mode = "large"})
 query_file =  csvigo.load({path = query_fn, mode = "large"})
 sent_file =  csvigo.load({path = sent_fn, mode = "large"})
 
--- cmd:text()
--- local opt = cmd:parse(arg or {})
--- model = opt.model
-model = 'lstm'
-
-rK = 200
-batch_size = 500
-nepochs = 50
-print_every = 1
-embed_dim = 10
-learning_rate = 0.01
-usecuda = true
-
-epsilon = 1
-cuts = 4.                  --- This is the number of cuts we want
-base_explore_rate = 0.25
-delta = 1./(nepochs/cuts) --- Only using epsilon greedy strategy for (nepochs/cuts)% of the epochs
+delta = 1./(opt.nepochs/opt.cuts) --- Only using epsilon greedy strategy for (nepochs/cuts)% of the epochs
 
 torch.manualSeed(420)
 
@@ -51,11 +53,11 @@ maxseqlend = getMaxseq(data_file)                             --- Extracting max
 maxseqlenq = getMaxseq(query_file)                            --- Extracting maximum sequence length
 maxseqlen = math.max(maxseqlenq, maxseqlend)
 
-batch_model  = build_model(model, vocab_size, embed_dim, 1, usecuda)
+batch_model  = build_model(opt.model, vocab_size, opt.embed_dim, 1, opt.usecuda)
 crit = nn.MSECriterion()
 
-out = iterateModel( batch_size, nepochs, queries[3], 
+out = iterateModel( opt.batch_size, opt.nepochs, queries[3], 
                     data_file, sent_file, 
-                    batch_model, crit, epsilon, delta, 
-                    maxseqlen, base_explore_rate, print_every, 
-                    nuggets, learning_rate, rK, usecuda)
+                    batch_model, crit, opt.epsilon, delta, 
+                    maxseqlen, opt.base_explore_rate, opt.print_every, 
+                    nuggets, opt.learning_rate, opt.rK, opt.usecuda)

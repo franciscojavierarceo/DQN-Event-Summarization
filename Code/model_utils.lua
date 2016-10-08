@@ -108,9 +108,8 @@ function iterateModel(batch_size, nepochs, qs, x, sent_file, model, crit, epsilo
       print("...running on CPU")
     end
     local yrouge = torch.totable(torch.randn(#x))
-    local action_list = torch.totable(torch.round(torch.rand(#x)))
-    local preds_list = torch.totable(torch.round(torch.rand(#x)))
-    preds_list[1] = 0
+    local action_list = torch.totable(torch.round(torch.ones(#x)))
+    action_list[1] = 0
     local ss_list = grabNsamples(sent_file, 1, #sent_file)
 
     print_string = string.format(
@@ -144,40 +143,37 @@ function iterateModel(batch_size, nepochs, qs, x, sent_file, model, crit, epsilo
             local qs2 = padZeros({qs}, 5)
             local qrep = repeatQuery(qs2[1], #xs)
             -- Find the optimal actions / predictions
-            -- local preds = geti_n(preds_list, nstart, nend)
             --- Update the summary every mini-batch
-            local sumry_list = buildKSummary(preds_list, ss_list, K)
+            local sumry_list = buildKSummary(action_list, ss_list, K)
             --- Rebuilding entire prediction each time
             local sumry_ss = geti_n(sumry_list, nstart, nend)
 
             local summary = LongTensor(sumry_ss):t()
             local sentences = LongTensor(xs):t()
             local query = LongTensor(qrep):t()
-            local actions = Tensor(geti_n(preds_list, nstart, nend)):resize(#xs, 1)
+            local actions = Tensor(geti_n(action_list, nstart, nend)):resize(#xs, 1)
 
             if use_cuda then
                  actions =  actions:cuda()
             end
 
             --- Run forward pass to evaluate our data 
-            myPreds = model:forward({sentences, summary, query, actions})
+            pred_rougue = model:forward({sentences, summary, query, actions})
             -- print(geti_n(torch.totable(myPreds), 1 , 5) )
 
             if use_cuda then
-                myPreds = myPreds:double()
+                pred_rougue = pred_rougue:double()
             end
 
             --- Execute policy based on our E[ROUGUE]
                 --- Notice that myPreds gives us our action by returning
                     ---  select if E[ROUGUE] > 0 or skip if E[ROUGUE] <= 0
-            preds = policy(myPreds, epsilon, #xs)
-            --- Concatenating predictions into a summary
-            predsummary = buildPredSummary(preds, xs, K)
+            preds = policy(pred_rougue, epsilon, #xs)
 
             --- Initializing rouge metrics at time {t-1} and save scores
             local rscores, pscores, fscores = {}, {}, {}
             -- Now we evaluate our action through the critic/Oracle
-            for i=1, #predsummary do
+            for i=1, #preds[1] do
                 --- Calculating rouge scores; Call get_i_n() to cumulatively compute rouge
                 rscores[i] = rougeRecall(buildPredSummary(geti_n(preds, 1, i), geti_n(xout, 1, i)), nuggets) - r_t1
                 pscores[i] = rougePrecision(buildPredSummary(geti_n(preds, 1, i), geti_n(xout, 1, i)), nuggets) - p_t1
@@ -188,25 +184,25 @@ function iterateModel(batch_size, nepochs, qs, x, sent_file, model, crit, epsilo
             local labels = torch.Tensor(pscores)
             if use_cuda then
                  labels = labels:cuda()
-                 myPreds = myPreds:cuda()
+                 pred_rougue = pred_rougue:cuda()
             end
 
             -- Now we backpropagate our observed outcomes
-            loss = loss + crit:forward(myPreds, labels)
-            grads = crit:backward(myPreds, labels)
+            loss = loss + crit:forward(pred_rougue, labels)
+            grads = crit:backward(pred_rougue, labels)
             model:zeroGradParameters()
             model:backward({sentences, summary, query, actions}, grads)
             model:updateParameters(learning_rate)        
 
-            -- Updating our bookkeeping arrays
+            -- Updating our bookkeeping tables
             yrouge = updateTable(yrouge, pscores, nstart)
-            preds_list = updateTable(preds_list, preds, nstart)
-            predsummary2 = buildPredSummary(preds_list, xs, K)
+            action_list = updateTable(action_list, preds, nstart)
+            predsummarytotal = buildPredSummary(action_list, xs, K)
 
             --- Calculating last one to see actual last rouge, without delta
-            rscore = rougeRecall(predsummary2, nuggets, K)
-            pscore = rougePrecision(predsummary2, nuggets, K)
-            fscore = rougeF1(predsummary2, nuggets, K)
+            rscore = rougeRecall(predsummarytotal, nuggets, K)
+            pscore = rougePrecision(predsummarytotal, nuggets, K)
+            fscore = rougeF1(predsummarytotal, nuggets, K)
 
             if (epoch % print_every)==0 then
                 perf_string = string.format(
@@ -217,7 +213,7 @@ function iterateModel(batch_size, nepochs, qs, x, sent_file, model, crit, epsilo
             end
         end
         epsilon = epsilon - delta           --- Decreasing the epsilon greedy strategy
-        if epsilon <= 0 then                --- leave a random exploration rate
+        if epsilon <= 0 then                --- and leaving a random exploration rate
             epsilon = base_explore_rate
         end
     end
