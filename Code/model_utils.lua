@@ -95,8 +95,10 @@ end
 --- then iteratere over minibatches
 --- then iterate over epochs
 
-function iterateModel(batch_size, nepochs, qs, x, sent_file, model, crit, epsilon, delta, mxl,
-                    base_explore_rate, print_every, nuggets, learning_rate, K, use_cuda)
+function iterateModel(batch_size, nepochs, nqueries, query_file, input_file, 
+                    sent_file, model, crit, epsilon, delta, mxl,
+                    base_explore_rate, print_every, nuggets, 
+                    learning_rate, K, use_cuda)
     if use_cuda then
       Tensor = torch.CudaTensor
       LongTensor = torch.CudaLongTensor
@@ -107,8 +109,9 @@ function iterateModel(batch_size, nepochs, qs, x, sent_file, model, crit, epsilo
       LongTensor = torch.LongTensor
       print("...running on CPU")
     end
-    local yrouge = torch.totable(torch.randn(#x))
-    local action_list = torch.totable(torch.round(torch.ones(#x)))
+    n = #input_file
+    local yrouge = torch.totable(torch.randn(n))
+    local action_list = torch.totable(torch.round(torch.ones(n)))
     action_list[1] = 0
     local ss_list = grabNsamples(sent_file, 1, #sent_file)
 
@@ -122,7 +125,7 @@ function iterateModel(batch_size, nepochs, qs, x, sent_file, model, crit, epsilo
         --- Reset the rougue each epoch
         local r_t1 , p_t1, f_t1 = 0., 0., 0.
         --- Looping over each bach of sentences for a given query
-        local nbatches = torch.floor( #x / batch_size)
+        local nbatches = torch.floor( n / batch_size)
         for minibatch = 1, nbatches do
             if minibatch == 1 then          -- Need +1 to skip the first row
                 nstart = 2
@@ -216,6 +219,6 @@ function iterateModel(batch_size, nepochs, qs, x, sent_file, model, crit, epsilo
         if epsilon <= 0 then                --- and leaving a random exploration rate
             epsilon = base_explore_rate
         end
-    end
+end
     return model
 end 
