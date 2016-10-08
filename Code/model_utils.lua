@@ -27,10 +27,68 @@ function updateTable(orig_table, insert_table, n_i)
         out_table[k] = v 
     end
     --- Need -1 because this starts indexing at 1
-    for k, v in pairs(insert_table) do
-        out_table[n_i + k - 1] = v 
+    for i=0, #insert_table-1 do
+        out_table[n_i + i] = insert_table[i+1]
     end
     return out_table
+end
+
+
+function build_bowmlp(vocab_size, embed_dim)
+    local model = nn.Sequential()
+    :add(nn.LookupTableMaskZero(vocab_size, embed_dim)) -- returns a sequence-length x batch-size x embedDim tensor
+    :add(nn.Sum(1, embed_dim, true)) -- splits into a sequence-length table with batch-size x embedDim entries
+    :add(nn.Linear(embed_dim, embed_dim)) -- map last state to a score for classification
+    -- :add(nn.Tanh())                     ---     :add(nn.ReLU()) <- this one did worse
+
+   return model
+end
+
+function build_lstm(vocab_size, embed_dim)
+    local model = nn.Sequential()
+    :add(nn.LookupTableMaskZero(vocab_size, embed_dim)) -- will return a sequence-length x batch-size x embedDim tensor
+    :add(nn.SplitTable(1, embed_dim)) -- splits into a sequence-length table with batch-size x embedDim entries
+    :add(nn.Sequencer(nn.LSTM(embed_dim, embed_dim)))
+    :add(nn.SelectTable(-1)) -- selects last state of the LSTM
+    :add(nn.Linear(embed_dim, embed_dim)) -- map last state to a score for classification
+    -- :add(nn.Tanh())                     ---     :add(nn.ReLU()) <- this one did worse
+   return model
+end
+
+function build_model(model, vocab_size, embed_dim, outputSize, use_cuda)
+    if model == 'bow' then
+        print("Running BOW model")
+        mod1 = build_bowmlp(vocab_size, embed_dim)
+        mod2 = build_bowmlp(vocab_size, embed_dim)
+        mod3 = build_bowmlp(vocab_size, embed_dim)
+    end
+    if model == 'lstm' then         
+        print("Running LSTM model")
+        mod1 = build_lstm(vocab_size, embed_dim)
+        mod2 = build_lstm(vocab_size, embed_dim)
+        mod3 = build_lstm(vocab_size, embed_dim)
+    end
+
+    local mod4 = nn.Sequential()
+    mod4:add(nn.Linear(1, embed_dim))
+    -- mlp1:add(nn.ReLU())
+
+    local ParallelModel = nn.ParallelTable()
+    ParallelModel:add(mod1)
+    ParallelModel:add(mod2)
+    ParallelModel:add(mod3)
+    ParallelModel:add(mod4)
+
+    local FinalMLP = nn.Sequential()
+    FinalMLP:add(ParallelModel)
+    FinalMLP:add(nn.JoinTable(2))
+    FinalMLP:add( nn.Linear(embed_dim * 4, outputSize) )
+
+    if use_cuda then
+        return FinalMLP:cuda()
+    else
+        return FinalMLP
+    end
 end
 
 --- This will loop over queries
@@ -43,23 +101,26 @@ function iterateModel(batch_size, nepochs, qs, x, sent_file, model, crit, epsilo
       Tensor = torch.CudaTensor
       LongTensor = torch.CudaLongTensor
       crit = crit:cuda()
-      print("Running DQN-LSTM with the GPU")
+      print("...running on GPU")
     else
       Tensor = torch.Tensor
       LongTensor = torch.LongTensor
-      print("Running DQN-LSTM with the CPU")
+      print("...running on CPU")
     end
-    local rscores, pscores, fscores = {}, {}, {}
     local yrouge = torch.totable(torch.randn(#x))
     local action_list = torch.totable(torch.round(torch.rand(#x)))
     local preds_list = torch.totable(torch.round(torch.rand(#x)))
+    preds_list[1] = 0
     local ss_list = grabNsamples(sent_file, 1, #sent_file)
 
-    print("training model...")
+    print_string = string.format(
+        "training model with learning rate = %.3f, K = %i, and minibatch size = %i...",
+                learning_rate, K, batch_size)
+    print(print_string)
 
     for epoch=0, nepochs, 1 do
-        loss = 0                    --- Compute a new MSE loss each time
-        --- Reset the rougue each time
+        loss = 0.                    --- Compute a new MSE loss each time
+        --- Reset the rougue each epoch
         local r_t1 , p_t1, f_t1 = 0., 0., 0.
         --- Looping over each bach of sentences for a given query
         local nbatches = torch.floor( #x / batch_size)
@@ -82,27 +143,24 @@ function iterateModel(batch_size, nepochs, qs, x, sent_file, model, crit, epsilo
             local xs  = padZeros(xout, mxl)                 --- Padding the data by the maximum length
             local qs2 = padZeros({qs}, 5)
             local qrep = repeatQuery(qs2[1], #xs)
-            local preds = geti_n(preds_list, nstart, nend)
+            -- Find the optimal actions / predictions
+            -- local preds = geti_n(preds_list, nstart, nend)
             --- Update the summary every mini-batch
-            local sumry_list = buildKSummary(preds_list, ss_list, 50)
+            local sumry_list = buildKSummary(preds_list, ss_list, K)
+            --- Rebuilding entire prediction each time
             local sumry_ss = geti_n(sumry_list, nstart, nend)
-            local summary = LongTensor(sumry_ss):t()
 
+            local summary = LongTensor(sumry_ss):t()
             local sentences = LongTensor(xs):t()
             local query = LongTensor(qrep):t()
-            local actions = torch.Tensor(geti_n(action_list, nstart, nend)):resize(#xs, 1)
-            local labels = torch.Tensor(geti_n(yrouge, nstart, nend))
+            local actions = Tensor(geti_n(preds_list, nstart, nend)):resize(#xs, 1)
 
             if use_cuda then
                  actions =  actions:cuda()
-                 labels = labels:cuda()
             end
+
             myPreds = model:forward({sentences, summary, query, actions})
-            loss = loss + crit:forward(myPreds, labels)
-            grads = crit:backward(myPreds, labels)
-            model:backward({sentences, summary, query, actions}, grads)
-            model:updateParameters(learning_rate)        -- Update parameters after each minibatch
-            model:zeroGradParameters()
+            -- print(geti_n(torch.totable(myPreds), 1 , 5) )
 
             if use_cuda then
                 myPreds = myPreds:double()
@@ -112,26 +170,39 @@ function iterateModel(batch_size, nepochs, qs, x, sent_file, model, crit, epsilo
             --- Concatenating predictions into a summary
             predsummary = buildPredSummary(preds, xs, K)
             --- Initializing rouge metrics at time {t-1} and save scores
+            local rscores, pscores, fscores = {}, {}, {}
             for i=1, #predsummary do
                 --- Calculating rouge scores; Call get_i_n() to cumulatively compute rouge
                 rscores[i] = rougeRecall(buildPredSummary(geti_n(preds, 1, i), geti_n(xout, 1, i)), nuggets) - r_t1
-                pscores[i] = rougePrecision(buildPredSummary(geti_n(preds, 1, i), geti_n(xout, 1, i)), nuggets) - r_t1
-                fscores[i] = rougeF1(buildPredSummary(geti_n(preds, 1, i), geti_n(xout, 1, i)), nuggets) - r_t1
+                pscores[i] = rougePrecision(buildPredSummary(geti_n(preds, 1, i), geti_n(xout, 1, i)), nuggets) - p_t1
+                fscores[i] = rougeF1(buildPredSummary(geti_n(preds, 1, i), geti_n(xout, 1, i)), nuggets) - f_t1
                 r_t1, p_t1, f_t1 = rscores[i], pscores[i], fscores[i]
             end
-            --- Updating change in rouge
-            yrouge = updateTable(yrouge, fscores, nstart)
+
+            local labels = torch.Tensor(fscores)
+            if use_cuda then
+                 labels = labels:cuda()
+                 myPreds = myPreds:cuda()
+            end
+
+            loss = loss + crit:forward(myPreds, labels)
+            grads = crit:backward(myPreds, labels)
+            model:zeroGradParameters()
+            model:backward({sentences, summary, query, actions}, grads)
+            model:updateParameters(learning_rate)        -- Update parameters after each minibatch
+
+            yrouge = updateTable(yrouge, rscores, nstart)
             preds_list = updateTable(preds_list, preds, nstart)
-            action_list = updateTable(action_list, torch.totable(actions:double()), nstart)
+            predsummary2 = buildPredSummary(preds_list, xs, K)
+
             --- Calculating last one to see actual last rouge, without delta
-            rscore = rougeRecall(predsummary, nuggets, K)
-            pscore = rougePrecision(predsummary, nuggets, K)
-            fscore = rougeF1(predsummary, nuggets, K)
-            -- print(string.format('\t Mini-batch %i/%i', minibatch, nbatches) )
+            rscore = rougeRecall(predsummary2, nuggets, K)
+            pscore = rougePrecision(predsummary2, nuggets, K)
+            fscore = rougeF1(predsummary2, nuggets, K)
             if (epoch % print_every)==0 then
                 perf_string = string.format(
-                    "Epoch %i, minibatch %i/%i, sum(y)/len(y) = %i/%i, {Recall = %.6f, Precision = %.6f, F1 = %.6f}", 
-                    epoch, minibatch, nbatches, sumTable(preds_list), #preds_list, rscore, pscore, fscore
+                    "Epoch %i, epsilon = %.3f, minibatch %i/%i, sum(y)/len(y) = %i/%i, {Recall = %.6f, Precision = %.6f, F1 = %.6f}", 
+                    epoch, epsilon, minibatch, nbatches, sumTable(preds), #preds, rscore, pscore, fscore
                     )
                 print(perf_string)
             end

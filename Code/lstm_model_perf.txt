@@ -1,0 +1,12 @@
+...Utils file loaded	
+<csv>	parsing file: /Users/franciscojavierarceo/GitHub/DeepNLPQLearning/DO_NOT_UPLOAD_THIS_DATA/0-output/2012_aurora_shooting_first_sentence_numtext2.csv	
+<csv>	parsing done	
+<csv>	parsing file: /Users/franciscojavierarceo/GitHub/DeepNLPQLearning/DO_NOT_UPLOAD_THIS_DATA/0-output/aurora_nuggets_numtext.csv	
+<csv>	parsing done	
+<csv>	parsing file: /Users/franciscojavierarceo/GitHub/DeepNLPQLearning/DO_NOT_UPLOAD_THIS_DATA/0-output/queries_numtext.csv	
+<csv>	parsing done	
+<csv>	parsing file: /Users/franciscojavierarceo/GitHub/DeepNLPQLearning/DO_NOT_UPLOAD_THIS_DATA/0-output/2012_aurora_sentence_numtext2.csv	
+<csv>	parsing done	
+Running LSTM model	
+...running on GPU	
+training model with learning rate = 0.010, K = 200, and minibatch size = 500...	

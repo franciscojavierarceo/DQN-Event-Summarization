@@ -20,57 +20,21 @@ nugget_file = csvigo.load({path = nugget_fn, mode = "large"})
 query_file =  csvigo.load({path = query_fn, mode = "large"})
 sent_file =  csvigo.load({path = sent_fn, mode = "large"})
 
-rK = 10
-batch_size = 1000
-nepochs = 10
+model = 'lstm'
+rK = 200
+batch_size = 500
+nepochs = 50
 print_every = 1
 embed_dim = 10
-learning_rate = 0.1
+learning_rate = 0.01
 usecuda = true
 
-epsilon = 0.1
+epsilon = 1
 cuts = 4.                  --- This is the number of cuts we want
 base_explore_rate = 0.1
 delta = 1./(nepochs/cuts) --- Only using epsilon greedy strategy for (nepochs/cuts)% of the epochs
 
 torch.manualSeed(420)
-
-function build_network(vocab_size, embed_dim)
-    local model = nn.Sequential()
-    :add(nn.LookupTableMaskZero(vocab_size, embed_dim)) -- returns a sequence-length x batch-size x embedDim tensor
-    :add(nn.Sum(1, embed_dim, true)) -- splits into a sequence-length table with batch-size x embedDim entries
-    :add(nn.Linear(embed_dim, embed_dim)) -- map last state to a score for classification
-    -- :add(nn.Tanh())                     ---     :add(nn.ReLU()) <- this one did worse
-
-   return model
-end
-
-function build_model(vocab_size, embed_dim, outputSize, use_cuda)
-    local mod1 = build_network(vocab_size, embed_dim)
-    local mod2 = build_network(vocab_size, embed_dim)
-    local mod3 = build_network(vocab_size, embed_dim)
-
-    local mlp1 = nn.Sequential()
-    mlp1:add(nn.Linear(1, embed_dim))
-    -- mlp1:add(nn.ReLU())
-
-    local ParallelModel = nn.ParallelTable()
-    ParallelModel:add(mod1)
-    ParallelModel:add(mod2)
-    ParallelModel:add(mod3)
-    ParallelModel:add(mlp1)
-
-    local FinalMLP = nn.Sequential()
-    FinalMLP:add(ParallelModel)
-    FinalMLP:add(nn.JoinTable(2))
-    FinalMLP:add( nn.Linear(embed_dim * 4, outputSize) )
-    
-    if use_cuda then
-        return FinalMLP:cuda()
-    else
-        return FinalMLP
-    end
-end
 
 vocab_sized = getVocabSize(data_file)                       --- getting length of dictionary
 vocab_sizeq = getVocabSize(query_file)                      --- getting length of dictionary
@@ -83,12 +47,11 @@ maxseqlend = getMaxseq(data_file)                             --- Extracting max
 maxseqlenq = getMaxseq(query_file)                            --- Extracting maximum sequence length
 maxseqlen = math.max(maxseqlenq, maxseqlend)
 
-batchMLP = build_model(vocab_size, embed_dim, 1, usecuda)
+batch_model  = build_model(model, vocab_size, embed_dim, 1, usecuda)
 crit = nn.MSECriterion()
 
-out = iterateModel( batch_size, nepochs, queries[3], data_file, sent_file, batchMLP, crit, epsilon, delta, 
-                    maxseqlen, base_explore_rate, print_every, nuggets, learning_rate, rK, usecuda)
-
-print("------------------")
-print("  Model complete  ")
-print("------------------")
+out = iterateModel( batch_size, nepochs, queries[3], 
+                    data_file, sent_file, 
+                    batch_model, crit, epsilon, delta, 
+                    maxseqlen, base_explore_rate, print_every, 
+                    nuggets, learning_rate, rK, usecuda)

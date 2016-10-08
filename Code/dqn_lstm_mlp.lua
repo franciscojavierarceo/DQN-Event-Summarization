@@ -20,16 +20,16 @@ nugget_file = csvigo.load({path = nugget_fn, mode = "large"})
 query_file =  csvigo.load({path = query_fn, mode = "large"})
 sent_file =  csvigo.load({path = sent_fn, mode = "large"})
 
-rK = 50
-batch_size = 10
+rK = 100
+batch_size = 500
 nepochs = 10
 print_every = 1
 embed_dim = 10
 learning_rate = 0.1
-usecuda = false
+usecuda = true
 
+epsilon = 0.1
 cuts = 4.                  --- This is the number of cuts we want
-epsilon = 1.
 base_explore_rate = 0.1
 delta = 1./(nepochs/cuts) --- Only using epsilon greedy strategy for (nepochs/cuts)% of the epochs
 
@@ -42,7 +42,7 @@ function build_network(vocab_size, embed_dim)
     :add(nn.Sequencer(nn.LSTM(embed_dim, embed_dim)))
     :add(nn.SelectTable(-1)) -- selects last state of the LSTM
     :add(nn.Linear(embed_dim, embed_dim)) -- map last state to a score for classification
-    :add(nn.ReLU())
+    -- :add(nn.Tanh())                     ---     :add(nn.ReLU()) <- this one did worse
    return model
 end
 
@@ -53,7 +53,7 @@ function build_model(vocab_size, embed_dim, outputSize, use_cuda)
 
     local mlp1 = nn.Sequential()
     mlp1:add(nn.Linear(1, embed_dim))
-    mlp1:add(nn.ReLU())
+    -- mlp1:add(nn.ReLU())
 
     local ParallelModel = nn.ParallelTable()
     ParallelModel:add(mod1)
