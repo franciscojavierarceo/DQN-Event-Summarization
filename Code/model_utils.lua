@@ -256,9 +256,9 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
         nugget_fn = inputs[query_id]['nuggets']
         sent_fn = inputs[query_id]['sentences']
 
-        input_file = csvigo.load({path = input_path .. input_fn, mode = "large"})
-        nugget_file = csvigo.load({path = input_path .. nugget_fn, mode = "large"})
-        sent_file =  csvigo.load({path = input_path .. sent_fn, mode = "large"})
+        input_file = csvigo.load({path = input_path .. input_fn, mode = "large", verbose = false})
+        nugget_file = csvigo.load({path = input_path .. nugget_fn, mode = "large", verbose = false})
+        sent_file =  csvigo.load({path = input_path .. sent_fn, mode = "large", verbose = false})
 
         vocab_sized = getVocabSize(input_file)
         vocab_sizeq = getVocabSize(query_file)
@@ -284,9 +284,9 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
         --- Looping over each bach of sentences for a given query
         for query_id = 1, #inputs do
 
-            input_file = csvigo.load({path = input_path .. inputs[query_id]['inputs'], mode = "large"})
-            nugget_file = csvigo.load({path = input_path .. inputs[query_id]['nuggets'], mode = "large"})
-            sent_file =  csvigo.load({path = input_path .. inputs[query_id]['sentences'], mode = "large"})
+            input_file = csvigo.load({path = input_path .. inputs[query_id]['inputs'], mode = "large", verbose = false})
+            nugget_file = csvigo.load({path = input_path .. inputs[query_id]['nuggets'], mode = "large", verbose = false})
+            sent_file =  csvigo.load({path = input_path .. inputs[query_id]['sentences'], mode = "large", verbose = false})
             qs = inputs[query_id]['query']
 
             nuggets = grabNsamples(nugget_file, #nugget_file, nil)    --- Extracting all samples
@@ -303,7 +303,7 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
                 end
                 if minibatch == nbatches then 
                     nstart = nend + 1
-                    nend = n
+                    nend = #input_file
                 end
                 if minibatch > 1 and minibatch < nbatches then 
                     nstart = nend + 1

@@ -36,10 +36,10 @@ nugget_fn = main_path ..'aurora_nuggets_numtext.csv'
 query_fn = main_path .. 'queries_numtext.csv'
 sent_fn = main_path .. '2012_aurora_sentence_numtext2.csv'
 
-input_file = csvigo.load({path = aurora_fn, mode = "large"})
-nugget_file = csvigo.load({path = nugget_fn, mode = "large"})
-query_file =  csvigo.load({path = query_fn, mode = "large"})
-sent_file =  csvigo.load({path = sent_fn, mode = "large"})
+input_file = csvigo.load({path = aurora_fn, mode = "large", verbose = false})
+nugget_file = csvigo.load({path = nugget_fn, mode = "large", verbose = false})
+query_file =  csvigo.load({path = query_fn, mode = "large", verbose = false})
+sent_file =  csvigo.load({path = sent_fn, mode = "large", verbose = false})
 
 delta = 1./(opt.nepochs/opt.cuts) --- Only using epsilon greedy strategy for (nepochs/cuts)% of the epochs
 

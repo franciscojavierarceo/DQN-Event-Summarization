@@ -30,19 +30,19 @@ dofile("model_utils.lua")
 
 data_path = '~/GitHub/DeepNLPQLearning/DO_NOT_UPLOAD_THIS_DATA/0-output/'
 query_fn = data_path .. 'queries_numtext.csv'
-query_file =  csvigo.load({path = query_fn, mode = "large"})
+query_file =  csvigo.load({path = query_fn, mode = "large", verbose = false})
 queries = grabNsamples(query_file, #query_file, nil)
 
 aurora = {
-        ['inputs'] = '2012_aurora_shooting_first_sentence_numtext.csv', 
+        ['inputs'] = '2012_aurora_shooting_first_sentence_numtext2.csv', 
         ['nuggets'] = 'aurora_nuggets_numtext.csv',
-        ['sentences'] = '2012_aurora_sentence_numtext.csv',
+        ['sentences'] = '2012_aurora_sentence_numtext2.csv',
         ['query'] = queries[3]
 }
 pakistan = {
-        ['inputs'] = '2012_pakistan_garment_factory_fires_numtext.csv',
+        ['inputs'] = '2012_pakistan_garment_factory_fires_first_sentence_numtext2.csv',
         ['nuggets'] ='pakistan_nuggets_numtext.csv',
-        ['sentences'] = '2012_aurora_sentence_numtext.csv',
+        ['sentences'] = '2012_pakistan_sentence_numtext2.csv',
         ['query'] = queries[2]
 }
 
