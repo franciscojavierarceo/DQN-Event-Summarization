@@ -63,6 +63,6 @@ crit = nn.MSECriterion()
 
 out = iterateModel( opt.batch_size, opt.nepochs, queries[3], 
                     input_file, sent_file, 
-                    batch_model, crit, opt.epsilon, delta, 
+                    batch_model, crit, opt.embed_dim, opt.epsilon, delta, 
                     maxseqlen, opt.base_explore_rate, opt.print_every, 
                     nuggets, opt.learning_rate, opt.rK, opt.usecuda)

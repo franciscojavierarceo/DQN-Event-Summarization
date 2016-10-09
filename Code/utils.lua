@@ -229,23 +229,6 @@ function buildPredSummary(preds, xs)
     return out
 end
 
--- function buildPredSummary(pred_action, xs) 
---     local predsummary = {}
---     --- This looks stupid but it's right because we have to retain
---     --- the tmp1 when it's not 1, so it's a running total
---     local tmp1 = {}
---     for i=1, #xs do
---         tmp = unpackZeros(xs[i])
---         if pred_action[i]== 1 then
---             table.insert(tmp1, tmp)
---             predsummary[i] = tmp1
---         else
---             predsummary[i] = tmp1
---         end
---     end
---     return predsummary
--- end
-
 function Tokenize(inputdic)
     local out = {}
     for k, v in pairs(inputdic) do
