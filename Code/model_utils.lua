@@ -39,7 +39,7 @@ function build_bowmlp(vocab_size, embed_dim)
     :add(nn.LookupTableMaskZero(vocab_size, embed_dim)) -- returns a sequence-length x batch-size x embedDim tensor
     :add(nn.Sum(1, embed_dim, true)) -- splits into a sequence-length table with batch-size x embedDim entries
     :add(nn.Linear(embed_dim, embed_dim)) -- map last state to a score for classification
-    -- :add(nn.Tanh())                     ---     :add(nn.ReLU()) <- this one did worse
+    :add(nn.Tanh())                     ---     :add(nn.ReLU()) <- this one did worse
 
    return model
 end
@@ -51,7 +51,7 @@ function build_lstm(vocab_size, embed_dim)
     :add(nn.Sequencer(nn.LSTM(embed_dim, embed_dim)))
     :add(nn.SelectTable(-1)) -- selects last state of the LSTM
     :add(nn.Linear(embed_dim, embed_dim)) -- map last state to a score for classification
-    -- :add(nn.Tanh())                     ---     :add(nn.ReLU()) <- this one did worse
+    :add(nn.Tanh())                     ---     :add(nn.ReLU()) <- this one did worse
    return model
 end
 
@@ -71,7 +71,7 @@ function build_model(model, vocab_size, embed_dim, outputSize, use_cuda)
 
     local mod4 = nn.Sequential()
     mod4:add(nn.Linear(1, embed_dim))
-    -- mlp1:add(nn.ReLU())
+    mod4:add(nn.ReLU())
 
     local ParallelModel = nn.ParallelTable()
     ParallelModel:add(mod1)
@@ -83,6 +83,7 @@ function build_model(model, vocab_size, embed_dim, outputSize, use_cuda)
     FinalMLP:add(ParallelModel)
     FinalMLP:add(nn.JoinTable(2))
     FinalMLP:add( nn.Linear(embed_dim * 4, outputSize) )
+    FinalMLP:add(nn.Tanh())
 
     if use_cuda then
         return FinalMLP:cuda()
@@ -220,7 +221,6 @@ function iterateModel(batch_size, nepochs, query, input_file,
 end 
 
 
-
 function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs, 
                     model, crit, embed_dim, epsilon, delta, 
                     base_explore_rate, print_every,
@@ -267,7 +267,7 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
 
         maxseqlend = getMaxseq(input_file)
         maxseqlen = math.max(maxseqlen, maxseqlenq, maxseqlend)
-        action_list = torch.totable(torch.round(torch.ones(#input_file)))
+        action_list = torch.totable(torch.round(torch.rand(#input_file)))
         action_list[1] = 0
         --- initialize the query level lists
         summary_query_list[query_id] = grabNsamples(sent_file, 1, #sent_file)
@@ -348,9 +348,12 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
                 -- Now we evaluate our action through the critic/Oracle
                 for i=1, #xs do
                     --- Calculating rouge scores; Call get_i_n() to cumulatively compute rouge
-                    rscores[i] = rougeRecall(buildPredSummary(geti_n(preds, 1, i), geti_n(xout, 1, i)), nuggets) - r_t1
-                    pscores[i] = rougePrecision(buildPredSummary(geti_n(preds, 1, i), geti_n(xout, 1, i)), nuggets) - p_t1
-                    fscores[i] = rougeF1(buildPredSummary(geti_n(preds, 1, i), geti_n(xout, 1, i)), nuggets) - f_t1
+                    rscores[i] = rougeRecall(buildPredSummary(geti_n(preds, 1, i), 
+                                             geti_n(xout, 1, i)), nuggets, K) - r_t1
+                    pscores[i] = rougePrecision(buildPredSummary(geti_n(preds, 1, i), 
+                                             geti_n(xout, 1, i)), nuggets, K) - p_t1
+                    fscores[i] = rougeF1(buildPredSummary(geti_n(preds, 1, i), 
+                                             geti_n(xout, 1, i)), nuggets, K) - f_t1
                     r_t1, p_t1, f_t1 = rscores[i], pscores[i], fscores[i]
                 end
 
@@ -370,9 +373,9 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
                 -- Updating our bookkeeping tables
                 yrouge = updateTable(yrouge, pscores, nstart)
                 action_list = updateTable(action_list, preds, nstart)
-                predsummarytotal = buildPredSummary(action_list, xs, K)
 
-                --- Calculating last one to see actual last rouge, without delta
+                --- Calculating total rouge, without delta
+                predsummarytotal = buildPredSummary(action_list, xs, K)
                 rscore = rougeRecall(predsummarytotal, nuggets, K)
                 pscore = rougePrecision(predsummarytotal, nuggets, K)
                 fscore = rougeF1(predsummarytotal, nuggets, K)
