@@ -92,10 +92,15 @@ function build_model(model, vocab_size, embed_dim, outputSize, use_cuda)
     end
 end
 
+-- out = iterateModel( opt.batch_size, opt.nepochs, queries[3], input_file, 
+--                     sent_file, batch_model, crit, opt.epsilon, delta, 
+--                     maxseqlen, opt.base_explore_rate, opt.print_every,  nuggets, 
+--                     opt.learning_rate, opt.K_tokens, opt.K_sentences, opt.usecuda)
+
 function iterateModel(batch_size, nepochs, query, input_file, 
                     sent_file, model, crit, epsilon, delta, mxl,
                     base_explore_rate, print_every, nuggets, 
-                    learning_rate, K, use_cuda)
+                    learning_rate, K_sentences, K_tokens, use_cuda)
     if use_cuda then
       Tensor = torch.CudaTensor
       LongTensor = torch.CudaLongTensor
@@ -113,8 +118,8 @@ function iterateModel(batch_size, nepochs, query, input_file,
     local ss_list = grabNsamples(sent_file, 1, #sent_file)
 
     print_string = string.format(
-        "training model with learning rate = %.3f, K = %i, and minibatch size = %i...",
-                learning_rate, K, batch_size)
+        "training model with learning rate = %.3f, # of Tokens = %i, and minibatch size = %i...",
+                learning_rate, K_tokens, batch_size)
     print(print_string)
 
     for epoch=0, nepochs, 1 do
@@ -138,15 +143,16 @@ function iterateModel(batch_size, nepochs, query, input_file,
             end
             --- This step is processing the data
             local x_ss  = geti_n(input_file, nstart, nend)
-            local xout  = grabNsamples(x_ss, 1, #x_ss)     --- Extracting N samples
+            local xout  = grabNsamples(x_ss, nil, K_tokens)     --- Extracting N samples
             local xs  = padZeros(xout, mxl)                 --- Padding the data by the maximum length
             local qs2 = padZeros({query}, 5)
             local qrep = repeatQuery(qs2[1], #xs)
             -- Find the optimal actions / predictions
             --- Update the summary every mini-batch
-            local sumry_list = buildKSummary(action_list, ss_list, K)
+            -- local sumry_list = buildKSummary(action_list, ss_list, K)
+            local sumry_list = buildPredSummary2(action_list, xout, K_sentences)
             --- Rebuilding entire prediction each time
-            local sumry_ss = geti_n(sumry_list, nstart, nend)
+            local sumry_ss = padZeros(geti_n(sumry_list, nstart, nend), K_tokens * K_sentences)
 
             local summary = LongTensor(sumry_ss):t()
             local sentences = LongTensor(xs):t()
@@ -175,9 +181,13 @@ function iterateModel(batch_size, nepochs, query, input_file,
             -- Now we evaluate our action through the critic/Oracle
             for i=1, #xs do
                 --- Calculating rouge scores; Call get_i_n() to cumulatively compute rouge
-                rscores[i] = rougeRecall(buildPredSummary(geti_n(preds, 1, i), geti_n(xout, 1, i)), nuggets) - r_t1
-                pscores[i] = rougePrecision(buildPredSummary(geti_n(preds, 1, i), geti_n(xout, 1, i)), nuggets) - p_t1
-                fscores[i] = rougeF1(buildPredSummary(geti_n(preds, 1, i), geti_n(xout, 1, i)), nuggets) - f_t1
+                -- local sumry_list = buildPredSummary2(action_list, ss_list, K)
+                rscores[i] = rougeRecall(buildPredSummary2(geti_n(preds, 1, i), 
+                                            geti_n(xout, 1, i)), nuggets, K_sentences) - r_t1
+                pscores[i] = rougePrecision(buildPredSummary2(geti_n(preds, 1, i), 
+                                            geti_n(xout, 1, i)), nuggets, K_sentences) - p_t1
+                fscores[i] = rougeF1(buildPredSummary2(geti_n(preds, 1, i), 
+                                            geti_n(xout, 1, i)), nuggets, K_sentences) - f_t1
                 r_t1, p_t1, f_t1 = rscores[i], pscores[i], fscores[i]
             end
 
@@ -197,7 +207,8 @@ function iterateModel(batch_size, nepochs, query, input_file,
             -- Updating our bookkeeping tables
             yrouge = updateTable(yrouge, pscores, nstart)
             action_list = updateTable(action_list, preds, nstart)
-            predsummarytotal = buildPredSummary(action_list, xs, K)
+            predsummarytotal = buildPredSummary2(action_list, xs, K_sentences)
+            -- predsummarytotal = buildPredSummary(action_list, xs, K)
 
             --- Calculating last one to see actual last rouge, without delta
             rscore = rougeRecall(predsummarytotal, nuggets, K)
@@ -224,7 +235,7 @@ end
 function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs, 
                     model, crit, embed_dim, epsilon, delta, 
                     base_explore_rate, print_every,
-                    learning_rate, K, use_cuda)
+                    learning_rate, K, K_tokens, use_cuda)
     if use_cuda then
       Tensor = torch.CudaTensor
       LongTensor = torch.CudaLongTensor
@@ -289,7 +300,7 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
             sent_file =  csvigo.load({path = input_path .. inputs[query_id]['sentences'], mode = "large", verbose = false})
             qs = inputs[query_id]['query']
 
-            nuggets = grabNsamples(nugget_file, #nugget_file, nil)    --- Extracting all samples
+            nuggets = grabNsamples(nugget_file, nil, nil)    --- Extracting all samples
             --- Extracting the query specific summaries, actions, and rougue
             ss_list = summary_query_list[query_id] 
             action_list = action_query_list[query_id]
@@ -311,13 +322,14 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
                 end
                 --- This step is processing the data
                 local x_ss  = geti_n(input_file, nstart, nend)
-                local xout  = grabNsamples(x_ss, 1, #x_ss)     --- Extracting N samples
+                local xout  = grabNsamples(x_ss, nil, K_tokens)     --- Extracting N samples
                 local xs  = padZeros(xout, maxseqlen)                 --- Padding the data by the maximum length
                 local qs2 = padZeros({qs}, 5)
                 local qrep = repeatQuery(qs2[1], #xs)
                 -- Find the optimal actions / predictions
                 --- Update the summary every mini-batch
                 local sumry_list = buildKSummary(action_list, ss_list, K)
+                -- local sumry_list = buildPredSummary2(action_list, ss_list, K)
                 --- Rebuilding entire prediction each time
                 local sumry_ss = geti_n(sumry_list, nstart, nend)
 
@@ -382,8 +394,8 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
 
                 if (epoch % print_every)==0 then
                     perf_string = string.format(
-                        "Epoch %i, epsilon = %.3f, minibatch %i/%i, sum(y)/len(y) = %i/%i, {Recall = %.6f, Precision = %.6f, F1 = %.6f}", 
-                        epoch, epsilon, minibatch, nbatches, sumTable(preds), #preds, rscore, pscore, fscore
+                        "Epoch %i, query = %s, epsilon = %.3f, minibatch %i/%i, sum(y)/len(y) = %i/%i, {Recall = %.6f, Precision = %.6f, F1 = %.6f}", 
+                        epoch, inputs[query_id]['query_name'], epsilon, minibatch, nbatches, sumTable(preds), #preds, rscore, pscore, fscore
                         )
                     print(perf_string)
                 end

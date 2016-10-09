@@ -37,13 +37,15 @@ aurora = {
         ['inputs'] = '2012_aurora_shooting_first_sentence_numtext2.csv', 
         ['nuggets'] = 'aurora_nuggets_numtext.csv',
         ['sentences'] = '2012_aurora_sentence_numtext2.csv',
-        ['query'] = queries[3]
+        ['query'] = queries[3],
+        ['query_name'] = 'aurora'
 }
 pakistan = {
         ['inputs'] = '2012_pakistan_garment_factory_fires_first_sentence_numtext2.csv',
         ['nuggets'] ='pakistan_nuggets_numtext.csv',
         ['sentences'] = '2012_pakistan_sentence_numtext2.csv',
-        ['query'] = queries[2]
+        ['query'] = queries[2],
+        ['query_name'] = 'pakistan'
 }
 
 inputs = {

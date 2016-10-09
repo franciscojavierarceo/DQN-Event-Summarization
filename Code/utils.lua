@@ -196,6 +196,20 @@ function buildKSummary(preds, xs, K)
     return padZeros(out2, maxlen)
 end
 
+function buildPredSummary2(preds, xs, K)
+    local out = {}
+    for i=1, #xs do
+        if i == 1 then 
+            out[i] = zero_or_x(preds[i], unpackZeros(xs[i]))
+        else 
+            --- Update it by adding xs_i and out_{i-1}
+            out[i] =  getLastKTokens(tableConcat(zero_or_x(preds[i], 
+                                    unpackZeros(xs[i]) ) , out[i-1]), K)
+        end
+    end
+    return out
+end
+
 function buildSummary(preds, xs, maxlen)
     local out = {}
     for i=1, #xs do

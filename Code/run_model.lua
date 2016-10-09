@@ -9,7 +9,8 @@ require 'cunnx'
 cmd = torch.CmdLine()
 --- setting the parameter defaults
 cmd:option('--model', 'lstm', 'using LSTM instead of BOW')                       
-cmd:option('--rK', 200, 'using last 200 sentences to calculate rougue')
+cmd:option('--K_tokens', 200, 'using last 200 sentences to calculate rougue')
+cmd:option('--K_sentences', 10, 'using last 10 sentences to calculate rougue')
 cmd:option('--nepochs', 50, 'running for 50 epochs')
 cmd:option('--print_every', 1, 'printing every 1 epoch')
 cmd:option('--embed_dim', 10, 'using an embedding dimension of 10')
@@ -62,7 +63,6 @@ batch_model  = build_model(opt.model, vocab_size, opt.embed_dim, 1, opt.usecuda)
 crit = nn.MSECriterion()
 
 out = iterateModel( opt.batch_size, opt.nepochs, queries[3], 
-                    input_file, sent_file, 
-                    batch_model, crit, opt.embed_dim, opt.epsilon, delta, 
-                    maxseqlen, opt.base_explore_rate, opt.print_every, 
-                    nuggets, opt.learning_rate, opt.rK, opt.usecuda)
+                    input_file, sent_file, batch_model, crit, opt.epsilon, delta, 
+                    maxseqlen, opt.base_explore_rate, opt.print_every,  nuggets, 
+                    opt.learning_rate, opt.K_tokens, opt.K_sentences, opt.usecuda)
