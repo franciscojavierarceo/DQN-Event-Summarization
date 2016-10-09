@@ -91,11 +91,7 @@ function build_model(model, vocab_size, embed_dim, outputSize, use_cuda)
     end
 end
 
---- This will loop over queries
---- then iteratere over minibatches
---- then iterate over epochs
-
-function iterateModel(batch_size, nepochs, nqueries, query_file, input_file, 
+function iterateModel(batch_size, nepochs, query, input_file, 
                     sent_file, model, crit, epsilon, delta, mxl,
                     base_explore_rate, print_every, nuggets, 
                     learning_rate, K, use_cuda)
@@ -124,7 +120,7 @@ function iterateModel(batch_size, nepochs, nqueries, query_file, input_file,
         loss = 0.                    --- Compute a new MSE loss each time
         --- Reset the rougue each epoch
         local r_t1 , p_t1, f_t1 = 0., 0., 0.
-        --- Looping over each bach of sentences for a given query
+        --- Looping over each batch of sentences for a given query
         local nbatches = torch.floor( n / batch_size)
         for minibatch = 1, nbatches do
             if minibatch == 1 then          -- Need +1 to skip the first row
@@ -133,17 +129,17 @@ function iterateModel(batch_size, nepochs, nqueries, query_file, input_file,
             end
             if minibatch == nbatches then 
                 nstart = nend + 1
-                nend = #x
+                nend = n
             end
             if minibatch > 1 and minibatch < nbatches then 
                 nstart = nend + 1
                 nend = torch.round(batch_size * minibatch)
             end
             --- This step is processing the data
-            local x_ss  = geti_n(x, nstart, nend)
+            local x_ss  = geti_n(input_file, nstart, nend)
             local xout  = grabNsamples(x_ss, 1, #x_ss)     --- Extracting N samples
             local xs  = padZeros(xout, mxl)                 --- Padding the data by the maximum length
-            local qs2 = padZeros({qs}, 5)
+            local qs2 = padZeros({query}, 5)
             local qrep = repeatQuery(qs2[1], #xs)
             -- Find the optimal actions / predictions
             --- Update the summary every mini-batch
@@ -176,7 +172,7 @@ function iterateModel(batch_size, nepochs, nqueries, query_file, input_file,
             --- Initializing rouge metrics at time {t-1} and save scores
             local rscores, pscores, fscores = {}, {}, {}
             -- Now we evaluate our action through the critic/Oracle
-            for i=1, #preds[1] do
+            for i=1, #xs do
                 --- Calculating rouge scores; Call get_i_n() to cumulatively compute rouge
                 rscores[i] = rougeRecall(buildPredSummary(geti_n(preds, 1, i), geti_n(xout, 1, i)), nuggets) - r_t1
                 pscores[i] = rougePrecision(buildPredSummary(geti_n(preds, 1, i), geti_n(xout, 1, i)), nuggets) - p_t1
@@ -219,6 +215,6 @@ function iterateModel(batch_size, nepochs, nqueries, query_file, input_file,
         if epsilon <= 0 then                --- and leaving a random exploration rate
             epsilon = base_explore_rate
         end
-end
+    end
     return model
 end 
