@@ -9,7 +9,7 @@ require 'cunnx'
 cmd = torch.CmdLine()
 --- setting the parameter defaults
 cmd:option('--model', 'lstm', 'using LSTM instead of BOW')                       
-cmd:option('--K_tokens', 200, 'using last 200 sentences to calculate rougue')
+cmd:option('--K_tokens', 10, 'using last 200 sentences to calculate rougue')
 cmd:option('--K_sentences', 10, 'using last 10 sentences to calculate rougue')
 cmd:option('--nepochs', 50, 'running for 50 epochs')
 cmd:option('--print_every', 1, 'printing every 1 epoch')
@@ -32,10 +32,10 @@ dofile("utils.lua")
 dofile("model_utils.lua")
 
 main_path = '~/GitHub/DeepNLPQLearning/DO_NOT_UPLOAD_THIS_DATA/0-output/'
-aurora_fn = main_path .. '2012_aurora_shooting_first_sentence_numtext2.csv'
+aurora_fn = main_path .. '2012_aurora_shooting_first_sentence_numtext.csv'
 nugget_fn = main_path ..'aurora_nuggets_numtext.csv'
 query_fn = main_path .. 'queries_numtext.csv'
-sent_fn = main_path .. '2012_aurora_sentence_numtext2.csv'
+sent_fn = main_path .. '2012_aurora_sentence_numtext.csv'
 
 input_file = csvigo.load({path = aurora_fn, mode = "large", verbose = false})
 nugget_file = csvigo.load({path = nugget_fn, mode = "large", verbose = false})
@@ -48,8 +48,8 @@ torch.manualSeed(420)
 
 vocab_sized = getVocabSize(input_file)                       --- getting length of dictionary
 vocab_sizeq = getVocabSize(query_file)                      --- getting length of dictionary
-vocab_sizes = getVocabSize(sent_file)                      --- getting length of dictionary
-vocab_size = math.max(vocab_sized, vocab_sizeq, vocab_sizes)
+-- vocab_sizes = getVocabSize(sent_file)                      --- getting length of dictionary
+vocab_size = math.max(vocab_sized, vocab_sizeq)
 
 data_file = grabNsamples(input_file, #input_file, nil) 
 queries = grabNsamples(query_file, #query_file, nil)      --- Extracting all queries

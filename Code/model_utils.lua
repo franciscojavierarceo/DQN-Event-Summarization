@@ -82,7 +82,7 @@ function build_model(model, vocab_size, embed_dim, outputSize, use_cuda)
     local FinalMLP = nn.Sequential()
     FinalMLP:add(ParallelModel)
     FinalMLP:add(nn.JoinTable(2))
-    FinalMLP:add( nn.Linear(embed_dim * 4, outputSize) )
+    FinalMLP:add(nn.Linear(embed_dim * 4, outputSize) )
     FinalMLP:add(nn.Tanh())
 
     if use_cuda then
@@ -152,7 +152,7 @@ function iterateModel(batch_size, nepochs, query, input_file,
             -- local sumry_list = buildKSummary(action_list, ss_list, K)
             local sumry_list = buildPredSummary2(action_list, xout, K_sentences)
             --- Rebuilding entire prediction each time
-            local sumry_ss = padZeros(geti_n(sumry_list, nstart, nend), K_tokens * K_sentences)
+            local sumry_ss = padZeros(sumry_list, K_sentences * K_tokens)
 
             local summary = LongTensor(sumry_ss):t()
             local sentences = LongTensor(xs):t()
@@ -179,15 +179,20 @@ function iterateModel(batch_size, nepochs, query, input_file,
             --- Initializing rouge metrics at time {t-1} and save scores
             local rscores, pscores, fscores = {}, {}, {}
             -- Now we evaluate our action through the critic/Oracle
-            for i=1, #xs do
+            for i=1, #xout do
                 --- Calculating rouge scores; Call get_i_n() to cumulatively compute rouge
                 -- local sumry_list = buildPredSummary2(action_list, ss_list, K)
-                rscores[i] = rougeRecall(buildPredSummary2(geti_n(preds, 1, i), 
-                                            geti_n(xout, 1, i)), nuggets, K_sentences) - r_t1
-                pscores[i] = rougePrecision(buildPredSummary2(geti_n(preds, 1, i), 
-                                            geti_n(xout, 1, i)), nuggets, K_sentences) - p_t1
-                fscores[i] = rougeF1(buildPredSummary2(geti_n(preds, 1, i), 
-                                            geti_n(xout, 1, i)), nuggets, K_sentences) - f_t1
+                local curr_summary = buildPredSummary2(geti_n(preds, 1, i), 
+                                                       geti_n(xout, 1 , i), K_sentences)
+                rscores[i] = rougeRecall(curr_summary, nuggets, K_sentences) - r_t1
+                pscores[i] = rougePrecision(curr_summary, nuggets, K_sentences) - p_t1
+                fscores[i] = rougeF1(curr_summary, nuggets, K_sentences) - f_t1
+                -- rscores[i] = rougeRecall(buildPredSummary2(geti_n(preds, 1, i), 
+                --                             geti_n(xout, 1, i)), nuggets, K_sentences) - r_t1
+                -- pscores[i] = rougePrecision(buildPredSummary2(geti_n(preds, 1, i), 
+                --                             geti_n(xout, 1, i)), nuggets, K_sentences) - p_t1
+                -- fscores[i] = rougeF1(buildPredSummary2(geti_n(preds, 1, i), 
+                --                             geti_n(xout, 1, i)), nuggets, K_sentences) - f_t1
                 r_t1, p_t1, f_t1 = rscores[i], pscores[i], fscores[i]
             end
 
@@ -211,9 +216,9 @@ function iterateModel(batch_size, nepochs, query, input_file,
             -- predsummarytotal = buildPredSummary(action_list, xs, K)
 
             --- Calculating last one to see actual last rouge, without delta
-            rscore = rougeRecall(predsummarytotal, nuggets, K)
-            pscore = rougePrecision(predsummarytotal, nuggets, K)
-            fscore = rougeF1(predsummarytotal, nuggets, K)
+            rscore = rougeRecall(predsummarytotal, nuggets, K_sentences)
+            pscore = rougePrecision(predsummarytotal, nuggets, K_sentences)
+            fscore = rougeF1(predsummarytotal, nuggets, K_sentences)
 
             if (epoch % print_every)==0 then
                 perf_string = string.format(
@@ -249,7 +254,7 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
 
     print_string = string.format(
         "training model with learning rate = %.3f, K = %i, and minibatch size = %i...",
-                learning_rate, K, batch_size
+                learning_rate, K_tokens, batch_size
                 )
 
     print(print_string)
