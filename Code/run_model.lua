@@ -9,17 +9,18 @@ require 'cunnx'
 cmd = torch.CmdLine()
 --- setting the parameter defaults
 cmd:option('--model', 'lstm', 'using LSTM instead of BOW')                       
+cmd:option('--nepochs', 50, 'running for 50 epochs')
 cmd:option('--K_tokens', 10, 'using last 200 sentences to calculate rougue')
 cmd:option('--K_sentences', 10, 'using last 10 sentences to calculate rougue')
-cmd:option('--nepochs', 50, 'running for 50 epochs')
-cmd:option('--print_every', 1, 'printing every 1 epoch')
+cmd:option('--batch_size', 500, 'batch size of 500')
+cmd:option('--thresh', 0.05, 'rougue improvement threshold')
 cmd:option('--embed_dim', 10, 'using an embedding dimension of 10')
 cmd:option('--learning_rate', 0.01, 'using a learning rate of 0.01')
+cmd:option('--print_every', 1, 'printing every 1 epoch')
 cmd:option('--usecuda', true, 'running on cuda')
-cmd:option('--epsilon', 1, 'starting with epsilon = 1')
+cmd:option('--epsilon', 0, 'starting with epsilon = 1')
 cmd:option('--cuts', 4, 'using epsilon-greedy strategy 1/4 of the time')
 cmd:option('--base_explore_rate', 0.25, 'base exploration rate of 0.25')
-cmd:option('--batch_size', 500, 'batch size of 500')
 cmd:text()
 
 --- this retrieves the commands and stores them in opt.variable (e.g., opt.model)
@@ -40,7 +41,7 @@ sent_fn = main_path .. '2012_aurora_sentence_numtext.csv'
 input_file = csvigo.load({path = aurora_fn, mode = "large", verbose = false})
 nugget_file = csvigo.load({path = nugget_fn, mode = "large", verbose = false})
 query_file =  csvigo.load({path = query_fn, mode = "large", verbose = false})
-sent_file =  csvigo.load({path = sent_fn, mode = "large", verbose = false})
+-- sent_file =  csvigo.load({path = sent_fn, mode = "large", verbose = false})
 
 delta = 1./(opt.nepochs/opt.cuts) --- Only using epsilon greedy strategy for (nepochs/cuts)% of the epochs
 
@@ -62,7 +63,7 @@ maxseqlen = math.max(maxseqlenq, maxseqlend)
 batch_model  = build_model(opt.model, vocab_size, opt.embed_dim, 1, opt.usecuda)
 crit = nn.MSECriterion()
 
-out = iterateModel( opt.batch_size, opt.nepochs, queries[3], 
-                    input_file, sent_file, batch_model, crit, opt.epsilon, delta, 
-                    maxseqlen, opt.base_explore_rate, opt.print_every,  nuggets, 
+out = iterateModel( opt.batch_size, opt.nepochs, queries[3], input_file, 
+                    maxseqlen, batch_model, crit, opt.thresh, opt.epsilon, 
+                    delta, opt.base_explore_rate, opt.print_every,  nuggets, 
                     opt.learning_rate, opt.K_tokens, opt.K_sentences, opt.usecuda)

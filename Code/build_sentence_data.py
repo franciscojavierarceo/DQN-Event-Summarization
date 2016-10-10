@@ -14,8 +14,11 @@ def build(input_file, output_file):
     print("Finished")
 
 if __name__ == '__main__':
-#   build('2012_aurora_shooting_first_sentence_numtext.csv',
-#         '2012_aurora_sentence_numtext.csv')
+  build('2012_aurora_shooting_first_sentence_numtext.csv',
+        '2012_aurora_sentence_numtext.csv')
 
-   build('2012_pakistan_garment_factory_fires_first_sentence_numtext.csv',
-         '2012_pakistan_sentence_numtext.csv')
+  build('2012_pakistan_garment_factory_fires_first_sentence_numtext.csv',
+        '2012_pakistan_sentence_numtext.csv')
+
+   build('hurricane_sandy_first_sentence_numtext.csv',
+         'hurricane_sandy_sentence_numtext.csv')

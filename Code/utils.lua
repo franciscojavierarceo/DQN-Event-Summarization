@@ -34,7 +34,15 @@ function grabKtokens(x, K)
     return tmp
 end
 
-function grabNsamples(x, N, K)
+function buildTermDocumentTable(x, K)
+    local out = {}
+    for k,v in pairs(x) do
+        out[k] = grabKtokens(split(x[k][1]), K)
+    end
+    return out
+end
+
+function grabNsamples(x, K)
     local out = {}
     if N == nil then 
         N = #x
@@ -161,7 +169,7 @@ function tableConcat(input_t1, input_t2)
     return out_table
 end
 
-function zero_or_x(pred_action, xs)
+function x_or_zero(pred_action, xs)
     if pred_action==1 then
         return xs
     else 
@@ -169,7 +177,17 @@ function zero_or_x(pred_action, xs)
     end
 end
 
+function x_or_pass(pred_action, xs)
+    if pred_action==1 then
+        return xs
+    else
+        return {}
+    end
+end
+
 function getLastKTokens(x, K)
+    --- This function grabs the last K elements from a table
+    --- e.g., getLastKTokens({1,2,3,4,5}, 3) = {1,2,3}
     local out = {}
     for i=0, K-1, 1 do
         out[i+1] = x[#x-i]
@@ -181,13 +199,17 @@ function getLastKTokens(x, K)
 end
 
 function buildPredSummary2(preds, xs, K)
+    --- This function is used to map the token indices to extract the summary
+    --- and produceds {token_id, 0, token_id} from any given *selected* sentence
     local out = {}
     for i=1, #xs do
         if i == 1 then 
-            out[i] = zero_or_x(preds[i], unpackZeros(xs[i]))
+            -- out[i] = x_or_zero(preds[i], unpackZeros(xs[i]))
+            out[i] = x_or_pass(preds[i], unpackZeros(xs[i]))
         else 
             --- Update it by adding xs_i and out_{i-1}
-            local tmp = tableConcat(zero_or_x(preds[i], unpackZeros(xs[i]) ), out[i-1])
+            -- local tmp = tableConcat(x_or_zero(preds[i], unpackZeros(xs[i]) ), out[i-1])
+            local tmp = tableConcat(x_or_pass(preds[i], unpackZeros(xs[i])) , out[i-1])
             out[i] =  getLastKTokens(tmp, K)
         end
     end
@@ -195,14 +217,16 @@ function buildPredSummary2(preds, xs, K)
 end
 
 function buildKSummary(preds, xs, K)
+    --- This method was used to map the sentence indices to extract the summary
+    --- and produceds {sentence_id, 0, sentence_id} 
     local out = {}
     local out2 = {}
     for i=1, #xs do
         if i == 1 then 
-            out[i] = zero_or_x(preds[i], {0} )
+            out[i] = x_or_zero(preds[i], {0} )
         else 
             --- Update it by adding xs_i and out_{i-1}
-            out[i] = tableConcat( out[i-1], zero_or_x(preds[i], xs[i]) )
+            out[i] = tableConcat( out[i-1], x_or_zero(preds[i], xs[i]) )
         end
     end
     local maxlen = 0
@@ -219,10 +243,10 @@ function buildSummary(preds, xs, maxlen)
     local out = {}
     for i=1, #xs do
         if i == 1 then 
-            out[i] = zero_or_x(preds[i], unpackZeros(xs[i]))
+            out[i] = x_or_zero(preds[i], unpackZeros(xs[i]))
         else 
             --- Update it by adding xs_i and out_{i-1}
-            out[i] = tableConcat(zero_or_x(preds[i], unpackZeros(xs[i])), out[i-1])
+            out[i] = tableConcat(x_or_zero(preds[i], unpackZeros(xs[i])), out[i-1])
         end
     end
     if maxlen == 0 then
@@ -239,23 +263,37 @@ function buildPredSummary(preds, xs)
     local out = {}
     for i=1, #xs do
         if i == 1 then 
-            out[i] = zero_or_x(preds[i], unpackZeros(xs[i]))
+            out[i] = x_or_zero(preds[i], unpackZeros(xs[i]))
         else 
             --- Update it by adding xs_i and out_{i-1}
-            out[i] =  zero_or_x(preds[i], unpackZeros(xs[i]))
+            out[i] =  x_or_zero(preds[i], unpackZeros(xs[i]))
         end
     end
     return out
 end
 
-function Tokenize(inputdic)
+function setContains(set, key)
+    return set[key] ~= nil
+end
+
+function Tokenize(inputdic, remove_stopwords)
     local out = {}
+    --- these can be found in the total_corpus_summary.csv file
+    local stopwordlist = {1, 3, 6, 23, 24, 28, 31, 54, 57, 62, 103}
+
     for k, v in pairs(inputdic) do
         for j, l in pairs(v) do
-           if out[l] == nil then
+            if out[l] == nil then
                 out[l] = 1
                 else 
                 out[l] = 1 + out[l]
+            end
+        end
+    end
+    if remove_stopwords then 
+        for k, stopword in pairs(stopwordlist) do
+            if setContains(set, stopwordlist) then
+                out[stopword] = nil
             end
         end
     end
