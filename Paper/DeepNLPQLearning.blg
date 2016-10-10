@@ -5,45 +5,45 @@ The style file: plain.bst
 Database file #1: DeepNLPQLearning.bib
 Warning--empty journal in kedzieextractive
 Warning--empty year in kedzieextractive
-You've used 8 entries,
+You've used 10 entries,
             2118 wiz_defined-function locations,
-            540 strings with 5688 characters,
-and the built_in function-call counts, 3133 in all, are:
-= -- 301
-> -- 183
+            551 strings with 6015 characters,
+and the built_in function-call counts, 3790 in all, are:
+= -- 365
+> -- 219
 < -- 3
-+ -- 72
-- -- 64
-* -- 214
-:= -- 521
-add.period$ -- 25
-call.type$ -- 8
-change.case$ -- 56
++ -- 87
+- -- 76
+* -- 263
+:= -- 637
+add.period$ -- 31
+call.type$ -- 10
+change.case$ -- 68
 chr.to.int$ -- 0
-cite$ -- 10
-duplicate$ -- 121
-empty$ -- 212
-format.name$ -- 64
-if$ -- 656
+cite$ -- 12
+duplicate$ -- 142
+empty$ -- 258
+format.name$ -- 76
+if$ -- 786
 int.to.chr$ -- 0
-int.to.str$ -- 8
-missing$ -- 8
-newline$ -- 42
-num.names$ -- 16
-pop$ -- 65
+int.to.str$ -- 10
+missing$ -- 10
+newline$ -- 52
+num.names$ -- 20
+pop$ -- 75
 preamble$ -- 1
-purify$ -- 48
+purify$ -- 58
 quote$ -- 0
-skip$ -- 95
+skip$ -- 109
 stack$ -- 0
-substring$ -- 144
-swap$ -- 39
+substring$ -- 186
+swap$ -- 41
 text.length$ -- 3
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 32
+type$ -- 40
 warning$ -- 2
-while$ -- 25
-width$ -- 9
-write$ -- 86
+while$ -- 31
+width$ -- 12
+write$ -- 107
 (There were 2 warnings)

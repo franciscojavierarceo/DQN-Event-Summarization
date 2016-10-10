@@ -24,7 +24,7 @@
 		\and  
 	Francisco Javier Arceo \\ \href{mailto: fja2114@columbia.edu}{\small fja2114@columbia.edu} 
 	}
-	
+
 \begin{document}
 \maketitle
 
@@ -39,7 +39,13 @@ I will insert something here\footnote{ \url{https://github.com/franciscojavierar
 
 \section{Introduction}
 
-\cite{kedzieextractive}
+Crisis informatics is becoming an increasingly popular area of study in machine learning with more recent research focusing on extractive summarization (e.g., \cite{kedzie2015predicting} and \cite{kedzieextractive}) of multi-document summarization. The approach by \cite{kedzie2015predicting}  has shown that it is possible to select relevant sentences from a massive number of documents on the web to create summaries with meaningful content by adapting classifiers to maximize search policies. These systems operate in a streaming fashion and are capable of of evaluating each sentence within each article to decide whether or not to select or skip the sentence. 
+
+Unfortunately, these systems have still been shown to fall short of heuristic algorithms [citation needed], which may be due to inadequate capturing of the rich structure and often idiosyncractic information by traditional n-gram models  inlanguage modeling. \cite{bengio2003neural} have shown that natural language processing can be mapped to a higher order dimension to represent more powerful features for various language modeling tasks. These embeddings have proven incredibly powerful on a variety of different natural language processing tasks [citations needed].
+
+In this paper we show that a deep recurrent neural network (DQN) with a long short term memory (LSTM) is able to successfully learn an extractive summary policy by encoding the action, state, and reward into our DQN-LSTM similar to that of  \cite{hausknecht2015deep}. We show that on a variety of different metrics, our specification is able to reach state-of-the-art performance.
+
+\section{Related Work}
 
 \section{Extractive Streaming Summarization}
 
@@ -235,17 +241,9 @@ I will insert something here\footnote{ \url{https://github.com/franciscojavierar
 \center
 \begin{tabular}{ l | c | c  }
 	\hline
-	Task  & Status  & Person\\ \hline
-  	Read DQN Paper \cite{MnihKSGAWR13}  & Complete  & Francisco \\
-	Read Asynchronous RL Paper \cite{DBLP:journals/corr/MnihBMGLHSK16} & Briefed  & Francisco \\
-	Read  Regularization Paper \cite{chen2012marginalized} & Complete  & Francisco \\
-	Read  Disaster Summarization Paper \cite{kedzie2015predicting} & Complete  & Francisco \\
-	Read  Sequential Decision Making Paper \cite{kedzie2016real} & Complete  & Francisco \\
-	Install Torch & Complete  & Francisco \\
-	Small simulation of MLP in Torch & Complete  & Francisco \\
-	Small simulation of DQN in Torch & Incomplete  & Francisco \\
-	Download data & Incomplete  & Francisco \\
-	Explore data & In-Progress  & Francisco \\
+	Metric  & Model  & Performance\\ \hline
+  	ROUGUE-NF1 & DQN-LSTM  & X \\
+	SOMETHING ELSE & DQN-BOW  & X \\
 	\hline
 \end{tabular}
 

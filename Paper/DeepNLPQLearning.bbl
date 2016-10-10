@@ -1,4 +1,9 @@
-\begin{thebibliography}{1}
+\begin{thebibliography}{10}
+
+\bibitem{bengio2003neural}
+Yoshua Bengio, R{\'e}jean Ducharme, Pascal Vincent, and Christian Jauvin.
+\newblock A neural probabilistic language model.
+\newblock {\em journal of machine learning research}, 3(Feb):1137--1155, 2003.
 
 \bibitem{chen2012marginalized}
 Minmin Chen, Zhixiang Xu, Kilian Weinberger, and Fei Sha.
@@ -10,6 +15,11 @@ Qi~Guo, Fernando Diaz, and Elad Yom-Tov.
 \newblock Updating users about time critical events.
 \newblock In {\em European Conference on Information Retrieval}, pages
   483--494. Springer, 2013.
+
+\bibitem{hausknecht2015deep}
+Matthew Hausknecht and Peter Stone.
+\newblock Deep recurrent q-learning for partially observable mdps.
+\newblock {\em arXiv preprint arXiv:1507.06527}, 2015.
 
 \bibitem{kedzieextractive}
 Chris Kedzie.
