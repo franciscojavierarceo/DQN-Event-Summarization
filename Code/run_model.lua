@@ -25,7 +25,7 @@ cmd:text()
 --- this retrieves the commands and stores them in opt.variable (e.g., opt.model)
 local opt = cmd:parse(arg or {})
 
-print(usecuda)
+print(opt.usecuda)
 
 --- Loading utility script
 dofile("utils.lua")

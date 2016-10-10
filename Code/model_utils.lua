@@ -2,7 +2,8 @@ function policy(nnpreds, epsilon, N)
     local pred = {}
     if torch.rand(1)[1] <= epsilon then  -- Epsilon greedy strategy
         for i=1, N do
-            pred[i] = (torch.rand(1)[1] > 0.5 ) and 1 or 0
+            -- pred[i] = 0
+            pred[i] = (torch.rand(1)[1] > 0.75 ) and 1 or 0
         end
     else 
         --- This is the action choice 1 select, 0 skip
@@ -92,11 +93,6 @@ function build_model(model, vocab_size, embed_dim, outputSize, use_cuda)
     end
 end
 
--- out = iterateModel( opt.batch_size, opt.nepochs, queries[3], input_file, 
---                     sent_file, batch_model, crit, opt.epsilon, delta, 
---                     maxseqlen, opt.base_explore_rate, opt.print_every,  nuggets, 
---                     opt.learning_rate, opt.K_tokens, opt.K_sentences, opt.usecuda)
-
 function iterateModel(batch_size, nepochs, query, input_file, 
                     sent_file, model, crit, epsilon, delta, mxl,
                     base_explore_rate, print_every, nuggets, 
@@ -119,7 +115,8 @@ function iterateModel(batch_size, nepochs, query, input_file,
 
     print_string = string.format(
         "training model with learning rate = %.3f, # of Tokens = %i, and minibatch size = %i...",
-                learning_rate, K_tokens, batch_size)
+                learning_rate, K_tokens, batch_size
+        )
     print(print_string)
 
     for epoch=0, nepochs, 1 do
@@ -240,7 +237,7 @@ end
 function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs, 
                     model, crit, embed_dim, epsilon, delta, 
                     base_explore_rate, print_every,
-                    learning_rate, K, K_tokens, use_cuda)
+                    learning_rate, K_sentences, K_tokens, use_cuda)
     if use_cuda then
       Tensor = torch.CudaTensor
       LongTensor = torch.CudaLongTensor
@@ -333,10 +330,11 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
                 local qrep = repeatQuery(qs2[1], #xs)
                 -- Find the optimal actions / predictions
                 --- Update the summary every mini-batch
-                local sumry_list = buildKSummary(action_list, ss_list, K)
-                -- local sumry_list = buildPredSummary2(action_list, ss_list, K)
+                local sumry_list = buildPredSummary2(action_list, xout, K_sentences)
+                -- local sumry_list = buildKSummary(action_list, ss_list, K)
+                local sumry_ss = padZeros(sumry_list, K_sentences * K_tokens)
                 --- Rebuilding entire prediction each time
-                local sumry_ss = geti_n(sumry_list, nstart, nend)
+                -- local sumry_ss = geti_n(sumry_list, nstart, nend)
 
                 local summary = LongTensor(sumry_ss):t()
                 local sentences = LongTensor(xs):t()
@@ -365,12 +363,17 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
                 -- Now we evaluate our action through the critic/Oracle
                 for i=1, #xs do
                     --- Calculating rouge scores; Call get_i_n() to cumulatively compute rouge
-                    rscores[i] = rougeRecall(buildPredSummary(geti_n(preds, 1, i), 
-                                             geti_n(xout, 1, i)), nuggets, K) - r_t1
-                    pscores[i] = rougePrecision(buildPredSummary(geti_n(preds, 1, i), 
-                                             geti_n(xout, 1, i)), nuggets, K) - p_t1
-                    fscores[i] = rougeF1(buildPredSummary(geti_n(preds, 1, i), 
-                                             geti_n(xout, 1, i)), nuggets, K) - f_t1
+                    local curr_summary = buildPredSummary2(geti_n(preds, 1, i), 
+                                                       geti_n(xout, 1 , i), K_sentences)
+                    rscores[i] = rougeRecall(curr_summary, nuggets, K_sentences) - r_t1
+                    pscores[i] = rougePrecision(curr_summary, nuggets, K_sentences) - p_t1
+                    fscores[i] = rougeF1(curr_summary, nuggets, K_sentences) - f_t1
+                    -- rscores[i] = rougeRecall(buildPredSummary(geti_n(preds, 1, i), 
+                    --                          geti_n(xout, 1, i)), nuggets, K) - r_t1
+                    -- pscores[i] = rougePrecision(buildPredSummary(geti_n(preds, 1, i), 
+                    --                          geti_n(xout, 1, i)), nuggets, K) - p_t1
+                    -- fscores[i] = rougeF1(buildPredSummary(geti_n(preds, 1, i), 
+                    --                          geti_n(xout, 1, i)), nuggets, K) - f_t1
                     r_t1, p_t1, f_t1 = rscores[i], pscores[i], fscores[i]
                 end
 
@@ -392,10 +395,18 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
                 action_list = updateTable(action_list, preds, nstart)
 
                 --- Calculating total rouge, without delta
-                predsummarytotal = buildPredSummary(action_list, xs, K)
-                rscore = rougeRecall(predsummarytotal, nuggets, K)
-                pscore = rougePrecision(predsummarytotal, nuggets, K)
-                fscore = rougeF1(predsummarytotal, nuggets, K)
+                predsummarytotal = buildPredSummary2(action_list, xs, K_sentences)
+                -- predsummarytotal = buildPredSummary(action_list, xs, K)
+
+                --- Calculating last one to see actual last rouge, without delta
+                rscore = rougeRecall(predsummarytotal, nuggets, K_sentences)
+                pscore = rougePrecision(predsummarytotal, nuggets, K_sentences)
+                fscore = rougeF1(predsummarytotal, nuggets, K_sentences)
+
+                -- predsummarytotal = buildPredSummary(action_list, xs, K)
+                -- rscore = rougeRecall(predsummarytotal, nuggets, K)
+                -- pscore = rougePrecision(predsummarytotal, nuggets, K)
+                -- fscore = rougeF1(predsummarytotal, nuggets, K)
 
                 if (epoch % print_every)==0 then
                     perf_string = string.format(
@@ -405,9 +416,11 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
                     print(perf_string)
                 end
             end
-            epsilon = epsilon - delta           --- Decreasing the epsilon greedy strategy
-            if epsilon <= 0 then                --- and leaving a random exploration rate
+
+            if epsilon <= base_explore_rate then                --- and leaving a random exploration rate
                 epsilon = base_explore_rate
+            else 
+                epsilon = epsilon - delta           --- Decreasing the epsilon greedy strategy
             end
             summary_query_list[query_id] = ss_list 
             action_query_list[query_id] = action_list

@@ -1,514 +1,514 @@
 ...Utils file loaded	
 ...running on GPU	
-training model with learning rate = 0.010, K = 200, and minibatch size = 200...	
+training model with learning rate = 0.010, K = 10, and minibatch size = 200...	
 Running LSTM model	
-Epoch 0, epsilon = 1.000, minibatch 1/5, sum(y)/len(y) = 103/199, {Recall = 0.526291, Precision = 0.474397, F1 = 0.498998}	
-Epoch 0, epsilon = 1.000, minibatch 2/5, sum(y)/len(y) = 101/200, {Recall = 0.534742, Precision = 0.411191, F1 = 0.464898}	
-Epoch 0, epsilon = 1.000, minibatch 3/5, sum(y)/len(y) = 106/200, {Recall = 0.616901, Precision = 0.413989, F1 = 0.495475}	
-Epoch 0, epsilon = 1.000, minibatch 4/5, sum(y)/len(y) = 88/200, {Recall = 0.609390, Precision = 0.480385, F1 = 0.537252}	
-Epoch 0, epsilon = 1.000, minibatch 5/5, sum(y)/len(y) = 111/200, {Recall = 0.606573, Precision = 0.511683, F1 = 0.555102}	
-Epoch 0, epsilon = 0.920, minibatch 1/5, sum(y)/len(y) = 96/199, {Recall = 0.500000, Precision = 0.102523, F1 = 0.170156}	
-Epoch 0, epsilon = 0.920, minibatch 2/5, sum(y)/len(y) = 112/200, {Recall = 0.523560, Precision = 0.115274, F1 = 0.188947}	
-Epoch 0, epsilon = 0.920, minibatch 3/5, sum(y)/len(y) = 91/200, {Recall = 0.502618, Precision = 0.114150, F1 = 0.186047}	
-Epoch 0, epsilon = 0.920, minibatch 4/5, sum(y)/len(y) = 98/200, {Recall = 0.526178, Precision = 0.095897, F1 = 0.162228}	
-Epoch 0, epsilon = 0.920, minibatch 5/5, sum(y)/len(y) = 95/200, {Recall = 0.583770, Precision = 0.104793, F1 = 0.177689}	
-Epoch 1, epsilon = 0.840, minibatch 1/5, sum(y)/len(y) = 92/199, {Recall = 0.508920, Precision = 0.498391, F1 = 0.503600}	
-Epoch 1, epsilon = 0.840, minibatch 2/5, sum(y)/len(y) = 110/200, {Recall = 0.477465, Precision = 0.450399, F1 = 0.463537}	
-Epoch 1, epsilon = 0.840, minibatch 3/5, sum(y)/len(y) = 103/200, {Recall = 0.577934, Precision = 0.470926, F1 = 0.518971}	
-Epoch 1, epsilon = 0.840, minibatch 4/5, sum(y)/len(y) = 103/200, {Recall = 0.530986, Precision = 0.521438, F1 = 0.526169}	
-Epoch 1, epsilon = 0.840, minibatch 5/5, sum(y)/len(y) = 102/200, {Recall = 0.565258, Precision = 0.539910, F1 = 0.552294}	
-Epoch 1, epsilon = 0.760, minibatch 1/5, sum(y)/len(y) = 83/199, {Recall = 0.528796, Precision = 0.108137, F1 = 0.179556}	
-Epoch 1, epsilon = 0.760, minibatch 2/5, sum(y)/len(y) = 200/200, {Recall = 0.526178, Precision = 0.118514, F1 = 0.193455}	
-Epoch 1, epsilon = 0.760, minibatch 3/5, sum(y)/len(y) = 99/200, {Recall = 0.500000, Precision = 0.126574, F1 = 0.202010}	
-Epoch 1, epsilon = 0.760, minibatch 4/5, sum(y)/len(y) = 108/200, {Recall = 0.526178, Precision = 0.111234, F1 = 0.183646}	
-Epoch 1, epsilon = 0.760, minibatch 5/5, sum(y)/len(y) = 95/200, {Recall = 0.547120, Precision = 0.107566, F1 = 0.179785}	
-Epoch 2, epsilon = 0.680, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.676056, Precision = 0.340909, F1 = 0.453258}	
-Epoch 2, epsilon = 0.680, minibatch 2/5, sum(y)/len(y) = 94/200, {Recall = 0.679343, Precision = 0.298782, F1 = 0.415029}	
-Epoch 2, epsilon = 0.680, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.739906, Precision = 0.284682, F1 = 0.411166}	
-Epoch 2, epsilon = 0.680, minibatch 4/5, sum(y)/len(y) = 94/200, {Recall = 0.726291, Precision = 0.304708, F1 = 0.429305}	
-Epoch 2, epsilon = 0.680, minibatch 5/5, sum(y)/len(y) = 200/200, {Recall = 0.733803, Precision = 0.341415, F1 = 0.466011}	
-Epoch 2, epsilon = 0.600, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.628272, Precision = 0.060438, F1 = 0.110269}	
-Epoch 2, epsilon = 0.600, minibatch 2/5, sum(y)/len(y) = 200/200, {Recall = 0.649215, Precision = 0.069820, F1 = 0.126080}	
-Epoch 2, epsilon = 0.600, minibatch 3/5, sum(y)/len(y) = 110/200, {Recall = 0.586387, Precision = 0.064796, F1 = 0.116697}	
-Epoch 2, epsilon = 0.600, minibatch 4/5, sum(y)/len(y) = 104/200, {Recall = 0.641361, Precision = 0.059322, F1 = 0.108599}	
-Epoch 2, epsilon = 0.600, minibatch 5/5, sum(y)/len(y) = 99/200, {Recall = 0.701571, Precision = 0.061076, F1 = 0.112369}	
-Epoch 3, epsilon = 0.520, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.676056, Precision = 0.340909, F1 = 0.453258}	
-Epoch 3, epsilon = 0.520, minibatch 2/5, sum(y)/len(y) = 200/200, {Recall = 0.679343, Precision = 0.298782, F1 = 0.415029}	
-Epoch 3, epsilon = 0.520, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.739906, Precision = 0.284682, F1 = 0.411166}	
-Epoch 3, epsilon = 0.520, minibatch 4/5, sum(y)/len(y) = 94/200, {Recall = 0.726291, Precision = 0.304708, F1 = 0.429305}	
-Epoch 3, epsilon = 0.520, minibatch 5/5, sum(y)/len(y) = 102/200, {Recall = 0.733803, Precision = 0.341415, F1 = 0.466011}	
-Epoch 3, epsilon = 0.440, minibatch 1/5, sum(y)/len(y) = 107/199, {Recall = 0.534031, Precision = 0.094096, F1 = 0.160000}	
-Epoch 3, epsilon = 0.440, minibatch 2/5, sum(y)/len(y) = 103/200, {Recall = 0.547120, Precision = 0.098168, F1 = 0.166468}	
-Epoch 3, epsilon = 0.440, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.515707, Precision = 0.101181, F1 = 0.169171}	
-Epoch 3, epsilon = 0.440, minibatch 4/5, sum(y)/len(y) = 98/200, {Recall = 0.541885, Precision = 0.093878, F1 = 0.160031}	
-Epoch 3, epsilon = 0.440, minibatch 5/5, sum(y)/len(y) = 100/200, {Recall = 0.604712, Precision = 0.088949, F1 = 0.155086}	
-Epoch 4, epsilon = 0.360, minibatch 1/5, sum(y)/len(y) = 108/199, {Recall = 0.507981, Precision = 0.493838, F1 = 0.500810}	
-Epoch 4, epsilon = 0.360, minibatch 2/5, sum(y)/len(y) = 100/200, {Recall = 0.533333, Precision = 0.448126, F1 = 0.487031}	
-Epoch 4, epsilon = 0.360, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.646009, Precision = 0.433933, F1 = 0.519147}	
-Epoch 4, epsilon = 0.360, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.632394, Precision = 0.446618, F1 = 0.523513}	
-Epoch 4, epsilon = 0.360, minibatch 5/5, sum(y)/len(y) = 200/200, {Recall = 0.621127, Precision = 0.490545, F1 = 0.548167}	
-Epoch 4, epsilon = 0.280, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.628272, Precision = 0.060438, F1 = 0.110269}	
-Epoch 4, epsilon = 0.280, minibatch 2/5, sum(y)/len(y) = 200/200, {Recall = 0.649215, Precision = 0.069820, F1 = 0.126080}	
-Epoch 4, epsilon = 0.280, minibatch 3/5, sum(y)/len(y) = 96/200, {Recall = 0.586387, Precision = 0.064796, F1 = 0.116697}	
-Epoch 4, epsilon = 0.280, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.641361, Precision = 0.059322, F1 = 0.108599}	
-Epoch 4, epsilon = 0.280, minibatch 5/5, sum(y)/len(y) = 200/200, {Recall = 0.701571, Precision = 0.061076, F1 = 0.112369}	
-Epoch 5, epsilon = 0.200, minibatch 1/5, sum(y)/len(y) = 81/199, {Recall = 0.431455, Precision = 0.498103, F1 = 0.462390}	
-Epoch 5, epsilon = 0.200, minibatch 2/5, sum(y)/len(y) = 200/200, {Recall = 0.467136, Precision = 0.453923, F1 = 0.460435}	
-Epoch 5, epsilon = 0.200, minibatch 3/5, sum(y)/len(y) = 97/200, {Recall = 0.571362, Precision = 0.466284, F1 = 0.513502}	
-Epoch 5, epsilon = 0.200, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.516901, Precision = 0.530091, F1 = 0.523413}	
-Epoch 5, epsilon = 0.200, minibatch 5/5, sum(y)/len(y) = 200/200, {Recall = 0.521596, Precision = 0.539582, F1 = 0.530437}	
-Epoch 5, epsilon = 0.120, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.628272, Precision = 0.060438, F1 = 0.110269}	
-Epoch 5, epsilon = 0.120, minibatch 2/5, sum(y)/len(y) = 200/200, {Recall = 0.649215, Precision = 0.069820, F1 = 0.126080}	
-Epoch 5, epsilon = 0.120, minibatch 3/5, sum(y)/len(y) = 98/200, {Recall = 0.586387, Precision = 0.064796, F1 = 0.116697}	
-Epoch 5, epsilon = 0.120, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.641361, Precision = 0.059322, F1 = 0.108599}	
-Epoch 5, epsilon = 0.120, minibatch 5/5, sum(y)/len(y) = 200/200, {Recall = 0.701571, Precision = 0.061076, F1 = 0.112369}	
-Epoch 6, epsilon = 0.040, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.676056, Precision = 0.340909, F1 = 0.453258}	
-Epoch 6, epsilon = 0.040, minibatch 2/5, sum(y)/len(y) = 200/200, {Recall = 0.679343, Precision = 0.298782, F1 = 0.415029}	
-Epoch 6, epsilon = 0.040, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.739906, Precision = 0.284682, F1 = 0.411166}	
-Epoch 6, epsilon = 0.040, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.726291, Precision = 0.304708, F1 = 0.429305}	
-Epoch 6, epsilon = 0.040, minibatch 5/5, sum(y)/len(y) = 200/200, {Recall = 0.733803, Precision = 0.341415, F1 = 0.466011}	
-Epoch 6, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.628272, Precision = 0.060438, F1 = 0.110269}	
-Epoch 6, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 99/200, {Recall = 0.649215, Precision = 0.069820, F1 = 0.126080}	
-Epoch 6, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.586387, Precision = 0.064796, F1 = 0.116697}	
-Epoch 6, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.641361, Precision = 0.059322, F1 = 0.108599}	
-Epoch 6, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 105/200, {Recall = 0.701571, Precision = 0.061076, F1 = 0.112369}	
-Epoch 7, epsilon = 0.170, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.676056, Precision = 0.340909, F1 = 0.453258}	
-Epoch 7, epsilon = 0.170, minibatch 2/5, sum(y)/len(y) = 200/200, {Recall = 0.679343, Precision = 0.298782, F1 = 0.415029}	
-Epoch 7, epsilon = 0.170, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.739906, Precision = 0.284682, F1 = 0.411166}	
-Epoch 7, epsilon = 0.170, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.726291, Precision = 0.304708, F1 = 0.429305}	
-Epoch 7, epsilon = 0.170, minibatch 5/5, sum(y)/len(y) = 200/200, {Recall = 0.733803, Precision = 0.341415, F1 = 0.466011}	
-Epoch 7, epsilon = 0.090, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.628272, Precision = 0.060438, F1 = 0.110269}	
-Epoch 7, epsilon = 0.090, minibatch 2/5, sum(y)/len(y) = 200/200, {Recall = 0.649215, Precision = 0.069820, F1 = 0.126080}	
-Epoch 7, epsilon = 0.090, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.586387, Precision = 0.064796, F1 = 0.116697}	
-Epoch 7, epsilon = 0.090, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.641361, Precision = 0.059322, F1 = 0.108599}	
-Epoch 7, epsilon = 0.090, minibatch 5/5, sum(y)/len(y) = 101/200, {Recall = 0.701571, Precision = 0.061076, F1 = 0.112369}	
-Epoch 8, epsilon = 0.010, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.676056, Precision = 0.340909, F1 = 0.453258}	
-Epoch 8, epsilon = 0.010, minibatch 2/5, sum(y)/len(y) = 200/200, {Recall = 0.679343, Precision = 0.298782, F1 = 0.415029}	
-Epoch 8, epsilon = 0.010, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.739906, Precision = 0.284682, F1 = 0.411166}	
-Epoch 8, epsilon = 0.010, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.726291, Precision = 0.304708, F1 = 0.429305}	
-Epoch 8, epsilon = 0.010, minibatch 5/5, sum(y)/len(y) = 200/200, {Recall = 0.733803, Precision = 0.341415, F1 = 0.466011}	
-Epoch 8, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 113/199, {Recall = 0.562827, Precision = 0.095259, F1 = 0.162941}	
-Epoch 8, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 200/200, {Recall = 0.531414, Precision = 0.106116, F1 = 0.176906}	
-Epoch 8, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 97/200, {Recall = 0.534031, Precision = 0.103448, F1 = 0.173322}	
-Epoch 8, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.536649, Precision = 0.081188, F1 = 0.141039}	
-Epoch 8, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 103/200, {Recall = 0.633508, Precision = 0.093944, F1 = 0.163624}	
-Epoch 9, epsilon = 0.170, minibatch 1/5, sum(y)/len(y) = 96/199, {Recall = 0.491549, Precision = 0.490858, F1 = 0.491203}	
-Epoch 9, epsilon = 0.170, minibatch 2/5, sum(y)/len(y) = 200/200, {Recall = 0.536620, Precision = 0.468827, F1 = 0.500438}	
-Epoch 9, epsilon = 0.170, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.569484, Precision = 0.478501, F1 = 0.520043}	
-Epoch 9, epsilon = 0.170, minibatch 4/5, sum(y)/len(y) = 100/200, {Recall = 0.621596, Precision = 0.472351, F1 = 0.536793}	
-Epoch 9, epsilon = 0.170, minibatch 5/5, sum(y)/len(y) = 200/200, {Recall = 0.564789, Precision = 0.531126, F1 = 0.547440}	
-Epoch 9, epsilon = 0.090, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.628272, Precision = 0.060438, F1 = 0.110269}	
-Epoch 9, epsilon = 0.090, minibatch 2/5, sum(y)/len(y) = 200/200, {Recall = 0.649215, Precision = 0.069820, F1 = 0.126080}	
-Epoch 9, epsilon = 0.090, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.586387, Precision = 0.064796, F1 = 0.116697}	
-Epoch 9, epsilon = 0.090, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.641361, Precision = 0.059322, F1 = 0.108599}	
-Epoch 9, epsilon = 0.090, minibatch 5/5, sum(y)/len(y) = 200/200, {Recall = 0.701571, Precision = 0.061076, F1 = 0.112369}	
-Epoch 10, epsilon = 0.010, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.676056, Precision = 0.340909, F1 = 0.453258}	
-Epoch 10, epsilon = 0.010, minibatch 2/5, sum(y)/len(y) = 200/200, {Recall = 0.679343, Precision = 0.298782, F1 = 0.415029}	
-Epoch 10, epsilon = 0.010, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.739906, Precision = 0.284682, F1 = 0.411166}	
-Epoch 10, epsilon = 0.010, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.726291, Precision = 0.304708, F1 = 0.429305}	
-Epoch 10, epsilon = 0.010, minibatch 5/5, sum(y)/len(y) = 200/200, {Recall = 0.733803, Precision = 0.341415, F1 = 0.466011}	
-Epoch 10, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.628272, Precision = 0.060438, F1 = 0.110269}	
-Epoch 10, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 81/200, {Recall = 0.649215, Precision = 0.069820, F1 = 0.126080}	
-Epoch 10, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.586387, Precision = 0.064796, F1 = 0.116697}	
-Epoch 10, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.641361, Precision = 0.059322, F1 = 0.108599}	
-Epoch 10, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 200/200, {Recall = 0.701571, Precision = 0.061076, F1 = 0.112369}	
-Epoch 11, epsilon = 0.170, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.676056, Precision = 0.340909, F1 = 0.453258}	
-Epoch 11, epsilon = 0.170, minibatch 2/5, sum(y)/len(y) = 112/200, {Recall = 0.679343, Precision = 0.298782, F1 = 0.415029}	
-Epoch 11, epsilon = 0.170, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.739906, Precision = 0.284682, F1 = 0.411166}	
-Epoch 11, epsilon = 0.170, minibatch 4/5, sum(y)/len(y) = 105/200, {Recall = 0.726291, Precision = 0.304708, F1 = 0.429305}	
-Epoch 11, epsilon = 0.170, minibatch 5/5, sum(y)/len(y) = 110/200, {Recall = 0.733803, Precision = 0.341415, F1 = 0.466011}	
-Epoch 11, epsilon = 0.090, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.628272, Precision = 0.060438, F1 = 0.110269}	
-Epoch 11, epsilon = 0.090, minibatch 2/5, sum(y)/len(y) = 200/200, {Recall = 0.649215, Precision = 0.069820, F1 = 0.126080}	
-Epoch 11, epsilon = 0.090, minibatch 3/5, sum(y)/len(y) = 96/200, {Recall = 0.586387, Precision = 0.064796, F1 = 0.116697}	
-Epoch 11, epsilon = 0.090, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.641361, Precision = 0.059322, F1 = 0.108599}	
-Epoch 11, epsilon = 0.090, minibatch 5/5, sum(y)/len(y) = 200/200, {Recall = 0.701571, Precision = 0.061076, F1 = 0.112369}	
-Epoch 12, epsilon = 0.010, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.676056, Precision = 0.340909, F1 = 0.453258}	
-Epoch 12, epsilon = 0.010, minibatch 2/5, sum(y)/len(y) = 200/200, {Recall = 0.679343, Precision = 0.298782, F1 = 0.415029}	
-Epoch 12, epsilon = 0.010, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.739906, Precision = 0.284682, F1 = 0.411166}	
-Epoch 12, epsilon = 0.010, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.726291, Precision = 0.304708, F1 = 0.429305}	
-Epoch 12, epsilon = 0.010, minibatch 5/5, sum(y)/len(y) = 200/200, {Recall = 0.733803, Precision = 0.341415, F1 = 0.466011}	
-Epoch 12, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 100/199, {Recall = 0.520942, Precision = 0.097311, F1 = 0.163988}	
-Epoch 12, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 200/200, {Recall = 0.513089, Precision = 0.100668, F1 = 0.168313}	
-Epoch 12, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.507853, Precision = 0.101998, F1 = 0.169877}	
-Epoch 12, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.534031, Precision = 0.104455, F1 = 0.174732}	
-Epoch 12, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 200/200, {Recall = 0.625654, Precision = 0.095868, F1 = 0.166261}	
-Epoch 13, epsilon = 0.170, minibatch 1/5, sum(y)/len(y) = 105/199, {Recall = 0.550235, Precision = 0.485904, F1 = 0.516072}	
-Epoch 13, epsilon = 0.170, minibatch 2/5, sum(y)/len(y) = 200/200, {Recall = 0.560094, Precision = 0.439249, F1 = 0.492365}	
-Epoch 13, epsilon = 0.170, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.628638, Precision = 0.461406, F1 = 0.532194}	
-Epoch 13, epsilon = 0.170, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.616901, Precision = 0.483266, F1 = 0.541967}	
-Epoch 13, epsilon = 0.170, minibatch 5/5, sum(y)/len(y) = 200/200, {Recall = 0.610798, Precision = 0.521652, F1 = 0.562716}	
-Epoch 13, epsilon = 0.090, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.628272, Precision = 0.060438, F1 = 0.110269}	
-Epoch 13, epsilon = 0.090, minibatch 2/5, sum(y)/len(y) = 200/200, {Recall = 0.649215, Precision = 0.069820, F1 = 0.126080}	
-Epoch 13, epsilon = 0.090, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.586387, Precision = 0.064796, F1 = 0.116697}	
-Epoch 13, epsilon = 0.090, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.641361, Precision = 0.059322, F1 = 0.108599}	
-Epoch 13, epsilon = 0.090, minibatch 5/5, sum(y)/len(y) = 200/200, {Recall = 0.701571, Precision = 0.061076, F1 = 0.112369}	
-Epoch 14, epsilon = 0.010, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.676056, Precision = 0.340909, F1 = 0.453258}	
-Epoch 14, epsilon = 0.010, minibatch 2/5, sum(y)/len(y) = 200/200, {Recall = 0.679343, Precision = 0.298782, F1 = 0.415029}	
-Epoch 14, epsilon = 0.010, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.739906, Precision = 0.284682, F1 = 0.411166}	
-Epoch 14, epsilon = 0.010, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.726291, Precision = 0.304708, F1 = 0.429305}	
-Epoch 14, epsilon = 0.010, minibatch 5/5, sum(y)/len(y) = 200/200, {Recall = 0.733803, Precision = 0.341415, F1 = 0.466011}	
-Epoch 14, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.628272, Precision = 0.060438, F1 = 0.110269}	
-Epoch 14, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 118/200, {Recall = 0.649215, Precision = 0.069820, F1 = 0.126080}	
-Epoch 14, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.586387, Precision = 0.064796, F1 = 0.116697}	
-Epoch 14, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.641361, Precision = 0.059322, F1 = 0.108599}	
-Epoch 14, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 200/200, {Recall = 0.701571, Precision = 0.061076, F1 = 0.112369}	
-Epoch 15, epsilon = 0.170, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.676056, Precision = 0.340909, F1 = 0.453258}	
-Epoch 15, epsilon = 0.170, minibatch 2/5, sum(y)/len(y) = 200/200, {Recall = 0.679343, Precision = 0.298782, F1 = 0.415029}	
-Epoch 15, epsilon = 0.170, minibatch 3/5, sum(y)/len(y) = 112/200, {Recall = 0.739906, Precision = 0.284682, F1 = 0.411166}	
-Epoch 15, epsilon = 0.170, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.726291, Precision = 0.304708, F1 = 0.429305}	
-Epoch 15, epsilon = 0.170, minibatch 5/5, sum(y)/len(y) = 200/200, {Recall = 0.733803, Precision = 0.341415, F1 = 0.466011}	
-Epoch 15, epsilon = 0.090, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.628272, Precision = 0.060438, F1 = 0.110269}	
-Epoch 15, epsilon = 0.090, minibatch 2/5, sum(y)/len(y) = 200/200, {Recall = 0.649215, Precision = 0.069820, F1 = 0.126080}	
-Epoch 15, epsilon = 0.090, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.586387, Precision = 0.064796, F1 = 0.116697}	
-Epoch 15, epsilon = 0.090, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.641361, Precision = 0.059322, F1 = 0.108599}	
-Epoch 15, epsilon = 0.090, minibatch 5/5, sum(y)/len(y) = 200/200, {Recall = 0.701571, Precision = 0.061076, F1 = 0.112369}	
-Epoch 16, epsilon = 0.010, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.676056, Precision = 0.340909, F1 = 0.453258}	
-Epoch 16, epsilon = 0.010, minibatch 2/5, sum(y)/len(y) = 200/200, {Recall = 0.679343, Precision = 0.298782, F1 = 0.415029}	
-Epoch 16, epsilon = 0.010, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.739906, Precision = 0.284682, F1 = 0.411166}	
-Epoch 16, epsilon = 0.010, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.726291, Precision = 0.304708, F1 = 0.429305}	
-Epoch 16, epsilon = 0.010, minibatch 5/5, sum(y)/len(y) = 200/200, {Recall = 0.733803, Precision = 0.341415, F1 = 0.466011}	
-Epoch 16, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.628272, Precision = 0.060438, F1 = 0.110269}	
-Epoch 16, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 103/200, {Recall = 0.649215, Precision = 0.069820, F1 = 0.126080}	
-Epoch 16, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.586387, Precision = 0.064796, F1 = 0.116697}	
-Epoch 16, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.641361, Precision = 0.059322, F1 = 0.108599}	
-Epoch 16, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 117/200, {Recall = 0.701571, Precision = 0.061076, F1 = 0.112369}	
-Epoch 17, epsilon = 0.170, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.676056, Precision = 0.340909, F1 = 0.453258}	
-Epoch 17, epsilon = 0.170, minibatch 2/5, sum(y)/len(y) = 200/200, {Recall = 0.679343, Precision = 0.298782, F1 = 0.415029}	
-Epoch 17, epsilon = 0.170, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.739906, Precision = 0.284682, F1 = 0.411166}	
-Epoch 17, epsilon = 0.170, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.726291, Precision = 0.304708, F1 = 0.429305}	
-Epoch 17, epsilon = 0.170, minibatch 5/5, sum(y)/len(y) = 200/200, {Recall = 0.733803, Precision = 0.341415, F1 = 0.466011}	
-Epoch 17, epsilon = 0.090, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.628272, Precision = 0.060438, F1 = 0.110269}	
-Epoch 17, epsilon = 0.090, minibatch 2/5, sum(y)/len(y) = 200/200, {Recall = 0.649215, Precision = 0.069820, F1 = 0.126080}	
-Epoch 17, epsilon = 0.090, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.586387, Precision = 0.064796, F1 = 0.116697}	
-Epoch 17, epsilon = 0.090, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.641361, Precision = 0.059322, F1 = 0.108599}	
-Epoch 17, epsilon = 0.090, minibatch 5/5, sum(y)/len(y) = 200/200, {Recall = 0.701571, Precision = 0.061076, F1 = 0.112369}	
-Epoch 18, epsilon = 0.010, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.676056, Precision = 0.340909, F1 = 0.453258}	
-Epoch 18, epsilon = 0.010, minibatch 2/5, sum(y)/len(y) = 200/200, {Recall = 0.679343, Precision = 0.298782, F1 = 0.415029}	
-Epoch 18, epsilon = 0.010, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.739906, Precision = 0.284682, F1 = 0.411166}	
-Epoch 18, epsilon = 0.010, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.726291, Precision = 0.304708, F1 = 0.429305}	
-Epoch 18, epsilon = 0.010, minibatch 5/5, sum(y)/len(y) = 200/200, {Recall = 0.733803, Precision = 0.341415, F1 = 0.466011}	
-Epoch 18, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.628272, Precision = 0.060438, F1 = 0.110269}	
-Epoch 18, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 200/200, {Recall = 0.649215, Precision = 0.069820, F1 = 0.126080}	
-Epoch 18, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.586387, Precision = 0.064796, F1 = 0.116697}	
-Epoch 18, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 95/200, {Recall = 0.641361, Precision = 0.059322, F1 = 0.108599}	
-Epoch 18, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 100/200, {Recall = 0.701571, Precision = 0.061076, F1 = 0.112369}	
-Epoch 19, epsilon = 0.170, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.676056, Precision = 0.340909, F1 = 0.453258}	
-Epoch 19, epsilon = 0.170, minibatch 2/5, sum(y)/len(y) = 200/200, {Recall = 0.679343, Precision = 0.298782, F1 = 0.415029}	
-Epoch 19, epsilon = 0.170, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.739906, Precision = 0.284682, F1 = 0.411166}	
-Epoch 19, epsilon = 0.170, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.726291, Precision = 0.304708, F1 = 0.429305}	
-Epoch 19, epsilon = 0.170, minibatch 5/5, sum(y)/len(y) = 200/200, {Recall = 0.733803, Precision = 0.341415, F1 = 0.466011}	
-Epoch 19, epsilon = 0.090, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.628272, Precision = 0.060438, F1 = 0.110269}	
-Epoch 19, epsilon = 0.090, minibatch 2/5, sum(y)/len(y) = 200/200, {Recall = 0.649215, Precision = 0.069820, F1 = 0.126080}	
-Epoch 19, epsilon = 0.090, minibatch 3/5, sum(y)/len(y) = 103/200, {Recall = 0.586387, Precision = 0.064796, F1 = 0.116697}	
-Epoch 19, epsilon = 0.090, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.641361, Precision = 0.059322, F1 = 0.108599}	
-Epoch 19, epsilon = 0.090, minibatch 5/5, sum(y)/len(y) = 200/200, {Recall = 0.701571, Precision = 0.061076, F1 = 0.112369}	
-Epoch 20, epsilon = 0.010, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.676056, Precision = 0.340909, F1 = 0.453258}	
-Epoch 20, epsilon = 0.010, minibatch 2/5, sum(y)/len(y) = 200/200, {Recall = 0.679343, Precision = 0.298782, F1 = 0.415029}	
-Epoch 20, epsilon = 0.010, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.739906, Precision = 0.284682, F1 = 0.411166}	
-Epoch 20, epsilon = 0.010, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.726291, Precision = 0.304708, F1 = 0.429305}	
-Epoch 20, epsilon = 0.010, minibatch 5/5, sum(y)/len(y) = 200/200, {Recall = 0.733803, Precision = 0.341415, F1 = 0.466011}	
-Epoch 20, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 88/199, {Recall = 0.534031, Precision = 0.103870, F1 = 0.173913}	
-Epoch 20, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 200/200, {Recall = 0.502618, Precision = 0.118445, F1 = 0.191712}	
-Epoch 20, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.510471, Precision = 0.114909, F1 = 0.187590}	
-Epoch 20, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.528796, Precision = 0.112535, F1 = 0.185576}	
-Epoch 20, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 109/200, {Recall = 0.562827, Precision = 0.103664, F1 = 0.175081}	
-Epoch 21, epsilon = 0.170, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.676056, Precision = 0.340909, F1 = 0.453258}	
-Epoch 21, epsilon = 0.170, minibatch 2/5, sum(y)/len(y) = 200/200, {Recall = 0.679343, Precision = 0.298782, F1 = 0.415029}	
-Epoch 21, epsilon = 0.170, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.739906, Precision = 0.284682, F1 = 0.411166}	
-Epoch 21, epsilon = 0.170, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.726291, Precision = 0.304708, F1 = 0.429305}	
-Epoch 21, epsilon = 0.170, minibatch 5/5, sum(y)/len(y) = 99/200, {Recall = 0.733803, Precision = 0.341415, F1 = 0.466011}	
-Epoch 21, epsilon = 0.090, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.628272, Precision = 0.060438, F1 = 0.110269}	
-Epoch 21, epsilon = 0.090, minibatch 2/5, sum(y)/len(y) = 200/200, {Recall = 0.649215, Precision = 0.069820, F1 = 0.126080}	
-Epoch 21, epsilon = 0.090, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.586387, Precision = 0.064796, F1 = 0.116697}	
-Epoch 21, epsilon = 0.090, minibatch 4/5, sum(y)/len(y) = 93/200, {Recall = 0.641361, Precision = 0.059322, F1 = 0.108599}	
-Epoch 21, epsilon = 0.090, minibatch 5/5, sum(y)/len(y) = 200/200, {Recall = 0.701571, Precision = 0.061076, F1 = 0.112369}	
-Epoch 22, epsilon = 0.010, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.676056, Precision = 0.340909, F1 = 0.453258}	
-Epoch 22, epsilon = 0.010, minibatch 2/5, sum(y)/len(y) = 200/200, {Recall = 0.679343, Precision = 0.298782, F1 = 0.415029}	
-Epoch 22, epsilon = 0.010, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.739906, Precision = 0.284682, F1 = 0.411166}	
-Epoch 22, epsilon = 0.010, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.726291, Precision = 0.304708, F1 = 0.429305}	
-Epoch 22, epsilon = 0.010, minibatch 5/5, sum(y)/len(y) = 200/200, {Recall = 0.733803, Precision = 0.341415, F1 = 0.466011}	
-Epoch 22, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.628272, Precision = 0.060438, F1 = 0.110269}	
-Epoch 22, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 200/200, {Recall = 0.649215, Precision = 0.069820, F1 = 0.126080}	
-Epoch 22, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.586387, Precision = 0.064796, F1 = 0.116697}	
-Epoch 22, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.641361, Precision = 0.059322, F1 = 0.108599}	
-Epoch 22, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 200/200, {Recall = 0.701571, Precision = 0.061076, F1 = 0.112369}	
-Epoch 23, epsilon = 0.170, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.676056, Precision = 0.340909, F1 = 0.453258}	
-Epoch 23, epsilon = 0.170, minibatch 2/5, sum(y)/len(y) = 96/200, {Recall = 0.679343, Precision = 0.298782, F1 = 0.415029}	
-Epoch 23, epsilon = 0.170, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.739906, Precision = 0.284682, F1 = 0.411166}	
-Epoch 23, epsilon = 0.170, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.726291, Precision = 0.304708, F1 = 0.429305}	
-Epoch 23, epsilon = 0.170, minibatch 5/5, sum(y)/len(y) = 200/200, {Recall = 0.733803, Precision = 0.341415, F1 = 0.466011}	
-Epoch 23, epsilon = 0.090, minibatch 1/5, sum(y)/len(y) = 105/199, {Recall = 0.534031, Precision = 0.091112, F1 = 0.155666}	
-Epoch 23, epsilon = 0.090, minibatch 2/5, sum(y)/len(y) = 200/200, {Recall = 0.560209, Precision = 0.107214, F1 = 0.179983}	
-Epoch 23, epsilon = 0.090, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.507853, Precision = 0.103799, F1 = 0.172368}	
-Epoch 23, epsilon = 0.090, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.552356, Precision = 0.083963, F1 = 0.145769}	
-Epoch 23, epsilon = 0.090, minibatch 5/5, sum(y)/len(y) = 200/200, {Recall = 0.612565, Precision = 0.091621, F1 = 0.159401}	
-Epoch 24, epsilon = 0.010, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.676056, Precision = 0.340909, F1 = 0.453258}	
-Epoch 24, epsilon = 0.010, minibatch 2/5, sum(y)/len(y) = 200/200, {Recall = 0.679343, Precision = 0.298782, F1 = 0.415029}	
-Epoch 24, epsilon = 0.010, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.739906, Precision = 0.284682, F1 = 0.411166}	
-Epoch 24, epsilon = 0.010, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.726291, Precision = 0.304708, F1 = 0.429305}	
-Epoch 24, epsilon = 0.010, minibatch 5/5, sum(y)/len(y) = 200/200, {Recall = 0.733803, Precision = 0.341415, F1 = 0.466011}	
-Epoch 24, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.628272, Precision = 0.060438, F1 = 0.110269}	
-Epoch 24, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 200/200, {Recall = 0.649215, Precision = 0.069820, F1 = 0.126080}	
-Epoch 24, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.586387, Precision = 0.064796, F1 = 0.116697}	
-Epoch 24, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 97/200, {Recall = 0.641361, Precision = 0.059322, F1 = 0.108599}	
-Epoch 24, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 200/200, {Recall = 0.701571, Precision = 0.061076, F1 = 0.112369}	
-Epoch 25, epsilon = 0.170, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.676056, Precision = 0.340909, F1 = 0.453258}	
-Epoch 25, epsilon = 0.170, minibatch 2/5, sum(y)/len(y) = 200/200, {Recall = 0.679343, Precision = 0.298782, F1 = 0.415029}	
-Epoch 25, epsilon = 0.170, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.739906, Precision = 0.284682, F1 = 0.411166}	
-Epoch 25, epsilon = 0.170, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.726291, Precision = 0.304708, F1 = 0.429305}	
-Epoch 25, epsilon = 0.170, minibatch 5/5, sum(y)/len(y) = 200/200, {Recall = 0.733803, Precision = 0.341415, F1 = 0.466011}	
-Epoch 25, epsilon = 0.090, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.628272, Precision = 0.060438, F1 = 0.110269}	
-Epoch 25, epsilon = 0.090, minibatch 2/5, sum(y)/len(y) = 200/200, {Recall = 0.649215, Precision = 0.069820, F1 = 0.126080}	
-Epoch 25, epsilon = 0.090, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.586387, Precision = 0.064796, F1 = 0.116697}	
-Epoch 25, epsilon = 0.090, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.641361, Precision = 0.059322, F1 = 0.108599}	
-Epoch 25, epsilon = 0.090, minibatch 5/5, sum(y)/len(y) = 200/200, {Recall = 0.701571, Precision = 0.061076, F1 = 0.112369}	
-Epoch 26, epsilon = 0.010, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.676056, Precision = 0.340909, F1 = 0.453258}	
-Epoch 26, epsilon = 0.010, minibatch 2/5, sum(y)/len(y) = 200/200, {Recall = 0.679343, Precision = 0.298782, F1 = 0.415029}	
-Epoch 26, epsilon = 0.010, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.739906, Precision = 0.284682, F1 = 0.411166}	
-Epoch 26, epsilon = 0.010, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.726291, Precision = 0.304708, F1 = 0.429305}	
-Epoch 26, epsilon = 0.010, minibatch 5/5, sum(y)/len(y) = 200/200, {Recall = 0.733803, Precision = 0.341415, F1 = 0.466011}	
-Epoch 26, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.628272, Precision = 0.060438, F1 = 0.110269}	
-Epoch 26, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 200/200, {Recall = 0.649215, Precision = 0.069820, F1 = 0.126080}	
-Epoch 26, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 97/200, {Recall = 0.586387, Precision = 0.064796, F1 = 0.116697}	
-Epoch 26, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.641361, Precision = 0.059322, F1 = 0.108599}	
-Epoch 26, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 200/200, {Recall = 0.701571, Precision = 0.061076, F1 = 0.112369}	
-Epoch 27, epsilon = 0.170, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.676056, Precision = 0.340909, F1 = 0.453258}	
-Epoch 27, epsilon = 0.170, minibatch 2/5, sum(y)/len(y) = 100/200, {Recall = 0.679343, Precision = 0.298782, F1 = 0.415029}	
-Epoch 27, epsilon = 0.170, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.739906, Precision = 0.284682, F1 = 0.411166}	
-Epoch 27, epsilon = 0.170, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.726291, Precision = 0.304708, F1 = 0.429305}	
-Epoch 27, epsilon = 0.170, minibatch 5/5, sum(y)/len(y) = 200/200, {Recall = 0.733803, Precision = 0.341415, F1 = 0.466011}	
-Epoch 27, epsilon = 0.090, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.628272, Precision = 0.060438, F1 = 0.110269}	
-Epoch 27, epsilon = 0.090, minibatch 2/5, sum(y)/len(y) = 200/200, {Recall = 0.649215, Precision = 0.069820, F1 = 0.126080}	
-Epoch 27, epsilon = 0.090, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.586387, Precision = 0.064796, F1 = 0.116697}	
-Epoch 27, epsilon = 0.090, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.641361, Precision = 0.059322, F1 = 0.108599}	
-Epoch 27, epsilon = 0.090, minibatch 5/5, sum(y)/len(y) = 200/200, {Recall = 0.701571, Precision = 0.061076, F1 = 0.112369}	
-Epoch 28, epsilon = 0.010, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.676056, Precision = 0.340909, F1 = 0.453258}	
-Epoch 28, epsilon = 0.010, minibatch 2/5, sum(y)/len(y) = 200/200, {Recall = 0.679343, Precision = 0.298782, F1 = 0.415029}	
-Epoch 28, epsilon = 0.010, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.739906, Precision = 0.284682, F1 = 0.411166}	
-Epoch 28, epsilon = 0.010, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.726291, Precision = 0.304708, F1 = 0.429305}	
-Epoch 28, epsilon = 0.010, minibatch 5/5, sum(y)/len(y) = 200/200, {Recall = 0.733803, Precision = 0.341415, F1 = 0.466011}	
-Epoch 28, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.628272, Precision = 0.060438, F1 = 0.110269}	
-Epoch 28, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 200/200, {Recall = 0.649215, Precision = 0.069820, F1 = 0.126080}	
-Epoch 28, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.586387, Precision = 0.064796, F1 = 0.116697}	
-Epoch 28, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.641361, Precision = 0.059322, F1 = 0.108599}	
-Epoch 28, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 200/200, {Recall = 0.701571, Precision = 0.061076, F1 = 0.112369}	
-Epoch 29, epsilon = 0.170, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.676056, Precision = 0.340909, F1 = 0.453258}	
-Epoch 29, epsilon = 0.170, minibatch 2/5, sum(y)/len(y) = 200/200, {Recall = 0.679343, Precision = 0.298782, F1 = 0.415029}	
-Epoch 29, epsilon = 0.170, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.739906, Precision = 0.284682, F1 = 0.411166}	
-Epoch 29, epsilon = 0.170, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.726291, Precision = 0.304708, F1 = 0.429305}	
-Epoch 29, epsilon = 0.170, minibatch 5/5, sum(y)/len(y) = 200/200, {Recall = 0.733803, Precision = 0.341415, F1 = 0.466011}	
-Epoch 29, epsilon = 0.090, minibatch 1/5, sum(y)/len(y) = 97/199, {Recall = 0.510471, Precision = 0.101089, F1 = 0.168758}	
-Epoch 29, epsilon = 0.090, minibatch 2/5, sum(y)/len(y) = 200/200, {Recall = 0.539267, Precision = 0.108364, F1 = 0.180464}	
-Epoch 29, epsilon = 0.090, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.520942, Precision = 0.112684, F1 = 0.185289}	
-Epoch 29, epsilon = 0.090, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.541885, Precision = 0.101970, F1 = 0.171642}	
-Epoch 29, epsilon = 0.090, minibatch 5/5, sum(y)/len(y) = 200/200, {Recall = 0.562827, Precision = 0.098987, F1 = 0.168363}	
-Epoch 30, epsilon = 0.010, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.676056, Precision = 0.340909, F1 = 0.453258}	
-Epoch 30, epsilon = 0.010, minibatch 2/5, sum(y)/len(y) = 200/200, {Recall = 0.679343, Precision = 0.298782, F1 = 0.415029}	
-Epoch 30, epsilon = 0.010, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.739906, Precision = 0.284682, F1 = 0.411166}	
-Epoch 30, epsilon = 0.010, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.726291, Precision = 0.304708, F1 = 0.429305}	
-Epoch 30, epsilon = 0.010, minibatch 5/5, sum(y)/len(y) = 200/200, {Recall = 0.733803, Precision = 0.341415, F1 = 0.466011}	
-Epoch 30, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.628272, Precision = 0.060438, F1 = 0.110269}	
-Epoch 30, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 200/200, {Recall = 0.649215, Precision = 0.069820, F1 = 0.126080}	
-Epoch 30, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.586387, Precision = 0.064796, F1 = 0.116697}	
-Epoch 30, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.641361, Precision = 0.059322, F1 = 0.108599}	
-Epoch 30, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 200/200, {Recall = 0.701571, Precision = 0.061076, F1 = 0.112369}	
-Epoch 31, epsilon = 0.170, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.676056, Precision = 0.340909, F1 = 0.453258}	
-Epoch 31, epsilon = 0.170, minibatch 2/5, sum(y)/len(y) = 200/200, {Recall = 0.679343, Precision = 0.298782, F1 = 0.415029}	
-Epoch 31, epsilon = 0.170, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.739906, Precision = 0.284682, F1 = 0.411166}	
-Epoch 31, epsilon = 0.170, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.726291, Precision = 0.304708, F1 = 0.429305}	
-Epoch 31, epsilon = 0.170, minibatch 5/5, sum(y)/len(y) = 94/200, {Recall = 0.733803, Precision = 0.341415, F1 = 0.466011}	
-Epoch 31, epsilon = 0.090, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.628272, Precision = 0.060438, F1 = 0.110269}	
-Epoch 31, epsilon = 0.090, minibatch 2/5, sum(y)/len(y) = 200/200, {Recall = 0.649215, Precision = 0.069820, F1 = 0.126080}	
-Epoch 31, epsilon = 0.090, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.586387, Precision = 0.064796, F1 = 0.116697}	
-Epoch 31, epsilon = 0.090, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.641361, Precision = 0.059322, F1 = 0.108599}	
-Epoch 31, epsilon = 0.090, minibatch 5/5, sum(y)/len(y) = 104/200, {Recall = 0.701571, Precision = 0.061076, F1 = 0.112369}	
-Epoch 32, epsilon = 0.010, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.676056, Precision = 0.340909, F1 = 0.453258}	
-Epoch 32, epsilon = 0.010, minibatch 2/5, sum(y)/len(y) = 200/200, {Recall = 0.679343, Precision = 0.298782, F1 = 0.415029}	
-Epoch 32, epsilon = 0.010, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.739906, Precision = 0.284682, F1 = 0.411166}	
-Epoch 32, epsilon = 0.010, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.726291, Precision = 0.304708, F1 = 0.429305}	
-Epoch 32, epsilon = 0.010, minibatch 5/5, sum(y)/len(y) = 200/200, {Recall = 0.733803, Precision = 0.341415, F1 = 0.466011}	
-Epoch 32, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.628272, Precision = 0.060438, F1 = 0.110269}	
-Epoch 32, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 200/200, {Recall = 0.649215, Precision = 0.069820, F1 = 0.126080}	
-Epoch 32, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.586387, Precision = 0.064796, F1 = 0.116697}	
-Epoch 32, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 90/200, {Recall = 0.641361, Precision = 0.059322, F1 = 0.108599}	
-Epoch 32, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 92/200, {Recall = 0.701571, Precision = 0.061076, F1 = 0.112369}	
-Epoch 33, epsilon = 0.170, minibatch 1/5, sum(y)/len(y) = 99/199, {Recall = 0.519718, Precision = 0.484888, F1 = 0.501700}	
-Epoch 33, epsilon = 0.170, minibatch 2/5, sum(y)/len(y) = 200/200, {Recall = 0.522535, Precision = 0.449153, F1 = 0.483073}	
-Epoch 33, epsilon = 0.170, minibatch 3/5, sum(y)/len(y) = 89/200, {Recall = 0.596714, Precision = 0.432019, F1 = 0.501183}	
-Epoch 33, epsilon = 0.170, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.607981, Precision = 0.467172, F1 = 0.528356}	
-Epoch 33, epsilon = 0.170, minibatch 5/5, sum(y)/len(y) = 200/200, {Recall = 0.614085, Precision = 0.528912, F1 = 0.568325}	
-Epoch 33, epsilon = 0.090, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.628272, Precision = 0.060438, F1 = 0.110269}	
-Epoch 33, epsilon = 0.090, minibatch 2/5, sum(y)/len(y) = 200/200, {Recall = 0.649215, Precision = 0.069820, F1 = 0.126080}	
-Epoch 33, epsilon = 0.090, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.586387, Precision = 0.064796, F1 = 0.116697}	
-Epoch 33, epsilon = 0.090, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.641361, Precision = 0.059322, F1 = 0.108599}	
-Epoch 33, epsilon = 0.090, minibatch 5/5, sum(y)/len(y) = 200/200, {Recall = 0.701571, Precision = 0.061076, F1 = 0.112369}	
-Epoch 34, epsilon = 0.010, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.676056, Precision = 0.340909, F1 = 0.453258}	
-Epoch 34, epsilon = 0.010, minibatch 2/5, sum(y)/len(y) = 200/200, {Recall = 0.679343, Precision = 0.298782, F1 = 0.415029}	
-Epoch 34, epsilon = 0.010, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.739906, Precision = 0.284682, F1 = 0.411166}	
-Epoch 34, epsilon = 0.010, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.726291, Precision = 0.304708, F1 = 0.429305}	
-Epoch 34, epsilon = 0.010, minibatch 5/5, sum(y)/len(y) = 200/200, {Recall = 0.733803, Precision = 0.341415, F1 = 0.466011}	
-Epoch 34, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.628272, Precision = 0.060438, F1 = 0.110269}	
-Epoch 34, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 103/200, {Recall = 0.649215, Precision = 0.069820, F1 = 0.126080}	
-Epoch 34, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 93/200, {Recall = 0.586387, Precision = 0.064796, F1 = 0.116697}	
-Epoch 34, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.641361, Precision = 0.059322, F1 = 0.108599}	
-Epoch 34, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 200/200, {Recall = 0.701571, Precision = 0.061076, F1 = 0.112369}	
-Epoch 35, epsilon = 0.170, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.676056, Precision = 0.340909, F1 = 0.453258}	
-Epoch 35, epsilon = 0.170, minibatch 2/5, sum(y)/len(y) = 200/200, {Recall = 0.679343, Precision = 0.298782, F1 = 0.415029}	
-Epoch 35, epsilon = 0.170, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.739906, Precision = 0.284682, F1 = 0.411166}	
-Epoch 35, epsilon = 0.170, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.726291, Precision = 0.304708, F1 = 0.429305}	
-Epoch 35, epsilon = 0.170, minibatch 5/5, sum(y)/len(y) = 200/200, {Recall = 0.733803, Precision = 0.341415, F1 = 0.466011}	
-Epoch 35, epsilon = 0.090, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.628272, Precision = 0.060438, F1 = 0.110269}	
-Epoch 35, epsilon = 0.090, minibatch 2/5, sum(y)/len(y) = 106/200, {Recall = 0.649215, Precision = 0.069820, F1 = 0.126080}	
-Epoch 35, epsilon = 0.090, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.586387, Precision = 0.064796, F1 = 0.116697}	
-Epoch 35, epsilon = 0.090, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.641361, Precision = 0.059322, F1 = 0.108599}	
-Epoch 35, epsilon = 0.090, minibatch 5/5, sum(y)/len(y) = 200/200, {Recall = 0.701571, Precision = 0.061076, F1 = 0.112369}	
-Epoch 36, epsilon = 0.010, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.676056, Precision = 0.340909, F1 = 0.453258}	
-Epoch 36, epsilon = 0.010, minibatch 2/5, sum(y)/len(y) = 200/200, {Recall = 0.679343, Precision = 0.298782, F1 = 0.415029}	
-Epoch 36, epsilon = 0.010, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.739906, Precision = 0.284682, F1 = 0.411166}	
-Epoch 36, epsilon = 0.010, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.726291, Precision = 0.304708, F1 = 0.429305}	
-Epoch 36, epsilon = 0.010, minibatch 5/5, sum(y)/len(y) = 200/200, {Recall = 0.733803, Precision = 0.341415, F1 = 0.466011}	
-Epoch 36, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 103/199, {Recall = 0.536649, Precision = 0.093565, F1 = 0.159347}	
-Epoch 36, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 105/200, {Recall = 0.544503, Precision = 0.117914, F1 = 0.193849}	
-Epoch 36, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.513089, Precision = 0.107162, F1 = 0.177295}	
-Epoch 36, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.557592, Precision = 0.102305, F1 = 0.172890}	
-Epoch 36, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 200/200, {Recall = 0.589005, Precision = 0.105932, F1 = 0.179569}	
-Epoch 37, epsilon = 0.170, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.676056, Precision = 0.340909, F1 = 0.453258}	
-Epoch 37, epsilon = 0.170, minibatch 2/5, sum(y)/len(y) = 200/200, {Recall = 0.679343, Precision = 0.298782, F1 = 0.415029}	
-Epoch 37, epsilon = 0.170, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.739906, Precision = 0.284682, F1 = 0.411166}	
-Epoch 37, epsilon = 0.170, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.726291, Precision = 0.304708, F1 = 0.429305}	
-Epoch 37, epsilon = 0.170, minibatch 5/5, sum(y)/len(y) = 200/200, {Recall = 0.733803, Precision = 0.341415, F1 = 0.466011}	
-Epoch 37, epsilon = 0.090, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.628272, Precision = 0.060438, F1 = 0.110269}	
-Epoch 37, epsilon = 0.090, minibatch 2/5, sum(y)/len(y) = 90/200, {Recall = 0.649215, Precision = 0.069820, F1 = 0.126080}	
-Epoch 37, epsilon = 0.090, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.586387, Precision = 0.064796, F1 = 0.116697}	
-Epoch 37, epsilon = 0.090, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.641361, Precision = 0.059322, F1 = 0.108599}	
-Epoch 37, epsilon = 0.090, minibatch 5/5, sum(y)/len(y) = 200/200, {Recall = 0.701571, Precision = 0.061076, F1 = 0.112369}	
-Epoch 38, epsilon = 0.010, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.676056, Precision = 0.340909, F1 = 0.453258}	
-Epoch 38, epsilon = 0.010, minibatch 2/5, sum(y)/len(y) = 200/200, {Recall = 0.679343, Precision = 0.298782, F1 = 0.415029}	
-Epoch 38, epsilon = 0.010, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.739906, Precision = 0.284682, F1 = 0.411166}	
-Epoch 38, epsilon = 0.010, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.726291, Precision = 0.304708, F1 = 0.429305}	
-Epoch 38, epsilon = 0.010, minibatch 5/5, sum(y)/len(y) = 200/200, {Recall = 0.733803, Precision = 0.341415, F1 = 0.466011}	
-Epoch 38, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.628272, Precision = 0.060438, F1 = 0.110269}	
-Epoch 38, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 200/200, {Recall = 0.649215, Precision = 0.069820, F1 = 0.126080}	
-Epoch 38, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.586387, Precision = 0.064796, F1 = 0.116697}	
-Epoch 38, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.641361, Precision = 0.059322, F1 = 0.108599}	
-Epoch 38, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 200/200, {Recall = 0.701571, Precision = 0.061076, F1 = 0.112369}	
-Epoch 39, epsilon = 0.170, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.676056, Precision = 0.340909, F1 = 0.453258}	
-Epoch 39, epsilon = 0.170, minibatch 2/5, sum(y)/len(y) = 200/200, {Recall = 0.679343, Precision = 0.298782, F1 = 0.415029}	
-Epoch 39, epsilon = 0.170, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.739906, Precision = 0.284682, F1 = 0.411166}	
-Epoch 39, epsilon = 0.170, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.726291, Precision = 0.304708, F1 = 0.429305}	
-Epoch 39, epsilon = 0.170, minibatch 5/5, sum(y)/len(y) = 200/200, {Recall = 0.733803, Precision = 0.341415, F1 = 0.466011}	
-Epoch 39, epsilon = 0.090, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.628272, Precision = 0.060438, F1 = 0.110269}	
-Epoch 39, epsilon = 0.090, minibatch 2/5, sum(y)/len(y) = 98/200, {Recall = 0.649215, Precision = 0.069820, F1 = 0.126080}	
-Epoch 39, epsilon = 0.090, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.586387, Precision = 0.064796, F1 = 0.116697}	
-Epoch 39, epsilon = 0.090, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.641361, Precision = 0.059322, F1 = 0.108599}	
-Epoch 39, epsilon = 0.090, minibatch 5/5, sum(y)/len(y) = 200/200, {Recall = 0.701571, Precision = 0.061076, F1 = 0.112369}	
-Epoch 40, epsilon = 0.010, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.676056, Precision = 0.340909, F1 = 0.453258}	
-Epoch 40, epsilon = 0.010, minibatch 2/5, sum(y)/len(y) = 200/200, {Recall = 0.679343, Precision = 0.298782, F1 = 0.415029}	
-Epoch 40, epsilon = 0.010, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.739906, Precision = 0.284682, F1 = 0.411166}	
-Epoch 40, epsilon = 0.010, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.726291, Precision = 0.304708, F1 = 0.429305}	
-Epoch 40, epsilon = 0.010, minibatch 5/5, sum(y)/len(y) = 200/200, {Recall = 0.733803, Precision = 0.341415, F1 = 0.466011}	
-Epoch 40, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.628272, Precision = 0.060438, F1 = 0.110269}	
-Epoch 40, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 87/200, {Recall = 0.649215, Precision = 0.069820, F1 = 0.126080}	
-Epoch 40, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.586387, Precision = 0.064796, F1 = 0.116697}	
-Epoch 40, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.641361, Precision = 0.059322, F1 = 0.108599}	
-Epoch 40, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 200/200, {Recall = 0.701571, Precision = 0.061076, F1 = 0.112369}	
-Epoch 41, epsilon = 0.170, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.676056, Precision = 0.340909, F1 = 0.453258}	
-Epoch 41, epsilon = 0.170, minibatch 2/5, sum(y)/len(y) = 200/200, {Recall = 0.679343, Precision = 0.298782, F1 = 0.415029}	
-Epoch 41, epsilon = 0.170, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.739906, Precision = 0.284682, F1 = 0.411166}	
-Epoch 41, epsilon = 0.170, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.726291, Precision = 0.304708, F1 = 0.429305}	
-Epoch 41, epsilon = 0.170, minibatch 5/5, sum(y)/len(y) = 200/200, {Recall = 0.733803, Precision = 0.341415, F1 = 0.466011}	
-Epoch 41, epsilon = 0.090, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.628272, Precision = 0.060438, F1 = 0.110269}	
-Epoch 41, epsilon = 0.090, minibatch 2/5, sum(y)/len(y) = 200/200, {Recall = 0.649215, Precision = 0.069820, F1 = 0.126080}	
-Epoch 41, epsilon = 0.090, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.586387, Precision = 0.064796, F1 = 0.116697}	
-Epoch 41, epsilon = 0.090, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.641361, Precision = 0.059322, F1 = 0.108599}	
-Epoch 41, epsilon = 0.090, minibatch 5/5, sum(y)/len(y) = 200/200, {Recall = 0.701571, Precision = 0.061076, F1 = 0.112369}	
-Epoch 42, epsilon = 0.010, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.676056, Precision = 0.340909, F1 = 0.453258}	
-Epoch 42, epsilon = 0.010, minibatch 2/5, sum(y)/len(y) = 200/200, {Recall = 0.679343, Precision = 0.298782, F1 = 0.415029}	
-Epoch 42, epsilon = 0.010, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.739906, Precision = 0.284682, F1 = 0.411166}	
-Epoch 42, epsilon = 0.010, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.726291, Precision = 0.304708, F1 = 0.429305}	
-Epoch 42, epsilon = 0.010, minibatch 5/5, sum(y)/len(y) = 200/200, {Recall = 0.733803, Precision = 0.341415, F1 = 0.466011}	
-Epoch 42, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.628272, Precision = 0.060438, F1 = 0.110269}	
-Epoch 42, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 93/200, {Recall = 0.649215, Precision = 0.069820, F1 = 0.126080}	
-Epoch 42, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 100/200, {Recall = 0.586387, Precision = 0.064796, F1 = 0.116697}	
-Epoch 42, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 101/200, {Recall = 0.641361, Precision = 0.059322, F1 = 0.108599}	
-Epoch 42, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 200/200, {Recall = 0.701571, Precision = 0.061076, F1 = 0.112369}	
-Epoch 43, epsilon = 0.170, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.676056, Precision = 0.340909, F1 = 0.453258}	
-Epoch 43, epsilon = 0.170, minibatch 2/5, sum(y)/len(y) = 200/200, {Recall = 0.679343, Precision = 0.298782, F1 = 0.415029}	
-Epoch 43, epsilon = 0.170, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.739906, Precision = 0.284682, F1 = 0.411166}	
-Epoch 43, epsilon = 0.170, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.726291, Precision = 0.304708, F1 = 0.429305}	
-Epoch 43, epsilon = 0.170, minibatch 5/5, sum(y)/len(y) = 200/200, {Recall = 0.733803, Precision = 0.341415, F1 = 0.466011}	
-Epoch 43, epsilon = 0.090, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.628272, Precision = 0.060438, F1 = 0.110269}	
-Epoch 43, epsilon = 0.090, minibatch 2/5, sum(y)/len(y) = 200/200, {Recall = 0.649215, Precision = 0.069820, F1 = 0.126080}	
-Epoch 43, epsilon = 0.090, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.586387, Precision = 0.064796, F1 = 0.116697}	
-Epoch 43, epsilon = 0.090, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.641361, Precision = 0.059322, F1 = 0.108599}	
-Epoch 43, epsilon = 0.090, minibatch 5/5, sum(y)/len(y) = 200/200, {Recall = 0.701571, Precision = 0.061076, F1 = 0.112369}	
-Epoch 44, epsilon = 0.010, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.676056, Precision = 0.340909, F1 = 0.453258}	
-Epoch 44, epsilon = 0.010, minibatch 2/5, sum(y)/len(y) = 200/200, {Recall = 0.679343, Precision = 0.298782, F1 = 0.415029}	
-Epoch 44, epsilon = 0.010, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.739906, Precision = 0.284682, F1 = 0.411166}	
-Epoch 44, epsilon = 0.010, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.726291, Precision = 0.304708, F1 = 0.429305}	
-Epoch 44, epsilon = 0.010, minibatch 5/5, sum(y)/len(y) = 200/200, {Recall = 0.733803, Precision = 0.341415, F1 = 0.466011}	
-Epoch 44, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.628272, Precision = 0.060438, F1 = 0.110269}	
-Epoch 44, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 200/200, {Recall = 0.649215, Precision = 0.069820, F1 = 0.126080}	
-Epoch 44, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.586387, Precision = 0.064796, F1 = 0.116697}	
-Epoch 44, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.641361, Precision = 0.059322, F1 = 0.108599}	
-Epoch 44, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 100/200, {Recall = 0.701571, Precision = 0.061076, F1 = 0.112369}	
-Epoch 45, epsilon = 0.170, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.676056, Precision = 0.340909, F1 = 0.453258}	
-Epoch 45, epsilon = 0.170, minibatch 2/5, sum(y)/len(y) = 200/200, {Recall = 0.679343, Precision = 0.298782, F1 = 0.415029}	
-Epoch 45, epsilon = 0.170, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.739906, Precision = 0.284682, F1 = 0.411166}	
-Epoch 45, epsilon = 0.170, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.726291, Precision = 0.304708, F1 = 0.429305}	
-Epoch 45, epsilon = 0.170, minibatch 5/5, sum(y)/len(y) = 200/200, {Recall = 0.733803, Precision = 0.341415, F1 = 0.466011}	
-Epoch 45, epsilon = 0.090, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.628272, Precision = 0.060438, F1 = 0.110269}	
-Epoch 45, epsilon = 0.090, minibatch 2/5, sum(y)/len(y) = 200/200, {Recall = 0.649215, Precision = 0.069820, F1 = 0.126080}	
-Epoch 45, epsilon = 0.090, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.586387, Precision = 0.064796, F1 = 0.116697}	
-Epoch 45, epsilon = 0.090, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.641361, Precision = 0.059322, F1 = 0.108599}	
-Epoch 45, epsilon = 0.090, minibatch 5/5, sum(y)/len(y) = 200/200, {Recall = 0.701571, Precision = 0.061076, F1 = 0.112369}	
-Epoch 46, epsilon = 0.010, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.676056, Precision = 0.340909, F1 = 0.453258}	
-Epoch 46, epsilon = 0.010, minibatch 2/5, sum(y)/len(y) = 200/200, {Recall = 0.679343, Precision = 0.298782, F1 = 0.415029}	
-Epoch 46, epsilon = 0.010, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.739906, Precision = 0.284682, F1 = 0.411166}	
-Epoch 46, epsilon = 0.010, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.726291, Precision = 0.304708, F1 = 0.429305}	
-Epoch 46, epsilon = 0.010, minibatch 5/5, sum(y)/len(y) = 200/200, {Recall = 0.733803, Precision = 0.341415, F1 = 0.466011}	
-Epoch 46, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.628272, Precision = 0.060438, F1 = 0.110269}	
-Epoch 46, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 200/200, {Recall = 0.649215, Precision = 0.069820, F1 = 0.126080}	
-Epoch 46, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 110/200, {Recall = 0.586387, Precision = 0.064796, F1 = 0.116697}	
-Epoch 46, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.641361, Precision = 0.059322, F1 = 0.108599}	
-Epoch 46, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 200/200, {Recall = 0.701571, Precision = 0.061076, F1 = 0.112369}	
-Epoch 47, epsilon = 0.170, minibatch 1/5, sum(y)/len(y) = 102/199, {Recall = 0.506573, Precision = 0.487573, F1 = 0.496892}	
-Epoch 47, epsilon = 0.170, minibatch 2/5, sum(y)/len(y) = 200/200, {Recall = 0.513146, Precision = 0.424961, F1 = 0.464909}	
-Epoch 47, epsilon = 0.170, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.619249, Precision = 0.455928, F1 = 0.525184}	
-Epoch 47, epsilon = 0.170, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.579812, Precision = 0.501625, F1 = 0.537892}	
-Epoch 47, epsilon = 0.170, minibatch 5/5, sum(y)/len(y) = 200/200, {Recall = 0.584038, Precision = 0.505280, F1 = 0.541812}	
-Epoch 47, epsilon = 0.090, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.628272, Precision = 0.060438, F1 = 0.110269}	
-Epoch 47, epsilon = 0.090, minibatch 2/5, sum(y)/len(y) = 200/200, {Recall = 0.649215, Precision = 0.069820, F1 = 0.126080}	
-Epoch 47, epsilon = 0.090, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.586387, Precision = 0.064796, F1 = 0.116697}	
-Epoch 47, epsilon = 0.090, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.641361, Precision = 0.059322, F1 = 0.108599}	
-Epoch 47, epsilon = 0.090, minibatch 5/5, sum(y)/len(y) = 200/200, {Recall = 0.701571, Precision = 0.061076, F1 = 0.112369}	
-Epoch 48, epsilon = 0.010, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.676056, Precision = 0.340909, F1 = 0.453258}	
-Epoch 48, epsilon = 0.010, minibatch 2/5, sum(y)/len(y) = 200/200, {Recall = 0.679343, Precision = 0.298782, F1 = 0.415029}	
-Epoch 48, epsilon = 0.010, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.739906, Precision = 0.284682, F1 = 0.411166}	
-Epoch 48, epsilon = 0.010, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.726291, Precision = 0.304708, F1 = 0.429305}	
-Epoch 48, epsilon = 0.010, minibatch 5/5, sum(y)/len(y) = 200/200, {Recall = 0.733803, Precision = 0.341415, F1 = 0.466011}	
-Epoch 48, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.628272, Precision = 0.060438, F1 = 0.110269}	
-Epoch 48, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 200/200, {Recall = 0.649215, Precision = 0.069820, F1 = 0.126080}	
-Epoch 48, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.586387, Precision = 0.064796, F1 = 0.116697}	
-Epoch 48, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 95/200, {Recall = 0.641361, Precision = 0.059322, F1 = 0.108599}	
-Epoch 48, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 104/200, {Recall = 0.701571, Precision = 0.061076, F1 = 0.112369}	
-Epoch 49, epsilon = 0.170, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.676056, Precision = 0.340909, F1 = 0.453258}	
-Epoch 49, epsilon = 0.170, minibatch 2/5, sum(y)/len(y) = 89/200, {Recall = 0.679343, Precision = 0.298782, F1 = 0.415029}	
-Epoch 49, epsilon = 0.170, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.739906, Precision = 0.284682, F1 = 0.411166}	
-Epoch 49, epsilon = 0.170, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.726291, Precision = 0.304708, F1 = 0.429305}	
-Epoch 49, epsilon = 0.170, minibatch 5/5, sum(y)/len(y) = 200/200, {Recall = 0.733803, Precision = 0.341415, F1 = 0.466011}	
-Epoch 49, epsilon = 0.090, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.628272, Precision = 0.060438, F1 = 0.110269}	
-Epoch 49, epsilon = 0.090, minibatch 2/5, sum(y)/len(y) = 200/200, {Recall = 0.649215, Precision = 0.069820, F1 = 0.126080}	
-Epoch 49, epsilon = 0.090, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.586387, Precision = 0.064796, F1 = 0.116697}	
-Epoch 49, epsilon = 0.090, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.641361, Precision = 0.059322, F1 = 0.108599}	
-Epoch 49, epsilon = 0.090, minibatch 5/5, sum(y)/len(y) = 200/200, {Recall = 0.701571, Precision = 0.061076, F1 = 0.112369}	
-Epoch 50, epsilon = 0.010, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.676056, Precision = 0.340909, F1 = 0.453258}	
-Epoch 50, epsilon = 0.010, minibatch 2/5, sum(y)/len(y) = 200/200, {Recall = 0.679343, Precision = 0.298782, F1 = 0.415029}	
-Epoch 50, epsilon = 0.010, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.739906, Precision = 0.284682, F1 = 0.411166}	
-Epoch 50, epsilon = 0.010, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.726291, Precision = 0.304708, F1 = 0.429305}	
-Epoch 50, epsilon = 0.010, minibatch 5/5, sum(y)/len(y) = 200/200, {Recall = 0.733803, Precision = 0.341415, F1 = 0.466011}	
-Epoch 50, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 104/199, {Recall = 0.531414, Precision = 0.093938, F1 = 0.159654}	
-Epoch 50, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 200/200, {Recall = 0.541885, Precision = 0.103811, F1 = 0.174242}	
-Epoch 50, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.505236, Precision = 0.105120, F1 = 0.174031}	
-Epoch 50, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.544503, Precision = 0.094203, F1 = 0.160618}	
-Epoch 50, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 200/200, {Recall = 0.589005, Precision = 0.094498, F1 = 0.162866}	
+Epoch 0, query = aurora, epsilon = 1.000, minibatch 1/5, sum(y)/len(y) = 58/199, {Recall = 0.081690, Precision = 0.087834, F1 = 0.084651}	
+Epoch 0, query = aurora, epsilon = 1.000, minibatch 2/5, sum(y)/len(y) = 47/200, {Recall = 0.089202, Precision = 0.095477, F1 = 0.092233}	
+Epoch 0, query = aurora, epsilon = 1.000, minibatch 3/5, sum(y)/len(y) = 49/200, {Recall = 0.181221, Precision = 0.193872, F1 = 0.187333}	
+Epoch 0, query = aurora, epsilon = 1.000, minibatch 4/5, sum(y)/len(y) = 45/200, {Recall = 0.121127, Precision = 0.129583, F1 = 0.125212}	
+Epoch 0, query = aurora, epsilon = 1.000, minibatch 5/5, sum(y)/len(y) = 52/200, {Recall = 0.106573, Precision = 0.114013, F1 = 0.110167}	
+Epoch 0, query = pakistan, epsilon = 0.920, minibatch 1/5, sum(y)/len(y) = 46/199, {Recall = 0.000000, Precision = 0.000000, F1 = 0.000000}	
+Epoch 0, query = pakistan, epsilon = 0.920, minibatch 2/5, sum(y)/len(y) = 50/200, {Recall = 0.000000, Precision = 0.000000, F1 = 0.000000}	
+Epoch 0, query = pakistan, epsilon = 0.920, minibatch 3/5, sum(y)/len(y) = 43/200, {Recall = 0.000000, Precision = 0.000000, F1 = 0.000000}	
+Epoch 0, query = pakistan, epsilon = 0.920, minibatch 4/5, sum(y)/len(y) = 47/200, {Recall = 0.000000, Precision = 0.000000, F1 = 0.000000}	
+Epoch 0, query = pakistan, epsilon = 0.920, minibatch 5/5, sum(y)/len(y) = 47/200, {Recall = 0.000000, Precision = 0.000000, F1 = 0.000000}	
+Epoch 1, query = aurora, epsilon = 0.840, minibatch 1/5, sum(y)/len(y) = 48/199, {Recall = 0.010798, Precision = 0.011735, F1 = 0.011247}	
+Epoch 1, query = aurora, epsilon = 0.840, minibatch 2/5, sum(y)/len(y) = 51/200, {Recall = 0.032864, Precision = 0.035533, F1 = 0.034146}	
+Epoch 1, query = aurora, epsilon = 0.840, minibatch 3/5, sum(y)/len(y) = 47/200, {Recall = 0.085915, Precision = 0.092893, F1 = 0.089268}	
+Epoch 1, query = aurora, epsilon = 0.840, minibatch 4/5, sum(y)/len(y) = 53/200, {Recall = 0.045540, Precision = 0.049239, F1 = 0.047317}	
+Epoch 1, query = aurora, epsilon = 0.840, minibatch 5/5, sum(y)/len(y) = 53/200, {Recall = 0.083099, Precision = 0.089848, F1 = 0.086341}	
+Epoch 1, query = pakistan, epsilon = 0.760, minibatch 1/5, sum(y)/len(y) = 36/199, {Recall = 0.104712, Precision = 0.020192, F1 = 0.033855}	
+Epoch 1, query = pakistan, epsilon = 0.760, minibatch 2/5, sum(y)/len(y) = 200/200, {Recall = 0.028796, Precision = 0.005525, F1 = 0.009271}	
+Epoch 1, query = pakistan, epsilon = 0.760, minibatch 3/5, sum(y)/len(y) = 51/200, {Recall = 0.073298, Precision = 0.014063, F1 = 0.023599}	
+Epoch 1, query = pakistan, epsilon = 0.760, minibatch 4/5, sum(y)/len(y) = 60/200, {Recall = 0.054974, Precision = 0.010547, F1 = 0.017699}	
+Epoch 1, query = pakistan, epsilon = 0.760, minibatch 5/5, sum(y)/len(y) = 42/200, {Recall = 0.007853, Precision = 0.001507, F1 = 0.002528}	
+Epoch 2, query = aurora, epsilon = 0.680, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.081690, Precision = 0.087834, F1 = 0.084651}	
+Epoch 2, query = aurora, epsilon = 0.680, minibatch 2/5, sum(y)/len(y) = 58/200, {Recall = 0.157746, Precision = 0.168844, F1 = 0.163107}	
+Epoch 2, query = aurora, epsilon = 0.680, minibatch 3/5, sum(y)/len(y) = 198/200, {Recall = 0.181221, Precision = 0.193872, F1 = 0.187333}	
+Epoch 2, query = aurora, epsilon = 0.680, minibatch 4/5, sum(y)/len(y) = 44/200, {Recall = 0.121127, Precision = 0.129583, F1 = 0.125212}	
+Epoch 2, query = aurora, epsilon = 0.680, minibatch 5/5, sum(y)/len(y) = 191/200, {Recall = 0.106573, Precision = 0.114013, F1 = 0.110167}	
+Epoch 2, query = pakistan, epsilon = 0.600, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.104712, Precision = 0.020192, F1 = 0.033855}	
+Epoch 2, query = pakistan, epsilon = 0.600, minibatch 2/5, sum(y)/len(y) = 200/200, {Recall = 0.028796, Precision = 0.005525, F1 = 0.009271}	
+Epoch 2, query = pakistan, epsilon = 0.600, minibatch 3/5, sum(y)/len(y) = 55/200, {Recall = 0.073298, Precision = 0.014063, F1 = 0.023599}	
+Epoch 2, query = pakistan, epsilon = 0.600, minibatch 4/5, sum(y)/len(y) = 52/200, {Recall = 0.054974, Precision = 0.010547, F1 = 0.017699}	
+Epoch 2, query = pakistan, epsilon = 0.600, minibatch 5/5, sum(y)/len(y) = 51/200, {Recall = 0.007853, Precision = 0.001507, F1 = 0.002528}	
+Epoch 3, query = aurora, epsilon = 0.520, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.081690, Precision = 0.087834, F1 = 0.084651}	
+Epoch 3, query = aurora, epsilon = 0.520, minibatch 2/5, sum(y)/len(y) = 197/200, {Recall = 0.157746, Precision = 0.168844, F1 = 0.163107}	
+Epoch 3, query = aurora, epsilon = 0.520, minibatch 3/5, sum(y)/len(y) = 198/200, {Recall = 0.181221, Precision = 0.193872, F1 = 0.187333}	
+Epoch 3, query = aurora, epsilon = 0.520, minibatch 4/5, sum(y)/len(y) = 51/200, {Recall = 0.121127, Precision = 0.129583, F1 = 0.125212}	
+Epoch 3, query = aurora, epsilon = 0.520, minibatch 5/5, sum(y)/len(y) = 55/200, {Recall = 0.106573, Precision = 0.114013, F1 = 0.110167}	
+Epoch 3, query = pakistan, epsilon = 0.440, minibatch 1/5, sum(y)/len(y) = 50/199, {Recall = 0.007853, Precision = 0.001521, F1 = 0.002548}	
+Epoch 3, query = pakistan, epsilon = 0.440, minibatch 2/5, sum(y)/len(y) = 54/200, {Recall = 0.091623, Precision = 0.017650, F1 = 0.029598}	
+Epoch 3, query = pakistan, epsilon = 0.440, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.096859, Precision = 0.018659, F1 = 0.031290}	
+Epoch 3, query = pakistan, epsilon = 0.440, minibatch 4/5, sum(y)/len(y) = 41/200, {Recall = 0.070681, Precision = 0.013616, F1 = 0.022833}	
+Epoch 3, query = pakistan, epsilon = 0.440, minibatch 5/5, sum(y)/len(y) = 41/200, {Recall = 0.070681, Precision = 0.013616, F1 = 0.022833}	
+Epoch 4, query = aurora, epsilon = 0.360, minibatch 1/5, sum(y)/len(y) = 55/199, {Recall = 0.050235, Precision = 0.054232, F1 = 0.052157}	
+Epoch 4, query = aurora, epsilon = 0.360, minibatch 2/5, sum(y)/len(y) = 55/200, {Recall = 0.164319, Precision = 0.176500, F1 = 0.170192}	
+Epoch 4, query = aurora, epsilon = 0.360, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.140376, Precision = 0.150782, F1 = 0.145393}	
+Epoch 4, query = aurora, epsilon = 0.360, minibatch 4/5, sum(y)/len(y) = 199/200, {Recall = 0.086854, Precision = 0.093293, F1 = 0.089959}	
+Epoch 4, query = aurora, epsilon = 0.360, minibatch 5/5, sum(y)/len(y) = 200/200, {Recall = 0.175587, Precision = 0.188603, F1 = 0.181862}	
+Epoch 4, query = pakistan, epsilon = 0.280, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.104712, Precision = 0.020192, F1 = 0.033855}	
+Epoch 4, query = pakistan, epsilon = 0.280, minibatch 2/5, sum(y)/len(y) = 200/200, {Recall = 0.028796, Precision = 0.005525, F1 = 0.009271}	
+Epoch 4, query = pakistan, epsilon = 0.280, minibatch 3/5, sum(y)/len(y) = 53/200, {Recall = 0.073298, Precision = 0.014063, F1 = 0.023599}	
+Epoch 4, query = pakistan, epsilon = 0.280, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.054974, Precision = 0.010547, F1 = 0.017699}	
+Epoch 4, query = pakistan, epsilon = 0.280, minibatch 5/5, sum(y)/len(y) = 196/200, {Recall = 0.007853, Precision = 0.001507, F1 = 0.002528}	
+Epoch 5, query = aurora, epsilon = 0.200, minibatch 1/5, sum(y)/len(y) = 38/199, {Recall = 0.081690, Precision = 0.087834, F1 = 0.084651}	
+Epoch 5, query = aurora, epsilon = 0.200, minibatch 2/5, sum(y)/len(y) = 198/200, {Recall = 0.157746, Precision = 0.168844, F1 = 0.163107}	
+Epoch 5, query = aurora, epsilon = 0.200, minibatch 3/5, sum(y)/len(y) = 48/200, {Recall = 0.181221, Precision = 0.193872, F1 = 0.187333}	
+Epoch 5, query = aurora, epsilon = 0.200, minibatch 4/5, sum(y)/len(y) = 199/200, {Recall = 0.121127, Precision = 0.129583, F1 = 0.125212}	
+Epoch 5, query = aurora, epsilon = 0.200, minibatch 5/5, sum(y)/len(y) = 200/200, {Recall = 0.106573, Precision = 0.114013, F1 = 0.110167}	
+Epoch 5, query = pakistan, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.104712, Precision = 0.020192, F1 = 0.033855}	
+Epoch 5, query = pakistan, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 200/200, {Recall = 0.028796, Precision = 0.005525, F1 = 0.009271}	
+Epoch 5, query = pakistan, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 51/200, {Recall = 0.073298, Precision = 0.014063, F1 = 0.023599}	
+Epoch 5, query = pakistan, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.054974, Precision = 0.010547, F1 = 0.017699}	
+Epoch 5, query = pakistan, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 47/200, {Recall = 0.007853, Precision = 0.001507, F1 = 0.002528}	
+Epoch 6, query = aurora, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 172/199, {Recall = 0.081690, Precision = 0.087834, F1 = 0.084651}	
+Epoch 6, query = aurora, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 198/200, {Recall = 0.157746, Precision = 0.168844, F1 = 0.163107}	
+Epoch 6, query = aurora, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 173/200, {Recall = 0.181221, Precision = 0.193872, F1 = 0.187333}	
+Epoch 6, query = aurora, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 49/200, {Recall = 0.121127, Precision = 0.129583, F1 = 0.125212}	
+Epoch 6, query = aurora, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 200/200, {Recall = 0.106573, Precision = 0.114013, F1 = 0.110167}	
+Epoch 6, query = pakistan, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 51/199, {Recall = 0.065445, Precision = 0.012755, F1 = 0.021349}	
+Epoch 6, query = pakistan, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 200/200, {Recall = 0.023560, Precision = 0.004569, F1 = 0.007653}	
+Epoch 6, query = pakistan, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 64/200, {Recall = 0.109948, Precision = 0.021320, F1 = 0.035714}	
+Epoch 6, query = pakistan, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 52/200, {Recall = 0.096859, Precision = 0.018782, F1 = 0.031463}	
+Epoch 6, query = pakistan, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 191/200, {Recall = 0.020942, Precision = 0.004061, F1 = 0.006803}	
+Epoch 7, query = aurora, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 49/199, {Recall = 0.010798, Precision = 0.011735, F1 = 0.011247}	
+Epoch 7, query = aurora, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 198/200, {Recall = 0.032864, Precision = 0.035533, F1 = 0.034146}	
+Epoch 7, query = aurora, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 55/200, {Recall = 0.085915, Precision = 0.092893, F1 = 0.089268}	
+Epoch 7, query = aurora, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 196/200, {Recall = 0.045540, Precision = 0.049239, F1 = 0.047317}	
+Epoch 7, query = aurora, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 200/200, {Recall = 0.083099, Precision = 0.089848, F1 = 0.086341}	
+Epoch 7, query = pakistan, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 50/199, {Recall = 0.104712, Precision = 0.020192, F1 = 0.033855}	
+Epoch 7, query = pakistan, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 42/200, {Recall = 0.028796, Precision = 0.005525, F1 = 0.009271}	
+Epoch 7, query = pakistan, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 48/200, {Recall = 0.073298, Precision = 0.014063, F1 = 0.023599}	
+Epoch 7, query = pakistan, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.054974, Precision = 0.010547, F1 = 0.017699}	
+Epoch 7, query = pakistan, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 191/200, {Recall = 0.007853, Precision = 0.001507, F1 = 0.002528}	
+Epoch 8, query = aurora, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 186/199, {Recall = 0.081690, Precision = 0.087834, F1 = 0.084651}	
+Epoch 8, query = aurora, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 198/200, {Recall = 0.157746, Precision = 0.168844, F1 = 0.163107}	
+Epoch 8, query = aurora, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 57/200, {Recall = 0.181221, Precision = 0.193872, F1 = 0.187333}	
+Epoch 8, query = aurora, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 51/200, {Recall = 0.121127, Precision = 0.129583, F1 = 0.125212}	
+Epoch 8, query = aurora, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 200/200, {Recall = 0.106573, Precision = 0.114013, F1 = 0.110167}	
+Epoch 8, query = pakistan, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.104712, Precision = 0.020192, F1 = 0.033855}	
+Epoch 8, query = pakistan, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 50/200, {Recall = 0.028796, Precision = 0.005525, F1 = 0.009271}	
+Epoch 8, query = pakistan, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 40/200, {Recall = 0.073298, Precision = 0.014063, F1 = 0.023599}	
+Epoch 8, query = pakistan, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.054974, Precision = 0.010547, F1 = 0.017699}	
+Epoch 8, query = pakistan, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 191/200, {Recall = 0.007853, Precision = 0.001507, F1 = 0.002528}	
+Epoch 9, query = aurora, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 186/199, {Recall = 0.081690, Precision = 0.087834, F1 = 0.084651}	
+Epoch 9, query = aurora, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 198/200, {Recall = 0.157746, Precision = 0.168844, F1 = 0.163107}	
+Epoch 9, query = aurora, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 151/200, {Recall = 0.181221, Precision = 0.193872, F1 = 0.187333}	
+Epoch 9, query = aurora, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 55/200, {Recall = 0.121127, Precision = 0.129583, F1 = 0.125212}	
+Epoch 9, query = aurora, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 200/200, {Recall = 0.106573, Precision = 0.114013, F1 = 0.110167}	
+Epoch 9, query = pakistan, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.104712, Precision = 0.020192, F1 = 0.033855}	
+Epoch 9, query = pakistan, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 200/200, {Recall = 0.028796, Precision = 0.005525, F1 = 0.009271}	
+Epoch 9, query = pakistan, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.073298, Precision = 0.014063, F1 = 0.023599}	
+Epoch 9, query = pakistan, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.054974, Precision = 0.010547, F1 = 0.017699}	
+Epoch 9, query = pakistan, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 193/200, {Recall = 0.007853, Precision = 0.001507, F1 = 0.002528}	
+Epoch 10, query = aurora, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 186/199, {Recall = 0.081690, Precision = 0.087834, F1 = 0.084651}	
+Epoch 10, query = aurora, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 198/200, {Recall = 0.157746, Precision = 0.168844, F1 = 0.163107}	
+Epoch 10, query = aurora, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 174/200, {Recall = 0.181221, Precision = 0.193872, F1 = 0.187333}	
+Epoch 10, query = aurora, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 187/200, {Recall = 0.121127, Precision = 0.129583, F1 = 0.125212}	
+Epoch 10, query = aurora, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 200/200, {Recall = 0.106573, Precision = 0.114013, F1 = 0.110167}	
+Epoch 10, query = pakistan, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.104712, Precision = 0.020192, F1 = 0.033855}	
+Epoch 10, query = pakistan, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 200/200, {Recall = 0.028796, Precision = 0.005525, F1 = 0.009271}	
+Epoch 10, query = pakistan, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.073298, Precision = 0.014063, F1 = 0.023599}	
+Epoch 10, query = pakistan, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.054974, Precision = 0.010547, F1 = 0.017699}	
+Epoch 10, query = pakistan, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 193/200, {Recall = 0.007853, Precision = 0.001507, F1 = 0.002528}	
+Epoch 11, query = aurora, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 56/199, {Recall = 0.000000, Precision = 0.000000, F1 = 0.000000}	
+Epoch 11, query = aurora, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 198/200, {Recall = 0.000000, Precision = 0.000000, F1 = 0.000000}	
+Epoch 11, query = aurora, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 47/200, {Recall = 0.000000, Precision = 0.000000, F1 = 0.000000}	
+Epoch 11, query = aurora, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 196/200, {Recall = 0.000000, Precision = 0.000000, F1 = 0.000000}	
+Epoch 11, query = aurora, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 200/200, {Recall = 0.000000, Precision = 0.000000, F1 = 0.000000}	
+Epoch 11, query = pakistan, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.104712, Precision = 0.020192, F1 = 0.033855}	
+Epoch 11, query = pakistan, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 200/200, {Recall = 0.028796, Precision = 0.005525, F1 = 0.009271}	
+Epoch 11, query = pakistan, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.073298, Precision = 0.014063, F1 = 0.023599}	
+Epoch 11, query = pakistan, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.054974, Precision = 0.010547, F1 = 0.017699}	
+Epoch 11, query = pakistan, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 55/200, {Recall = 0.007853, Precision = 0.001507, F1 = 0.002528}	
+Epoch 12, query = aurora, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 168/199, {Recall = 0.081690, Precision = 0.087834, F1 = 0.084651}	
+Epoch 12, query = aurora, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 198/200, {Recall = 0.157746, Precision = 0.168844, F1 = 0.163107}	
+Epoch 12, query = aurora, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 58/200, {Recall = 0.181221, Precision = 0.193872, F1 = 0.187333}	
+Epoch 12, query = aurora, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 196/200, {Recall = 0.121127, Precision = 0.129583, F1 = 0.125212}	
+Epoch 12, query = aurora, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 59/200, {Recall = 0.106573, Precision = 0.114013, F1 = 0.110167}	
+Epoch 12, query = pakistan, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.104712, Precision = 0.020192, F1 = 0.033855}	
+Epoch 12, query = pakistan, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 46/200, {Recall = 0.028796, Precision = 0.005525, F1 = 0.009271}	
+Epoch 12, query = pakistan, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 57/200, {Recall = 0.073298, Precision = 0.014063, F1 = 0.023599}	
+Epoch 12, query = pakistan, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.054974, Precision = 0.010547, F1 = 0.017699}	
+Epoch 12, query = pakistan, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 174/200, {Recall = 0.007853, Precision = 0.001507, F1 = 0.002528}	
+Epoch 13, query = aurora, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 180/199, {Recall = 0.081690, Precision = 0.087834, F1 = 0.084651}	
+Epoch 13, query = aurora, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 198/200, {Recall = 0.157746, Precision = 0.168844, F1 = 0.163107}	
+Epoch 13, query = aurora, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 155/200, {Recall = 0.181221, Precision = 0.193872, F1 = 0.187333}	
+Epoch 13, query = aurora, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 196/200, {Recall = 0.121127, Precision = 0.129583, F1 = 0.125212}	
+Epoch 13, query = aurora, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 47/200, {Recall = 0.106573, Precision = 0.114013, F1 = 0.110167}	
+Epoch 13, query = pakistan, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.104712, Precision = 0.020192, F1 = 0.033855}	
+Epoch 13, query = pakistan, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 54/200, {Recall = 0.028796, Precision = 0.005525, F1 = 0.009271}	
+Epoch 13, query = pakistan, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 55/200, {Recall = 0.073298, Precision = 0.014063, F1 = 0.023599}	
+Epoch 13, query = pakistan, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.054974, Precision = 0.010547, F1 = 0.017699}	
+Epoch 13, query = pakistan, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 195/200, {Recall = 0.007853, Precision = 0.001507, F1 = 0.002528}	
+Epoch 14, query = aurora, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 186/199, {Recall = 0.081690, Precision = 0.087834, F1 = 0.084651}	
+Epoch 14, query = aurora, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 198/200, {Recall = 0.157746, Precision = 0.168844, F1 = 0.163107}	
+Epoch 14, query = aurora, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 181/200, {Recall = 0.181221, Precision = 0.193872, F1 = 0.187333}	
+Epoch 14, query = aurora, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 45/200, {Recall = 0.121127, Precision = 0.129583, F1 = 0.125212}	
+Epoch 14, query = aurora, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 129/200, {Recall = 0.106573, Precision = 0.114013, F1 = 0.110167}	
+Epoch 14, query = pakistan, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 49/199, {Recall = 0.057592, Precision = 0.011311, F1 = 0.018908}	
+Epoch 14, query = pakistan, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 49/200, {Recall = 0.000000, Precision = 0.000000, F1 = 0.000000}	
+Epoch 14, query = pakistan, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 199/200, {Recall = 0.000000, Precision = 0.000000, F1 = 0.000000}	
+Epoch 14, query = pakistan, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.000000, Precision = 0.000000, F1 = 0.000000}	
+Epoch 14, query = pakistan, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 40/200, {Recall = 0.005236, Precision = 0.001023, F1 = 0.001712}	
+Epoch 15, query = aurora, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 186/199, {Recall = 0.081690, Precision = 0.087834, F1 = 0.084651}	
+Epoch 15, query = aurora, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 198/200, {Recall = 0.157746, Precision = 0.168844, F1 = 0.163107}	
+Epoch 15, query = aurora, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 181/200, {Recall = 0.181221, Precision = 0.193872, F1 = 0.187333}	
+Epoch 15, query = aurora, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 177/200, {Recall = 0.121127, Precision = 0.129583, F1 = 0.125212}	
+Epoch 15, query = aurora, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 55/200, {Recall = 0.106573, Precision = 0.114013, F1 = 0.110167}	
+Epoch 15, query = pakistan, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 51/199, {Recall = 0.065445, Precision = 0.012755, F1 = 0.021349}	
+Epoch 15, query = pakistan, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 199/200, {Recall = 0.023560, Precision = 0.004569, F1 = 0.007653}	
+Epoch 15, query = pakistan, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.109948, Precision = 0.021320, F1 = 0.035714}	
+Epoch 15, query = pakistan, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 58/200, {Recall = 0.096859, Precision = 0.018782, F1 = 0.031463}	
+Epoch 15, query = pakistan, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 199/200, {Recall = 0.020942, Precision = 0.004061, F1 = 0.006803}	
+Epoch 16, query = aurora, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 186/199, {Recall = 0.081690, Precision = 0.087834, F1 = 0.084651}	
+Epoch 16, query = aurora, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 45/200, {Recall = 0.157746, Precision = 0.168844, F1 = 0.163107}	
+Epoch 16, query = aurora, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 47/200, {Recall = 0.181221, Precision = 0.193872, F1 = 0.187333}	
+Epoch 16, query = aurora, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 196/200, {Recall = 0.121127, Precision = 0.129583, F1 = 0.125212}	
+Epoch 16, query = aurora, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 166/200, {Recall = 0.106573, Precision = 0.114013, F1 = 0.110167}	
+Epoch 16, query = pakistan, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.104712, Precision = 0.020192, F1 = 0.033855}	
+Epoch 16, query = pakistan, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 44/200, {Recall = 0.028796, Precision = 0.005525, F1 = 0.009271}	
+Epoch 16, query = pakistan, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 51/200, {Recall = 0.073298, Precision = 0.014063, F1 = 0.023599}	
+Epoch 16, query = pakistan, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 45/200, {Recall = 0.054974, Precision = 0.010547, F1 = 0.017699}	
+Epoch 16, query = pakistan, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 199/200, {Recall = 0.007853, Precision = 0.001507, F1 = 0.002528}	
+Epoch 17, query = aurora, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 186/199, {Recall = 0.081690, Precision = 0.087834, F1 = 0.084651}	
+Epoch 17, query = aurora, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 200/200, {Recall = 0.157746, Precision = 0.168844, F1 = 0.163107}	
+Epoch 17, query = aurora, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 193/200, {Recall = 0.181221, Precision = 0.193872, F1 = 0.187333}	
+Epoch 17, query = aurora, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 196/200, {Recall = 0.121127, Precision = 0.129583, F1 = 0.125212}	
+Epoch 17, query = aurora, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 166/200, {Recall = 0.106573, Precision = 0.114013, F1 = 0.110167}	
+Epoch 17, query = pakistan, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.104712, Precision = 0.020192, F1 = 0.033855}	
+Epoch 17, query = pakistan, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 200/200, {Recall = 0.028796, Precision = 0.005525, F1 = 0.009271}	
+Epoch 17, query = pakistan, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 50/200, {Recall = 0.073298, Precision = 0.014063, F1 = 0.023599}	
+Epoch 17, query = pakistan, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 52/200, {Recall = 0.054974, Precision = 0.010547, F1 = 0.017699}	
+Epoch 17, query = pakistan, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 199/200, {Recall = 0.007853, Precision = 0.001507, F1 = 0.002528}	
+Epoch 18, query = aurora, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 186/199, {Recall = 0.081690, Precision = 0.087834, F1 = 0.084651}	
+Epoch 18, query = aurora, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 50/200, {Recall = 0.157746, Precision = 0.168844, F1 = 0.163107}	
+Epoch 18, query = aurora, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 195/200, {Recall = 0.181221, Precision = 0.193872, F1 = 0.187333}	
+Epoch 18, query = aurora, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 47/200, {Recall = 0.121127, Precision = 0.129583, F1 = 0.125212}	
+Epoch 18, query = aurora, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 166/200, {Recall = 0.106573, Precision = 0.114013, F1 = 0.110167}	
+Epoch 18, query = pakistan, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 49/199, {Recall = 0.104712, Precision = 0.020192, F1 = 0.033855}	
+Epoch 18, query = pakistan, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 200/200, {Recall = 0.028796, Precision = 0.005525, F1 = 0.009271}	
+Epoch 18, query = pakistan, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.073298, Precision = 0.014063, F1 = 0.023599}	
+Epoch 18, query = pakistan, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.054974, Precision = 0.010547, F1 = 0.017699}	
+Epoch 18, query = pakistan, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 199/200, {Recall = 0.007853, Precision = 0.001507, F1 = 0.002528}	
+Epoch 19, query = aurora, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 186/199, {Recall = 0.081690, Precision = 0.087834, F1 = 0.084651}	
+Epoch 19, query = aurora, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 54/200, {Recall = 0.157746, Precision = 0.168844, F1 = 0.163107}	
+Epoch 19, query = aurora, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 55/200, {Recall = 0.181221, Precision = 0.193872, F1 = 0.187333}	
+Epoch 19, query = aurora, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 50/200, {Recall = 0.121127, Precision = 0.129583, F1 = 0.125212}	
+Epoch 19, query = aurora, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 44/200, {Recall = 0.106573, Precision = 0.114013, F1 = 0.110167}	
+Epoch 19, query = pakistan, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 42/199, {Recall = 0.104712, Precision = 0.020192, F1 = 0.033855}	
+Epoch 19, query = pakistan, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 200/200, {Recall = 0.028796, Precision = 0.005525, F1 = 0.009271}	
+Epoch 19, query = pakistan, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.073298, Precision = 0.014063, F1 = 0.023599}	
+Epoch 19, query = pakistan, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.054974, Precision = 0.010547, F1 = 0.017699}	
+Epoch 19, query = pakistan, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 199/200, {Recall = 0.007853, Precision = 0.001507, F1 = 0.002528}	
+Epoch 20, query = aurora, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 186/199, {Recall = 0.081690, Precision = 0.087834, F1 = 0.084651}	
+Epoch 20, query = aurora, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 199/200, {Recall = 0.157746, Precision = 0.168844, F1 = 0.163107}	
+Epoch 20, query = aurora, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 40/200, {Recall = 0.181221, Precision = 0.193872, F1 = 0.187333}	
+Epoch 20, query = aurora, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 50/200, {Recall = 0.121127, Precision = 0.129583, F1 = 0.125212}	
+Epoch 20, query = aurora, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 123/200, {Recall = 0.106573, Precision = 0.114013, F1 = 0.110167}	
+Epoch 20, query = pakistan, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.104712, Precision = 0.020192, F1 = 0.033855}	
+Epoch 20, query = pakistan, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 200/200, {Recall = 0.028796, Precision = 0.005525, F1 = 0.009271}	
+Epoch 20, query = pakistan, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.073298, Precision = 0.014063, F1 = 0.023599}	
+Epoch 20, query = pakistan, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.054974, Precision = 0.010547, F1 = 0.017699}	
+Epoch 20, query = pakistan, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 199/200, {Recall = 0.007853, Precision = 0.001507, F1 = 0.002528}	
+Epoch 21, query = aurora, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 186/199, {Recall = 0.081690, Precision = 0.087834, F1 = 0.084651}	
+Epoch 21, query = aurora, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 199/200, {Recall = 0.157746, Precision = 0.168844, F1 = 0.163107}	
+Epoch 21, query = aurora, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 176/200, {Recall = 0.181221, Precision = 0.193872, F1 = 0.187333}	
+Epoch 21, query = aurora, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 177/200, {Recall = 0.121127, Precision = 0.129583, F1 = 0.125212}	
+Epoch 21, query = aurora, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 135/200, {Recall = 0.106573, Precision = 0.114013, F1 = 0.110167}	
+Epoch 21, query = pakistan, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.104712, Precision = 0.020192, F1 = 0.033855}	
+Epoch 21, query = pakistan, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 200/200, {Recall = 0.028796, Precision = 0.005525, F1 = 0.009271}	
+Epoch 21, query = pakistan, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.073298, Precision = 0.014063, F1 = 0.023599}	
+Epoch 21, query = pakistan, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.054974, Precision = 0.010547, F1 = 0.017699}	
+Epoch 21, query = pakistan, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 199/200, {Recall = 0.007853, Precision = 0.001507, F1 = 0.002528}	
+Epoch 22, query = aurora, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 46/199, {Recall = 0.081690, Precision = 0.087834, F1 = 0.084651}	
+Epoch 22, query = aurora, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 199/200, {Recall = 0.089202, Precision = 0.095477, F1 = 0.092233}	
+Epoch 22, query = aurora, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 181/200, {Recall = 0.181221, Precision = 0.193872, F1 = 0.187333}	
+Epoch 22, query = aurora, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 177/200, {Recall = 0.121127, Precision = 0.129583, F1 = 0.125212}	
+Epoch 22, query = aurora, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 47/200, {Recall = 0.106573, Precision = 0.114013, F1 = 0.110167}	
+Epoch 22, query = pakistan, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.104712, Precision = 0.020192, F1 = 0.033855}	
+Epoch 22, query = pakistan, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 54/200, {Recall = 0.028796, Precision = 0.005525, F1 = 0.009271}	
+Epoch 22, query = pakistan, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.073298, Precision = 0.014063, F1 = 0.023599}	
+Epoch 22, query = pakistan, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.054974, Precision = 0.010547, F1 = 0.017699}	
+Epoch 22, query = pakistan, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 199/200, {Recall = 0.007853, Precision = 0.001507, F1 = 0.002528}	
+Epoch 23, query = aurora, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 158/199, {Recall = 0.081690, Precision = 0.087834, F1 = 0.084651}	
+Epoch 23, query = aurora, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 55/200, {Recall = 0.089202, Precision = 0.095477, F1 = 0.092233}	
+Epoch 23, query = aurora, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 186/200, {Recall = 0.181221, Precision = 0.193872, F1 = 0.187333}	
+Epoch 23, query = aurora, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 177/200, {Recall = 0.121127, Precision = 0.129583, F1 = 0.125212}	
+Epoch 23, query = aurora, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 54/200, {Recall = 0.106573, Precision = 0.114013, F1 = 0.110167}	
+Epoch 23, query = pakistan, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.104712, Precision = 0.020192, F1 = 0.033855}	
+Epoch 23, query = pakistan, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 200/200, {Recall = 0.028796, Precision = 0.005525, F1 = 0.009271}	
+Epoch 23, query = pakistan, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 60/200, {Recall = 0.073298, Precision = 0.014063, F1 = 0.023599}	
+Epoch 23, query = pakistan, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 47/200, {Recall = 0.054974, Precision = 0.010547, F1 = 0.017699}	
+Epoch 23, query = pakistan, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 199/200, {Recall = 0.007853, Precision = 0.001507, F1 = 0.002528}	
+Epoch 24, query = aurora, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 180/199, {Recall = 0.081690, Precision = 0.087834, F1 = 0.084651}	
+Epoch 24, query = aurora, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 199/200, {Recall = 0.157746, Precision = 0.168844, F1 = 0.163107}	
+Epoch 24, query = aurora, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 192/200, {Recall = 0.181221, Precision = 0.193872, F1 = 0.187333}	
+Epoch 24, query = aurora, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 177/200, {Recall = 0.121127, Precision = 0.129583, F1 = 0.125212}	
+Epoch 24, query = aurora, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 138/200, {Recall = 0.106573, Precision = 0.114013, F1 = 0.110167}	
+Epoch 24, query = pakistan, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.104712, Precision = 0.020192, F1 = 0.033855}	
+Epoch 24, query = pakistan, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 46/200, {Recall = 0.028796, Precision = 0.005525, F1 = 0.009271}	
+Epoch 24, query = pakistan, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.073298, Precision = 0.014063, F1 = 0.023599}	
+Epoch 24, query = pakistan, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 50/200, {Recall = 0.054974, Precision = 0.010547, F1 = 0.017699}	
+Epoch 24, query = pakistan, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 199/200, {Recall = 0.007853, Precision = 0.001507, F1 = 0.002528}	
+Epoch 25, query = aurora, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 56/199, {Recall = 0.000000, Precision = 0.000000, F1 = 0.000000}	
+Epoch 25, query = aurora, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 199/200, {Recall = 0.000000, Precision = 0.000000, F1 = 0.000000}	
+Epoch 25, query = aurora, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 195/200, {Recall = 0.000000, Precision = 0.000000, F1 = 0.000000}	
+Epoch 25, query = aurora, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 199/200, {Recall = 0.000000, Precision = 0.000000, F1 = 0.000000}	
+Epoch 25, query = aurora, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 200/200, {Recall = 0.000000, Precision = 0.000000, F1 = 0.000000}	
+Epoch 25, query = pakistan, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.104712, Precision = 0.020192, F1 = 0.033855}	
+Epoch 25, query = pakistan, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 197/200, {Recall = 0.028796, Precision = 0.005525, F1 = 0.009271}	
+Epoch 25, query = pakistan, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.073298, Precision = 0.014063, F1 = 0.023599}	
+Epoch 25, query = pakistan, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.054974, Precision = 0.010547, F1 = 0.017699}	
+Epoch 25, query = pakistan, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 199/200, {Recall = 0.007853, Precision = 0.001507, F1 = 0.002528}	
+Epoch 26, query = aurora, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 45/199, {Recall = 0.050235, Precision = 0.054232, F1 = 0.052157}	
+Epoch 26, query = aurora, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 199/200, {Recall = 0.164319, Precision = 0.176500, F1 = 0.170192}	
+Epoch 26, query = aurora, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.140376, Precision = 0.150782, F1 = 0.145393}	
+Epoch 26, query = aurora, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 199/200, {Recall = 0.086854, Precision = 0.093293, F1 = 0.089959}	
+Epoch 26, query = aurora, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 200/200, {Recall = 0.175587, Precision = 0.188603, F1 = 0.181862}	
+Epoch 26, query = pakistan, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.104712, Precision = 0.020192, F1 = 0.033855}	
+Epoch 26, query = pakistan, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 197/200, {Recall = 0.028796, Precision = 0.005525, F1 = 0.009271}	
+Epoch 26, query = pakistan, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.073298, Precision = 0.014063, F1 = 0.023599}	
+Epoch 26, query = pakistan, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.054974, Precision = 0.010547, F1 = 0.017699}	
+Epoch 26, query = pakistan, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 199/200, {Recall = 0.007853, Precision = 0.001507, F1 = 0.002528}	
+Epoch 27, query = aurora, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 125/199, {Recall = 0.081690, Precision = 0.087834, F1 = 0.084651}	
+Epoch 27, query = aurora, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 45/200, {Recall = 0.157746, Precision = 0.168844, F1 = 0.163107}	
+Epoch 27, query = aurora, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.181221, Precision = 0.193872, F1 = 0.187333}	
+Epoch 27, query = aurora, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 199/200, {Recall = 0.121127, Precision = 0.129583, F1 = 0.125212}	
+Epoch 27, query = aurora, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 47/200, {Recall = 0.106573, Precision = 0.114013, F1 = 0.110167}	
+Epoch 27, query = pakistan, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.104712, Precision = 0.020192, F1 = 0.033855}	
+Epoch 27, query = pakistan, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 197/200, {Recall = 0.028796, Precision = 0.005525, F1 = 0.009271}	
+Epoch 27, query = pakistan, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.073298, Precision = 0.014063, F1 = 0.023599}	
+Epoch 27, query = pakistan, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.054974, Precision = 0.010547, F1 = 0.017699}	
+Epoch 27, query = pakistan, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 47/200, {Recall = 0.007853, Precision = 0.001507, F1 = 0.002528}	
+Epoch 28, query = aurora, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 166/199, {Recall = 0.081690, Precision = 0.087834, F1 = 0.084651}	
+Epoch 28, query = aurora, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 194/200, {Recall = 0.157746, Precision = 0.168844, F1 = 0.163107}	
+Epoch 28, query = aurora, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 51/200, {Recall = 0.181221, Precision = 0.193872, F1 = 0.187333}	
+Epoch 28, query = aurora, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 199/200, {Recall = 0.121127, Precision = 0.129583, F1 = 0.125212}	
+Epoch 28, query = aurora, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 113/200, {Recall = 0.106573, Precision = 0.114013, F1 = 0.110167}	
+Epoch 28, query = pakistan, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 48/199, {Recall = 0.057592, Precision = 0.011305, F1 = 0.018900}	
+Epoch 28, query = pakistan, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 200/200, {Recall = 0.000000, Precision = 0.000000, F1 = 0.000000}	
+Epoch 28, query = pakistan, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.002618, Precision = 0.000511, F1 = 0.000855}	
+Epoch 28, query = pakistan, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 41/200, {Recall = 0.047120, Precision = 0.009202, F1 = 0.015398}	
+Epoch 28, query = pakistan, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 46/200, {Recall = 0.044503, Precision = 0.008691, F1 = 0.014542}	
+Epoch 29, query = aurora, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 166/199, {Recall = 0.081690, Precision = 0.087834, F1 = 0.084651}	
+Epoch 29, query = aurora, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 194/200, {Recall = 0.157746, Precision = 0.168844, F1 = 0.163107}	
+Epoch 29, query = aurora, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 163/200, {Recall = 0.181221, Precision = 0.193872, F1 = 0.187333}	
+Epoch 29, query = aurora, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 199/200, {Recall = 0.121127, Precision = 0.129583, F1 = 0.125212}	
+Epoch 29, query = aurora, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 116/200, {Recall = 0.106573, Precision = 0.114013, F1 = 0.110167}	
+Epoch 29, query = pakistan, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 46/199, {Recall = 0.007853, Precision = 0.001521, F1 = 0.002548}	
+Epoch 29, query = pakistan, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 200/200, {Recall = 0.091623, Precision = 0.017650, F1 = 0.029598}	
+Epoch 29, query = pakistan, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 55/200, {Recall = 0.096859, Precision = 0.018659, F1 = 0.031290}	
+Epoch 29, query = pakistan, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 167/200, {Recall = 0.070681, Precision = 0.013616, F1 = 0.022833}	
+Epoch 29, query = pakistan, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 174/200, {Recall = 0.070681, Precision = 0.013616, F1 = 0.022833}	
+Epoch 30, query = aurora, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 172/199, {Recall = 0.081690, Precision = 0.087834, F1 = 0.084651}	
+Epoch 30, query = aurora, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 200/200, {Recall = 0.157746, Precision = 0.168844, F1 = 0.163107}	
+Epoch 30, query = aurora, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 186/200, {Recall = 0.181221, Precision = 0.193872, F1 = 0.187333}	
+Epoch 30, query = aurora, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 52/200, {Recall = 0.121127, Precision = 0.129583, F1 = 0.125212}	
+Epoch 30, query = aurora, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 45/200, {Recall = 0.106573, Precision = 0.114013, F1 = 0.110167}	
+Epoch 30, query = pakistan, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.104712, Precision = 0.020192, F1 = 0.033855}	
+Epoch 30, query = pakistan, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 45/200, {Recall = 0.028796, Precision = 0.005525, F1 = 0.009271}	
+Epoch 30, query = pakistan, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.073298, Precision = 0.014063, F1 = 0.023599}	
+Epoch 30, query = pakistan, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 47/200, {Recall = 0.054974, Precision = 0.010547, F1 = 0.017699}	
+Epoch 30, query = pakistan, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 44/200, {Recall = 0.007853, Precision = 0.001507, F1 = 0.002528}	
+Epoch 31, query = aurora, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 172/199, {Recall = 0.081690, Precision = 0.087834, F1 = 0.084651}	
+Epoch 31, query = aurora, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 200/200, {Recall = 0.157746, Precision = 0.168844, F1 = 0.163107}	
+Epoch 31, query = aurora, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 186/200, {Recall = 0.181221, Precision = 0.193872, F1 = 0.187333}	
+Epoch 31, query = aurora, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 127/200, {Recall = 0.121127, Precision = 0.129583, F1 = 0.125212}	
+Epoch 31, query = aurora, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 50/200, {Recall = 0.106573, Precision = 0.114013, F1 = 0.110167}	
+Epoch 31, query = pakistan, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.104712, Precision = 0.020192, F1 = 0.033855}	
+Epoch 31, query = pakistan, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 196/200, {Recall = 0.028796, Precision = 0.005525, F1 = 0.009271}	
+Epoch 31, query = pakistan, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.073298, Precision = 0.014063, F1 = 0.023599}	
+Epoch 31, query = pakistan, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.054974, Precision = 0.010547, F1 = 0.017699}	
+Epoch 31, query = pakistan, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 190/200, {Recall = 0.007853, Precision = 0.001507, F1 = 0.002528}	
+Epoch 32, query = aurora, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 172/199, {Recall = 0.081690, Precision = 0.087834, F1 = 0.084651}	
+Epoch 32, query = aurora, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 200/200, {Recall = 0.157746, Precision = 0.168844, F1 = 0.163107}	
+Epoch 32, query = aurora, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 186/200, {Recall = 0.181221, Precision = 0.193872, F1 = 0.187333}	
+Epoch 32, query = aurora, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 129/200, {Recall = 0.121127, Precision = 0.129583, F1 = 0.125212}	
+Epoch 32, query = aurora, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 125/200, {Recall = 0.106573, Precision = 0.114013, F1 = 0.110167}	
+Epoch 32, query = pakistan, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.104712, Precision = 0.020192, F1 = 0.033855}	
+Epoch 32, query = pakistan, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 196/200, {Recall = 0.028796, Precision = 0.005525, F1 = 0.009271}	
+Epoch 32, query = pakistan, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 52/200, {Recall = 0.073298, Precision = 0.014063, F1 = 0.023599}	
+Epoch 32, query = pakistan, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.054974, Precision = 0.010547, F1 = 0.017699}	
+Epoch 32, query = pakistan, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 190/200, {Recall = 0.007853, Precision = 0.001507, F1 = 0.002528}	
+Epoch 33, query = aurora, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 172/199, {Recall = 0.081690, Precision = 0.087834, F1 = 0.084651}	
+Epoch 33, query = aurora, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 200/200, {Recall = 0.157746, Precision = 0.168844, F1 = 0.163107}	
+Epoch 33, query = aurora, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 186/200, {Recall = 0.181221, Precision = 0.193872, F1 = 0.187333}	
+Epoch 33, query = aurora, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 129/200, {Recall = 0.121127, Precision = 0.129583, F1 = 0.125212}	
+Epoch 33, query = aurora, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 122/200, {Recall = 0.106573, Precision = 0.114013, F1 = 0.110167}	
+Epoch 33, query = pakistan, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.104712, Precision = 0.020192, F1 = 0.033855}	
+Epoch 33, query = pakistan, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 196/200, {Recall = 0.028796, Precision = 0.005525, F1 = 0.009271}	
+Epoch 33, query = pakistan, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 200/200, {Recall = 0.073298, Precision = 0.014063, F1 = 0.023599}	
+Epoch 33, query = pakistan, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.054974, Precision = 0.010547, F1 = 0.017699}	
+Epoch 33, query = pakistan, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 190/200, {Recall = 0.007853, Precision = 0.001507, F1 = 0.002528}	
+Epoch 34, query = aurora, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 172/199, {Recall = 0.081690, Precision = 0.087834, F1 = 0.084651}	
+Epoch 34, query = aurora, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 47/200, {Recall = 0.157746, Precision = 0.168844, F1 = 0.163107}	
+Epoch 34, query = aurora, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 186/200, {Recall = 0.181221, Precision = 0.193872, F1 = 0.187333}	
+Epoch 34, query = aurora, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 129/200, {Recall = 0.121127, Precision = 0.129583, F1 = 0.125212}	
+Epoch 34, query = aurora, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 122/200, {Recall = 0.106573, Precision = 0.114013, F1 = 0.110167}	
+Epoch 34, query = pakistan, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.104712, Precision = 0.020192, F1 = 0.033855}	
+Epoch 34, query = pakistan, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 49/200, {Recall = 0.028796, Precision = 0.005525, F1 = 0.009271}	
+Epoch 34, query = pakistan, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 54/200, {Recall = 0.073298, Precision = 0.014063, F1 = 0.023599}	
+Epoch 34, query = pakistan, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.054974, Precision = 0.010547, F1 = 0.017699}	
+Epoch 34, query = pakistan, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 56/200, {Recall = 0.007853, Precision = 0.001507, F1 = 0.002528}	
+Epoch 35, query = aurora, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 172/199, {Recall = 0.081690, Precision = 0.087834, F1 = 0.084651}	
+Epoch 35, query = aurora, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 167/200, {Recall = 0.157746, Precision = 0.168844, F1 = 0.163107}	
+Epoch 35, query = aurora, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 186/200, {Recall = 0.181221, Precision = 0.193872, F1 = 0.187333}	
+Epoch 35, query = aurora, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 48/200, {Recall = 0.121127, Precision = 0.129583, F1 = 0.125212}	
+Epoch 35, query = aurora, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 47/200, {Recall = 0.106573, Precision = 0.114013, F1 = 0.110167}	
+Epoch 35, query = pakistan, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.104712, Precision = 0.020192, F1 = 0.033855}	
+Epoch 35, query = pakistan, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 144/200, {Recall = 0.028796, Precision = 0.005525, F1 = 0.009271}	
+Epoch 35, query = pakistan, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 188/200, {Recall = 0.073298, Precision = 0.014063, F1 = 0.023599}	
+Epoch 35, query = pakistan, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.054974, Precision = 0.010547, F1 = 0.017699}	
+Epoch 35, query = pakistan, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 151/200, {Recall = 0.007853, Precision = 0.001507, F1 = 0.002528}	
+Epoch 36, query = aurora, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 172/199, {Recall = 0.081690, Precision = 0.087834, F1 = 0.084651}	
+Epoch 36, query = aurora, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 172/200, {Recall = 0.157746, Precision = 0.168844, F1 = 0.163107}	
+Epoch 36, query = aurora, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 52/200, {Recall = 0.181221, Precision = 0.193872, F1 = 0.187333}	
+Epoch 36, query = aurora, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 108/200, {Recall = 0.121127, Precision = 0.129583, F1 = 0.125212}	
+Epoch 36, query = aurora, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 61/200, {Recall = 0.106573, Precision = 0.114013, F1 = 0.110167}	
+Epoch 36, query = pakistan, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.104712, Precision = 0.020192, F1 = 0.033855}	
+Epoch 36, query = pakistan, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 144/200, {Recall = 0.028796, Precision = 0.005525, F1 = 0.009271}	
+Epoch 36, query = pakistan, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 188/200, {Recall = 0.073298, Precision = 0.014063, F1 = 0.023599}	
+Epoch 36, query = pakistan, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.054974, Precision = 0.010547, F1 = 0.017699}	
+Epoch 36, query = pakistan, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 61/200, {Recall = 0.007853, Precision = 0.001507, F1 = 0.002528}	
+Epoch 37, query = aurora, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 172/199, {Recall = 0.081690, Precision = 0.087834, F1 = 0.084651}	
+Epoch 37, query = aurora, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 172/200, {Recall = 0.157746, Precision = 0.168844, F1 = 0.163107}	
+Epoch 37, query = aurora, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 46/200, {Recall = 0.181221, Precision = 0.193872, F1 = 0.187333}	
+Epoch 37, query = aurora, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 111/200, {Recall = 0.121127, Precision = 0.129583, F1 = 0.125212}	
+Epoch 37, query = aurora, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 59/200, {Recall = 0.106573, Precision = 0.114013, F1 = 0.110167}	
+Epoch 37, query = pakistan, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 47/199, {Recall = 0.000000, Precision = 0.000000, F1 = 0.000000}	
+Epoch 37, query = pakistan, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 146/200, {Recall = 0.000000, Precision = 0.000000, F1 = 0.000000}	
+Epoch 37, query = pakistan, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 188/200, {Recall = 0.000000, Precision = 0.000000, F1 = 0.000000}	
+Epoch 37, query = pakistan, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.000000, Precision = 0.000000, F1 = 0.000000}	
+Epoch 37, query = pakistan, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 77/200, {Recall = 0.000000, Precision = 0.000000, F1 = 0.000000}	
+Epoch 38, query = aurora, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 172/199, {Recall = 0.081690, Precision = 0.087834, F1 = 0.084651}	
+Epoch 38, query = aurora, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 172/200, {Recall = 0.157746, Precision = 0.168844, F1 = 0.163107}	
+Epoch 38, query = aurora, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 42/200, {Recall = 0.181221, Precision = 0.193872, F1 = 0.187333}	
+Epoch 38, query = aurora, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 55/200, {Recall = 0.121127, Precision = 0.129583, F1 = 0.125212}	
+Epoch 38, query = aurora, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 63/200, {Recall = 0.106573, Precision = 0.114013, F1 = 0.110167}	
+Epoch 38, query = pakistan, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 45/199, {Recall = 0.054974, Precision = 0.010682, F1 = 0.017888}	
+Epoch 38, query = pakistan, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 170/200, {Recall = 0.062827, Precision = 0.012146, F1 = 0.020356}	
+Epoch 38, query = pakistan, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 50/200, {Recall = 0.070681, Precision = 0.013664, F1 = 0.022901}	
+Epoch 38, query = pakistan, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.133508, Precision = 0.025810, F1 = 0.043257}	
+Epoch 38, query = pakistan, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 47/200, {Recall = 0.054974, Precision = 0.010628, F1 = 0.017812}	
+Epoch 39, query = aurora, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 172/199, {Recall = 0.081690, Precision = 0.087834, F1 = 0.084651}	
+Epoch 39, query = aurora, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 47/200, {Recall = 0.157746, Precision = 0.168844, F1 = 0.163107}	
+Epoch 39, query = aurora, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 120/200, {Recall = 0.181221, Precision = 0.193872, F1 = 0.187333}	
+Epoch 39, query = aurora, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 53/200, {Recall = 0.121127, Precision = 0.129583, F1 = 0.125212}	
+Epoch 39, query = aurora, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 99/200, {Recall = 0.106573, Precision = 0.114013, F1 = 0.110167}	
+Epoch 39, query = pakistan, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.104712, Precision = 0.020192, F1 = 0.033855}	
+Epoch 39, query = pakistan, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 175/200, {Recall = 0.028796, Precision = 0.005525, F1 = 0.009271}	
+Epoch 39, query = pakistan, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 53/200, {Recall = 0.073298, Precision = 0.014063, F1 = 0.023599}	
+Epoch 39, query = pakistan, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 200/200, {Recall = 0.054974, Precision = 0.010547, F1 = 0.017699}	
+Epoch 39, query = pakistan, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 161/200, {Recall = 0.007853, Precision = 0.001507, F1 = 0.002528}	
+Epoch 40, query = aurora, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 56/199, {Recall = 0.000469, Precision = 0.000514, F1 = 0.000491}	
+Epoch 40, query = aurora, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 155/200, {Recall = 0.000000, Precision = 0.000000, F1 = 0.000000}	
+Epoch 40, query = aurora, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 45/200, {Recall = 0.001408, Precision = 0.001535, F1 = 0.001469}	
+Epoch 40, query = aurora, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 194/200, {Recall = 0.028169, Precision = 0.030691, F1 = 0.029376}	
+Epoch 40, query = aurora, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 114/200, {Recall = 0.000469, Precision = 0.000512, F1 = 0.000490}	
+Epoch 40, query = pakistan, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.104712, Precision = 0.020192, F1 = 0.033855}	
+Epoch 40, query = pakistan, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 41/200, {Recall = 0.028796, Precision = 0.005525, F1 = 0.009271}	
+Epoch 40, query = pakistan, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 49/200, {Recall = 0.073298, Precision = 0.014063, F1 = 0.023599}	
+Epoch 40, query = pakistan, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 49/200, {Recall = 0.054974, Precision = 0.010547, F1 = 0.017699}	
+Epoch 40, query = pakistan, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 166/200, {Recall = 0.007853, Precision = 0.001507, F1 = 0.002528}	
+Epoch 41, query = aurora, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 181/199, {Recall = 0.081690, Precision = 0.087834, F1 = 0.084651}	
+Epoch 41, query = aurora, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 186/200, {Recall = 0.157746, Precision = 0.168844, F1 = 0.163107}	
+Epoch 41, query = aurora, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 136/200, {Recall = 0.181221, Precision = 0.193872, F1 = 0.187333}	
+Epoch 41, query = aurora, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 195/200, {Recall = 0.121127, Precision = 0.129583, F1 = 0.125212}	
+Epoch 41, query = aurora, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 112/200, {Recall = 0.106573, Precision = 0.114013, F1 = 0.110167}	
+Epoch 41, query = pakistan, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.104712, Precision = 0.020192, F1 = 0.033855}	
+Epoch 41, query = pakistan, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 154/200, {Recall = 0.028796, Precision = 0.005525, F1 = 0.009271}	
+Epoch 41, query = pakistan, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 199/200, {Recall = 0.073298, Precision = 0.014063, F1 = 0.023599}	
+Epoch 41, query = pakistan, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 198/200, {Recall = 0.054974, Precision = 0.010547, F1 = 0.017699}	
+Epoch 41, query = pakistan, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 182/200, {Recall = 0.007853, Precision = 0.001507, F1 = 0.002528}	
+Epoch 42, query = aurora, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 198/199, {Recall = 0.081690, Precision = 0.087834, F1 = 0.084651}	
+Epoch 42, query = aurora, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 191/200, {Recall = 0.157746, Precision = 0.168844, F1 = 0.163107}	
+Epoch 42, query = aurora, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 58/200, {Recall = 0.181221, Precision = 0.193872, F1 = 0.187333}	
+Epoch 42, query = aurora, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 46/200, {Recall = 0.121127, Precision = 0.129583, F1 = 0.125212}	
+Epoch 42, query = aurora, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 109/200, {Recall = 0.106573, Precision = 0.114013, F1 = 0.110167}	
+Epoch 42, query = pakistan, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.104712, Precision = 0.020192, F1 = 0.033855}	
+Epoch 42, query = pakistan, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 154/200, {Recall = 0.028796, Precision = 0.005525, F1 = 0.009271}	
+Epoch 42, query = pakistan, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 199/200, {Recall = 0.073298, Precision = 0.014063, F1 = 0.023599}	
+Epoch 42, query = pakistan, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 198/200, {Recall = 0.054974, Precision = 0.010547, F1 = 0.017699}	
+Epoch 42, query = pakistan, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 43/200, {Recall = 0.007853, Precision = 0.001507, F1 = 0.002528}	
+Epoch 43, query = aurora, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 198/199, {Recall = 0.081690, Precision = 0.087834, F1 = 0.084651}	
+Epoch 43, query = aurora, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 56/200, {Recall = 0.157746, Precision = 0.168844, F1 = 0.163107}	
+Epoch 43, query = aurora, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 93/200, {Recall = 0.181221, Precision = 0.193872, F1 = 0.187333}	
+Epoch 43, query = aurora, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 95/200, {Recall = 0.121127, Precision = 0.129583, F1 = 0.125212}	
+Epoch 43, query = aurora, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 103/200, {Recall = 0.106573, Precision = 0.114013, F1 = 0.110167}	
+Epoch 43, query = pakistan, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 199/199, {Recall = 0.104712, Precision = 0.020192, F1 = 0.033855}	
+Epoch 43, query = pakistan, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 154/200, {Recall = 0.028796, Precision = 0.005525, F1 = 0.009271}	
+Epoch 43, query = pakistan, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 199/200, {Recall = 0.073298, Precision = 0.014063, F1 = 0.023599}	
+Epoch 43, query = pakistan, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 198/200, {Recall = 0.054974, Precision = 0.010547, F1 = 0.017699}	
+Epoch 43, query = pakistan, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 113/200, {Recall = 0.007853, Precision = 0.001507, F1 = 0.002528}	
+Epoch 44, query = aurora, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 197/199, {Recall = 0.081690, Precision = 0.087834, F1 = 0.084651}	
+Epoch 44, query = aurora, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 137/200, {Recall = 0.157746, Precision = 0.168844, F1 = 0.163107}	
+Epoch 44, query = aurora, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 55/200, {Recall = 0.181221, Precision = 0.193872, F1 = 0.187333}	
+Epoch 44, query = aurora, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 50/200, {Recall = 0.121127, Precision = 0.129583, F1 = 0.125212}	
+Epoch 44, query = aurora, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 103/200, {Recall = 0.106573, Precision = 0.114013, F1 = 0.110167}	
+Epoch 44, query = pakistan, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 47/199, {Recall = 0.104712, Precision = 0.020192, F1 = 0.033855}	
+Epoch 44, query = pakistan, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 56/200, {Recall = 0.028796, Precision = 0.005525, F1 = 0.009271}	
+Epoch 44, query = pakistan, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 48/200, {Recall = 0.073298, Precision = 0.014063, F1 = 0.023599}	
+Epoch 44, query = pakistan, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 198/200, {Recall = 0.054974, Precision = 0.010547, F1 = 0.017699}	
+Epoch 44, query = pakistan, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 113/200, {Recall = 0.007853, Precision = 0.001507, F1 = 0.002528}	
+Epoch 45, query = aurora, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 197/199, {Recall = 0.081690, Precision = 0.087834, F1 = 0.084651}	
+Epoch 45, query = aurora, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 49/200, {Recall = 0.157746, Precision = 0.168844, F1 = 0.163107}	
+Epoch 45, query = aurora, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 98/200, {Recall = 0.181221, Precision = 0.193872, F1 = 0.187333}	
+Epoch 45, query = aurora, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 106/200, {Recall = 0.121127, Precision = 0.129583, F1 = 0.125212}	
+Epoch 45, query = aurora, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 51/200, {Recall = 0.106573, Precision = 0.114013, F1 = 0.110167}	
+Epoch 45, query = pakistan, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 177/199, {Recall = 0.104712, Precision = 0.020192, F1 = 0.033855}	
+Epoch 45, query = pakistan, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 152/200, {Recall = 0.028796, Precision = 0.005525, F1 = 0.009271}	
+Epoch 45, query = pakistan, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 196/200, {Recall = 0.073298, Precision = 0.014063, F1 = 0.023599}	
+Epoch 45, query = pakistan, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 198/200, {Recall = 0.054974, Precision = 0.010547, F1 = 0.017699}	
+Epoch 45, query = pakistan, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 147/200, {Recall = 0.007853, Precision = 0.001507, F1 = 0.002528}	
+Epoch 46, query = aurora, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 197/199, {Recall = 0.081690, Precision = 0.087834, F1 = 0.084651}	
+Epoch 46, query = aurora, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 186/200, {Recall = 0.157746, Precision = 0.168844, F1 = 0.163107}	
+Epoch 46, query = aurora, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 150/200, {Recall = 0.181221, Precision = 0.193872, F1 = 0.187333}	
+Epoch 46, query = aurora, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 119/200, {Recall = 0.121127, Precision = 0.129583, F1 = 0.125212}	
+Epoch 46, query = aurora, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 53/200, {Recall = 0.106573, Precision = 0.114013, F1 = 0.110167}	
+Epoch 46, query = pakistan, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 197/199, {Recall = 0.104712, Precision = 0.020192, F1 = 0.033855}	
+Epoch 46, query = pakistan, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 171/200, {Recall = 0.028796, Precision = 0.005525, F1 = 0.009271}	
+Epoch 46, query = pakistan, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 199/200, {Recall = 0.073298, Precision = 0.014063, F1 = 0.023599}	
+Epoch 46, query = pakistan, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 198/200, {Recall = 0.054974, Precision = 0.010547, F1 = 0.017699}	
+Epoch 46, query = pakistan, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 148/200, {Recall = 0.007853, Precision = 0.001507, F1 = 0.002528}	
+Epoch 47, query = aurora, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 65/199, {Recall = 0.079812, Precision = 0.086470, F1 = 0.083008}	
+Epoch 47, query = aurora, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 69/200, {Recall = 0.044131, Precision = 0.047571, F1 = 0.045787}	
+Epoch 47, query = aurora, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 195/200, {Recall = 0.072770, Precision = 0.078441, F1 = 0.075499}	
+Epoch 47, query = aurora, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 165/200, {Recall = 0.013615, Precision = 0.014676, F1 = 0.014126}	
+Epoch 47, query = aurora, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 199/200, {Recall = 0.070892, Precision = 0.076417, F1 = 0.073551}	
+Epoch 47, query = pakistan, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 197/199, {Recall = 0.104712, Precision = 0.020192, F1 = 0.033855}	
+Epoch 47, query = pakistan, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 171/200, {Recall = 0.028796, Precision = 0.005525, F1 = 0.009271}	
+Epoch 47, query = pakistan, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 199/200, {Recall = 0.073298, Precision = 0.014063, F1 = 0.023599}	
+Epoch 47, query = pakistan, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 198/200, {Recall = 0.054974, Precision = 0.010547, F1 = 0.017699}	
+Epoch 47, query = pakistan, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 148/200, {Recall = 0.007853, Precision = 0.001507, F1 = 0.002528}	
+Epoch 48, query = aurora, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 159/199, {Recall = 0.081690, Precision = 0.087834, F1 = 0.084651}	
+Epoch 48, query = aurora, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 174/200, {Recall = 0.157746, Precision = 0.168844, F1 = 0.163107}	
+Epoch 48, query = aurora, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 195/200, {Recall = 0.181221, Precision = 0.193872, F1 = 0.187333}	
+Epoch 48, query = aurora, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 165/200, {Recall = 0.121127, Precision = 0.129583, F1 = 0.125212}	
+Epoch 48, query = aurora, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 128/200, {Recall = 0.106573, Precision = 0.114013, F1 = 0.110167}	
+Epoch 48, query = pakistan, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 197/199, {Recall = 0.104712, Precision = 0.020192, F1 = 0.033855}	
+Epoch 48, query = pakistan, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 171/200, {Recall = 0.028796, Precision = 0.005525, F1 = 0.009271}	
+Epoch 48, query = pakistan, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 199/200, {Recall = 0.073298, Precision = 0.014063, F1 = 0.023599}	
+Epoch 48, query = pakistan, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 198/200, {Recall = 0.054974, Precision = 0.010547, F1 = 0.017699}	
+Epoch 48, query = pakistan, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 148/200, {Recall = 0.007853, Precision = 0.001507, F1 = 0.002528}	
+Epoch 49, query = aurora, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 185/199, {Recall = 0.081690, Precision = 0.087834, F1 = 0.084651}	
+Epoch 49, query = aurora, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 174/200, {Recall = 0.157746, Precision = 0.168844, F1 = 0.163107}	
+Epoch 49, query = aurora, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 195/200, {Recall = 0.181221, Precision = 0.193872, F1 = 0.187333}	
+Epoch 49, query = aurora, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 165/200, {Recall = 0.121127, Precision = 0.129583, F1 = 0.125212}	
+Epoch 49, query = aurora, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 115/200, {Recall = 0.106573, Precision = 0.114013, F1 = 0.110167}	
+Epoch 49, query = pakistan, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 197/199, {Recall = 0.104712, Precision = 0.020192, F1 = 0.033855}	
+Epoch 49, query = pakistan, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 171/200, {Recall = 0.028796, Precision = 0.005525, F1 = 0.009271}	
+Epoch 49, query = pakistan, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 53/200, {Recall = 0.073298, Precision = 0.014063, F1 = 0.023599}	
+Epoch 49, query = pakistan, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 198/200, {Recall = 0.054974, Precision = 0.010547, F1 = 0.017699}	
+Epoch 49, query = pakistan, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 49/200, {Recall = 0.007853, Precision = 0.001507, F1 = 0.002528}	
+Epoch 50, query = aurora, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 185/199, {Recall = 0.081690, Precision = 0.087834, F1 = 0.084651}	
+Epoch 50, query = aurora, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 46/200, {Recall = 0.157746, Precision = 0.168844, F1 = 0.163107}	
+Epoch 50, query = aurora, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 40/200, {Recall = 0.181221, Precision = 0.193872, F1 = 0.187333}	
+Epoch 50, query = aurora, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 108/200, {Recall = 0.121127, Precision = 0.129583, F1 = 0.125212}	
+Epoch 50, query = aurora, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 99/200, {Recall = 0.106573, Precision = 0.114013, F1 = 0.110167}	
+Epoch 50, query = pakistan, epsilon = 0.250, minibatch 1/5, sum(y)/len(y) = 197/199, {Recall = 0.104712, Precision = 0.020192, F1 = 0.033855}	
+Epoch 50, query = pakistan, epsilon = 0.250, minibatch 2/5, sum(y)/len(y) = 171/200, {Recall = 0.028796, Precision = 0.005525, F1 = 0.009271}	
+Epoch 50, query = pakistan, epsilon = 0.250, minibatch 3/5, sum(y)/len(y) = 171/200, {Recall = 0.073298, Precision = 0.014063, F1 = 0.023599}	
+Epoch 50, query = pakistan, epsilon = 0.250, minibatch 4/5, sum(y)/len(y) = 198/200, {Recall = 0.054974, Precision = 0.010547, F1 = 0.017699}	
+Epoch 50, query = pakistan, epsilon = 0.250, minibatch 5/5, sum(y)/len(y) = 136/200, {Recall = 0.007853, Precision = 0.001507, F1 = 0.002528}	
