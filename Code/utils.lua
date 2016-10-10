@@ -18,6 +18,26 @@ function split(pString)
    return Table
 end
 
+function repeatQuery(query_table, n)
+    local out = {}
+    for i=1, n do
+        out[i] = query_table
+    end
+    return out
+end
+
+function updateTable(orig_table, insert_table, n_i)
+    local out_table = {}
+    for k, v in pairs(orig_table) do
+        out_table[k] = v 
+    end
+    --- Need -1 because this starts indexing at 1
+    for i=0, #insert_table-1 do
+        out_table[n_i + i] = insert_table[i+1]
+    end
+    return out_table
+end
+
 function grabKtokens(x, K)
     local tmp = {}
     if K == nil then 
