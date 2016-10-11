@@ -1,3 +1,4 @@
-head -n 1000 ../DO_NOT_UPLOAD_THIS_DATA/0-output/2012_aurora_shooting_first_sentence_numtext.csv > ../DO_NOT_UPLOAD_THIS_DATA/0-output/2012_aurora_shooting_first_sentence_numtext2.csv
-head -n 1000 ../DO_NOT_UPLOAD_THIS_DATA/0-output/2012_pakistan_sentence_numtext.csv > ../DO_NOT_UPLOAD_THIS_DATA/0-output/2012_pakistan_sentence_numtext2.csv
-head -n 1000 ../DO_NOT_UPLOAD_THIS_DATA/0-output/hurricane_sandy_first_sentence_numtext.csv > ../DO_NOT_UPLOAD_THIS_DATA/0-output/hurricane_sandy_first_sentence_numtext2.csv
+head -n 1000 /Users/franciscojavierarceo/GitHub/DeepNLPQLearning/DO_NOT_UPLOAD_THIS_DATA/0-output/2012_aurora_shooting_first_sentence_numtext.csv > /Users/franciscojavierarceo/GitHub/DeepNLPQLearning/DO_NOT_UPLOAD_THIS_DATA/0-output/2012_aurora_shooting_first_sentence_numtext2.csv
+head -n 1000 /Users/franciscojavierarceo/GitHub/DeepNLPQLearning/DO_NOT_UPLOAD_THIS_DATA/0-output/2012_pakistan_garment_factory_fires_first_sentence_numtext.csv > /Users/franciscojavierarceo/GitHub/DeepNLPQLearning/DO_NOT_UPLOAD_THIS_DATA/0-output/2012_pakistan_garment_factory_fires_first_sentence_numtext2.csv
+head -n 1000 /Users/franciscojavierarceo/GitHub/DeepNLPQLearning/DO_NOT_UPLOAD_THIS_DATA/0-output/hurricane_sandy_first_sentence_numtext.csv > /Users/franciscojavierarceo/GitHub/DeepNLPQLearning/DO_NOT_UPLOAD_THIS_DATA/0-output/hurricane_sandy_first_sentence_numtext2.csv
+echo "Top 1000 records exported for aurora, sandy, and pakistan datasets"
