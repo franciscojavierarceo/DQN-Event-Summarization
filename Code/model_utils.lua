@@ -144,6 +144,8 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
             
             --- Initializing rouge metrics at time {t-1} and save scores, reset each new epoch
             local r_t1 , p_t1, f_t1 = 0., 0., 0.
+            local rsm, psm, fsm = 0., 0., 0.
+            local den = 0.
             for minibatch = 1, nbatches do
                 if minibatch == 1 then
                     -- Need to skip the first row because it says "Text"
@@ -194,7 +196,8 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
                         ---  skip   {0} if E[ROUGUE] <= thresh
                 opt_action = policy(pred_rougue, epsilon, thresh)
 
-                local rscores, pscores, fscores = {}, {}, {}                
+                local rscores, pscores, fscores = {}, {}, {}
+                rsm, psm, fsm = 0., 0., 0.
                 for i=1, #xs do
                     -- Now we evaluate our action through the critic/Oracle
                     --- Calculating rouge scores; Call get_i_n() to cumulatively compute rouge
@@ -203,6 +206,7 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
                     rscores[i] = rougeRecall(curr_summary, nuggets, K_sentences) - r_t1
                     pscores[i] = rougePrecision(curr_summary, nuggets, K_sentences) - p_t1
                     fscores[i] = rougeF1(curr_summary, nuggets, K_sentences) - f_t1
+                    rsm, psm, fsm = rsm+rscores[i] + r_t1, psm + pscores[i] + p_t1, fsm + fscores[i] + f_t1
                     r_t1, p_t1, f_t1 = rscores[i], pscores[i], fscores[i]
                 end
 
@@ -224,12 +228,14 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
                 yrouge = updateTable(yrouge, pscores, nstart)
                 action_list = updateTable(action_list, opt_action, nstart)
 
-                --- Calculating total rouge, without delta
-                predsummarytotal = buildPredSummary(action_list, xtdm, K_sentences)
+                -- - Calculating total rouge, without delta
+                -- predsummarytotal = buildPredSummary(action_list, xtdm, K_sentences)
                 --- Calculating last one to see actual last rouge, without delta
-                rscore = rougeRecall(predsummarytotal, nuggets, K_sentences)
-                pscore = rougePrecision(predsummarytotal, nuggets, K_sentences)
-                fscore = rougeF1(predsummarytotal, nuggets, K_sentences)
+                local den = den + #xs
+                rscore, pscore, fscore = rsm/den, psm/den, fsm/den
+                -- rscore = rougeRecall(predsummarytotal, nuggets, K_sentences)
+                -- pscore = rougePrecision(predsummarytotal, nuggets, K_sentences)
+                -- fscore = rougeF1(predsummarytotal, nuggets, K_sentences)
 
                 if (epoch % print_every)==0 then
                     perf_string = string.format(
