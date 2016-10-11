@@ -72,19 +72,6 @@ function build_model(model, vocab_size, embed_dim, outputSize, use_cuda)
     end
 end
 
--- function EvalModel(preds, )
--- local rscores, pscores, fscores = {}, {}, {}
--- -- Now we evaluate our action through the critic/Oracle
--- for i=1, #xs do
---     --- Calculating rouge scores; Call get_i_n() to cumulatively compute rouge
---     local curr_summary = buildPredSummary2(geti_n(preds, 1, i), 
---                                        geti_n(xout, 1 , i), K_sentences)
---     rscores[i] = rougeRecall(curr_summary, nuggets, K_sentences) - r_t1
---     pscores[i] = rougePrecision(curr_summary, nuggets, K_sentences) - p_t1
---     fscores[i] = rougeF1(curr_summary, nuggets, K_sentences) - f_t1
---     r_t1, p_t1, f_t1 = rscores[i], pscores[i], fscores[i]
--- end
-
 function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs, 
                             model, crit, thresh, embed_dim, epsilon, delta, 
                             base_explore_rate, print_every,
