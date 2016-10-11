@@ -30,24 +30,25 @@ local opt = cmd:parse(arg or {})
 dofile("utils.lua")
 dofile("model_utils.lua")
 
+torch.manualSeed(420)
+
 data_path = '~/GitHub/DeepNLPQLearning/DO_NOT_UPLOAD_THIS_DATA/0-output/'
+
 query_fn = data_path .. 'queries_numtext.csv'
 query_file =  csvigo.load({path = query_fn, mode = "large", verbose = false})
-queries = grabNsamples(query_file, #query_file, nil)
+queries = buildTermDocumentTable(query_file, nil)
 
-aurora = {
-        ['inputs'] = '2012_aurora_shooting_first_sentence_numtext2.csv', 
-        ['nuggets'] = 'aurora_nuggets_numtext.csv',
-        -- ['sentences'] = '2012_aurora_sentence_numtext2.csv',
-        ['query'] = queries[3],
-        ['query_name'] = 'aurora'
-}
 pakistan = {
         ['inputs'] = '2012_pakistan_garment_factory_fires_first_sentence_numtext2.csv',
         ['nuggets'] ='pakistan_nuggets_numtext.csv',
-        -- ['sentences'] = '2012_pakistan_sentence_numtext2.csv',
         ['query'] = queries[2],
         ['query_name'] = 'pakistan'
+}
+aurora = {
+        ['inputs'] = '2012_aurora_shooting_first_sentence_numtext2.csv', 
+        ['nuggets'] = 'aurora_nuggets_numtext.csv',
+        ['query'] = queries[3],
+        ['query_name'] = 'aurora'
 }
 sandy = {
         ['inputs'] = 'hurricane_sandy_first_sentence_numtext2.csv',
@@ -62,7 +63,6 @@ inputs = {
         sandy
     }
 --- Only using epsilon greedy strategy for (nepochs/cuts)% of the epochs
-torch.manualSeed(420)
 delta = 1./(opt.nepochs/opt.cuts) 
 crit = nn.MSECriterion()
 

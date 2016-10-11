@@ -18,10 +18,10 @@ function split(pString)
    return Table
 end
 
-function repeatQuery(query_table, n)
+function repeatTable(input_table, n)
     local out = {}
     for i=1, n do
-        out[i] = query_table
+        out[i] = input_table
     end
     return out
 end
@@ -38,37 +38,11 @@ function updateTable(orig_table, insert_table, n_i)
     return out_table
 end
 
-function grabKtokens(x, K)
-    local tmp = {}
-    if K == nil then 
-        return x
-    end
-    for k, v in pairs(x) do
-        if k <= K then
-            tmp[k] = v
-        end
-        if k > K then
-            return tmp
-        end
-    end
-    return tmp
-end
-
 function buildTermDocumentTable(x, K)
+    --- If K == nil then getFirstKtokens() returns x
     local out = {}
     for k,v in pairs(x) do
-        out[k] = grabKtokens(split(x[k][1]), K)
-    end
-    return out
-end
-
-function grabNsamples(x, K)
-    local out = {}
-    if N == nil then 
-        N = #x
-    end
-    for k,v in pairs(x) do
-        out[k] = grabKtokens(split(x[k][1]), K)
+        out[k] = getFirstKElements(split(x[k][1]), K)
     end
     return out
 end
@@ -83,29 +57,6 @@ function getMaxseq(x)
     end
     return maxval
 end
-
-function sampleData(x, K, mxl)
-    local nbatches = torch.round( #x / K)
-    for i = 1, K do
-        if i == 1 then
-            nstart = 2
-            nend = torch.round(nbatches * i)
-        end
-        if i == #x then 
-            nstart = nend + 1
-            nend = #x
-        end
-        if i > 1 and i < #x then 
-            nstart = nend + 1
-            nend = torch.round(nbatches * i)
-        end
-        x_ss  = geti_n(x, nstart, nend)
-        out  = grabNsamples(x_ss, 1, #x_ss)        --- Extracting N samples
-        xs = padZeros(out, mxl)             --- Padding the data by the maximum length
-        input = torch.LongTensor(xs)        --- This is the correct format to input it
-    end
-    return out
-end    
 
 function getVocabSize(x)
     local vocab_size = 0
@@ -205,9 +156,30 @@ function x_or_pass(pred_action, xs)
     end
 end
 
-function getLastKTokens(x, K)
+function getFirstKElements(x, K)
+    --- This function grabs the first K elements from a table
+    --- e.g., getFirstKElements({1,2,3,4,5}, 3) = {1, 2, 3}
+    local tmp = {}
+    if K == nil then 
+        return x
+    end
+    for k, v in pairs(x) do
+        if k <= K then
+            tmp[k] = v
+        end
+        if k > K then
+            return tmp
+        end
+    end
+    return tmp
+end
+
+function getLastKElements(x, K)
     --- This function grabs the last K elements from a table
-    --- e.g., getLastKTokens({1,2,3,4,5}, 3) = {1,2,3}
+    --- e.g., getLastKElements({1,2,3,4,5}, 3) = {5,4,3}
+    if K == nil then
+        return x 
+    end
     local out = {}
     for i=0, K-1, 1 do
         out[i+1] = x[#x-i]
@@ -218,27 +190,28 @@ function getLastKTokens(x, K)
     return out
 end
 
-function buildPredSummary2(preds, xs, K)
+function buildPredSummary(preds, xs, K)
     --- This function is used to map the token indices to extract the summary
     --- and produceds {token_id, 0, token_id} from any given *selected* sentence
     local out = {}
     for i=1, #xs do
         if i == 1 then 
-            -- out[i] = x_or_zero(preds[i], unpackZeros(xs[i]))
             out[i] = x_or_pass(preds[i], unpackZeros(xs[i]))
         else 
             --- Update it by adding xs_i and out_{i-1}
-            -- local tmp = tableConcat(x_or_zero(preds[i], unpackZeros(xs[i]) ), out[i-1])
             local tmp = tableConcat(x_or_pass(preds[i], unpackZeros(xs[i])) , out[i-1])
-            out[i] =  getLastKTokens(tmp, K)
+            --- Getting the last K tokens because we want to keep last K tokens
+            out[i] =  getLastKElements(tmp, K)
         end
     end
     return out
 end
 
-function buildKSummary(preds, xs, K)
+function buildSentenceSummary(preds, xs, K)
     --- This method was used to map the sentence indices to extract the summary
     --- and produceds {sentence_id, 0, sentence_id} 
+    --- No longer using this method, instead, I'm keeping this here in case we 
+    --- Decide to try it this way later on
     local out = {}
     local out2 = {}
     for i=1, #xs do
@@ -251,49 +224,10 @@ function buildKSummary(preds, xs, K)
     end
     local maxlen = 0
     for i=1, #out do
-        out2[i] = getLastKTokens(out[i], K)
+        out2[i] = getLastKElements(out[i], K)
         maxlen = math.max(maxlen, #out2[i])
     end    
     return padZeros(out2, maxlen)
-end
-
-
-
-function buildSummary(preds, xs, maxlen)
-    local out = {}
-    for i=1, #xs do
-        if i == 1 then 
-            out[i] = x_or_zero(preds[i], unpackZeros(xs[i]))
-        else 
-            --- Update it by adding xs_i and out_{i-1}
-            out[i] = tableConcat(x_or_zero(preds[i], unpackZeros(xs[i])), out[i-1])
-        end
-    end
-    if maxlen == 0 then
-        maxlen = 0
-        for k,v in pairs(out) do
-            maxlen = math.max(maxlen, #v)
-        end
-    end
-    outpadded = padZeros(out, maxlen)
-    return outpadded
-end
-
-function buildPredSummary(preds, xs)
-    local out = {}
-    for i=1, #xs do
-        if i == 1 then 
-            out[i] = x_or_zero(preds[i], unpackZeros(xs[i]))
-        else 
-            --- Update it by adding xs_i and out_{i-1}
-            out[i] =  x_or_zero(preds[i], unpackZeros(xs[i]))
-        end
-    end
-    return out
-end
-
-function setContains(set, key)
-    return set[key] ~= nil
 end
 
 function Tokenize(inputdic, remove_stopwords)
@@ -312,39 +246,20 @@ function Tokenize(inputdic, remove_stopwords)
     end
     if remove_stopwords then 
         for k, stopword in pairs(stopwordlist) do
-            if setContains(set, stopwordlist) then
+            -- Removing stop words here
+            if out[stopword] ~= nil then
                 out[stopword] = nil
             end
         end
     end
     return out
 end
---- Necessary for the Rouge calculation for last K streams
-function getLastK(x, K)
-    --- Note: need to use K-1 bc we start at 0
-    if K == nil then
-        return x
-    end
-    out = {}
-    k = 0
-    for i=0, #x-1 do
-        if sumTable(x[#x - i])  ~= 0 then
-            if k <= K-1 then
-                --- 10 - 0 - 1 = 9..., 8, 7 ..., 1
-                out[#x-i-1] = x[#x - i]
-                k = k + 1
-            else
-                return out
-            end
-        end
-    end
-    return out
-end
+
 --- Now we can calculate ROUGE
 function rougeRecall(pred_summary, ref_summaries, K)
     -- pred_summary = getLastK(pred_summary, K)
-    rsd = Tokenize(ref_summaries)
-    sws = Tokenize(pred_summary)
+    rsd = Tokenize(ref_summaries, true)
+    sws = Tokenize(pred_summary, true)
     for k, v in pairs(rsd) do
         if sws[k] == nil then
             sws[k] = 0
@@ -367,8 +282,8 @@ end
 ---- Precision
 function rougePrecision(pred_summary, ref_summaries, K)
     -- pred_summary = getLastK(pred_summary, K)
-    rsd = Tokenize(ref_summaries)
-    sws = Tokenize(pred_summary)
+    rsd = Tokenize(ref_summaries, true)
+    sws = Tokenize(pred_summary, true)
     for k, v in pairs(rsd) do
         if sws[k] == nil then
             sws[k] = 0
