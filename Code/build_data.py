@@ -251,4 +251,5 @@ if __name__ == '__main__':
                 qtexts = qtext,
                 ntexts = ntext)
 
+    sys.system('source /Users/franciscojavierarceo/GitHub/DeepNLPQLearning/Code/trim_data.sh')
     print("----- END ------")
