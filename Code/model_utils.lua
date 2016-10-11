@@ -231,15 +231,9 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
                 yrouge = updateTable(yrouge, pscores, nstart)
                 action_list = updateTable(action_list, opt_action, nstart)
 
-                -- - Calculating total rouge, without delta
-                -- predsummarytotal = buildPredSummary(action_list, xtdm, K_sentences)
                 --- Calculating last one to see actual last rouge, without delta
                 local den = den + #xs
                 rscore, pscore, fscore = rsm/den, psm/den, fsm/den
-                -- rscore = rougeRecall(predsummarytotal, nuggets, K_sentences)
-                -- pscore = rougePrecision(predsummarytotal, nuggets, K_sentences)
-                -- fscore = rougeF1(predsummarytotal, nuggets, K_sentences)
-
                 if (epoch % print_every)==0 then
                     perf_string = string.format(
                         "Epoch %i, epsilon = %.3f, minibatch %i/%i, sum(y)/len(y) = %i/%i, {Recall = %.6f, Precision = %.6f, F1 = %.6f}, query = %s", 
