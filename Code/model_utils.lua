@@ -78,6 +78,7 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
                             model, crit, thresh, embed_dim, epsilon, delta, 
                             base_explore_rate, print_every,
                             learning_rate, K_sentences, K_tokens, use_cuda)
+    --- This function iterates over the epochs, queries, and mini-batches to learn the model
     if use_cuda then
       Tensor = torch.CudaTensor
       LongTensor = torch.CudaLongTensor

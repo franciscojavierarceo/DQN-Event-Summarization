@@ -135,7 +135,7 @@ def TokenizeData(infile_list, qfilename, outfile_list, word2idx, top_n, qtexts, 
                 [
                     tfdf.iloc[0:top_n,:], 
                     tfdf[tfdf['qfile']==True],
-                    tfdf[tfdf['nfile'==True]]
+                    tfdf[tfdf['nfile']==True]
                 ]
             )
     tfdf.drop_duplicates(inplace=True)
