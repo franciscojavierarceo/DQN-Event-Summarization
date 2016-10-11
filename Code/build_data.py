@@ -38,13 +38,14 @@ def BuildIndexFiles(infile_list, qfilename):
         print('Loading and tokenizing %s (%i of %i)' % (infilename, idx+1, len(infile_list)) )
         if (qfilename not in infilename) and 'nuggets' not in infilename:
             df = pd.read_csv(infilename, sep='\t', encoding='latin-1')
-            df['text'] = df['text'].str.replace('[^A-Za-z0-9]+', ' ').str.strip()
+            df['text'] = df['text'].str.replace('[^A-Za-z0-9]+', ' ').str.strip().str.lower()
             texts = [ t.split(" ") for t in df['text'] ]
 
         if 'nuggets' in infilename:
             df = pd.read_csv(infilename, sep='\t', encoding='latin-1')
-            df['nugget_text'] = df['nugget_text'].str.replace('[^A-Za-z0-9]+', ' ').str.strip()
+            df['nugget_text'] = df['nugget_text'].str.replace('[^A-Za-z0-9]+', ' ').str.strip().str.lower()
             texts = [ t.split(" ") for t in df['nugget_text'] ]
+            ntexts = texts 
 
         if infilename == qfilename:
             texts = loadQuery(infilename)
@@ -56,12 +57,14 @@ def BuildIndexFiles(infile_list, qfilename):
         texts = [ [token for token in text ]  for text in texts]
         # Collecting all the list of tokens
         all_tokens.append(texts)
+        
 
     if qtexts == None:
         qtexts = []
 
     texts = sum(all_tokens, [])
     qtexts = sum(qtexts, [])
+    ntexts = sum(ntexts, [])
 
     # Getting the dictionary with token info
     dictionary = corpora.Dictionary(texts)
@@ -95,9 +98,9 @@ def BuildIndexFiles(infile_list, qfilename):
     # Exporting data
     odf.to_csv('./0-output/total_corpus_smry.csv', index=False)
 
-    return dictionary, qtexts
+    return dictionary, qtexts, ntexts
     
-def TokenizeData(infile_list, qfilename, outfile_list, word2idx, top_n, qtexts):
+def TokenizeData(infile_list, qfilename, outfile_list, word2idx, top_n, qtexts, ntexts):
     """
     :type  infile_list:  list
     :param infile_list:  List of file names to import
@@ -120,11 +123,21 @@ def TokenizeData(infile_list, qfilename, outfile_list, word2idx, top_n, qtexts):
 
     if qtexts == None:
         qtexts = []
+    if ntexts == None:
+        ntexts = []
+
     # Loading the token frequencies
     tfdf = pd.read_csv('./0-output/total_corpus_smry.csv')
     tfdf['qfile'] = tfdf['token'].isin(qtexts)
+    tfdf['nfile'] = tfdf['token'].isin(ntexts)
     tfdf.sort_values(by='frequency', ascending=False, inplace=True)
-    tfdf = pd.concat([tfdf.iloc[0:top_n,:], tfdf[tfdf['qfile']==True]])
+    tfdf = pd.concat(
+                [
+                    tfdf.iloc[0:top_n,:], 
+                    tfdf[tfdf['qfile']==True],
+                    tdfdf[tfdf['nfile'==True]]
+                ]
+            )
     tfdf.drop_duplicates(inplace=True)
     token_ss = dict(zip(tfdf['token'], tfdf['id']))
 
@@ -185,13 +198,14 @@ if __name__ == '__main__':
 
     qfilename = './trec-2013-data/trec2013-ts-topics-test.xml'
     # Exporting the raw files
-    mycorpora, qtext = BuildIndexFiles(infilelist, qfilename)
+    mycorpora, qtext, ntext = BuildIndexFiles(infilelist, qfilename)
     TokenizeData(infile_list = infilelist, 
                 qfilename = qfilename, 
                 outfile_list = outfilelist, 
                 word2idx = mycorpora.token2id, 
                 top_n = 10000,
-                qtexts = qtext)
+                qtexts = qtext,
+                ntexts = ntext)
     
     # Exporting the first setence files -- corpora based on the total list
     infilelist_fs = [
@@ -213,7 +227,8 @@ if __name__ == '__main__':
                 outfile_list = outfilelist_fs, 
                 word2idx = mycorpora.token2id, 
                 top_n = 10000,
-                qtexts = qtext)
+                qtexts = qtext,
+                ntexts = ntext)
 
     # Exporting the nuggets only -- corpora based on the total list
     infile_nuggets = [
@@ -233,6 +248,7 @@ if __name__ == '__main__':
                 outfile_list = outfile_nuggets, 
                 word2idx = mycorpora.token2id, 
                 top_n = 10000,
-                qtexts = qtext)
+                qtexts = qtext,
+                ntexts = ntext)
 
     print("----- END ------")
