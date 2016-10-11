@@ -1,12 +1,14 @@
 function policy(nnpreds, epsilon, thresh)
+    --- This executes our policy over our predicted rougue from the NN
     local pred = {}
     local N = nnpreds:size()[1]
-    if torch.rand(1)[1] <= epsilon then  -- Epsilon greedy strategy
+    -- Epsilon greedy strategy
+    if torch.rand(1)[1] <= epsilon then  
         for i=1, N do
             pred[i] = (torch.rand(1)[1] > 0.50 ) and 1 or 0
         end
     else 
-        --- This is the action choice 1 select, 0 skip
+    --- This is the action choice 1 select, 0 skip
         for i=1, N do
             pred[i] = (nnpreds[i][1] > thresh) and 1 or 0
         end
