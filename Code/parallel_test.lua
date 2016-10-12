@@ -47,7 +47,7 @@ function buildFullModel(vocab_size, embed_dim, model, use_cuda)
     FinalMLP = nn.Sequential()
     FinalMLP:add(ParallelModel)
     FinalMLP:add(nn.JoinTable(2))
-    FinalMLP:add( nn.Linear(embed_dim * 4, 1) )
+    FinalMLP:add( nn.Linear(embed_dim * 4, 2) )
     FinalMLP = FinalMLP
     if use_cuda then
         return FinalMLP:cuda()
@@ -78,7 +78,7 @@ function build_data(use_cuda)
     summary = LongTensor{{0, 0, 1, 4}, {0, 2, 3, 1}}:t()
     query = LongTensor{{0, 0, 4, 3}, {0, 0, 0, 0}}:t()
     actions = torch.round(torch.rand(2, 1))
-    yrouge = torch.rand(2)
+    yrouge = torch.rand(2, 2)
     if use_cuda then
         return sentences, summary, query, actions:cuda(), yrouge:cuda()
     else

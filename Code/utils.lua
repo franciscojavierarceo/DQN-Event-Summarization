@@ -18,6 +18,13 @@ function split(pString)
    return Table
 end
 
+function threshold(x, thresh)
+    if x <= thresh and x > 0 then
+        return 0
+    else 
+        return x 
+    end
+end
 function repeatTable(input_table, n)
     local out = {}
     for i=1, n do

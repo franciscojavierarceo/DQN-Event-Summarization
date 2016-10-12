@@ -1,8 +1,5 @@
 # /bin/sh
 
-# echo "Random model"
-# th ./dqn_random.lua
-
 echo "DQN BOW"
 th ./dqn_model.lua --model bow  > dqn_full_bow_model_perf.txt
 

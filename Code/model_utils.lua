@@ -1,4 +1,4 @@
-function policy(nnpreds, epsilon, thresh)
+function policy(nnpreds, epsilon)
     --- This executes our policy over our predicted rougue from the NN
     local pred = {}
     local N = nnpreds:size()[1]
@@ -10,7 +10,7 @@ function policy(nnpreds, epsilon, thresh)
     else 
     --- This is the action choice 1 select, 0 skip
         for i=1, N do
-            pred[i] = (nnpreds[i][1] > thresh) and 1 or 0
+            pred[i] = (nnpreds[i][2] > nnpreds[i][1]) and 1 or 0
         end
     end
     return pred
@@ -59,12 +59,12 @@ function build_model(model, vocab_size, embed_dim, outputSize, use_cuda)
     ParallelModel:add(mod1)
     ParallelModel:add(mod2)
     ParallelModel:add(mod3)
-    ParallelModel:add(mod4)
+    -- ParallelModel:add(mod4)
 
     local FinalMLP = nn.Sequential()
     FinalMLP:add(ParallelModel)
     FinalMLP:add(nn.JoinTable(2))
-    FinalMLP:add(nn.Linear(embed_dim * 4, outputSize) )
+    FinalMLP:add(nn.Linear(embed_dim * 3, outputSize) )
     FinalMLP:add(nn.Tanh())
 
     if use_cuda then
@@ -74,6 +74,17 @@ function build_model(model, vocab_size, embed_dim, outputSize, use_cuda)
     end
 end
 
+
+--- To do list:
+    --- 1. Replicate node module
+    --- 2. Change sumary to output Last K terms, not limited by sequence length
+    --- 3. Output 2 score for rougue, 1 for action =1 and action = 0
+    --- 4. share weights and embeddings between LSTMs
+    --- 5. threshold appliedto rougue delta
+    --- 6. RMS prop in optim package
+    --- 7. adjust sampling methology and backpropogation
+    --- 8. Map tokens below some threshold to unknown
+    --- 
 function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs, 
                             model, crit, thresh, embed_dim, epsilon, delta, 
                             base_explore_rate, print_every,
@@ -123,10 +134,10 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
         --- initialize the query level lists
         summary_query_list[query_id] = torch.totable(torch.zeros(#input_file))
         action_query_list[query_id] = action_list
-        yrougue_query_list[query_id] = torch.totable(torch.randn(#input_file))
+        yrougue_query_list[query_id] = torch.totable(torch.randn(#input_file, 2))
     end
 
-    model  = build_model(model, vocab_size, embed_dim, 1, use_cuda)
+    model  = build_model(model, vocab_size, embed_dim, 2, use_cuda)
 
     for epoch=0, nepochs, 1 do
         loss = 0.                    --- Compute a new MSE loss each time
@@ -188,7 +199,7 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
                 end
 
                 --- Forward pass to estimate expected rougue)
-                pred_rougue = model:forward({sentences, summary, query, actions})
+                pred_rougue = model:forward({sentences, summary, query})
 
                 if use_cuda then
                     pred_rougue = pred_rougue:double()
@@ -197,18 +208,21 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
                     --- Notice that pred_rougue gives us our optimal action by returning
                         ---  select {1} if E[ROUGUE]  > thresh  or 
                         ---  skip   {0} if E[ROUGUE] <= thresh
-                opt_action = policy(pred_rougue, epsilon, thresh)
-
+                -- opt_action = policy(pred_rougue, epsilon)
+                opt_action = {}
                 local rscores, pscores, fscores = {}, {}, {}
-                rsm, psm, fsm = 0., 0., 0.
                 for i=1, #xs do
                     -- Now we evaluate our action through the critic/Oracle
                     --- Calculating rouge scores; Call get_i_n() to cumulatively compute rouge
-                    local curr_summary = buildPredSummary(geti_n(opt_action, 1, i), 
+                    if i==1 then 
+                        opt_action.insert(1)
+                    local curr_summarySel = buildPredSummary(geti_n(opt_action, 1, i), 
                                                        geti_n(xout, 1 , i), K_sentences)
-                    rscores[i] = rougeRecall(curr_summary, nuggets, K_sentences) - r_t1
-                    pscores[i] = rougePrecision(curr_summary, nuggets, K_sentences) - p_t1
-                    fscores[i] = rougeF1(curr_summary, nuggets, K_sentences) - f_t1
+
+                    end
+                    rscores[i] = threshold(rougeRecall(curr_summary, nuggets, K_sentences) - r_t1, thresh)
+                    pscores[i] = threshold(rougePrecision(curr_summary, nuggets, K_sentences) - p_t1, thresh)
+                    fscores[i] = threshold(rougeF1(curr_summary, nuggets, K_sentences) - f_t1, thresh)
                     rsm, psm, fsm = rsm+rscores[i] + r_t1, psm + pscores[i] + p_t1, fsm + fscores[i] + f_t1
                     r_t1, p_t1, f_t1 = rscores[i], pscores[i], fscores[i]
                 end
