@@ -1,19 +1,19 @@
 function policy(nnpreds, epsilon)
     --- This executes our policy over our predicted rougue from the NN
-    local pred = {}
+    local opt_action = {}
     local N = nnpreds:size()[1]
     -- Epsilon greedy strategy
     if torch.rand(1)[1] <= epsilon then  
         for i=1, N do
-            pred[i] = (torch.rand(1)[1] > 0.50 ) and 1 or 0
+            opt_action[i] = (torch.rand(1)[1] > 0.50 ) and 1 or 0
         end
     else 
     --- This is the action choice 1 select, 0 skip
         for i=1, N do
-            pred[i] = (nnpreds[i][2] > nnpreds[i][1]) and 1 or 0
+            opt_action[i] = (nnpreds[i][1] > nnpreds[i][2]) and 1 or 0
         end
     end
-    return pred
+    return opt_action
 end
 
 function build_bowmlp(vocab_size, embed_dim)
@@ -206,24 +206,19 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
                 end
                 --- Execute policy based on our E[ROUGUE]
                     --- Notice that pred_rougue gives us our optimal action by returning
-                        ---  select {1} if E[ROUGUE]  > thresh  or 
-                        ---  skip   {0} if E[ROUGUE] <= thresh
-                -- opt_action = policy(pred_rougue, epsilon)
-                opt_action = {}
+                        ---  E[ROUGUE | Select ] > E[ROUGUE | Skip]
+                opt_action = policy(pred_rougue, epsilon)
                 local rscores, pscores, fscores = {}, {}, {}
                 for i=1, #xs do
-                    -- Now we evaluate our action through the critic/Oracle
+                    --- Now we evaluate our action through the critic/oracle
                     --- Calculating rouge scores; Call get_i_n() to cumulatively compute rouge
-                    if i==1 then 
-                        opt_action.insert(1)
                     local curr_summarySel = buildPredSummary(geti_n(opt_action, 1, i), 
-                                                       geti_n(xout, 1 , i), K_sentences)
-
-                    end
+                                                             geti_n(xout, 1, i), 
+                                                             K_sentences)
                     rscores[i] = threshold(rougeRecall(curr_summary, nuggets, K_sentences) - r_t1, thresh)
                     pscores[i] = threshold(rougePrecision(curr_summary, nuggets, K_sentences) - p_t1, thresh)
                     fscores[i] = threshold(rougeF1(curr_summary, nuggets, K_sentences) - f_t1, thresh)
-                    rsm, psm, fsm = rsm+rscores[i] + r_t1, psm + pscores[i] + p_t1, fsm + fscores[i] + f_t1
+                    rsm, psm, fsm = rsm + rscores[i] + r_t1, psm + pscores[i] + p_t1, fsm + fscores[i] + f_t1
                     r_t1, p_t1, f_t1 = rscores[i], pscores[i], fscores[i]
                 end
 
