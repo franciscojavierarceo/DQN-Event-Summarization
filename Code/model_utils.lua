@@ -6,7 +6,7 @@ function policy(nnpreds, epsilon)
     if torch.rand(1)[1] <= epsilon then  
         output = torch.rand(N,2)
     else     --- This is the action choice 1 select, 0 skip
-        nnpreds
+        return nnpreds
     end
     return output
 end
@@ -203,7 +203,7 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
                     --- Notice that pred_rougue gives us our optimal action by returning
                         ---  E[ROUGUE | Select ] > E[ROUGUE | Skip]
 
-                pred_rougue = policy(pred_rougue, epsilon)
+                -- pred_rougue = policy(pred_rougue, epsilon)
 
                 opt_action = {}
                 f1_rougue_select,  re_rougue_select, pr_rougue_select = {}, {}, {}
