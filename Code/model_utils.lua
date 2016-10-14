@@ -212,7 +212,8 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
                 f1_rougue_select,  re_rougue_select, pr_rougue_select = {}, {}, {}
                 f1_rougue_skip, re_rougue_skip , pr_rougue_skip = {}, {}, {}
                 fsel_t1, fskp_t1, rsel_t1, rskp_t1, psel_t1, pskp_t1 = 0., 0., 0., 0., 0., 0.
-                for i=1, #pred_rougue[1] do
+
+                for i=1, #pred_rougue do
                 --     opt_action[i] = (pred_rougue[i][1]  > pred_rougue[i][2]) and 1 or 0
                 --     curr_summary= buildPredSummary(geti_n(opt_action, 1, i), 
                 --                                        geti_n(xout, 1, i),  nil) 
@@ -240,12 +241,14 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
                     opt_action[i] = (f1_rougue_select[i] > f1_rougue_skip[i]) and 1 or 0
                 end
 
-                local labels = torch.Tensor(f1_rougue_skip):cat(torch.Tensor(f1_rougue_select), 2)
+
+                local labels = Tensor(f1_rougue_skip):cat(Tensor(f1_rougue_select), 2)
 
                 if use_cuda then
                      labels = labels:cuda()
                      pred_rougue = Tensor(pred_rougue):cuda()
                 end
+
                 predsummary = buildPredSummary(opt_action, xout, nil)
                 predsummary = predsummary[#predsummary]
 
@@ -253,10 +256,7 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
                 pscore = rougePrecision({predsummary}, nuggets)
                 fscore = rougeF1({predsummary}, nuggets)
 
-
                 -- We backpropagate our observed outcomes
-                print(#labels)
-                print(#pred_rougue)
                 loss = loss + crit:forward(pred_rougue, labels)
                 grads = crit:backward(pred_rougue, labels)
                 model:zeroGradParameters()
@@ -264,13 +264,12 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
                 model:updateParameters(learning_rate)        
 
                 -- Updating our bookkeeping tables
-                yrouge = updateTable(yrouge, pscores, nstart)
                 action_list = updateTable(action_list, opt_action, nstart)
+                yrouge = updateTable(yrouge, torch.totable(labels), nstart)
 
                 --- Calculating last one to see actual last rouge, without delta
-                rsm = sumTable()
-                local den = den + #xs
-                rscore, pscore, fscore = rsm/den, psm/den, fsm/den
+                -- local den = den + #xs
+                -- rscore, pscore, fscore = rsm/den, psm/den, fsm/den
                 if (epoch % print_every)==0 then
                     perf_string = string.format(
                         "Epoch %i, epsilon = %.3f, minibatch %i/%i, sum(y)/len(y) = %i/%i, {Recall = %.6f, Precision = %.6f, F1 = %.6f}, query = %s", 
