@@ -202,39 +202,65 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
                 pred_rougue = model:forward({sentences, summary, query})
 
                 if use_cuda then
-                    pred_rougue = pred_rougue:double()
+                     pred_rougue =  torch.totable(pred_rougue)
                 end
                 --- Execute policy based on our E[ROUGUE]
                     --- Notice that pred_rougue gives us our optimal action by returning
                         ---  E[ROUGUE | Select ] > E[ROUGUE | Skip]
-                opt_action_list = policy(pred_rougue, epsilon)
-                local rscores, pscores, fscores = {}, {}, {}
-                for i=1, #xs do
-                    --- Now we evaluate our action through the critic/oracle
-                    --- Calculating rouge scores; Call get_i_n() to cumulatively compute rouge
-                    local curr_summarySel = buildPredSummary(geti_n(opt_action, 1, i), 
-                                                             geti_n(xout, 1, i), 
-                                                             K_sentences)
-                    rscores[i] = threshold(rougeRecall(curr_summary, nuggets, K_sentences) - r_t1, thresh)
-                    pscores[i] = threshold(rougePrecision(curr_summary, nuggets, K_sentences) - p_t1, thresh)
-                    fscores[i] = threshold(rougeF1(curr_summary, nuggets, K_sentences) - f_t1, thresh)
-                    rsm, psm, fsm = rsm + rscores[i] + r_t1, psm + pscores[i] + p_t1, fsm + fscores[i] + f_t1
-                    r_t1, p_t1, f_t1 = rscores[i], pscores[i], fscores[i]
-                    opt_action.insert(opt_action)
+
+                opt_action = {}
+                f1_rougue_select,  re_rougue_select, pr_rougue_select = {}, {}, {}
+                f1_rougue_skip, re_rougue_skip , pr_rougue_skip = {}, {}, {}
+                fsel_t1, fskp_t1, rsel_t1, rskp_t1, psel_t1, pskp_t1 = 0., 0., 0., 0., 0., 0.
+                for i=1, #pred_rougue[1] do
+                --     opt_action[i] = (pred_rougue[i][1]  > pred_rougue[i][2]) and 1 or 0
+                --     curr_summary= buildPredSummary(geti_n(opt_action, 1, i), 
+                --                                        geti_n(xout, 1, i),  nil) 
+                --     fsocres[i] = rougeF1({curr_summary[i]}, nuggets ) - f_t1
+                --     rscores[i] = rougeRecall({curr_summary[i]}, nuggets ) - r_t1
+                --     pscores[i] = rougePrecision({curr_summary[i]}, nuggets ) - p_t1
+                -- end
+                    if i ==1 then 
+                        curr_summarySkp = buildPredSummary({0}, {xout[i]},  nil)
+                        curr_summarySel = buildPredSummary({1}, {xout[i]},  nil)
+                    else
+                        curr_summarySkp = buildPredSummary(tableConcat(geti_n(opt_action, 1, i-1), {0}), 
+                                                            geti_n(xout, 1, i),  nil) 
+                        curr_summarySel = buildPredSummary(tableConcat(geti_n(opt_action, 1, i-1), {1}), 
+                                                            geti_n(xout, 1, i),  nil)
+                    end
+                    f1_rougue_select[i] = rougeF1({curr_summarySel[i]}, nuggets ) - fsel_t1
+                    re_rougue_select[i] = rougeRecall({curr_summarySel[i]}, nuggets ) - rsel_t1
+                    pr_rougue_select[i] = rougePrecision({curr_summarySel[i]}, nuggets ) - psel_t1
+                    f1_rougue_skip[i] = rougeF1({curr_summarySkp[i]}, nuggets )  - fskp_t1
+                    re_rougue_skip[i] = rougeRecall({curr_summarySkp[i]}, nuggets )  - rskp_t1
+                    pr_rougue_skip[i] = rougePrecision({curr_summarySkp[i]}, nuggets )  - pskp_t1
+                    fsel_t1, rsel_t1, psel_t1 = f1_rougue_select[i], pr_rougue_select[i], pr_rougue_select[i]
+                    fskp_t1,  rskp_t1,  pskp_t1 = f1_rougue_skip[i], re_rougue_skip[i], pr_rougue_skip[i]
+                    opt_action[i] = (f1_rougue_select[i] > f1_rougue_skip[i]) and 1 or 0
                 end
 
-                local labels = torch.Tensor(pscores)
+                local labels = torch.Tensor(f1_rougue_skip):cat(torch.Tensor(f1_rougue_select), 2)
 
                 if use_cuda then
                      labels = labels:cuda()
-                     pred_rougue = pred_rougue:cuda()
+                     pred_rougue = Tensor(pred_rougue):cuda()
                 end
+                predsummary = buildPredSummary(opt_action, xout, nil)
+                predsummary = predsummary[#predsummary]
+
+                rscore = rougeRecall({predsummary}, nuggets)
+                pscore = rougePrecision({predsummary}, nuggets)
+                fscore = rougeF1({predsummary}, nuggets)
+
 
                 -- We backpropagate our observed outcomes
+                print(#labels)
+                print(#pred_rougue)
                 loss = loss + crit:forward(pred_rougue, labels)
                 grads = crit:backward(pred_rougue, labels)
                 model:zeroGradParameters()
-                model:backward({sentences, summary, query, actions}, grads)
+                model:backward({sentences, summary, query}, grads)
                 model:updateParameters(learning_rate)        
 
                 -- Updating our bookkeeping tables
@@ -242,6 +268,7 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
                 action_list = updateTable(action_list, opt_action, nstart)
 
                 --- Calculating last one to see actual last rouge, without delta
+                rsm = sumTable()
                 local den = den + #xs
                 rscore, pscore, fscore = rsm/den, psm/den, fsm/den
                 if (epoch % print_every)==0 then
