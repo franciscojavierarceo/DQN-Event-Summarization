@@ -207,7 +207,7 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
                 --- Execute policy based on our E[ROUGUE]
                     --- Notice that pred_rougue gives us our optimal action by returning
                         ---  E[ROUGUE | Select ] > E[ROUGUE | Skip]
-                opt_action = policy(pred_rougue, epsilon)
+                opt_action_list = policy(pred_rougue, epsilon)
                 local rscores, pscores, fscores = {}, {}, {}
                 for i=1, #xs do
                     --- Now we evaluate our action through the critic/oracle
@@ -220,6 +220,7 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
                     fscores[i] = threshold(rougeF1(curr_summary, nuggets, K_sentences) - f_t1, thresh)
                     rsm, psm, fsm = rsm + rscores[i] + r_t1, psm + pscores[i] + p_t1, fsm + fscores[i] + f_t1
                     r_t1, p_t1, f_t1 = rscores[i], pscores[i], fscores[i]
+                    opt_action.insert(opt_action)
                 end
 
                 local labels = torch.Tensor(pscores)

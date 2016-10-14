@@ -44,12 +44,19 @@ function updateTable(orig_table, insert_table, n_i)
     end
     return out_table
 end
+function makeInt(x)
+    local out = {}
+    for k,v in pairs(x) do
+        table.insert(out, tonumber(v))
+    end
+    return out 
+end
 
 function buildTermDocumentTable(x, K)
     --- If K == nil then getFirstKtokens() returns x
     local out = {}
     for k,v in pairs(x) do
-        out[k] = getFirstKElements(split(x[k][1]), K)
+        out[k] = makeInt(getFirstKElements(split(x[k][1]), K))
     end
     return out
 end
@@ -183,16 +190,16 @@ end
 
 function getLastKElements(x, K)
     --- This function grabs the last K elements from a table
-    --- e.g., getLastKElements({1,2,3,4,5}, 3) = {5,4,3}
+    --- e.g., getLastKElements({1,2,3,4,5}, 3) = {3,4,5}
     if K == nil then
         return x 
     end
     local out = {}
-    for i=0, K-1, 1 do
-        out[i+1] = x[#x-i]
-        if  i > #x then
-            return out
-        end
+    if K > #x then 
+        return x
+    end
+    for i=1, K, 1 do
+        out[i] = x[ #x - K + i ]
     end 
     return out
 end
@@ -206,7 +213,7 @@ function buildPredSummary(preds, xs, K)
             out[i] = x_or_pass(preds[i], unpackZeros(xs[i]))
         else 
             --- Update it by adding xs_i and out_{i-1}
-            local tmp = tableConcat(x_or_pass(preds[i], unpackZeros(xs[i])) , out[i-1])
+            local tmp = tableConcat(out[i-1], x_or_pass(preds[i], unpackZeros(xs[i])))
             --- Getting the last K tokens because we want to keep last K tokens
             out[i] =  getLastKElements(tmp, K)
         end
@@ -263,8 +270,7 @@ function Tokenize(inputdic, remove_stopwords)
 end
 
 --- Now we can calculate ROUGE
-function rougeRecall(pred_summary, ref_summaries, K)
-    -- pred_summary = getLastK(pred_summary, K)
+function rougeRecall(pred_summary, ref_summaries)
     rsd = Tokenize(ref_summaries, true)
     sws = Tokenize(pred_summary, true)
     for k, v in pairs(rsd) do
@@ -287,8 +293,7 @@ function rougeRecall(pred_summary, ref_summaries, K)
     return (den > 0) and num/den or 0
 end
 ---- Precision
-function rougePrecision(pred_summary, ref_summaries, K)
-    -- pred_summary = getLastK(pred_summary, K)
+function rougePrecision(pred_summary, ref_summaries)
     rsd = Tokenize(ref_summaries, true)
     sws = Tokenize(pred_summary, true)
     for k, v in pairs(rsd) do
@@ -310,9 +315,9 @@ function rougePrecision(pred_summary, ref_summaries, K)
     return (den > 0) and num/den or 0
 end
 ---- F1
-function rougeF1(pred_summary, ref_summaries, K) 
-    rnp = rougeRecall(pred_summary, ref_summaries, K)
-    rnr = rougePrecision(pred_summary, ref_summaries, K)
+function rougeF1(pred_summary, ref_summaries) 
+    rnp = rougeRecall(pred_summary, ref_summaries)
+    rnr = rougePrecision(pred_summary, ref_summaries)
     --- Had to add this line b/c f1 starts out at 0
     f1 = (rnr > 0) and (2. * rnp * rnr ) / (rnp + rnr) or 0
     return f1
