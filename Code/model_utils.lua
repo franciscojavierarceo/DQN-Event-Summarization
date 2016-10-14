@@ -77,8 +77,8 @@ end
 
 --- To do list:
     --- 1. Replicate node module
-    --- 2. Change sumary to output Last K terms, not limited by sequence length
-    --- 3. Output 2 score for rougue, 1 for action =1 and action = 0
+    --- 2. Change sumary to output Last K terms, not limited by sequence length == Done
+    --- 3. Output 2 score for rougue, 1 for action =1 and action = 0  === kind of done
     --- 4. share weights and embeddings between LSTMs
     --- 5. threshold appliedto rougue delta
     --- 6. RMS prop in optim package
@@ -214,7 +214,7 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
                 fsel_t1, fskp_t1, rsel_t1, rskp_t1, psel_t1, pskp_t1 = 0., 0., 0., 0., 0., 0.
 
                 for i=1, #pred_rougue do
-                --     opt_action[i] = (pred_rougue[i][1]  > pred_rougue[i][2]) and 1 or 0
+                    opt_action[i] = (pred_rougue[i][1]  > pred_rougue[i][2]) and 1 or 0
                 --     curr_summary= buildPredSummary(geti_n(opt_action, 1, i), 
                 --                                        geti_n(xout, 1, i),  nil) 
                 --     fsocres[i] = rougeF1({curr_summary[i]}, nuggets ) - f_t1
@@ -238,7 +238,7 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
                     pr_rougue_skip[i] = rougePrecision({curr_summarySkp[i]}, nuggets )  - pskp_t1
                     fsel_t1, rsel_t1, psel_t1 = f1_rougue_select[i], pr_rougue_select[i], pr_rougue_select[i]
                     fskp_t1,  rskp_t1,  pskp_t1 = f1_rougue_skip[i], re_rougue_skip[i], pr_rougue_skip[i]
-                    opt_action[i] = (f1_rougue_select[i] > f1_rougue_skip[i]) and 1 or 0
+                    -- opt_action[i] = (f1_rougue_select[i] > f1_rougue_skip[i]) and 1 or 0
                 end
 
 
