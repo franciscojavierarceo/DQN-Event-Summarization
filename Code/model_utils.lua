@@ -4,9 +4,9 @@ function policy(nnpreds, epsilon)
     local N = #nnpreds
     -- Epsilon greedy strategy
     if torch.rand(1)[1] <= epsilon then  
-        output = torch.rand(N,2)
+        output = torch.totable(torch.rand(N,2))
     else     --- This is the action choice 1 select, 0 skip
-        return nnpreds
+        output =  nnpreds
     end
     return output
 end
@@ -203,14 +203,14 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
                     --- Notice that pred_rougue gives us our optimal action by returning
                         ---  E[ROUGUE | Select ] > E[ROUGUE | Skip]
 
-                -- pred_rougue = policy(pred_rougue, epsilon)
+                pred_rougue = policy(pred_rougue, epsilon)
 
                 opt_action = {}
                 f1_rougue_select,  re_rougue_select, pr_rougue_select = {}, {}, {}
                 f1_rougue_skip, re_rougue_skip , pr_rougue_skip = {}, {}, {}
                 fsel_t1, fskp_t1, rsel_t1, rskp_t1, psel_t1, pskp_t1 = 0., 0., 0., 0., 0., 0.
 
-
+                --- TODO map evaluation to zero for the actions we don't take
                 for i=1, #pred_rougue do
                     opt_action[i] = (pred_rougue[i][1]  > pred_rougue[i][2]) and 1 or 0
                 --     curr_summary= buildPredSummary(geti_n(opt_action, 1, i), 
