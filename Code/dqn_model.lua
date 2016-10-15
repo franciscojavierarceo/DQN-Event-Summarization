@@ -13,14 +13,14 @@ cmd:option('--nepochs', 50, 'running for 50 epochs')
 cmd:option('--K_tokens', 10, 'using the first 10 tokens to extract data')
 cmd:option('--K_sentences', 20, 'using last 10 sentences to calculate rougue')
 cmd:option('--batch_size', 100, 'batch size of 500')
-cmd:option('--thresh', 0.01, 'rougue improvement threshold')
+cmd:option('--thresh', 0.05, 'rougue improvement threshold')
 cmd:option('--embed_dim', 100, 'using an embedding dimension of 10')
 cmd:option('--learning_rate', 0.01, 'using a learning rate of 0.01')
 cmd:option('--print_every', 1, 'printing every 1 epoch')
 cmd:option('--usecuda', true, 'running on cuda')
 cmd:option('--epsilon', 1, 'starting with epsilon = 1')
 cmd:option('--cuts', 4, 'using epsilon-greedy strategy 1/4 of the time')
-cmd:option('--base_explore_rate', 0.25, 'base exploration rate of 0.25')
+cmd:option('--base_explore_rate', 0.10, 'base exploration rate of 0.10')
 cmd:text()
 
 --- this retrieves the commands and stores them in opt.variable (e.g., opt.model)
@@ -59,8 +59,8 @@ sandy = {
 
 inputs = {
         aurora, 
-        -- pakistan,
-        -- sandy
+        pakistan,
+        sandy
     }
 --- Only using epsilon greedy strategy for (nepochs/cuts)% of the epochs
 delta = 1./(opt.nepochs/opt.cuts) 
