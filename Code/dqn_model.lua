@@ -28,7 +28,7 @@ local opt = cmd:parse(arg or {})
 
 --- Loading utility script
 dofile("utils.lua")
-dofile("model_utils.lua")
+dofile("model_utils2.lua")
 
 torch.manualSeed(420)
 
