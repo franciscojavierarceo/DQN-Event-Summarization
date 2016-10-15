@@ -210,37 +210,64 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
                 f1_rougue_skip, re_rougue_skip , pr_rougue_skip = {}, {}, {}
                 fsel_t1, fskp_t1, rsel_t1, rskp_t1, psel_t1, pskp_t1 = 0., 0., 0., 0., 0., 0.
 
+                f1_t1, f0_t1, r1_t1, r0_t1, p1_t1, p0_t1 = 0., 0., 0., 0., 0., 0.
+                fscores, rscores, pscores = {}, {}, {}
+                fscores1, rscores1, pscores1 = {}, {}, {}
+                fscores0, rscores0, pscores0 = {}, {}, {}
                 --- TODO map evaluation to zero for the actions we don't take
                 for i=1, #pred_rougue do
+                    --- This is the argmax part()
                     opt_action[i] = (pred_rougue[i][1]  > pred_rougue[i][2]) and 1 or 0
-                --     curr_summary= buildPredSummary(geti_n(opt_action, 1, i), 
-                --                                        geti_n(xout, 1, i),  nil) 
-                --     fsocres[i] = rougeF1({curr_summary[i]}, nuggets ) - f_t1
-                --     rscores[i] = rougeRecall({curr_summary[i]}, nuggets ) - r_t1
-                --     pscores[i] = rougePrecision({curr_summary[i]}, nuggets ) - p_t1
-                -- end
-                    if i ==1 then 
-                        curr_summarySkp = buildPredSummary({0}, {xout[i]},  nil)
-                        curr_summarySel = buildPredSummary({1}, {xout[i]},  nil)
-                    else
-                        curr_summarySkp = buildPredSummary(tableConcat(geti_n(opt_action, 1, i-1), {0}), 
-                                                            geti_n(xout, 1, i),  nil) 
-                        curr_summarySel = buildPredSummary(tableConcat(geti_n(opt_action, 1, i-1), {1}), 
-                                                            geti_n(xout, 1, i),  nil)
-                    end
-                    f1_rougue_select[i] = rougeF1({curr_summarySel[i]}, nuggets ) - fsel_t1
-                    re_rougue_select[i] = rougeRecall({curr_summarySel[i]}, nuggets ) - rsel_t1
-                    pr_rougue_select[i] = rougePrecision({curr_summarySel[i]}, nuggets ) - psel_t1
-                    f1_rougue_skip[i] = rougeF1({curr_summarySkp[i]}, nuggets )  - fskp_t1
-                    re_rougue_skip[i] = rougeRecall({curr_summarySkp[i]}, nuggets )  - rskp_t1
-                    pr_rougue_skip[i] = rougePrecision({curr_summarySkp[i]}, nuggets )  - pskp_t1
-                    fsel_t1, rsel_t1, psel_t1 = f1_rougue_select[i], pr_rougue_select[i], pr_rougue_select[i]
-                    fskp_t1,  rskp_t1,  pskp_t1 = f1_rougue_skip[i], re_rougue_skip[i], pr_rougue_skip[i]
-                    -- opt_action[i] = (f1_rougue_select[i] > f1_rougue_skip[i]) and 1 or 0
+                    curr_summary= buildPredSummary(geti_n(opt_action, 1, i), 
+                                                       geti_n(xout, 1, i),  nil) 
+                    fscores[i] = rougeF1({curr_summary[i]}, nuggets )
+                    rscores[i] = rougeRecall({curr_summary[i]}, nuggets )
+                    pscores[i] = rougePrecision({curr_summary[i]}, nuggets )
+
+                    if opt_action[i]==1 then
+                        fscores1[i] = fscores[i] - f1_t1
+                        rscores1[i] = rscores[i] - r1_t1
+                        pscores1[i] = pscores[i] - p1_t1
+
+                        fscores0[i] = 0 - f0_t1
+                        rscores0[i] = 0 - r0_t1
+                        pscores0[i] = 0 - p0_t1                
+                        f1_t1, r1_t1, p1_t1  = fscores1[i], rscores1[i], pscores1[i]
+                        f0_t1, r0_t1, p0_t1  = fscores0[i], rscores0[i], pscores0[i]
+                    else 
+                        fscores1[i] = 0 - f1_t1
+                        rscores1[i] = 0 - r1_t1
+                        pscores1[i] = 0 - p1_t1
+
+                        fscores0[i] = fscores[i] - f0_t1
+                        rscores0[i] = rscores[i] - r0_t1
+                        pscores0[i] = pscores[i] - p0_t1                
+                        f1_t1, r1_t1, p1_t1  = fscores1[i], rscores1[i], pscores1[i]
+                        f0_t1, r0_t1, p0_t1  = fscores0[i], rscores0[i], pscores0[i]
+                    end 
                 end
+                    -- if i ==1 then 
+                    --     curr_summarySkp = buildPredSummary({0}, {xout[i]},  nil)
+                    --     curr_summarySel = buildPredSummary({1}, {xout[i]},  nil)
+                    -- else
+                    --     curr_summarySkp = buildPredSummary(tableConcat(geti_n(opt_action, 1, i-1), {0}), 
+                    --                                         geti_n(xout, 1, i),  nil) 
+                    --     curr_summarySel = buildPredSummary(tableConcat(geti_n(opt_action, 1, i-1), {1}), 
+                    --                                         geti_n(xout, 1, i),  nil)
+                    -- end
+                    -- f1_rougue_select[i] = rougeF1({curr_summarySel[i]}, nuggets ) - fsel_t1
+                    -- re_rougue_select[i] = rougeRecall({curr_summarySel[i]}, nuggets ) - rsel_t1
+                    -- pr_rougue_select[i] = rougePrecision({curr_summarySel[i]}, nuggets ) - psel_t1
+                    -- f1_rougue_skip[i] = rougeF1({curr_summarySkp[i]}, nuggets )  - fskp_t1
+                    -- re_rougue_skip[i] = rougeRecall({curr_summarySkp[i]}, nuggets )  - rskp_t1
+                    -- pr_rougue_skip[i] = rougePrecision({curr_summarySkp[i]}, nuggets )  - pskp_t1
+                    -- fsel_t1, rsel_t1, psel_t1 = f1_rougue_select[i], pr_rougue_select[i], pr_rougue_select[i]
+                    -- fskp_t1,  rskp_t1,  pskp_t1 = f1_rougue_skip[i], re_rougue_skip[i], pr_rougue_skip[i]
+                    -- opt_action[i] = (f1_rougue_select[i] > f1_rougue_skip[i]) and 1 or 0
+                -- end
 
-
-                local labels = Tensor(f1_rougue_skip):cat(Tensor(f1_rougue_select), 2)
+                local labels = Tensor(fscores1):cat(Tensor(fscores0), 2)
+                -- local labels = Tensor(f1_rougue_skip):cat(Tensor(f1_rougue_select), 2)
 
                 if use_cuda then
                      labels = labels:cuda()
