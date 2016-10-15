@@ -4,8 +4,10 @@ function policy(nnpreds, epsilon)
     local N = #nnpreds
     -- Epsilon greedy strategy
     if torch.rand(1)[1] <= epsilon then  
+        print('executing random policy')
         output = torch.totable(torch.rand(N,2))
     else     --- This is the action choice 1 select, 0 skip
+        print('executing deterministic policy')
         output =  nnpreds
     end
     return output

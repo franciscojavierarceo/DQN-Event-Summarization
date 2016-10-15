@@ -59,8 +59,8 @@ sandy = {
 
 inputs = {
         aurora, 
-        pakistan,
-        sandy
+        -- pakistan,
+        -- sandy
     }
 --- Only using epsilon greedy strategy for (nepochs/cuts)% of the epochs
 delta = 1./(opt.nepochs/opt.cuts) 
