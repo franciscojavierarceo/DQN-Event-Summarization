@@ -14,7 +14,7 @@ cmd:option('--K_tokens', 10, 'using the first 10 tokens to extract data')
 cmd:option('--K_sentences', 20, 'using last 10 sentences to calculate rougue')
 cmd:option('--batch_size', 100, 'batch size of 500')
 cmd:option('--thresh', 0.05, 'rougue improvement threshold')
-cmd:option('--embed_dim', 100, 'using an embedding dimension of 10')
+cmd:option('--embed_dim', 50, 'using an embedding dimension of 10')
 cmd:option('--learning_rate', 0.01, 'using a learning rate of 0.01')
 cmd:option('--print_every', 1, 'printing every 1 epoch')
 cmd:option('--usecuda', true, 'running on cuda')
@@ -67,7 +67,7 @@ delta = 1./(opt.nepochs/opt.cuts)
 crit = nn.MSECriterion()
 
 
-out = iterateModelQueries(data_path, query_file, opt.batch_size, opt.nepochs, inputs, 
+out = iterateModelQueries2(data_path, query_file, opt.batch_size, opt.nepochs, inputs, 
                             opt.model, crit, opt.thresh, opt.embed_dim, opt.epsilon, delta, 
                             opt.base_explore_rate, opt.print_every,
                             opt.learning_rate, opt.K_tokens, opt.K_sentences, opt.usecuda)

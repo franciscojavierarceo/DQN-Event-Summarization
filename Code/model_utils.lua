@@ -28,7 +28,7 @@ function policy2(nnpreds, epsilon)
     return output
 end
 
-function score_model(pred, sentence_xs, epsilon)
+function score_model(pred, sentence_xs, epsilon, thresh)
     local pred = policy(pred, epsilon)
     local opt_action = {}
     local f1_t1, r1_t1, p1_t1 = 0., 0., 0.
@@ -46,23 +46,23 @@ function score_model(pred, sentence_xs, epsilon)
         pscores[i] = rougePrecision({curr_summary[i]}, nuggets )
 
         if opt_action[i]==1 then
-            fscores1[i] = fscores[i] - f1_t1
-            rscores1[i] = rscores[i] - r1_t1
-            pscores1[i] = pscores[i] - p1_t1
+            fscores1[i] = threshold(fscores[i] - f1_t1, thresh)
+            rscores1[i] = threshold(rscores[i] - r1_t1, thresh)
+            pscores1[i] = threshold(pscores[i] - p1_t1, thresh)
 
-            fscores0[i] = 0. - f0_t1
-            rscores0[i] = 0. - r0_t1
-            pscores0[i] = 0. - p0_t1                
+            fscores0[i] = threshold(0. - f0_t1, thresh)
+            rscores0[i] = threshold(0. - r0_t1, thresh)
+            pscores0[i] = threshold(0. - p0_t1, thresh)
             f1_t1, r1_t1, p1_t1  = fscores1[i], rscores1[i], pscores1[i]
             f0_t1, r0_t1, p0_t1  = fscores0[i], rscores0[i], pscores0[i]
         else 
-            fscores1[i] = 0. - f1_t1
-            rscores1[i] = 0. - r1_t1
-            pscores1[i] = 0. - p1_t1
+            fscores1[i] = threshold(0. - f1_t1, thresh)
+            rscores1[i] = threshold(0. - r1_t1, thresh)
+            pscores1[i] = threshold(0. - p1_t1, thresh)
 
-            fscores0[i] = fscores[i] - f0_t1
-            rscores0[i] = rscores[i] - r0_t1
-            pscores0[i] = pscores[i] - p0_t1                
+            fscores0[i] = threshold(fscores[i] - f0_t1, thresh)
+            rscores0[i] = threshold(rscores[i] - r0_t1, thresh)
+            pscores0[i] = threshold(pscores[i] - p0_t1, thresh)
             f1_t1, r1_t1, p1_t1  = fscores1[i], rscores1[i], pscores1[i]
             f0_t1, r0_t1, p0_t1  = fscores0[i], rscores0[i], pscores0[i]
         end 
