@@ -4,10 +4,8 @@ function policy(nnpreds, epsilon)
     local N = #nnpreds
     -- Epsilon greedy strategy
     if torch.rand(1)[1] <= epsilon then  
-        print('executing random policy')
         output = torch.totable(torch.rand(N,2))
     else     --- This is the action choice 1 select, 0 skip
-        print('executing deterministic policy')
         output =  nnpreds
     end
     return output
@@ -318,17 +316,13 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
                 local query = LongTensor(qrep):t()
                 local actions = Tensor(action_out):resize(#xs, 1)
 
-                if use_cuda then
-                     actions =  actions:cuda()
-                end
                 --- Forward pass to estimate expected rougue)
                 local pred_rougue = model:forward({sentences, summary, query, actions})
-                pred_rougue = torch.totable(pred_rougue)
+                labels, opt_action = score_model(torch.totable(pred_rougue), xout, epsilon)
 
-                labels, opt_action = score_model(pred_rougue, xout, epsilon)
                 -- Updating our bookkeeping tables
                 yrouge = updateTable(yrouge, torch.totable(labels), nstart)
-                preds =  updateTable(preds, pred_rougue, nstart)
+                preds =  updateTable(preds, torch.totable(pred_rougue), nstart)
                 action_list = updateTable(action_list, opt_action, nstart)
             end
             --- Rerunning on the scoring on the full data and rescoring cumulatively
@@ -337,14 +331,6 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
                 ---  E[ROUGUE | Select ] > E[ROUGUE | Skip]
             predsummary = buildPredSummary(action_list, xtdm, nil)
             predsummary = predsummary[#predsummary]
-
-            labels = Tensor(yrouge)
-            pred_rougue = Tensor(preds)
-
-            if use_cuda then
-                labels = labels:cuda()
-                pred_rougue = pred_rougue:cuda()
-            end
 
             rscore = rougeRecall({predsummary}, nuggets)
             pscore = rougePrecision({predsummary}, nuggets)
@@ -362,24 +348,30 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
                     )
                 print(perf_string)
             end
-            local xs  = padZeros(xtdm, K_tokens)    --- Padding the data by K tokens because we chose this as the max value
+
+            --- Have to skip over stupid header
+            local xout = geti_n(xtdm, 2, #preds)
+            local action_out = geti_n(action_list, 2, #preds)
+            local pred_rougue = Tensor(geti_n(preds, 2, #preds)):resize(#xout, 1)
+            local labels = Tensor(geti_n(yrouge, 2, #preds)):resize(#xout, 1)
+
+            local xs  = padZeros(xout, K_tokens)    --- Padding the data by K tokens because we chose this as the max value
             local qs2 = padZeros({qs}, 5)
             local qrep = repeatTable(qs2[1], #xs)
-            local sumry_list = buildPredSummary(action_list, xtdm, K_tokens * J_sentences)
-            local sumry_ss = padZeros(sumry_list, J_sentences * K_tokens)
-            --- Inserting data into tensors
-            local summary = LongTensor(sumry_ss):t()
+
+            local sumry_list = buildPredSummary(action_out, xs, K_tokens * J_sentences)
+            local summary = LongTensor(padZeros(sumry_list, K_tokens * J_sentences)):t()
+
+            --- Inserting data into tensors            
             local sentences = LongTensor(xs):t()
             local query = LongTensor(qrep):t()
-            local actions = Tensor(action_list):resize(#xs, 1)
 
-            -- We backpropagate our observed outcomes and after the full set of queries
-            print('sizes are ', #summary, #sentences, #query, #actions, #labels)
             loss = loss + crit:forward(pred_rougue, labels)
             grads = crit:backward(pred_rougue, labels)
             model:zeroGradParameters()
             model:backward({sentences, summary, query}, grads)
             model:updateParameters(learning_rate)
+
         end
         if epsilon <= base_explore_rate then                --- and leaving a random exploration rate
             epsilon = base_explore_rate
@@ -509,24 +501,19 @@ function iterateModelQueries2(input_path, query_file, batch_size, nepochs, input
 
                 --- Score under oposite action
                 local pred_rougue1 = model:forward({sentences, summary, query, actions})
-                -- print('sizes are ')
-                -- print(#summary)
-                -- print(#sentences)
-                -- print(#query)
-                -- print(#actions)
-                -- print(#pred_rougue1)
+
                 pred_rougue = Tensor(pred_rougue0):cat(Tensor(pred_rougue1), 2)
                 pred_rougue = torch.totable(pred_rougue)
 
                 pred_rougue, labels, opt_action = score_model2(pred_rougue, xout, epsilon)
 
-                pred_rougue = Tensor(pred_rougue)
-                loss = loss + crit:forward(pred_rougue, labels)
-                grads = crit:backward(pred_rougue, labels)
-                model:zeroGradParameters()
-                model:backward({sentences, summary, query, actions}, grads)
-                model:updateParameters(learning_rate)
-                pred_rougue = torch.totable(pred_rougue)
+                -- pred_rougue = Tensor(pred_rougue)
+                -- loss = loss + crit:forward(pred_rougue, labels)
+                -- grads = crit:backward(pred_rougue, labels)
+                -- model:zeroGradParameters()
+                -- model:backward({sentences, summary, query, actions}, grads)
+                -- model:updateParameters(learning_rate)
+                -- pred_rougue = torch.totable(pred_rougue)
                 -- Updating our bookkeeping tables
                 yrouge = updateTable(yrouge, torch.totable(labels), nstart)
                 preds =  updateTable(preds, pred_rougue, nstart)
@@ -569,10 +556,6 @@ function iterateModelQueries2(input_path, query_file, batch_size, nepochs, input
             local sumry_list = buildPredSummary(action_out, xs, K_tokens * J_sentences)
             local summary = LongTensor(padZeros(sumry_list, K_tokens * J_sentences)):t()
 
-            -- local sentences = LongTensor(xs):t()
-            -- local query = LongTensor(qrep):t()
-            -- local actions = Tensor(action_out):resize(#xs, 1)
-
             --- Inserting data into tensors            
             local sentences = LongTensor(xs):t()
             local query = LongTensor(qrep):t()
@@ -586,14 +569,14 @@ function iterateModelQueries2(input_path, query_file, batch_size, nepochs, input
             -- print(#labels)
             -- print(#pred_rougue)
             -- We backpropagate our observed outcomes and after the full set of queries
-                
-            -- loss = loss + crit:forward(pred_rougue, labels)
-            -- grads = crit:backward(pred_rougue, labels)
-            -- model:zeroGradParameters()
-            -- model:backward({sentences, summary, query, actions}, grads)
-            -- model:updateParameters(learning_rate)
+
+            loss = loss + crit:forward(pred_rougue, labels)
+            grads = crit:backward(pred_rougue, labels)
+            model:zeroGradParameters()
+            model:backward({sentences, summary, query, actions}, grads)
+            model:updateParameters(learning_rate)
         end
-        if epsilon <= base_explore_rate then                --- and leaving a random exploration rate
+        if (epsilon - delta) <= base_explore_rate then                --- and leaving a random exploration rate
             epsilon = base_explore_rate
         else 
             epsilon = epsilon - delta           --- Decreasing the epsilon greedy strategy
