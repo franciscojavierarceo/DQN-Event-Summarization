@@ -213,6 +213,8 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
                             base_explore_rate, print_every,
                             learning_rate, J_sentences, K_tokens, use_cuda)
     --- This function iterates over the epochs, queries, and mini-batches to learn the model
+    --- This version differs in that we output 2 units from the MLP and only the 3 LSTMs
+    --- and simply map {0 - action_{t-1}} as the outcome that wasnt't selected
     if use_cuda then
       Tensor = torch.CudaTensor
       LongTensor = torch.CudaLongTensor
@@ -387,6 +389,8 @@ function iterateModelQueries2(input_path, query_file, batch_size, nepochs, input
                             base_explore_rate, print_every,
                             learning_rate, J_sentences, K_tokens, use_cuda)
     --- This function iterates over the epochs, queries, and mini-batches to learn the model
+    --- This version differs in that we output 1 unit from the MLP and have actions as an input
+    --- We also score under the two different possible actions and model based on this
     if use_cuda then
       Tensor = torch.CudaTensor
       LongTensor = torch.CudaLongTensor
