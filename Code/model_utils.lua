@@ -174,6 +174,38 @@ function build_model(model, vocab_size, embed_dim, outputSize, use_cuda)
         mod3 = build_lstm(vocab_size, embed_dim)
     end
 
+
+    local ParallelModel = nn.ParallelTable()
+    ParallelModel:add(mod1)
+    ParallelModel:add(mod2)
+    ParallelModel:add(mod3)
+
+    local FinalMLP = nn.Sequential()
+    FinalMLP:add(ParallelModel)
+    FinalMLP:add(nn.JoinTable(2))
+    FinalMLP:add(nn.Linear(embed_dim * 3, outputSize) )
+    FinalMLP:add(nn.Tanh())
+
+    if use_cuda then
+        return FinalMLP:cuda()
+    else
+        return FinalMLP
+    end
+end
+function build_model2(model, vocab_size, embed_dim, outputSize, use_cuda)
+    if model == 'bow' then
+        print("Running BOW model")
+        mod1 = build_bowmlp(vocab_size, embed_dim)
+        mod2 = build_bowmlp(vocab_size, embed_dim)
+        mod3 = build_bowmlp(vocab_size, embed_dim)
+    end
+    if model == 'lstm' then         
+        print("Running LSTM model")
+        mod1 = build_lstm(vocab_size, embed_dim)
+        mod2 = build_lstm(vocab_size, embed_dim)
+        mod3 = build_lstm(vocab_size, embed_dim)
+    end
+
     local mod4 = nn.Sequential()
     mod4:add(nn.Linear(1, embed_dim))
     mod4:add(nn.ReLU())
@@ -197,6 +229,13 @@ function build_model(model, vocab_size, embed_dim, outputSize, use_cuda)
     end
 end
 
+function getIndices(xtable, xindices)
+    output = {}
+    for i=1, #xindices do
+        output[i] = xtable[xindices[i]]
+    end
+    return output
+end
 
 --- To do list:
     --- 1. Replicate node module
@@ -351,11 +390,16 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
                 print(perf_string)
             end
 
+            --- creating the indices we want
+            local indices = {}
+            for i=1, 100 do
+                indices[i] = math.random(2, #xtdm)
+            end
             --- Have to skip over stupid header
-            local xout = geti_n(xtdm, 2, #preds)
-            local action_out = geti_n(action_list, 2, #preds)
-            local pred_rougue = Tensor(geti_n(preds, 2, #preds)):resize(#xout, 1)
-            local labels = Tensor(geti_n(yrouge, 2, #preds)):resize(#xout, 1)
+            local xout = getIndices(xtdm, indices)
+            local action_out = getIndices(action_list, indices)
+            local labels = Tensor(getIndices(yrouge, indices)):resize(#xout, 1)
+            local pred_rougue = Tensor(getIndices(preds, indices)):resize(#xout, 1)
 
             local xs  = padZeros(xout, K_tokens)    --- Padding the data by K tokens because we chose this as the max value
             local qs2 = padZeros({qs}, 5)
@@ -439,7 +483,7 @@ function iterateModelQueries2(input_path, query_file, batch_size, nepochs, input
         pred_query_list[query_id] = torch.totable(torch.zeros(#input_file))    --- Predicted
     end
 
-    model  = build_model(model, vocab_size, embed_dim, 1, use_cuda)
+    model  = build_model2(model, vocab_size, embed_dim, 1, use_cuda)
 
     for epoch=0, nepochs, 1 do
         loss = 0.                    --- Compute a new MSE loss each time
@@ -511,13 +555,25 @@ function iterateModelQueries2(input_path, query_file, batch_size, nepochs, input
 
                 pred_rougue, labels, opt_action = score_model2(pred_rougue, xout, epsilon)
 
-                -- pred_rougue = Tensor(pred_rougue)
+                if minibatch==nbatches then
+                    pred_rougue = Tensor(pred_rougue)
+                    print('sizes are ')
+                    print(string.format('summary %i x %i', summary:size()[1], summary:size()[2]))
+                    print(string.format('sentences %i x %i', sentences:size()[1], sentences:size()[2]))
+                    print(string.format('query %i x %i', query:size()[1], query:size()[2]))
+                    print(string.format('actions %i x %i', actions:size()[1], actions:size()[2]))
+                    print(string.format('labels %i', labels:size()[1]))
+                    print(string.format('prediction %i', pred_rougue:size()[1]))
+                    pred_rougue = torch.totable(pred_rougue)
+                end
+
                 -- loss = loss + crit:forward(pred_rougue, labels)
                 -- grads = crit:backward(pred_rougue, labels)
                 -- model:zeroGradParameters()
                 -- model:backward({sentences, summary, query, actions}, grads)
                 -- model:updateParameters(learning_rate)
                 -- pred_rougue = torch.totable(pred_rougue)
+
                 -- Updating our bookkeeping tables
                 yrouge = updateTable(yrouge, torch.totable(labels), nstart)
                 preds =  updateTable(preds, pred_rougue, nstart)
@@ -548,30 +604,30 @@ function iterateModelQueries2(input_path, query_file, batch_size, nepochs, input
             end
 
             --- Have to skip over stupid header
-            local xout = geti_n(xtdm, 2, #preds)
-            local action_out = geti_n(action_list, 2, #preds)
-            local pred_rougue = Tensor(geti_n(preds, 2, #preds)):resize(#xout, 1)
-            local labels = Tensor(geti_n(yrouge, 2, #preds)):resize(#xout, 1)
+            local xout = geti_n(xtdm, 2, #xtdm)
+            local action_out = geti_n(action_list, 2, #xtdm)
+            local pred_rougue = Tensor(geti_n(preds, 2, #xtdm))
+            local labels = Tensor(geti_n(yrouge, 2, #xtdm))
 
             local xs  = padZeros(xout, K_tokens)    --- Padding the data by K tokens because we chose this as the max value
             local qs2 = padZeros({qs}, 5)
             local qrep = repeatTable(qs2[1], #xs)
 
-            local sumry_list = buildPredSummary(action_out, xs, K_tokens * J_sentences)
-            local summary = LongTensor(padZeros(sumry_list, K_tokens * J_sentences)):t()
+            local sumry_list = buildPredSummary(action_out, xout, J_sentences * K_tokens)
+            local summary = LongTensor(padZeros(sumry_list, J_sentences * K_tokens)):t()
 
             --- Inserting data into tensors            
             local sentences = LongTensor(xs):t()
             local query = LongTensor(qrep):t()
             local actions = Tensor(action_out):resize(#xs, 1)
 
-            -- print('sizes are ')
-            -- print(#summary)
-            -- print(#sentences)
-            -- print(#query)
-            -- print(#actions)
-            -- print(#labels)
-            -- print(#pred_rougue)
+            print('sizes are ')
+            print(string.format('summary %i x %i', summary:size()[1], summary:size()[2]))
+            print(string.format('sentences %i x %i', sentences:size()[1], sentences:size()[2]))
+            print(string.format('query %i x %i', query:size()[1], query:size()[2]))
+            print(string.format('actions %i x %i', actions:size()[1], actions:size()[2]))
+            print(string.format('labels %i', labels:size()[1]))
+            print(string.format('prediction %i', pred_rougue:size()[1]))
             -- We backpropagate our observed outcomes and after the full set of queries
 
             loss = loss + crit:forward(pred_rougue, labels)
