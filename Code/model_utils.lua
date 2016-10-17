@@ -242,8 +242,8 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
     end
 
     print_string = string.format(
-        "training model with learning rate = %.3f, K = %i, and minibatch size = %i...",
-                learning_rate, K_tokens, batch_size
+        "training model with learning rate = %.3f, K = %i, J = %i, and minibatch size = %i...",
+                learning_rate, K_tokens, J_sentences, batch_size
                 )
 
     print(print_string)
