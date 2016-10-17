@@ -246,7 +246,7 @@ end
     --- 2. Change sumary to output Last K terms, not limited by sequence length == Done
     --- 3. Output 2 score for rougue, 1 for action =1 and action = 0  === kind of done
     --- 4. share weights and embeddings between LSTMs
-    --- 5. threshold appliedto rougue delta
+    --- 5. threshold appliedto rougue delta - done 
     --- 6. RMS prop in optim package
     --- 7. adjust sampling methology and backpropogation
     --- 8. Map tokens below some threshold to unknown
