@@ -28,7 +28,7 @@ function policy2(nnpreds, epsilon)
     return output
 end
 
-function score_model(pred, sentence_xs, epsilon, thresh)
+function score_model(pred, sentence_xs, epsilon, thresh, skip_rate)
     local pred = policy(pred, epsilon)
     local opt_action = {}
     local f1_t1, r1_t1, p1_t1 = 0., 0., 0.
@@ -49,12 +49,14 @@ function score_model(pred, sentence_xs, epsilon, thresh)
             fscores1[i] = threshold(fscores[i] - f1_t1, thresh)
             rscores1[i] = threshold(rscores[i] - r1_t1, thresh)
             pscores1[i] = threshold(pscores[i] - p1_t1, thresh)
-
+ 
             fscores0[i] = threshold(0. - f0_t1, thresh)
             rscores0[i] = threshold(0. - r0_t1, thresh)
             pscores0[i] = threshold(0. - p0_t1, thresh)
-            f1_t1, r1_t1, p1_t1  = fscores1[i], rscores1[i], pscores1[i]
-            f0_t1, r0_t1, p0_t1  = fscores0[i], rscores0[i], pscores0[i]
+            if torch.rand(1)[1] <= skip_rate then  
+                f1_t1, r1_t1, p1_t1  = fscores1[i], rscores1[i], pscores1[i]
+                f0_t1, r0_t1, p0_t1  = fscores0[i], rscores0[i], pscores0[i]
+            end
         else 
             fscores1[i] = threshold(0. - f1_t1, thresh)
             rscores1[i] = threshold(0. - r1_t1, thresh)
@@ -63,8 +65,10 @@ function score_model(pred, sentence_xs, epsilon, thresh)
             fscores0[i] = threshold(fscores[i] - f0_t1, thresh)
             rscores0[i] = threshold(rscores[i] - r0_t1, thresh)
             pscores0[i] = threshold(pscores[i] - p0_t1, thresh)
-            f1_t1, r1_t1, p1_t1  = fscores1[i], rscores1[i], pscores1[i]
-            f0_t1, r0_t1, p0_t1  = fscores0[i], rscores0[i], pscores0[i]
+            if torch.rand(1)[1] <= skip_rate then  
+                f1_t1, r1_t1, p1_t1  = fscores1[i], rscores1[i], pscores1[i]
+                f0_t1, r0_t1, p0_t1  = fscores0[i], rscores0[i], pscores0[i]
+            end
         end 
     end
     local labels = Tensor(fscores1):cat(Tensor(fscores0), 2)
@@ -359,7 +363,7 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
 
                 --- Forward pass to estimate expected rougue)
                 local pred_rougue = model:forward({sentences, summary, query, actions})
-                labels, opt_action = score_model(torch.totable(pred_rougue), xout, epsilon)
+                labels, opt_action = score_model(torch.totable(pred_rougue), xout, epsilon, 0.8)
 
                 -- Updating our bookkeeping tables
                 yrouge = updateTable(yrouge, torch.totable(labels), nstart)
