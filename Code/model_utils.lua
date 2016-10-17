@@ -325,7 +325,7 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
                 --- Forward pass to estimate expected rougue)
                 local pred_rougue = model:forward({sentences, summary, query, actions})
                 --- Note setting the skip_rate = 0 means no random skipping of delta calculation
-                labels, opt_action = score_model(torch.totable(pred_rougue), xout, epsilon, 0)
+                labels, opt_action = score_model(torch.totable(pred_rougue), xout, epsilon, thresh, 0)
 
                 -- Updating our bookkeeping tables
                 yrouge = updateTable(yrouge, torch.totable(labels), nstart)
