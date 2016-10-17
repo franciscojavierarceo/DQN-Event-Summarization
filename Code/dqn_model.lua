@@ -10,8 +10,8 @@ cmd = torch.CmdLine()
 --- setting the parameter defaults
 cmd:option('--model', 'lstm', 'using LSTM instead of BOW')                       
 cmd:option('--nepochs', 200, 'running for 50 epochs')
-cmd:option('--K_tokens', 20, 'using the first 10 tokens to extract data')
-cmd:option('--K_sentences', 10, 'using last 10 sentences to calculate rougue')
+cmd:option('--K_tokens', 30, 'using the first 10 tokens to extract data')
+cmd:option('--J_sentences', 10, 'using last 10 sentences to calculate rougue')
 cmd:option('--batch_size', 100, 'batch size of 500')
 cmd:option('--thresh', 0.01, 'rougue improvement threshold')
 cmd:option('--embed_dim', 50, 'using an embedding dimension of 10')
@@ -21,6 +21,7 @@ cmd:option('--usecuda', true, 'running on cuda')
 cmd:option('--epsilon', 1, 'starting with epsilon = 1')
 cmd:option('--cuts', 4, 'using epsilon-greedy strategy 1/4 of the time')
 cmd:option('--base_explore_rate', 0.10, 'base exploration rate of 0.10')
+cmd:option('--skip_rate', 0., 'skipping rate of cumulative rougue calculation')
 cmd:text()
 
 --- this retrieves the commands and stores them in opt.variable (e.g., opt.model)
@@ -70,4 +71,5 @@ crit = nn.MSECriterion()
 out = iterateModelQueries(data_path, query_file, opt.batch_size, opt.nepochs, inputs, 
                             opt.model, crit, opt.thresh, opt.embed_dim, opt.epsilon, delta, 
                             opt.base_explore_rate, opt.print_every,
-                            opt.learning_rate, opt.K_tokens, opt.K_sentences, opt.usecuda)
+                            opt.learning_rate, opt.K_tokens, opt.J_sentences, opt.usecuda,
+                            opt.skip_rate)

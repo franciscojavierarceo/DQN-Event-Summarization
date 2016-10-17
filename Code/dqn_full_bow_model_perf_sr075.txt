@@ -3,14 +3,14 @@
 training model with learning rate = 0.050, K = 10, and minibatch size = 100...	
 Running BOW model	
 Epoch 0, epsilon = 1.000, sum(y)/len(y) = 507/1000, {Recall = 0.621945, Precision = 0.319390, F1 = 0.422045}, query = aurora	
-Epoch 1, epsilon = 0.980, sum(y)/len(y) = 451/1000, {Recall = 0.620508, Precision = 0.355769, F1 = 0.452244}, query = aurora	
+Epoch 1, epsilon = 0.980, sum(y)/len(y) = 450/1000, {Recall = 0.620508, Precision = 0.356651, F1 = 0.452956}, query = aurora	
 Epoch 2, epsilon = 0.960, sum(y)/len(y) = 484/1000, {Recall = 0.627695, Precision = 0.334953, F1 = 0.436812}, query = aurora	
 Epoch 3, epsilon = 0.940, sum(y)/len(y) = 514/1000, {Recall = 0.633445, Precision = 0.317559, F1 = 0.423040}, query = aurora	
 Epoch 4, epsilon = 0.920, sum(y)/len(y) = 450/1000, {Recall = 0.613800, Precision = 0.348098, F1 = 0.444252}, query = aurora	
 Epoch 5, epsilon = 0.900, sum(y)/len(y) = 497/1000, {Recall = 0.635841, Precision = 0.327493, F1 = 0.432318}, query = aurora	
 Epoch 6, epsilon = 0.880, sum(y)/len(y) = 457/1000, {Recall = 0.623383, Precision = 0.350674, F1 = 0.448853}, query = aurora	
-Epoch 7, epsilon = 0.860, sum(y)/len(y) = 329/1000, {Recall = 0.544801, Precision = 0.423148, F1 = 0.476330}, query = aurora	
-Epoch 8, epsilon = 0.840, sum(y)/len(y) = 600/1000, {Recall = 0.664111, Precision = 0.281994, F1 = 0.395887}, query = aurora	
+Epoch 7, epsilon = 0.860, sum(y)/len(y) = 326/1000, {Recall = 0.543364, Precision = 0.426476, F1 = 0.477876}, query = aurora	
+Epoch 8, epsilon = 0.840, sum(y)/len(y) = 421/1000, {Recall = 0.591279, Precision = 0.358930, F1 = 0.446697}, query = aurora	
 Epoch 9, epsilon = 0.820, sum(y)/len(y) = 361/1000, {Recall = 0.575946, Precision = 0.410239, F1 = 0.479171}, query = aurora	
 Epoch 10, epsilon = 0.800, sum(y)/len(y) = 444/1000, {Recall = 0.610925, Precision = 0.350853, F1 = 0.445726}, query = aurora	
 Epoch 11, epsilon = 0.780, sum(y)/len(y) = 267/1000, {Recall = 0.499281, Precision = 0.480406, F1 = 0.489662}, query = aurora	

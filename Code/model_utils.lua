@@ -203,19 +203,30 @@ function getIndices(xtable, xindices)
 end
 
 --- To do list:
-    --- 1. Replicate node module
-    --- 2. Change sumary to output Last K terms, not limited by sequence length == Done
-    --- 3. Output 2 score for rougue, 1 for action =1 and action = 0  === kind of done
+    --- 1. Replicate node module 
+        -- looked into this a little tried testing it wasn't straightforward
+        -- NOT DONE
+    --- 2. Change sumary to output Last K terms, not limited by sequence length
+            -- Done, no longer adding zero for sequence
+    --- 3. Output 2 score for rougue, 1 for action =1 and action = 0  
+            -- Done but need to discuss htis more
     --- 4. share weights and embeddings between LSTMs
-    --- 5. threshold appliedto rougue delta - done 
+            -- NOT DONE 
+    --- 5. threshold applied to rougue delta
+            -- Done, should find some way to decide this intuitively
     --- 6. RMS prop in optim package
-    --- 7. adjust sampling methology and backpropogation
-    --- 8. Map tokens below some threshold to unknown
-    --- 
+            -- Started looking into this, will require more review
+    --- 7. adjust sampling methology and backpropogation 
+            -- Done--ish, only sample through rows as I iterate through queries
+                -- Technically should sample from each query and then the rows
+    --- 8. Map tokens below some threshold to unknown -- Need to modify inputs
+            --- NOT DONE
+    --- 9. Not meant to do but did anyways: trying a sampling method to skip
 function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs, 
                             model, crit, thresh, embed_dim, epsilon, delta, 
                             base_explore_rate, print_every,
-                            learning_rate, J_sentences, K_tokens, use_cuda)
+                            learning_rate, J_sentences, K_tokens, use_cuda,
+                            skiprate)
     --- This function iterates over the epochs, queries, and mini-batches to learn the model
     --- This version differs in that we output 2 units from the MLP and only the 3 LSTMs
     --- and simply map {0 - action_{t-1}} as the outcome that wasnt't selected
@@ -315,7 +326,7 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
                 local qs2 = padZeros({qs}, 5)
                 local qrep = repeatTable(qs2[1], #xs)
                 local sumry_list = buildPredSummary(action_out, xout, K_tokens * J_sentences)
-                local sumry_ss = padZeros(sumry_list, J_sentences * K_tokens)
+                local sumry_ss = padZeros(sumry_list, K_tokens * J_sentences)
                 --- Inserting data into tensors
                 local summary = LongTensor(sumry_ss):t()
                 local sentences = LongTensor(xs):t()
@@ -325,7 +336,7 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
                 --- Forward pass to estimate expected rougue)
                 local pred_rougue = model:forward({sentences, summary, query, actions})
                 --- Note setting the skip_rate = 0 means no random skipping of delta calculation
-                labels, opt_action = score_model(torch.totable(pred_rougue), xout, epsilon, thresh, 0)
+                labels, opt_action = score_model(torch.totable(pred_rougue), xout, epsilon, thresh, skiprate)
 
                 -- Updating our bookkeeping tables
                 yrouge = updateTable(yrouge, torch.totable(labels), nstart)
@@ -413,8 +424,8 @@ function iterateModelQueries2(input_path, query_file, batch_size, nepochs, input
     end
 
     print_string = string.format(
-        "training model with learning rate = %.3f, K = %i, and minibatch size = %i...",
-                learning_rate, K_tokens, batch_size
+        "training model with learning rate = %.3f, K = %i, J = %i, and minibatch size = %i...",
+                learning_rate, K_tokens, J_sentences, batch_size
                 )
 
     print(print_string)
@@ -455,7 +466,6 @@ function iterateModelQueries2(input_path, query_file, batch_size, nepochs, input
         loss = 0.                    --- Compute a new MSE loss each time
         --- Looping over each bach of sentences for a given query
         for query_id = 1, #inputs do
-
             --- Grabbing all of the input data
             qs = inputs[query_id]['query']
             input_file = csvigo.load({path = input_path .. inputs[query_id]['inputs'], mode = "large", verbose = false})
