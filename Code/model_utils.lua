@@ -53,7 +53,9 @@ function score_model(pred, sentence_xs, epsilon, thresh, skip_rate)
             fscores0[i] = threshold(0. - f0_t1, thresh)
             rscores0[i] = threshold(0. - r0_t1, thresh)
             pscores0[i] = threshold(0. - p0_t1, thresh)
-            if torch.rand(1)[1] <= skip_rate then  
+            -- if skip_rate = 0 we'll always run this
+            -- if skip_rate = 1 we'll always skip it
+            if skip_rate <= torch.rand(1)[1] then  
                 f1_t1, r1_t1, p1_t1  = fscores1[i], rscores1[i], pscores1[i]
                 f0_t1, r0_t1, p0_t1  = fscores0[i], rscores0[i], pscores0[i]
             end
@@ -65,13 +67,14 @@ function score_model(pred, sentence_xs, epsilon, thresh, skip_rate)
             fscores0[i] = threshold(fscores[i] - f0_t1, thresh)
             rscores0[i] = threshold(rscores[i] - r0_t1, thresh)
             pscores0[i] = threshold(pscores[i] - p0_t1, thresh)
-            if torch.rand(1)[1] <= skip_rate then  
+            if skip_rate <= torch.rand(1)[1]  then  
                 f1_t1, r1_t1, p1_t1  = fscores1[i], rscores1[i], pscores1[i]
                 f0_t1, r0_t1, p0_t1  = fscores0[i], rscores0[i], pscores0[i]
             end
         end 
     end
-    local labels = Tensor(fscores1):cat(Tensor(fscores0), 2)
+    local labels = Tensor(rscores1):cat(Tensor(rscores0), 2)
+    -- local labels = Tensor(fscores1):cat(Tensor(fscores0), 2)
     return labels, opt_action
 end
 
@@ -101,48 +104,6 @@ function score_model2(pred, sentence_xs, epsilon)
     return pred, Tensor(fscores), actions
 end
 
-function score_model(pred, sentence_xs, epsilon)
-    local pred = policy(pred, epsilon)
-    local opt_action = {}
-    local f1_t1, r1_t1, p1_t1 = 0., 0., 0.
-    local f0_t1, r0_t1, p0_t1 = 0., 0., 0.
-    local fscores, rscores, pscores = {}, {}, {}
-    local fscores1, rscores1, pscores1 = {}, {}, {}
-    local fscores0, rscores0, pscores0 = {}, {}, {}
-    for i=1, #pred do
-        --- This is the argmax part()
-        opt_action[i] = (pred[i][1]  > pred[i][2]) and 1 or 0
-        local curr_summary= buildPredSummary(geti_n(opt_action, 1, i), 
-                                           geti_n(sentence_xs, 1, i),  nil) 
-        fscores[i] = rougeF1({curr_summary[i]}, nuggets )
-        rscores[i] = rougeRecall({curr_summary[i]}, nuggets )
-        pscores[i] = rougePrecision({curr_summary[i]}, nuggets )
-
-        if opt_action[i]==1 then
-            fscores1[i] = fscores[i] - f1_t1
-            rscores1[i] = rscores[i] - r1_t1
-            pscores1[i] = pscores[i] - p1_t1
-
-            fscores0[i] = 0. - f0_t1
-            rscores0[i] = 0. - r0_t1
-            pscores0[i] = 0. - p0_t1                
-            f1_t1, r1_t1, p1_t1  = fscores1[i], rscores1[i], pscores1[i]
-            f0_t1, r0_t1, p0_t1  = fscores0[i], rscores0[i], pscores0[i]
-        else 
-            fscores1[i] = 0. - f1_t1
-            rscores1[i] = 0. - r1_t1
-            pscores1[i] = 0. - p1_t1
-
-            fscores0[i] = fscores[i] - f0_t1
-            rscores0[i] = rscores[i] - r0_t1
-            pscores0[i] = pscores[i] - p0_t1                
-            f1_t1, r1_t1, p1_t1  = fscores1[i], rscores1[i], pscores1[i]
-            f0_t1, r0_t1, p0_t1  = fscores0[i], rscores0[i], pscores0[i]
-        end 
-    end
-    local labels = Tensor(fscores1):cat(Tensor(fscores0), 2)
-    return labels, opt_action
-end
 function build_bowmlp(vocab_size, embed_dim)
     local model = nn.Sequential()
     :add(nn.LookupTableMaskZero(vocab_size, embed_dim)) -- returns a sequence-length x batch-size x embedDim tensor
@@ -363,7 +324,8 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
 
                 --- Forward pass to estimate expected rougue)
                 local pred_rougue = model:forward({sentences, summary, query, actions})
-                labels, opt_action = score_model(torch.totable(pred_rougue), xout, epsilon, 0.8)
+                --- Note setting the skip_rate = 0 means no random skipping of delta calculation
+                labels, opt_action = score_model(torch.totable(pred_rougue), xout, epsilon, 0)
 
                 -- Updating our bookkeeping tables
                 yrouge = updateTable(yrouge, torch.totable(labels), nstart)
