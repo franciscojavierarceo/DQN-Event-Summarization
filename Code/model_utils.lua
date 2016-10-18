@@ -28,7 +28,7 @@ function policy2(nnpreds, epsilon)
     return output
 end
 
-function score_model(pred, sentence_xs, epsilon, thresh, skip_rate)
+function score_model(pred, sentence_xs, epsilon, thresh, skip_rate, metric)
     local pred = policy(pred, epsilon)
     local opt_action = {}
     local f1_t1, r1_t1, p1_t1 = 0., 0., 0.
@@ -57,8 +57,10 @@ function score_model(pred, sentence_xs, epsilon, thresh, skip_rate)
             -- if skip_rate = 0 we'll always run this
             -- if skip_rate = 1 we'll always skip it
             if skip_rate <= torch.rand(1)[1] then
-                f1_t1, r1_t1, p1_t1  = fscores1[i] + f1_t1, rscores1[i] + r1_t1, pscores1[i] + p1_t1
-                f0_t1, r0_t1, p0_t1  = fscores0[i] + f0_t1, rscores0[i] + r0_t1, pscores0[i] + p0_t1
+                -- f1_t1, r1_t1, p1_t1  = fscores1[i], rscores1[i], pscores1[i]
+                -- f0_t1, r0_t1, p0_t1  = fscores0[i], rscores0[i], pscores0[i]
+                -- f1_t1, r1_t1, p1_t1  = fscores1[i] + f1_t1, rscores1[i] + r1_t1, pscores1[i] + p1_t1
+                -- f0_t1, r0_t1, p0_t1  = fscores0[i] + f0_t1, rscores0[i] + r0_t1, pscores0[i] + p0_t1
             end
         else 
             fscores1[i] = threshold(0. - f1_t1, thresh)
@@ -69,13 +71,20 @@ function score_model(pred, sentence_xs, epsilon, thresh, skip_rate)
             rscores0[i] = threshold(rscores[i] - r0_t1, thresh)
             pscores0[i] = threshold(pscores[i] - p0_t1, thresh)
             if skip_rate <= torch.rand(1)[1]  then  
-                f1_t1, r1_t1, p1_t1  = fscores1[i] + f1_t1, rscores1[i] + r1_t1, pscores1[i] + p1_t1
-                f0_t1, r0_t1, p0_t1  = fscores0[i] + f0_t1, rscores0[i] + r0_t1, pscores0[i] + p0_t1
+                -- f1_t1, r1_t1, p1_t1  = fscores1[i], rscores1[i], pscores1[i]
+                -- f0_t1, r0_t1, p0_t1  = fscores0[i], rscores0[i], pscores0[i]
+                -- f1_t1, r1_t1, p1_t1  = fscores1[i] + f1_t1, rscores1[i] + r1_t1, pscores1[i] + p1_t1
+                -- f0_t1, r0_t1, p0_t1  = fscores0[i] + f0_t1, rscores0[i] + r0_t1, pscores0[i] + p0_t1
             end
         end 
     end
-    local labels = Tensor(fscores1):cat(Tensor(fscores0), 2)
-    -- local labels = Tensor(rscores1):cat(Tensor(rscores0), 2)
+    if metric == 'precision' then
+        local labels = Tensor(pscores1):cat(Tensor(pscores0), 2)
+    elseif metric == 'recall' then
+        local labels = Tensor(rscores1):cat(Tensor(rscores0), 2)
+    else then 
+        local labels = Tensor(fscores1):cat(Tensor(fscores0), 2)
+    end
     return labels, opt_action
 end
 
@@ -230,7 +239,7 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
                             model, crit, thresh, embed_dim, epsilon, delta, 
                             base_explore_rate, print_every,
                             learning_rate, J_sentences, K_tokens, use_cuda,
-                            skiprate)
+                            skiprate, emetric)
     --- This function iterates over the epochs, queries, and mini-batches to learn the model
     --- This version differs in that we output 2 units from the MLP and only the 3 LSTMs
     --- and simply map {0 - action_{t-1}} as the outcome that wasnt't selected
@@ -246,8 +255,8 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
     end
 
     print_string = string.format(
-        "training model with learning rate = %.3f, K = %i, J = %i, threshold = %.3f, embedding size = %i, and batch size = %i...",
-                learning_rate, K_tokens, J_sentences, thresh, embed_dim, batch_size
+        "training model with metric = %s, learning rate = %.3f, K = %i, J = %i, threshold = %.3f, embedding size = %i, and batch size = %i...",
+                emetric, learning_rate, K_tokens, J_sentences, thresh, embed_dim, batch_size
                 )
 
     print(print_string)
@@ -341,7 +350,7 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
                 --- Forward pass to estimate expected rougue)
                 local pred_rougue = model:forward({sentences, summary, query, actions})
                 --- Note setting the skip_rate = 0 means no random skipping of delta calculation
-                labels, opt_action = score_model(torch.totable(pred_rougue), xout, epsilon, thresh, skiprate)
+                labels, opt_action = score_model(torch.totable(pred_rougue), xout, epsilon, thresh, skiprate, emetric)
 
                 -- Updating our bookkeeping tables
                 yrouge = updateTable(yrouge, torch.totable(labels), nstart)
@@ -388,7 +397,7 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
             local xs  = padZeros(xout, K_tokens)    --- Padding the data by K tokens because we chose this as the max value
             local qs2 = padZeros({qs}, 5)
             local qrep = repeatTable(qs2[1], #xs)
-            
+
             local sumry_list = buildCurrentSummary(action_out, xs, K_tokens * J_sentences)
             -- local sumry_list = buildPredSummary(action_out, xs, K_tokens * J_sentences)
             local summary = LongTensor(padZeros(sumry_list, K_tokens * J_sentences)):t()
