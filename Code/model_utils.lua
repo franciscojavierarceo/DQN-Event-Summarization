@@ -242,8 +242,8 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
     end
 
     print_string = string.format(
-        "training model with learning rate = %.3f, K = %i, J = %i, and minibatch size = %i...",
-                learning_rate, K_tokens, J_sentences, batch_size
+        "training model with learning rate = %.3f, K = %i, J = %i, threshold = %.3f, embedding size = %i, and batch size = %i...",
+                learning_rate, K_tokens, J_sentences, thresh, embed_dim, batch_size
                 )
 
     print(print_string)
@@ -368,15 +368,17 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
             end
 
             --- creating the indices we want
-            local indices = {}
+            local qindices = {}
+            local xindices = {}
             for i=1, 100 do
-                indices[i] = math.random(2, #xtdm)
+                qindices[i] = math.random(1, #inputs)
+                xindices[i] = math.random(2, #xtdm)
             end
             --- Have to skip over stupid header
-            local xout = getIndices(xtdm, indices)
-            local action_out = getIndices(action_list, indices)
-            local labels = Tensor(getIndices(yrouge, indices)):resize(#xout, 1)
-            local pred_rougue = Tensor(getIndices(preds, indices)):resize(#xout, 1)
+            local xout = getIndices(xtdm, xindices)
+            local action_out = getIndices(action_list, xindices)
+            local labels = Tensor(getIndices(yrouge, xindices)):resize(#xout, 1)
+            local pred_rougue = Tensor(getIndices(preds, xindices)):resize(#xout, 1)
 
             local xs  = padZeros(xout, K_tokens)    --- Padding the data by K tokens because we chose this as the max value
             local qs2 = padZeros({qs}, 5)

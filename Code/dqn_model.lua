@@ -8,9 +8,9 @@ require 'cunnx'
 
 cmd = torch.CmdLine()
 --- setting the parameter defaults
-cmd:option('--model', 'lstm', 'using LSTM instead of BOW')                       
+cmd:option('--model', 'lstm', 'using LSTM instead of BOW')
 cmd:option('--nepochs', 200, 'running for 50 epochs')
-cmd:option('--K_tokens', 30, 'using the first 10 tokens to extract data')
+cmd:option('--K_tokens', 20, 'using the first 10 tokens to extract data')
 cmd:option('--J_sentences', 10, 'using last 10 sentences to calculate rougue')
 cmd:option('--batch_size', 100, 'batch size of 500')
 cmd:option('--thresh', 0.01, 'rougue improvement threshold')
@@ -32,6 +32,7 @@ dofile("utils.lua")
 dofile("model_utils.lua")
 
 torch.manualSeed(420)
+math.randomseed(420)
 
 data_path = '~/GitHub/DeepNLPQLearning/DO_NOT_UPLOAD_THIS_DATA/0-output/'
 
