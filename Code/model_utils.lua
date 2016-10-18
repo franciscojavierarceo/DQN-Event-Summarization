@@ -73,7 +73,7 @@ function score_model(pred, sentence_xs, epsilon, thresh, skip_rate)
             end
         end 
     end
-    local labels = Tensor(rscores1):cat(Tensor(rscores0), 2)
+    local labels = Tensor(fscores1):cat(Tensor(fscores0), 2)
     -- local labels = Tensor(fscores1):cat(Tensor(fscores0), 2)
     return labels, opt_action
 end
