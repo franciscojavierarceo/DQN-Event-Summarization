@@ -398,7 +398,7 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
             model:updateParameters(learning_rate)
 
         end
-        if epsilon <= base_explore_rate then                --- and leaving a random exploration rate
+        if (epsilon - delta) <= base_explore_rate then                --- and leaving a random exploration rate
             epsilon = base_explore_rate
         else 
             epsilon = epsilon - delta           --- Decreasing the epsilon greedy strategy
