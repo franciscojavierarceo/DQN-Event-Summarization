@@ -46,6 +46,7 @@ function score_model(pred, sentence_xs, epsilon, thresh, skip_rate)
         pscores[i] = rougePrecision({curr_summary[i]}, nuggets )
 
         if opt_action[i]==1 then
+            --- The difference here is that we swap out the location of zeros
             fscores1[i] = threshold(fscores[i] - f1_t1, thresh)
             rscores1[i] = threshold(rscores[i] - r1_t1, thresh)
             pscores1[i] = threshold(pscores[i] - p1_t1, thresh)
@@ -55,9 +56,9 @@ function score_model(pred, sentence_xs, epsilon, thresh, skip_rate)
             pscores0[i] = threshold(0. - p0_t1, thresh)
             -- if skip_rate = 0 we'll always run this
             -- if skip_rate = 1 we'll always skip it
-            if skip_rate <= torch.rand(1)[1] then  
-                f1_t1, r1_t1, p1_t1  = fscores1[i], rscores1[i], pscores1[i]
-                f0_t1, r0_t1, p0_t1  = fscores0[i], rscores0[i], pscores0[i]
+            if skip_rate <= torch.rand(1)[1] then
+                f1_t1, r1_t1, p1_t1  = fscores1[i] + f1_t1, rscores1[i] + r1_t1, pscores1[i] + p1_t1
+                f0_t1, r0_t1, p0_t1  = fscores0[i] + f0_t1, rscores0[i] + r0_t1, pscores0[i] + p0_t1
             end
         else 
             fscores1[i] = threshold(0. - f1_t1, thresh)
@@ -68,13 +69,13 @@ function score_model(pred, sentence_xs, epsilon, thresh, skip_rate)
             rscores0[i] = threshold(rscores[i] - r0_t1, thresh)
             pscores0[i] = threshold(pscores[i] - p0_t1, thresh)
             if skip_rate <= torch.rand(1)[1]  then  
-                f1_t1, r1_t1, p1_t1  = fscores1[i], rscores1[i], pscores1[i]
-                f0_t1, r0_t1, p0_t1  = fscores0[i], rscores0[i], pscores0[i]
+                f1_t1, r1_t1, p1_t1  = fscores1[i] + f1_t1, rscores1[i] + r1_t1, pscores1[i] + p1_t1
+                f0_t1, r0_t1, p0_t1  = fscores0[i] + f0_t1, rscores0[i] + r0_t1, pscores0[i] + p0_t1
             end
         end 
     end
     local labels = Tensor(fscores1):cat(Tensor(fscores0), 2)
-    -- local labels = Tensor(fscores1):cat(Tensor(fscores0), 2)
+    -- local labels = Tensor(rscores1):cat(Tensor(rscores0), 2)
     return labels, opt_action
 end
 
@@ -87,19 +88,22 @@ function optimalPred(pred)
     return output
 end
 
-function score_model2(pred, sentence_xs, epsilon)
+function score_model2(pred, sentence_xs, thresh, epsilon, skip_rate)
     local actions = policy2(pred, epsilon)
     local pred = optimalPred(pred)
-    local f1_t1, r1_t1, p1_t1 = 0., 0., 0.
-    local f0_t1, r0_t1, p0_t1 = 0., 0., 0.
+    local f_t1, r_t1, p_t1 = 0., 0., 0.
     local fscores, rscores, pscores = {}, {}, {}
     for i=1, #pred do
         --- This is the argmax part()
         local curr_summary= buildPredSummary(geti_n(actions, 1, i), 
                                            geti_n(sentence_xs, 1, i),  nil) 
-        fscores[i] = rougeF1({curr_summary[i]}, nuggets ) - f1_t1
-        rscores[i] = rougeRecall({curr_summary[i]}, nuggets ) - r1_t1
-        pscores[i] = rougePrecision({curr_summary[i]}, nuggets ) - p1_t1
+        fscores[i] = threshold(rougeF1({curr_summary[i]}, nuggets ) - f_t1, thresh)
+        rscores[i] = threshold(rougeRecall({curr_summary[i]}, nuggets ) - r_t1, thresh)
+        pscores[i] = threshold(rougePrecision({curr_summary[i]}, nuggets ) - p_t1, thresh)
+        -- Randomly shifting the delta calculation
+        if skip_rate <= torch.rand(1)[1] then  
+            f_t1, r_t1, p_t1 = fscores[i] + f_t1, rscores[i] + r_t1, pscores[i] + p_t1
+        end
     end
     return pred, Tensor(fscores), actions
 end
@@ -293,7 +297,7 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
             
             --- Building table of all of the input sentences
             local xtdm  = buildTermDocumentTable(input_file, K_tokens)
-            
+
             --- Extracting the query specific summaries, actions, and rougue
             action_list = action_query_list[query_id]
             yrouge = yrougue_query_list[query_id] 
@@ -325,7 +329,8 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
                 local xs  = padZeros(xout, K_tokens)    --- Padding the data by K tokens because we chose this as the max value
                 local qs2 = padZeros({qs}, 5)
                 local qrep = repeatTable(qs2[1], #xs)
-                local sumry_list = buildPredSummary(action_out, xout, K_tokens * J_sentences)
+                local sumry_list = buildCurrentSummary(action_out, xout, K_tokens * J_sentences)
+                -- local sumry_list = buildPredSummary(action_out, xout, K_tokens * J_sentences)
                 local sumry_ss = padZeros(sumry_list, K_tokens * J_sentences)
                 --- Inserting data into tensors
                 local summary = LongTensor(sumry_ss):t()
@@ -383,21 +388,23 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
             local xs  = padZeros(xout, K_tokens)    --- Padding the data by K tokens because we chose this as the max value
             local qs2 = padZeros({qs}, 5)
             local qrep = repeatTable(qs2[1], #xs)
-
-            local sumry_list = buildPredSummary(action_out, xs, K_tokens * J_sentences)
+            
+            local sumry_list = buildCurrentSummary(action_out, xs, K_tokens * J_sentences)
+            -- local sumry_list = buildPredSummary(action_out, xs, K_tokens * J_sentences)
             local summary = LongTensor(padZeros(sumry_list, K_tokens * J_sentences)):t()
 
             --- Inserting data into tensors            
             local sentences = LongTensor(xs):t()
             local query = LongTensor(qrep):t()
 
+            --- Backprop model
             loss = loss + crit:forward(pred_rougue, labels)
             grads = crit:backward(pred_rougue, labels)
             model:zeroGradParameters()
             model:backward({sentences, summary, query}, grads)
             model:updateParameters(learning_rate)
 
-        end
+        end -- ends the query loop
         if (epsilon - delta) <= base_explore_rate then                --- and leaving a random exploration rate
             epsilon = base_explore_rate
         else 
@@ -410,7 +417,8 @@ end
 function iterateModelQueries2(input_path, query_file, batch_size, nepochs, inputs, 
                             model, crit, thresh, embed_dim, epsilon, delta, 
                             base_explore_rate, print_every,
-                            learning_rate, J_sentences, K_tokens, use_cuda)
+                            learning_rate, J_sentences, K_tokens, use_cuda, 
+                            skiprate)
     --- This function iterates over the epochs, queries, and mini-batches to learn the model
     --- This version differs in that we output 1 unit from the MLP and have actions as an input
     --- We also score under the two different possible actions and model based on this
@@ -531,7 +539,7 @@ function iterateModelQueries2(input_path, query_file, batch_size, nepochs, input
                 pred_rougue = Tensor(pred_rougue0):cat(Tensor(pred_rougue1), 2)
                 pred_rougue = torch.totable(pred_rougue)
 
-                pred_rougue, labels, opt_action = score_model2(pred_rougue, xout, epsilon)
+                pred_rougue, labels, opt_action = score_model2(pred_rougue, xout, epsilon, thresh, skiprate)
 
                 if minibatch==nbatches then
                     pred_rougue = Tensor(pred_rougue)
@@ -580,25 +588,31 @@ function iterateModelQueries2(input_path, query_file, batch_size, nepochs, input
                     )
                 print(perf_string)
             end
-
+            --- creating the indices we want
+            local xindices = {}
+            for i=1, 100 do
+                xindices[i] = math.random(2, #xtdm)
+            end
             --- Have to skip over stupid header
-            local xout = geti_n(xtdm, 2, #xtdm)
-            local action_out = geti_n(action_list, 2, #xtdm)
-            local pred_rougue = Tensor(geti_n(preds, 2, #xtdm))
-            local labels = Tensor(geti_n(yrouge, 2, #xtdm))
+            local xout = getIndices(xtdm, xindices)
+            local action_out = getIndices(action_list, xindices)
+            local labels = Tensor(getIndices(yrouge, xindices)):resize(#xout, 1)
+            local pred_rougue = Tensor(getIndices(preds, xindices)):resize(#xout, 1)
 
             local xs  = padZeros(xout, K_tokens)    --- Padding the data by K tokens because we chose this as the max value
             local qs2 = padZeros({qs}, 5)
             local qrep = repeatTable(qs2[1], #xs)
-
-            local sumry_list = buildPredSummary(action_out, xout, J_sentences * K_tokens)
-            local summary = LongTensor(padZeros(sumry_list, J_sentences * K_tokens)):t()
+            local sumry_list = padZeros(buildPredSummary(action_out, xs, 
+                                            K_tokens * J_sentences), 
+                                        K_tokens * J_sentences)
 
             --- Inserting data into tensors            
             local sentences = LongTensor(xs):t()
+            local summary = LongTensor(sumry_list):t()
             local query = LongTensor(qrep):t()
             local actions = Tensor(action_out):resize(#xs, 1)
-
+ 
+            --- Backprop model
             print('sizes are ')
             print(string.format('summary %i x %i', summary:size()[1], summary:size()[2]))
             print(string.format('sentences %i x %i', sentences:size()[1], sentences:size()[2]))
@@ -606,13 +620,45 @@ function iterateModelQueries2(input_path, query_file, batch_size, nepochs, input
             print(string.format('actions %i x %i', actions:size()[1], actions:size()[2]))
             print(string.format('labels %i', labels:size()[1]))
             print(string.format('prediction %i', pred_rougue:size()[1]))
-            -- We backpropagate our observed outcomes and after the full set of queries
 
             loss = loss + crit:forward(pred_rougue, labels)
             grads = crit:backward(pred_rougue, labels)
             model:zeroGradParameters()
             model:backward({sentences, summary, query, actions}, grads)
             model:updateParameters(learning_rate)
+
+            -- --- Have to skip over stupid header
+            -- local xout = geti_n(xtdm, 2, #xtdm)
+            -- local action_out = geti_n(action_list, 2, #xtdm)
+            -- local pred_rougue = Tensor(geti_n(preds, 2, #xtdm))
+            -- local labels = Tensor(geti_n(yrouge, 2, #xtdm))
+
+            -- local xs  = padZeros(xout, K_tokens)    --- Padding the data by K tokens because we chose this as the max value
+            -- local qs2 = padZeros({qs}, 5)
+            -- local qrep = repeatTable(qs2[1], #xs)
+
+            -- local sumry_list = buildPredSummary(action_out, xout, J_sentences * K_tokens)
+            -- local summary = LongTensor(padZeros(sumry_list, J_sentences * K_tokens)):t()
+
+            -- --- Inserting data into tensors            
+            -- local sentences = LongTensor(xs):t()
+            -- local query = LongTensor(qrep):t()
+            -- local actions = Tensor(action_out):resize(#xs, 1)
+
+            -- print('sizes are ')
+            -- print(string.format('summary %i x %i', summary:size()[1], summary:size()[2]))
+            -- print(string.format('sentences %i x %i', sentences:size()[1], sentences:size()[2]))
+            -- print(string.format('query %i x %i', query:size()[1], query:size()[2]))
+            -- print(string.format('actions %i x %i', actions:size()[1], actions:size()[2]))
+            -- print(string.format('labels %i', labels:size()[1]))
+            -- print(string.format('prediction %i', pred_rougue:size()[1]))
+            -- -- We backpropagate our observed outcomes and after the full set of queries
+
+            -- loss = loss + crit:forward(pred_rougue, labels)
+            -- grads = crit:backward(pred_rougue, labels)
+            -- model:zeroGradParameters()
+            -- model:backward({sentences, summary, query, actions}, grads)
+            -- model:updateParameters(learning_rate)
         end
         if (epsilon - delta) <= base_explore_rate then                --- and leaving a random exploration rate
             epsilon = base_explore_rate

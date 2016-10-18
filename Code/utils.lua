@@ -204,6 +204,22 @@ function getLastKElements(x, K)
     return out
 end
 
+function buildCurrentSummary(preds, xs, K)
+    local out = {}
+    for i = 1, #xs do
+        if i == 1 then
+            out[i] = {}
+        elseif i == 2 then
+            tmp = x_or_pass(preds[i-1], unpackZeros(xs[i-1])) 
+            out[i] = getLastKElements(tmp, K)
+        else 
+            local tmp = tableConcat(out[i-2], x_or_pass(preds[i-1], unpackZeros(xs[i-1])))
+            out[i] = getLastKElements(tmp, K)
+        end 
+    end
+    return out 
+end
+
 function buildPredSummary(preds, xs, K)
     --- This function is used to map the token indices to extract the summary
     --- and produceds {token_id, 0, token_id} from any given *selected* sentence
@@ -343,4 +359,5 @@ function sumTable(x)
     end
     return o
 end
+
 print("...Utils file loaded")
