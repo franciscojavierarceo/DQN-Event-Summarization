@@ -1,14 +1,9 @@
-\begin{thebibliography}{10}
+\begin{thebibliography}{1}
 
 \bibitem{bengio2003neural}
 Yoshua Bengio, R{\'e}jean Ducharme, Pascal Vincent, and Christian Jauvin.
 \newblock A neural probabilistic language model.
 \newblock {\em journal of machine learning research}, 3(Feb):1137--1155, 2003.
-
-\bibitem{chen2012marginalized}
-Minmin Chen, Zhixiang Xu, Kilian Weinberger, and Fei Sha.
-\newblock Marginalized denoising autoencoders for domain adaptation.
-\newblock {\em arXiv preprint arXiv:1206.4683}, 2012.
 
 \bibitem{guo2013updating}
 Qi~Guo, Fernando Diaz, and Elad Yom-Tov.
@@ -47,16 +42,11 @@ Richard McCreadie, Craig Macdonald, and Iadh Ounis.
   Conference on Information and Knowledge Management}, pages 301--310. ACM,
   2014.
 
-\bibitem{DBLP:journals/corr/MnihBMGLHSK16}
-Volodymyr Mnih, Adri{\`{a}}~Puigdom{\`{e}}nech Badia, Mehdi Mirza, Alex Graves,
-  Timothy~P. Lillicrap, Tim Harley, David Silver, and Koray Kavukcuoglu.
-\newblock Asynchronous methods for deep reinforcement learning.
-\newblock {\em CoRR}, abs/1602.01783, 2016.
-
-\bibitem{MnihKSGAWR13}
-Volodymyr Mnih, Koray Kavukcuoglu, David Silver, Alex Graves, Ioannis
-  Antonoglou, Daan Wierstra, and Martin~A. Riedmiller.
-\newblock Playing atari with deep reinforcement learning.
-\newblock {\em CoRR}, abs/1312.5602, 2013.
+\bibitem{narasimhan2015language}
+Karthik Narasimhan, Tejas~D Kulkarni, and Regina Barzilay.
+\newblock Language understanding for textbased games using deep reinforcement
+  learning.
+\newblock In {\em In Proceedings of the Conference on Empirical Methods in
+  Natural Language Processing}. Citeseer, 2015.
 
 \end{thebibliography}

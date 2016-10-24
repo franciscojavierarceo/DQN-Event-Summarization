@@ -39,9 +39,9 @@ I will insert something here\footnote{ \url{https://github.com/franciscojavierar
 
 \section{Introduction}
 
-Crisis informatics is becoming an increasingly popular area of study in machine learning with more recent research focusing on extractive summarization (e.g., \cite{kedzie2015predicting} and \cite{kedzieextractive}) of multi-document summarization. The approach by \cite{kedzie2015predicting}  has shown that it is possible to select relevant sentences from a massive number of documents on the web to create summaries with meaningful content by adapting classifiers to maximize search policies. These systems operate in a streaming fashion and are capable of of evaluating each sentence within each article to decide whether or not to select or skip the sentence. 
+Crisis informatics is becoming an increasingly popular area of study in machine learning with more recent research focusing on extractive summarization (e.g., \cite{kedzie2015predicting} and \cite{kedzieextractive}) of multi-document summarization. The approach by \cite{kedzie2015predicting}  has shown that it is possible to select relevant sentences from a massive number of documents on the web to create summaries with meaningful content by adapting classifiers to maximize search policies. These systems operate in a streaming fashion and are capable of evaluating each sentence within each article to decide whether or not to select or skip the sentence. 
 
-Unfortunately, these systems have still been shown to fall short of heuristic algorithms [citation needed], which may be due to inadequate capturing of the rich structure and often idiosyncractic information by traditional n-gram models  inlanguage modeling. \cite{bengio2003neural} have shown that natural language processing can be mapped to a higher order dimension to represent more powerful features for various language modeling tasks. These embeddings have proven incredibly powerful on a variety of different natural language processing tasks [citations needed].
+Unfortunately, these systems have still been shown to fall short of heuristic algorithms [citation needed], which may be due to inadequate capturing of the rich structure and often idiosyncractic information by traditional n-gram models  in language modeling. \cite{bengio2003neural} have shown that natural language processing can be mapped to a higher order dimension to represent more powerful features for various language modeling tasks. These embeddings have proven incredibly powerful on a variety of different natural language processing tasks [citations needed].
 
 In this paper we show that a deep recurrent neural network (DQN) with a long short term memory (LSTM) is able to successfully learn an extractive summary policy by encoding the action, state, and reward into our DQN-LSTM similar to that of  \cite{hausknecht2015deep}. We show that on a variety of different metrics, our specification is able to reach state-of-the-art performance.
 
@@ -89,8 +89,8 @@ In this paper we show that a deep recurrent neural network (DQN) with a long sho
   representation and mode of interaction between the stream, summary, and 
   query can be learned. 
   Second, the learned Q function (plus random noise) controls the state 
-  space that is explored, ensuring more consistancy between train and test 
-  distribtuions than for example naive imitation learning 
+  space that is explored, ensuring more consistency between train and test 
+  distributions than for example naive imitation learning 
   (possibly -- I'm not totally happy with this sentence).
 
 \subsection{Problem Definition}
@@ -176,17 +176,66 @@ In this paper we show that a deep recurrent neural network (DQN) with a long sho
 
     TODO: Think about how to incorporate a time penalty into the reward.
 
-\center
+\subsection{Parameter Learning}
 
-% Notation here is not very clear, need to clean it up
+The architecture for our DQN-LSTM is nearly identical to that of  \cite{narasimhan2015language} with modifications where appropriate. We learn the parameters using stochastic gradient descent with RMSprop \cite{tielemanHinton2012}, where we minimize the following loss function: 
+
+\begin{equation}
+\mathcal{L}_i(\theta_i) =  E_{\hat{s}, \hat{a}}[ \big (y_i - Q(\hat{s}, \hat{a}; \theta_i) \big )^2].
+\end{equation}
+
+where 
+\begin{equation}
+y_i = E_{\hat{s}, \hat{a}}[ r + \gamma max_{a'} Q(s', a' ; \theta_{i-1}) | s', a' ]
+\end{equation}
+
+And the updates are computed using the following gradient update of $L_i(\theta_i)$:
+
+\begin{equation}
+\Delta L_i(\theta_i) =  E_{\hat{s}, \hat{a}}[ 2  \big (y_i - Q(\hat{s}, \hat{a}; \theta_i) \big ) \Delta_{\theta_{i}}  Q(\hat{s}, \hat{a}; \theta_i)].
+\end{equation}
+
+
+\center
+    % Define the layers to draw the diagram
+\pgfdeclarelayer{background}
+\pgfdeclarelayer{foreground}
+\pgfsetlayers{background,main,foreground}
+    \tikzstyle{sensor}=[draw, fill=blue!20, text width=5em,  text centered, minimum height=2.5em,drop shadow]
+    \tikzstyle{term}=[draw, fill=gray!20, text width=5em,  text centered, minimum height=2.5em,drop shadow]
+    \tikzstyle{wa} = [sensor, text width=10em, fill=red!20,  minimum height=3em, rounded corners, drop shadow]
+    \def\blockdist{2.3}
+    \def\edgedist{2.5}
+    \begin{tikzpicture}
+        \node (wa) [wa] {\textbf{Linear} };
+        \path (wa.west)+(-3.2 ,  2.0) node (asr1)[sensor] {$LSTM$};
+        \path (wa.west)+(-3.2 ,  0.0) node (asr2)[sensor] {$LSTM$};
+        \path (wa.west)+(-3.2 , -2.0) node (asr3)[sensor] {$LSTM$};
+        \path (wa.east)+(\blockdist,0) node (vote) [term] {\textbf{ReLU}};
+
+        \path [draw, ->] (asr1.east) -- node [above] {}         (wa.175) ;
+        \path [draw, ->] (asr2.east) -- node [above] {}         (wa.180);
+        \path [draw, ->] (asr3.east) -- node [above] {}         (wa.185);
+        \path [draw, ->] (wa.east) -- node [above] {}       (vote.west);
+
+     \begin{pgfonlayer}{background}
+            \path (asr1.north  |- asr1.south)+(-2.5, 1.5) node (a) {};
+            \path (asr3.west  |- vote.east)+(+13.0, -3.5) node (d) {};
+            \path[fill=white!20,rounded corners, draw=black!50, dashed]         (a) rectangle (d);
+        \end{pgfonlayer}
+        \path (wa.east) + (-2.3, -3.0)  node (vote.east) {DQN-LSTM for Event Summarization};
+\end{tikzpicture}
+
+
 \begin{algorithm}
     \bf{Input:} { \rm $\{ x_q, \pi^{*}_q \}_{\forall q \in \mathcal{Q} }$, number of iterations $T$, mixture parameter $\epsilon$  } \\
     \underline{\bf{Output:}  $\hat{\pi}$ }
   \begin{algorithmic}[1]
   \STATE \rm Initialize memory $\Gamma$
   \STATE \rm Initialize action-value function $\mathcal{Q}$ with random weights
-%  \STATE \rm $i \leftarrow \emptyset$ 
-    \FOR{$i \in \{0,1,.., N-1\} $}
+   \FOR{$i \in \{0,1,.., N-1\} $}
+%     \IF{ random() < \epsilon}
+%     \ENDIF
       \FOR{$query \in \mathcal{Q}$}
         \STATE \rm Execute $\pi_i$ $\forall$ $s(t,q) \in Q$
         \FOR{ $a \in \mathcal{A}(s_t) $}
@@ -195,57 +244,28 @@ In this paper we show that a deep recurrent neural network (DQN) with a long sho
 		\STATE $\Gamma \leftarrow \Gamma \cup \{ [\phi(s_t), a, c_t(a)]\}$
         \ENDFOR
         \STATE Sample random minibatches of transitions $\gamma_j$ from $\Gamma$
-        \STATE Set $y_j = r_j + \gamma$ max$_{a'}Q(\phi_{j+1}, a';$ $\theta)$ for terminal $\phi_{j+1}$
+        \STATE $y_j = r_j + \gamma$ max$_{a'}Q(\phi_{j+1}, a';$ $\theta)$
         \STATE Perform gradient step on $(y_j - Q(\phi_j, a_j; \theta))^2$
-%        \STATE $i \leftarrow i + 1$
       \ENDFOR
     \ENDFOR
   \end{algorithmic}
-    \caption{Streaming DQN-LSTM}
+    \caption{Training Procedure for DQN-LSTM}
 \end{algorithm}
 
+\newpage
 
 \begin{tabular}{ l | c | c  }
 	\hline
-	Metric  & Model  & Performance\\ \hline
+	Metric  & Model  & Performance\\ \hline \hline
   	ROUGUE-NF1 & DQN-LSTM  & X \\
-	SOMETHING ELSE & DQN-BOW  & X \\
+  	ROUGUE-NF1 & DQN-BOW  & X \\
+  	ROUGUE-NF1 & Random  & X \\ \hline
+  	OTHER METRIC & DQN-LSTM  & X \\
+  	OTHER METRIC & DQN-BOW  & X \\
+  	OTHER METRIC & Random  & X \\ \hline
 	\hline
 \end{tabular}
 
-    % Define the layers to draw the diagram
-    \pgfdeclarelayer{background}
-    \pgfdeclarelayer{foreground}
-    \pgfsetlayers{background,main,foreground}
-
-    \tikzstyle{sensor}=[draw, fill=blue!20, text width=5em,  text centered, minimum height=2.5em,drop shadow]
-    \tikzstyle{term}=[draw, fill=gray!20, text width=5em,  text centered, minimum height=2.5em,drop shadow]
-    \tikzstyle{wa} = [sensor, text width=10em, fill=red!20,  minimum height=3em, rounded corners, drop shadow]
-    
-    \def\blockdist{2.3}
-    \def\edgedist{2.5}
-
-    \begin{tikzpicture}
-        \node (wa) [wa] {\textbf{Linear Layer} };
-        \path (wa.west)+(-3.2 ,  2.0) node (asr1)[sensor] {$LSTM_1$};
-        \path (wa.west)+(-3.2 ,  0.5) node (asr2)[sensor] {$LSTM_2$};
-        \path (wa.west)+(-3.2 , -1.0) node (asr3)[sensor] {$LSTM_3$};
-        \path (wa.west)+(-3.2 , -2.5) node (asr4)[sensor] {$MLP$};
-        \path (wa.east)+(\blockdist,0) node (vote) [term] {\textbf{Output}};
-
-        \path [draw, ->] (asr1.east) -- node [above] {}         (wa.170) ;
-        \path [draw, ->] (asr2.east) -- node [above] {}         (wa.175);
-        \path [draw, ->] (asr3.east) -- node [above] {}         (wa.185);
-        \path [draw, ->] (asr4.east) -- node [above] {}         (wa.190);
-        \path [draw, ->] (wa.east) -- node [above] {}       (vote.west);
-
-     \begin{pgfonlayer}{background}
-            \path (asr1.north  |- asr1.south)+(-2.5, 1.5) node (a) {};
-            \path (asr4.west  |- vote.east)+(+13.0, -3.5) node (d) {};
-            \path[fill=white!20,rounded corners, draw=black!50, dashed]         (a) rectangle (d);
-        \end{pgfonlayer}
-        \path (wa.east) + (-2.3, -3.0)  node (vote.east) {DQN-LSTM for Event Summarization};
-    \end{tikzpicture}
 
 
 \bibliography{DeepNLPQLearning}
