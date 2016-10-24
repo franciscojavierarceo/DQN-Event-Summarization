@@ -93,68 +93,6 @@ In this paper we show that a deep recurrent neural network (DQN) with a long sho
   distribtuions than for example naive imitation learning 
   (possibly -- I'm not totally happy with this sentence).
 
-\subsection{Algorithm}
-
-% Notation here is not very clear, need to clean it up
-\begin{algorithm}
-    \bf{Input:} { \rm $\{ x_q, \pi^{*}_q \}_{\forall q \in \mathcal{Q} }$, number of iterations $N$, mixture parameter $\epsilon$  } \\
-    \underline{\bf{Output:}  $\hat{\pi}$ }
-  \begin{algorithmic}[1]
-  \STATE The notation is not very clear -- WORK IN PROGRESS
-  \STATE \rm Initialize experience memory $\Gamma$
-  \STATE \rm Initialize action-value function $\mathcal{Q}$ with random weights
-    \STATE \rm $i \leftarrow \emptyset$ 
-    \FOR{$n \in \{0,1,.., N-1\} $}
-      \FOR{$q \in \mathcal{Q}$}
-      	\FOR{$t \in \{0, 1, ..., T-1\}$ }
-        \STATE \rm Execute $\pi_i$ $t$ times and reach $s_t$
-        \FOR{ $a \in \mathcal{A}(s_t) $}
-        		\STATE \rm With probability $\epsilon$ set $\pi^0 = \pi^{*}_q$, else $\pi_i$
-		\STATE Compute $c_t(a)$ by executing $\pi^0$
-		\STATE $\Gamma \leftarrow \Gamma \cup \{ [\phi(s_t), a, c_t(a)]\}$
-		\ENDFOR
-        \ENDFOR
-        \STATE Sample random minibatches of transitions $\gamma_j$ from $\Gamma$
-        \STATE Set $y_j = r_j$ for terminal $\phi_{j+1}$
-        \STATE Perform gradient step on $(y_j - Q(\phi_j, a_j; \theta))^2$
-        \STATE $i \leftarrow i + 1$
-      \ENDFOR
-    \ENDFOR
-  \end{algorithmic}
-    \caption{Streaming DQN-LSTM}
-\end{algorithm}
-
-
-% Notation here is not very clear, need to clean it up
-\begin{algorithm}
-    \bf{Input:} { \rm $\{ x_q, \pi^{*}_q \}_{\forall q \in \mathcal{Q} }$, number of iterations $N$, mixture parameter $\epsilon$  } \\
-    \underline{\bf{Output:}  $\hat{\pi}$ }
-  \begin{algorithmic}[1]
-  \STATE The notation is not very clear -- WORK IN PROGRESS
-  \STATE \rm Initialize $\pi_0$, $\Gamma$
-  \STATE \rm Initialize action-value function $\mathcal{Q}$ with random weights
-    \STATE \rm $i \leftarrow \emptyset$ 
-    \FOR{$n \in \{0,1,.., N-1\} $}
-      \FOR{$q \in \mathcal{Q}$}
-      	\FOR{$t \in \{0, 1, ..., T-1\}$ }
-        \STATE \rm Execute $\pi_i$ $t$ times and reach $s_t$
-        \FOR{ $a \in \mathcal{A}(s_t) $}
-        		\STATE \rm With probability $\epsilon$ set $\pi^0 = \pi^{*}_q$, else $\pi_i$
-		\STATE Compute $c_t(a)$ by executing $\pi^0$
-		\STATE $\Gamma \leftarrow \Gamma \cup \{ [\phi(s_t), a, c_t(a)]\}$
-		\ENDFOR
-        \ENDFOR
-        \STATE Sample random minibatches of transitions $\gamma_j$ from $\Gamma$
-        \STATE Set $y_j = r_j$ for terminal $\phi_{j+1}$
-        \STATE Perform gradient step on $(y_j - Q(\phi_j, a_j; \theta))^2$
-        \STATE $i \leftarrow i + 1$
-      \ENDFOR
-    \ENDFOR
-  \end{algorithmic}
-    \caption{Streaming DQN-LSTM}
-\end{algorithm}
-
-
 \subsection{Problem Definition}
    
     DQN learns by using an a $\epsilon$-greedy search policy to generate a 
@@ -239,6 +177,34 @@ In this paper we show that a deep recurrent neural network (DQN) with a long sho
     TODO: Think about how to incorporate a time penalty into the reward.
 
 \center
+
+% Notation here is not very clear, need to clean it up
+\begin{algorithm}
+    \bf{Input:} { \rm $\{ x_q, \pi^{*}_q \}_{\forall q \in \mathcal{Q} }$, number of iterations $T$, mixture parameter $\epsilon$  } \\
+    \underline{\bf{Output:}  $\hat{\pi}$ }
+  \begin{algorithmic}[1]
+  \STATE \rm Initialize memory $\Gamma$
+  \STATE \rm Initialize action-value function $\mathcal{Q}$ with random weights
+%  \STATE \rm $i \leftarrow \emptyset$ 
+    \FOR{$i \in \{0,1,.., N-1\} $}
+      \FOR{$query \in \mathcal{Q}$}
+        \STATE \rm Execute $\pi_i$ $\forall$ $s(t,q) \in Q$
+        \FOR{ $a \in \mathcal{A}(s_t) $}
+        		\STATE \rm With probability $\epsilon$ set $\pi^0 = \pi^{*}_q$, else $\pi_i$
+		\STATE Compute $c_t(a)$ by executing $\pi^0$
+		\STATE $\Gamma \leftarrow \Gamma \cup \{ [\phi(s_t), a, c_t(a)]\}$
+        \ENDFOR
+        \STATE Sample random minibatches of transitions $\gamma_j$ from $\Gamma$
+        \STATE Set $y_j = r_j + \gamma$ max$_{a'}Q(\phi_{j+1}, a';$ $\theta)$ for terminal $\phi_{j+1}$
+        \STATE Perform gradient step on $(y_j - Q(\phi_j, a_j; \theta))^2$
+%        \STATE $i \leftarrow i + 1$
+      \ENDFOR
+    \ENDFOR
+  \end{algorithmic}
+    \caption{Streaming DQN-LSTM}
+\end{algorithm}
+
+
 \begin{tabular}{ l | c | c  }
 	\hline
 	Metric  & Model  & Performance\\ \hline
