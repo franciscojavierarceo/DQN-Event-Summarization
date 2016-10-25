@@ -165,7 +165,6 @@ function build_model(model, vocab_size, embed_dim, outputSize, use_cuda)
         mod3 = build_lstm(nn_vocab, embed_dim)
     end
 
-
     local ParallelModel = nn.ParallelTable()
     ParallelModel:add(mod1)
     ParallelModel:add(mod2)
