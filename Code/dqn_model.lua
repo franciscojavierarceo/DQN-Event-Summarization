@@ -69,7 +69,7 @@ inputs = {
 delta = 1./(opt.nepochs/opt.cuts) 
 crit = nn.MSECriterion()
 
-out = iterateModelQueries2(data_path, query_file, opt.batch_size, opt.nepochs, inputs, 
+out = iterateModelQueries(data_path, query_file, opt.batch_size, opt.nepochs, inputs, 
                             opt.model, crit, opt.thresh, opt.embed_dim, opt.epsilon, delta, 
                             opt.base_explore_rate, opt.print_every,
                             opt.learning_rate, opt.J_sentences, opt.K_tokens, opt.usecuda,

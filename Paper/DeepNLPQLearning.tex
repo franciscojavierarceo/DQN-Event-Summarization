@@ -178,21 +178,21 @@ In this paper we show that a deep recurrent neural network (DQN) with a long sho
 
 \subsection{Parameter Learning}
 
-The architecture for our DQN-LSTM is nearly identical to that of  \cite{narasimhan2015language} with modifications where appropriate. We learn the parameters using stochastic gradient descent with RMSprop \cite{tielemanHinton2012}, where we minimize the following loss function: 
+The architecture for our DQN-LSTM is nearly identical to that of  \cite{narasimhan2015language} with modifications where appropriate. We learn the parameters using stochastic gradient descent with RMSprop \cite{hinton2012lecture}, where we minimize the following loss function: 
 
 \begin{equation}
-\mathcal{L}_i(\theta_i) =  E_{\hat{s}, \hat{a}}[ \big (y_i - Q(\hat{s}, \hat{a}; \theta_i) \big )^2].
+\mathcal{L}_i(\theta_i) =  \textrm{E}_{\hat{s}, \hat{a}}[ \big (y_i - Q(\hat{s}, \hat{a}; \theta_i) \big )^2].
 \end{equation}
 
 where 
 \begin{equation}
-y_i = E_{\hat{s}, \hat{a}}[ r + \gamma max_{a'} Q(s', a' ; \theta_{i-1}) | s', a' ]
+y_i = \textrm{E}_{\hat{s}, \hat{a}}[ r + \gamma \textrm{max}_{a'} Q(s', a' ; \theta_{i-1}) | s', a' ]
 \end{equation}
 
 And the updates are computed using the following gradient update of $L_i(\theta_i)$:
 
 \begin{equation}
-\Delta L_i(\theta_i) =  E_{\hat{s}, \hat{a}}[ 2  \big (y_i - Q(\hat{s}, \hat{a}; \theta_i) \big ) \Delta_{\theta_{i}}  Q(\hat{s}, \hat{a}; \theta_i)].
+\Delta L_i(\theta_i) = \textrm{E}_{\hat{s}, \hat{a}}[ 2  \big (y_i - Q(\hat{s}, \hat{a}; \theta_i) \big ) \Delta_{\theta_{i}}  Q(\hat{s}, \hat{a}; \theta_i)].
 \end{equation}
 
 

@@ -16,6 +16,10 @@ Matthew Hausknecht and Peter Stone.
 \newblock Deep recurrent q-learning for partially observable mdps.
 \newblock {\em arXiv preprint arXiv:1507.06527}, 2015.
 
+\bibitem{hinton2012lecture}
+Geoffrey Hinton, N~Srivastava, and Kevin Swersky.
+\newblock Lecture 6a overview of mini--batch gradient descent.
+
 \bibitem{kedzieextractive}
 Chris Kedzie.
 \newblock Extractive and abstractive event summarization over streaming web
