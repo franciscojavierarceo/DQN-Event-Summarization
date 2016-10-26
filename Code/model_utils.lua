@@ -15,7 +15,7 @@ function score_model(opt_action, sentence_xs, epsilon, thresh, skip_rate, metric
     local opt_action = {}
     local f_t1, r_t1, p_t1 = 0., 0., 0.
     local fscores, rscores, pscores = {}, {}, {}
-    for i=1, #nnpreds do
+    for i=1, #opt_action do
         local curr_summary= buildPredSummary(geti_n(opt_action, 1, i), 
                                            geti_n(sentence_xs, 1, i),  nil) 
         fscores[i] = rougeF1({curr_summary[i]}, nuggets )
@@ -254,22 +254,22 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
                 xindices[i] = math.random(1, #xtdm)
             end
 
-            local sumry_list = padZeros(buildCurrentSummary(action_list, xtdm, 
-                                        K_tokens * J_sentences),  
+            local summaries = padZeros(buildCurrentSummary(action_list, xtdm, 
+                                        K_tokens * J_sentences), 
                                         K_tokens * J_sentences)
 
             --- Backward step
             for i= 1, batch_size do
-                summary = LongTensor(sumry_list[xindices[i]]):t()
                 sentence = LongTensor(padZeros( {xtdm[xindices[i]]}, K_tokens) ):t()
+                summary = LongTensor({summaries[xindices[i]]}):t()
                 query = LongTensor(padZeros({qs}, 5)):t()
 
                 labels = Tensor(yrougue[xindices[i]])
                 pred_rougue = Tensor(preds[xindices[i]])
 
                 --- Backprop model
-                loss = loss + crit:forward(preds, labels)
-                grads = crit:backward(preds, labels)
+                loss = loss + crit:forward(pred_rougue, labels)
+                grads = crit:backward(pred_rougue, labels)
                 model:zeroGradParameters()
                 model:backward({sentence, summary, query}, grads)
                 model:updateParameters(learning_rate)

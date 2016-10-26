@@ -48,7 +48,7 @@ function build_model(model, vocab_size, embed_dim, outputSize, use_cuda)
     :add(ParallelModel)
     :add(nn.JoinTable(2))
     :add(nn.Linear(embed_dim * 3, 2) )
-    FinalMLP:add(nn.Max(1) )
+    FinalMLP:add(nn.Max(2) )
     FinalMLP:add(nn.Tanh())
 
     if use_cuda then
@@ -58,52 +58,50 @@ function build_model(model, vocab_size, embed_dim, outputSize, use_cuda)
     end
 end
 
-function build_data(use_cuda)    
-    if use_cuda then
-      Tensor = torch.CudaTensor
-      LongTensor = torch.CudaLongTensor
-    else
-      Tensor = torch.Tensor
-      LongTensor = torch.LongTensor
-    end
-    sentences = LongTensor{{0, 1, 3, 4}, {0, 2, 4, 3}}:t()
-    summary = LongTensor{{0, 0, 1, 4}, {0, 2, 3, 1}}:t()
-    query = LongTensor{{0, 0, 4, 3}, {0, 0, 0, 0}}:t()
-    yrouge = torch.rand(2, 1)
-    if use_cuda then
-        return sentences, summary, query, yrouge:cuda()
-    else
-        return sentences, summary, query,  yrouge
-    end 
-end    
 
 usecuda = true
 model = 'lstm'
-
 batch_size = 2
 vocab_size = 4
 embed_dim = 10
 outputSize = 1
 learning_rate = 0.2
 
-sentences, summary, query, yrouge = build_data(usecuda)
 FinalMLP  = build_model(model, vocab_size, embed_dim, outputSize, usecuda)
-
 criterion = nn.MSECriterion():cuda()
 
-print(sentences)
-print(summary)
-print(query)
-print(yrouge)
-print('sumval =', sentences[1]:sum())
+sentences = {{0, 1, 3, 4}, {0, 2, 4, 3}}
+summaries = {{0, 0, 1, 4}, {0, 2, 3, 1}}
+queries = {{0, 1, 4, 3}, {0, 1, 4, 3}}
+scores = {0.74, -0.24}
 
-for epoch=1, 100 do
-    preds = FinalMLP:forward({sentences, summary, query})
-    loss = criterion:forward(preds, yrouge)
-    grads = criterion:backward(preds, yrouge)
-    FinalMLP:backward({sentences, summary, query}, grads)
-    FinalMLP:updateParameters(learning_rate)
-    FinalMLP:zeroGradParameters()
+if use_cuda then
+  Tensor = torch.CudaTensor
+  LongTensor = torch.CudaLongTensor
+else
+  Tensor = torch.Tensor
+  LongTensor = torch.LongTensor
+end
+
+fullpreds = {0, 0}
+for epoch = 1, 100 do
+    for minibatch = 1, 2 do
+        sentence = LongTensor({sentences[minibatch]}):t()
+        summary = LongTensor({summaries[minibatch]}):t()
+        query = LongTensor({queries[minibatch]}):t()
+        
+        yrougue = Tensor({scores[minibatch]}):cuda()
+        preds = FinalMLP:forward({sentence, summary, query})
+        --- storing predictions
+        fullpreds[minibatch] = torch.totable(preds)
+        
+        loss = criterion:forward(preds, yrougue)
+        FinalMLP:zeroGradParameters()
+        grads = criterion:backward(preds, yrougue)
+        FinalMLP:backward({sentence, summary, query}, grads)
+        FinalMLP:updateParameters(learning_rate)
+
+    end
     if (epoch % 10)==0 then 
         print(string.format("Epoch %i, loss =%6f", epoch, loss))
     end
