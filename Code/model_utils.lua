@@ -90,35 +90,6 @@ function policy2(nnpreds, epsilon)
     return output
 end
 
-function optimalPred(pred)
-    local N = #pred
-    local output = {}
-    for i =1, N do
-        output[i] = (pred[i][1] > pred[i][2]) and pred[i][1] or pred[i][2]
-    end
-    return output
-end
-
-function score_model2(pred, sentence_xs, thresh, epsilon, skip_rate)
-    local actions = policy2(pred, epsilon)
-    local pred = optimalPred(pred)
-    local f_t1, r_t1, p_t1 = 0., 0., 0.
-    local fscores, rscores, pscores = {}, {}, {}
-    for i=1, #pred do
-        --- This is the argmax part()
-        local curr_summary= buildPredSummary(geti_n(actions, 1, i), 
-                                           geti_n(sentence_xs, 1, i),  nil) 
-        fscores[i] = threshold(rougeF1({curr_summary[i]}, nuggets ) - f_t1, thresh)
-        rscores[i] = threshold(rougeRecall({curr_summary[i]}, nuggets ) - r_t1, thresh)
-        pscores[i] = threshold(rougePrecision({curr_summary[i]}, nuggets ) - p_t1, thresh)
-        -- Randomly shifting the delta calculation
-        if skip_rate <= torch.rand(1)[1] then  
-            f_t1, r_t1, p_t1 = fscores[i] + f_t1, rscores[i] + r_t1, pscores[i] + p_t1
-        end
-    end
-    return pred, Tensor(fscores), actions
-end
-
 function build_bowmlp(nn_vocab_module, embed_dim)
     local model = nn.Sequential()
     :add(nn_vocab_module)            -- returns a sequence-length x batch-size x embedDim tensor
@@ -131,17 +102,6 @@ end
 function build_lstm(nn_vocab_module, embed_dim)
     local model = nn.Sequential()
     :add(nn_vocab_module)            -- returns a sequence-length x batch-size x embedDim tensor
-    :add(nn.SplitTable(1, embed_dim)) -- splits into a sequence-length table with batch-size x embedDim entries
-    :add(nn.Sequencer(nn.LSTM(embed_dim, embed_dim)))
-    :add(nn.SelectTable(-1)) -- selects last state of the LSTM
-    :add(nn.Linear(embed_dim, embed_dim)) -- map last state to a score for classification
-    :add(nn.Tanh())                     ---     :add(nn.ReLU()) <- this one did worse
-   return model
-end
-
-function build_lstm2(nn_vocab_module, embed_dim)
-    local model = nn.Sequential()
-    :add(nn_vocab_module)
     :add(nn.SplitTable(1, embed_dim)) -- splits into a sequence-length table with batch-size x embedDim entries
     :add(nn.Sequencer(nn.LSTM(embed_dim, embed_dim)))
     :add(nn.SelectTable(-1)) -- selects last state of the LSTM
@@ -175,7 +135,7 @@ function build_model(model, vocab_size, embed_dim, outputSize, use_cuda)
     FinalMLP:add(nn.JoinTable(2))
     FinalMLP:add(nn.Linear(embed_dim * 3, 2) )
     -- Taking the max over the first dimension
-    FinalMLP:add(nn.Max(1) )
+    FinalMLP:add(nn.Max(2) )
     FinalMLP:add(nn.Tanh())
 
     if use_cuda then
@@ -356,13 +316,16 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
                 -- local sumry_list = buildPredSummary(action_out, xout, K_tokens * J_sentences)
                 local sumry_ss = padZeros(sumry_list, K_tokens * J_sentences)
                 --- Inserting data into tensors
-                local summary = LongTensor(sumry_ss):t()
-                local sentences = LongTensor(xs):t()
-                local query = LongTensor(qrep):t()
-                local actions = Tensor(action_out):resize(#xs, 1)
+                local summary = LongTensor(sumry_ss)
+                local sentences = LongTensor(xs)
+                local query = LongTensor(qrep)
+                -- local summary = LongTensor(sumry_ss):t()
+                -- local sentences = LongTensor(xs):t()
+                -- local query = LongTensor(qrep):t()
 
-                --- Forward pass to estimate expected rougue)
+                --- Forward pass to estimate expected rougue
                 local pred_rougue = model:forward({sentences, summary, query})
+                --- Have to retrieve the intermedaite optimal action step
                 pred_actions = torch.totable(model:get(3).output)
                 --- Note setting the skip_rate = 0 means no random skipping of delta calculation
                 labels, opt_action = score_model(pred_actions, xout, epsilon, thresh, skiprate, emetric)
