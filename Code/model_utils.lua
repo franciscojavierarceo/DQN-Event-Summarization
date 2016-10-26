@@ -11,22 +11,18 @@ function policy(nnpreds, epsilon)
     return output
 end
 
-function score_model(nnpreds, sentence_xs, epsilon, thresh, skip_rate, metric)
+function score_model(opt_action, sentence_xs, epsilon, thresh, skip_rate, metric)
     local opt_action = {}
     local f_t1, r_t1, p_t1 = 0., 0., 0.
     local fscores, rscores, pscores = {}, {}, {}
-    local fscores1, rscores1, pscores1 = {}, {}, {}
-    local fscores0, rscores0, pscores0 = {}, {}, {}
     for i=1, #nnpreds do
-        --- This is the argmax part()
-        opt_action[i] = (nnpreds[i][1]  > nnpreds[i][2]) and 1 or 0
         local curr_summary= buildPredSummary(geti_n(opt_action, 1, i), 
                                            geti_n(sentence_xs, 1, i),  nil) 
         fscores[i] = rougeF1({curr_summary[i]}, nuggets )
         rscores[i] = rougeRecall({curr_summary[i]}, nuggets )
         pscores[i] = rougePrecision({curr_summary[i]}, nuggets )
         if skip_rate <= torch.rand(1)[1] then  
-            f_t1, r_t1, p_t1 = fscores[i] + f_t1, rscores[i] + r_t1, pscores[i] + p_t1
+            f_t1, r_t1, p_t1 = fscores[i], rscores[i], pscores[i]
         end
     end
     return Tensor(fscores), opt_action
@@ -137,7 +133,7 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
     end
 
     print_string = string.format(
-        "training model with metric = %s, learning rate = %.3f, K = %i, J = %i, threshold = %.3f, embedding size = %i, and batch size = %i...",
+        "training model with metric = %s, learning rate = %.3f, K = %i, J = %i, threshold = %.3f, embedding size = %i",
                 emetric, learning_rate, K_tokens, J_sentences, thresh, embed_dim, batch_size
                 )
 
@@ -151,12 +147,15 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
     yrougue_query_list = {}
     pred_query_list = {}
 
+    --- Initializing query information
     for query_id = 1, #inputs do
         input_fn = inputs[query_id]['inputs']
         nugget_fn = inputs[query_id]['nuggets']
 
         input_file = csvigo.load({path = input_path .. input_fn, mode = "large", verbose = false})
         nugget_file = csvigo.load({path = input_path .. nugget_fn, mode = "large", verbose = false})
+        input_file = geti_n(input_file, 2, #input_file) 
+        nugget_file = geti_n(nugget_file, 2, #nugget_file) 
 
         vocab_sized = getVocabSize(input_file)
         vocab_sizeq = getVocabSize(query_file)
@@ -165,12 +164,11 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
         maxseqlend = getMaxseq(input_file)
         maxseqlen = math.max(maxseqlen, maxseqlenq, maxseqlend)
         action_list = torch.totable(torch.round(torch.rand(#input_file)))
-        action_list[1] = 0
 
         --- initialize the query specific lists
         action_query_list[query_id] = action_list
-        yrougue_query_list[query_id] = torch.totable(torch.randn(#input_file, 2)) --- Actual
-        pred_query_list[query_id] = torch.totable(torch.zeros(#input_file, 2))    --- Predicted
+        yrougue_query_list[query_id] = torch.totable(torch.randn(#input_file, 1)) --- Actual
+        pred_query_list[query_id] = torch.totable(torch.zeros(#input_file, 1))    --- Predicted
     end
 
     model  = build_model(model, vocab_size, embed_dim, 2, use_cuda)
@@ -184,68 +182,51 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
             qs = inputs[query_id]['query']
             input_file = csvigo.load({path = input_path .. inputs[query_id]['inputs'], mode = "large", verbose = false})
             nugget_file = csvigo.load({path = input_path .. inputs[query_id]['nuggets'], mode = "large", verbose = false})
-            nuggets = buildTermDocumentTable(nugget_file, nil)
+            --- Dropping the headers
+            input_file = geti_n(input_file, 2, #input_file) 
+            nugget_file = geti_n(nugget_file, 2, #nugget_file) 
             
             --- Building table of all of the input sentences
+            local nuggets = buildTermDocumentTable(nugget_file, nil)
             local xtdm  = buildTermDocumentTable(input_file, K_tokens)
 
             --- Extracting the query specific summaries, actions, and rougue
             action_list = action_query_list[query_id]
-            yrouge = yrougue_query_list[query_id] 
-            preds = pred_query_list[query_id] 
-
-            local nbatches = torch.floor( #input_file / batch_size)
+            yrougue = yrougue_query_list[query_id] 
+            preds = pred_query_list[query_id]
             
-            --- Initializing rouge metrics at time {t-1} and save scores, reset each new epoch
-            local r_t1 , p_t1, f_t1 = 0., 0., 0.
-            local rsm, psm, fsm = 0., 0., 0.
-            local den = 0.
-            for minibatch = 2, #input_file do
-                nstart = minibatch
-                nend = minibatch
-            -- for minibatch = 1, nbatches do
-                -- if minibatch == 1 then
-                --     -- Need to skip the first row because it says "Text"
-                --     nstart = 2
-                --     nend = torch.round(batch_size * minibatch)
-                -- end
-                -- if minibatch > 1 and minibatch < nbatches then 
-                --     nstart = nend + 1
-                --     nend = torch.round(batch_size * minibatch)
-                -- end
-                -- if minibatch == nbatches then 
-                --     nstart = nend + 1
-                --     nend = #input_file
-                -- end
-                --- Processing the input data to get {query, input_sentences, summary, actions}
-                local action_out = geti_n(action_list, nstart, nend)                
-                local xout  = geti_n(xtdm, nstart, nend)    --- Extracting the mini-batch from our input sentences
-                local xs  = padZeros(xout, K_tokens)    --- Padding the data by K tokens because we chose this as the max value
-                local qs2 = padZeros({qs}, 5)
-                local qrep = repeatTable(qs2[1], #xs)
-                local sumry_list = buildCurrentSummary(action_out, xout, K_tokens * J_sentences)
-                -- local sumry_list = buildPredSummary(action_out, xout, K_tokens * J_sentences)
-                local sumry_ss = padZeros(sumry_list, K_tokens * J_sentences)
-                --- Inserting data into tensors
-                -- local summary = LongTensor(sumry_ss)
-                -- local sentences = LongTensor(xs)
-                -- local query = LongTensor(qrep)
-                local summary = LongTensor(sumry_ss):t()
-                local sentences = LongTensor(xs):t()
-                local query = LongTensor(qrep):t()
+            --- Loop over file to execute forward pass to estimate expected rougue
+            for minibatch = 1, #xtdm do
+                --- Notice that the actionlist is optimized at after each iteration
+                local summaries = padZeros(buildCurrentSummary(action_list, xtdm, 
+                                        K_tokens * J_sentences), 
+                                        K_tokens * J_sentences)
+                sentence = LongTensor(padZeros( {xtdm[minibatch]}, K_tokens) ):t()
+                summary = LongTensor({ summaries[minibatch] }):t()
+                query = LongTensor( padZeros({qs}, 5) ):t()
 
-                --- Forward pass to estimate expected rougue
-                local pred_rougue = model:forward({sentences, summary, query})
-                --- Have to retrieve the intermedaite optimal action step
-                pred_actions = torch.totable(model:get(3).output)
-                --- Note setting the skip_rate = 0 means no random skipping of delta calculation
-                labels, opt_action = score_model(pred_actions, xout, epsilon, thresh, skiprate, emetric)
-
-                -- Updating our bookkeeping tables
-                yrouge = updateTable(yrouge, torch.totable(labels), nstart)
-                preds =  updateTable(preds, torch.totable(pred_rougue), nstart)
-                action_list = updateTable(action_list, opt_action, nstart)
+                --- Retrieve intermediate optimal action in model.get(3).output
+                local pred_rougue = model:forward({sentence, summary, query})   
+                local pred_actions = torch.totable(model:get(3).output)
+                opt_action = (pred_actions[1][1] > pred_actions[1][2]) and 1 or 0
+                
+                -- Updating our book-keeping tables
+                preds[minibatch] = pred_rougue
+                action_list[minibatch] = opt_action
             end
+            --- Updating variables
+            action_query_list[query_id] = action_list
+            yrougue_query_list[query_id] = yrouge
+            pred_query_list[query_id] = preds
+
+            --- Note setting the skip_rate = 0 means no random skipping of delta calculation
+            labels, opt_action = score_model(action_list, 
+                                            xtdm,
+                                            epsilon, 
+                                            thresh, 
+                                            skiprate, 
+                                            emetric)
+
             --- Rerunning on the scoring on the full data and rescoring cumulatively
             --- Execute policy and evaluation based on our E[ROUGUE] after all of the minibatches
                 --- Notice that pred_rougue gives us our optimal action by returning
@@ -257,11 +238,6 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
             pscore = rougePrecision({predsummary}, nuggets)
             fscore = rougeF1({predsummary}, nuggets)
 
-            --- Updating variables
-            action_query_list[query_id] = action_list
-            yrougue_query_list[query_id] = yrouge
-            pred_query_list[query_id] = preds
-
             if (epoch % print_every)==0 then
                 perf_string = string.format(
                     "Epoch %i, epsilon = %.3f, sum(y)/len(y) = %i/%i, {Recall = %.6f, Precision = %.6f, F1 = %.6f}, query = %s", 
@@ -271,36 +247,33 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
             end
 
             --- creating the indices we want
-            local qindices = {}
+            -- local qindices = {}
             local xindices = {}
-            for i=1, 100 do
-                qindices[i] = math.random(1, #inputs)
-                xindices[i] = math.random(2, #xtdm)
+            for i=1, batch_size do
+                -- qindices[i] = math.random(1, #inputs)
+                xindices[i] = math.random(1, #xtdm)
             end
-            --- Have to skip over stupid header
-            local xout = getIndices(xtdm, xindices)
-            local action_out = getIndices(action_list, xindices)
-            local labels = Tensor(getIndices(yrouge, xindices)):resize(#xout, 1)
-            local pred_rougue = Tensor(getIndices(preds, xindices)):resize(#xout, 1)
 
-            local xs  = padZeros(xout, K_tokens)    --- Padding the data by K tokens because we chose this as the max value
-            local qs2 = padZeros({qs}, 5)
-            local qrep = repeatTable(qs2[1], #xs)
+            local sumry_list = padZeros(buildCurrentSummary(action_list, xtdm, 
+                                        K_tokens * J_sentences),  
+                                        K_tokens * J_sentences)
 
-            local sumry_list = buildCurrentSummary(action_out, xs, K_tokens * J_sentences)
-            -- local sumry_list = buildPredSummary(action_out, xs, K_tokens * J_sentences)
-            local summary = LongTensor(padZeros(sumry_list, K_tokens * J_sentences)):t()
+            --- Backward step
+            for i= 1, batch_size do
+                summary = LongTensor(sumry_list[xindices[i]]):t()
+                sentence = LongTensor(padZeros( {xtdm[xindices[i]]}, K_tokens) ):t()
+                query = LongTensor(padZeros({qs}, 5)):t()
 
-            --- Inserting data into tensors            
-            local sentences = LongTensor(xs):t()
-            local query = LongTensor(qrep):t()
+                labels = Tensor(yrougue[xindices[i]])
+                pred_rougue = Tensor(preds[xindices[i]])
 
-            --- Backprop model
-            loss = loss + crit:forward(pred_rougue, labels)
-            grads = crit:backward(pred_rougue, labels)
-            model:zeroGradParameters()
-            model:backward({sentences, summary, query}, grads)
-            model:updateParameters(learning_rate)
+                --- Backprop model
+                loss = loss + crit:forward(preds, labels)
+                grads = crit:backward(preds, labels)
+                model:zeroGradParameters()
+                model:backward({sentence, summary, query}, grads)
+                model:updateParameters(learning_rate)
+            end 
 
         end -- ends the query loop
         if (epsilon - delta) <= base_explore_rate then                --- and leaving a random exploration rate

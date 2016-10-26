@@ -100,7 +100,6 @@ print('sumval =', sentences[1]:sum())
 for epoch=1, 100 do
     preds = FinalMLP:forward({sentences, summary, query})
     loss = criterion:forward(preds, yrouge)
-    -- This is where it fails
     grads = criterion:backward(preds, yrouge)
     FinalMLP:backward({sentences, summary, query}, grads)
     FinalMLP:updateParameters(learning_rate)
