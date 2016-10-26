@@ -1,16 +1,3 @@
-function policy(nnpreds, epsilon)
-    --- This executes our policy over our predicted rougue from the NN
-    local output = {}
-    local N = #nnpreds
-    -- Epsilon greedy strategy
-    if torch.rand(1)[1] <= epsilon then  
-        output = torch.totable(torch.rand(N,2))
-    else     --- This is the action choice 1 select, 0 skip
-        output =  nnpreds
-    end
-    return output
-end
-
 function score_model(opt_action, sentence_xs, epsilon, thresh, skip_rate, metric)
     local opt_action = {}
     local f_t1, r_t1, p_t1 = 0., 0., 0.
@@ -49,31 +36,31 @@ function build_lstm(nn_vocab_module, embed_dim)
    return model
 end
 
-function build_model(model, vocab_size, embed_dim, outputSize, use_cuda)
+function build_model(model, vocab_size, embed_dim, use_cuda)
     local nn_vocab = nn.LookupTableMaskZero(vocab_size, embed_dim)
     if model == 'bow' then
         print("Running BOW model")
         mod1 = build_bowmlp(nn_vocab, embed_dim)
-        mod2 = build_bowmlp(nn_vocab, embed_dim)
-        mod3 = build_bowmlp(nn_vocab, embed_dim)
+        -- mod2 = build_bowmlp(nn_vocab, embed_dim)
+        -- mod3 = build_bowmlp(nn_vocab, embed_dim)
     end
     if model == 'lstm' then         
         print("Running LSTM model")
         mod1 = build_lstm(nn_vocab, embed_dim)
-        mod2 = build_lstm(nn_vocab, embed_dim)
-        mod3 = build_lstm(nn_vocab, embed_dim)
+        -- mod2 = build_lstm(nn_vocab, embed_dim)
+        -- mod3 = build_lstm(nn_vocab, embed_dim)
     end
 
     local ParallelModel = nn.ParallelTable()
     ParallelModel:add(mod1)
-    ParallelModel:add(mod2)
-    ParallelModel:add(mod3)
+    ParallelModel:add(mod1:clone())
+    ParallelModel:add(mod1:clone())
 
     local FinalMLP = nn.Sequential()
     FinalMLP:add(ParallelModel)
     FinalMLP:add(nn.JoinTable(2))
     FinalMLP:add(nn.Linear(embed_dim * 3, 2) )
-    -- Taking the max over the first dimension
+    -- Taking the max over the second dimension
     FinalMLP:add(nn.Max(2) )
     FinalMLP:add(nn.Tanh())
 
@@ -82,15 +69,6 @@ function build_model(model, vocab_size, embed_dim, outputSize, use_cuda)
     else
         return FinalMLP
     end
-end
-
-
-function getIndices(xtable, xindices)
-    output = {}
-    for i=1, #xindices do
-        output[i] = xtable[xindices[i]]
-    end
-    return output
 end
 
 --- To do list:
@@ -171,13 +149,12 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
         pred_query_list[query_id] = torch.totable(torch.zeros(#input_file, 1))    --- Predicted
     end
 
-    model  = build_model(model, vocab_size, embed_dim, 2, use_cuda)
+    model  = build_model(model, vocab_size, embed_dim, use_cuda)
 
     for epoch=0, nepochs, 1 do
         loss = 0.                    --- Compute a new MSE loss each time
         --- Looping over each bach of sentences for a given query
         for query_id = 1, #inputs do
-
             --- Grabbing all of the input data
             qs = inputs[query_id]['query']
             input_file = csvigo.load({path = input_path .. inputs[query_id]['inputs'], mode = "large", verbose = false})
@@ -210,6 +187,13 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
                 local pred_actions = torch.totable(model:get(3).output)
                 opt_action = (pred_actions[1][1] > pred_actions[1][2]) and 1 or 0
                 
+                -- doing this way works just fine...                
+                -- local labels = Tensor(yrougue[minibatch])
+                -- local grads = crit:backward(pred_rougue, labels)
+                -- model:zeroGradParameters()
+                -- model:backward({sentence, summary, query}, grads)
+                -- model:updateParameters(learning_rate)
+
                 -- Updating our book-keeping tables
                 preds[minibatch] = pred_rougue
                 action_list[minibatch] = opt_action
@@ -267,14 +251,17 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
                 labels = Tensor(yrougue[xindices[i]])
                 pred_rougue = Tensor(preds[xindices[i]])
 
+                print(sentence:size(), summary:size(), query:size(), pred_rougue:size(), labels:size())
+                print(sentence:sum(), summary:sum(), query:sum(), pred_rougue:sum(), labels:sum())
+                -- print(xtdm[xindices[i]], summaries[xindices[i]], qs, pred_rougue, labels )
                 --- Backprop model
                 loss = loss + crit:forward(pred_rougue, labels)
-                grads = crit:backward(pred_rougue, labels)
+                local grads = crit:backward(pred_rougue, labels)
                 model:zeroGradParameters()
                 model:backward({sentence, summary, query}, grads)
                 model:updateParameters(learning_rate)
+                print('pass', i)
             end 
-
         end -- ends the query loop
         if (epsilon - delta) <= base_explore_rate then                --- and leaving a random exploration rate
             epsilon = base_explore_rate
