@@ -12,16 +12,16 @@ function policy(nnpreds, epsilon)
 end
 
 function score_model(nnpreds, sentence_xs, epsilon, thresh, skip_rate, metric)
-    local pred = policy(pred, epsilon)
+    -- local pred = policy(pred, epsilon)
     local opt_action = {}
     local f1_t1, r1_t1, p1_t1 = 0., 0., 0.
     local f0_t1, r0_t1, p0_t1 = 0., 0., 0.
     local fscores, rscores, pscores = {}, {}, {}
     local fscores1, rscores1, pscores1 = {}, {}, {}
     local fscores0, rscores0, pscores0 = {}, {}, {}
-    for i=1, #pred do
+    for i=1, #nnpreds do
         --- This is the argmax part()
-        opt_action[i] = (pred[i][1]  > pred[i][2]) and 1 or 0
+        opt_action[i] = (nnpreds[i][1]  > nnpreds[i][2]) and 1 or 0
         local curr_summary= buildPredSummary(geti_n(opt_action, 1, i), 
                                            geti_n(sentence_xs, 1, i),  nil) 
         fscores[i] = rougeF1({curr_summary[i]}, nuggets )
@@ -292,20 +292,23 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
             local r_t1 , p_t1, f_t1 = 0., 0., 0.
             local rsm, psm, fsm = 0., 0., 0.
             local den = 0.
-            for minibatch = 1, nbatches do
-                if minibatch == 1 then
-                    -- Need to skip the first row because it says "Text"
-                    nstart = 2
-                    nend = torch.round(batch_size * minibatch)
-                end
-                if minibatch > 1 and minibatch < nbatches then 
-                    nstart = nend + 1
-                    nend = torch.round(batch_size * minibatch)
-                end
-                if minibatch == nbatches then 
-                    nstart = nend + 1
-                    nend = #input_file
-                end
+            for minibatch = 2, #input_file do
+                nstart = minibatch
+                nend = minibatch
+            -- for minibatch = 1, nbatches do
+                -- if minibatch == 1 then
+                --     -- Need to skip the first row because it says "Text"
+                --     nstart = 2
+                --     nend = torch.round(batch_size * minibatch)
+                -- end
+                -- if minibatch > 1 and minibatch < nbatches then 
+                --     nstart = nend + 1
+                --     nend = torch.round(batch_size * minibatch)
+                -- end
+                -- if minibatch == nbatches then 
+                --     nstart = nend + 1
+                --     nend = #input_file
+                -- end
                 --- Processing the input data to get {query, input_sentences, summary, actions}
                 local action_out = geti_n(action_list, nstart, nend)                
                 local xout  = geti_n(xtdm, nstart, nend)    --- Extracting the mini-batch from our input sentences
@@ -316,12 +319,12 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
                 -- local sumry_list = buildPredSummary(action_out, xout, K_tokens * J_sentences)
                 local sumry_ss = padZeros(sumry_list, K_tokens * J_sentences)
                 --- Inserting data into tensors
-                local summary = LongTensor(sumry_ss)
-                local sentences = LongTensor(xs)
-                local query = LongTensor(qrep)
-                -- local summary = LongTensor(sumry_ss):t()
-                -- local sentences = LongTensor(xs):t()
-                -- local query = LongTensor(qrep):t()
+                -- local summary = LongTensor(sumry_ss)
+                -- local sentences = LongTensor(xs)
+                -- local query = LongTensor(qrep)
+                local summary = LongTensor(sumry_ss):t()
+                local sentences = LongTensor(xs):t()
+                local query = LongTensor(qrep):t()
 
                 --- Forward pass to estimate expected rougue
                 local pred_rougue = model:forward({sentences, summary, query})
