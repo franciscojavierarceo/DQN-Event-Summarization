@@ -12,10 +12,8 @@ function policy(nnpreds, epsilon)
 end
 
 function score_model(nnpreds, sentence_xs, epsilon, thresh, skip_rate, metric)
-    -- local pred = policy(pred, epsilon)
     local opt_action = {}
-    local f1_t1, r1_t1, p1_t1 = 0., 0., 0.
-    local f0_t1, r0_t1, p0_t1 = 0., 0., 0.
+    local f_t1, r_t1, p_t1 = 0., 0., 0.
     local fscores, rscores, pscores = {}, {}, {}
     local fscores1, rscores1, pscores1 = {}, {}, {}
     local fscores0, rscores0, pscores0 = {}, {}, {}
@@ -27,68 +25,13 @@ function score_model(nnpreds, sentence_xs, epsilon, thresh, skip_rate, metric)
         fscores[i] = rougeF1({curr_summary[i]}, nuggets )
         rscores[i] = rougeRecall({curr_summary[i]}, nuggets )
         pscores[i] = rougePrecision({curr_summary[i]}, nuggets )
-
-        if opt_action[i]==1 then
-            --- The difference here is that we swap out the location of zeros
-            fscores1[i] = threshold(fscores[i] - f1_t1, thresh)
-            rscores1[i] = threshold(rscores[i] - r1_t1, thresh)
-            pscores1[i] = threshold(pscores[i] - p1_t1, thresh)
- 
-            fscores0[i] = threshold(0. - f0_t1, thresh)
-            rscores0[i] = threshold(0. - r0_t1, thresh)
-            pscores0[i] = threshold(0. - p0_t1, thresh)
-            -- if skip_rate = 0 we'll always run this
-            -- if skip_rate = 1 we'll always skip it
-            -- if skip_rate <= torch.rand(1)[1] then
-            --     f1_t1, r1_t1, p1_t1  = fscores1[i], rscores1[i], pscores1[i]
-            --     f0_t1, r0_t1, p0_t1  = fscores0[i], rscores0[i], pscores0[i]
-                -- f1_t1, r1_t1, p1_t1  = fscores1[i] + f1_t1, rscores1[i] + r1_t1, pscores1[i] + p1_t1
-                -- f0_t1, r0_t1, p0_t1  = fscores0[i] + f0_t1, rscores0[i] + r0_t1, pscores0[i] + p0_t1
-            -- end
-        else 
-            fscores1[i] = threshold(0. - f1_t1, thresh)
-            rscores1[i] = threshold(0. - r1_t1, thresh)
-            pscores1[i] = threshold(0. - p1_t1, thresh)
-
-            fscores0[i] = threshold(fscores[i] - f0_t1, thresh)
-            rscores0[i] = threshold(rscores[i] - r0_t1, thresh)
-            pscores0[i] = threshold(pscores[i] - p0_t1, thresh)
-            -- if skip_rate <= torch.rand(1)[1]  then  
-            --     f1_t1, r1_t1, p1_t1  = fscores1[i], rscores1[i], pscores1[i]
-            --     f0_t1, r0_t1, p0_t1  = fscores0[i], rscores0[i], pscores0[i]
-                -- f1_t1, r1_t1, p1_t1  = fscores1[i] + f1_t1, rscores1[i] + r1_t1, pscores1[i] + p1_t1
-                -- f0_t1, r0_t1, p0_t1  = fscores0[i] + f0_t1, rscores0[i] + r0_t1, pscores0[i] + p0_t1
-            -- end
-        end 
-    end
-    -- if metric == 'precision' then
-        -- local labels = Tensor(pscores1):cat(Tensor(pscores0), 2)
-
-    -- elseif metric == 'recall' then
-        local labels = Tensor(rscores1):cat(Tensor(rscores0), 2)
-
-    -- else
-        -- local labels = Tensor(fscores1):cat(Tensor(fscores0), 2)
-    -- end
-    return labels, opt_action
-end
-
-function policy2(nnpreds, epsilon)
-    --- This executes our policy over our predicted rougue from the NN
-    local output = {}
-    local N = #nnpreds
-    -- Epsilon greedy strategy
-    if torch.rand(1)[1] <= epsilon then  
-        print('executing random policy')
-        output = torch.totable(torch.round(torch.rand(N)))
-    else     --- This is the action choice 1 select, 0 skip
-        print('executing deterministic policy')
-        for i =1, N do
-            output[i] = (nnpreds[i][1] > nnpreds[i][2]) and 1 or 0
+        if skip_rate <= torch.rand(1)[1] then  
+            f_t1, r_t1, p_t1 = fscores[i] + f_t1, rscores[i] + r_t1, pscores[i] + p_t1
         end
     end
-    return output
+    return Tensor(fscores), opt_action
 end
+
 
 function build_bowmlp(nn_vocab_module, embed_dim)
     local model = nn.Sequential()
@@ -144,42 +87,7 @@ function build_model(model, vocab_size, embed_dim, outputSize, use_cuda)
         return FinalMLP
     end
 end
-function build_model2(model, vocab_size, embed_dim, outputSize, use_cuda)
-    if model == 'bow' then
-        print("Running BOW model")
-        mod1 = build_bowmlp(vocab_size, embed_dim)
-        mod2 = build_bowmlp(vocab_size, embed_dim)
-        mod3 = build_bowmlp(vocab_size, embed_dim)
-    end
-    if model == 'lstm' then         
-        print("Running LSTM model")
-        mod1 = build_lstm(vocab_size, embed_dim)
-        mod2 = build_lstm(vocab_size, embed_dim)
-        mod3 = build_lstm(vocab_size, embed_dim)
-    end
 
-    local mod4 = nn.Sequential()
-    mod4:add(nn.Linear(1, embed_dim))
-    mod4:add(nn.Tanh())
-
-    local ParallelModel = nn.ParallelTable()
-    ParallelModel:add(mod1)
-    ParallelModel:add(mod2)
-    ParallelModel:add(mod3)
-    -- ParallelModel:add(mod4)
-
-    local FinalMLP = nn.Sequential()
-    FinalMLP:add(ParallelModel)
-    FinalMLP:add(nn.JoinTable(2))
-    FinalMLP:add(nn.Linear(embed_dim * 3, outputSize) )
-    FinalMLP:add(nn.Tanh())
-
-    if use_cuda then
-        return FinalMLP:cuda()
-    else
-        return FinalMLP
-    end
-end
 
 function getIndices(xtable, xindices)
     output = {}
