@@ -162,8 +162,8 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
             nugget_file = geti_n(nugget_file, 2, #nugget_file) 
             
             --- Building table of all of the input sentences
-            local nuggets = buildTermDocumentTable(nugget_file, nil)
-            local xtdm  = buildTermDocumentTable(input_file, K_tokens)
+            nuggets = buildTermDocumentTable(nugget_file, nil)
+            xtdm  = buildTermDocumentTable(input_file, K_tokens)
 
             --- Extracting the query specific summaries, actions, and rougue
             action_list = action_query_list[query_id]
@@ -185,29 +185,22 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
                 local pred_actions = torch.totable(model:get(3).output)
                 opt_action = (pred_actions[1][1] > pred_actions[1][2]) and 1 or 0
                 
-                -- doing this way works just fine...                
-                -- local labels = Tensor(yrougue[minibatch])
-                -- local grads = crit:backward(pred_rougue, labels)
-                -- model:zeroGradParameters()
-                -- model:backward({sentence, summary, query}, grads)
-                -- model:updateParameters(learning_rate)
-
                 -- Updating our book-keeping tables
-                preds[minibatch] = pred_rougue
+                preds[minibatch] = pred_rougue[1]
                 action_list[minibatch] = opt_action
             end
-            --- Updating variables
-            action_query_list[query_id] = action_list
-            yrougue_query_list[query_id] = yrouge
-            pred_query_list[query_id] = preds
-
             --- Note setting the skip_rate = 0 means no random skipping of delta calculation
-            labels, opt_action = score_model(action_list, 
-                                            xtdm,
-                                            epsilon, 
-                                            thresh, 
-                                            skiprate, 
-                                            emetric)
+            yrougue = score_model(action_list, 
+                            xtdm,
+                            epsilon, 
+                            thresh, 
+                            skiprate, 
+                            emetric)
+
+            --- Updating variables
+            pred_query_list[query_id] = preds
+            yrougue_query_list[query_id] = yrougue
+            action_query_list[query_id] = action_list
 
             --- Rerunning on the scoring on the full data and rescoring cumulatively
             --- Execute policy and evaluation based on our E[ROUGUE] after all of the minibatches
@@ -239,27 +232,24 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
             local summaries = padZeros(buildCurrentSummary(action_list, xtdm, 
                                         K_tokens * J_sentences), 
                                         K_tokens * J_sentences)
-
             --- Backward step
             for i= 1, batch_size do
                 sentence = LongTensor(padZeros( {xtdm[xindices[i]]}, K_tokens) ):t()
                 summary = LongTensor({summaries[xindices[i]]}):t()
                 query = LongTensor(padZeros({qs}, 5)):t()
 
-                labels = Tensor(yrougue[xindices[i]])
-                pred_rougue = Tensor(preds[xindices[i]])
+                labels = Tensor({yrougue[xindices[i]]})
+                pred_rougue = Tensor({preds[xindices[i]]})
 
-                print(sentence:size(), summary:size(), query:size(), pred_rougue:size(), labels:size())
-                print(sentence:sum(), summary:sum(), query:sum(), pred_rougue:sum(), labels:sum())
-                -- print(xtdm[xindices[i]], summaries[xindices[i]], qs, pred_rougue, labels )
                 --- Backprop model
                 loss = loss + crit:forward(pred_rougue, labels)
                 local grads = crit:backward(pred_rougue, labels)
                 model:zeroGradParameters()
+                --- For some reason doing this fixes it
+                local tmp = model:forward({sentence, summary, query})
                 model:backward({sentence, summary, query}, grads)
                 model:updateParameters(learning_rate)
-                print('pass', i)
-            end 
+            end
         end -- ends the query loop
         if (epsilon - delta) <= base_explore_rate then                --- and leaving a random exploration rate
             epsilon = base_explore_rate
