@@ -1,4 +1,4 @@
-function score_model(opt_action, input_nuggets, sentence_xs, thresh, skip_rate, metric)
+function score_model(opt_action, sentence_xs, input_nuggets, thresh, skip_rate, metric)
     --- Scores the model given the list of optimal actions, input sentences, and nuggets
         --- Note: we calculate *change* in rougue from time t-1 to t for each sentence
         --- The skip_rate controls this delta calculation
@@ -84,25 +84,10 @@ function build_model(model, vocab_size, embed_dim, use_cuda)
 end
 
 --- To do list:
-    --- 1. Replicate node module 
-        -- looked into this a little tried testing it wasn't straightforward
-        -- DONE
-    --- 2. Change sumary to output Last K terms, not limited by sequence length
-            -- Done, no longer adding zero for sequence
-    --- 3. Output 2 score for rougue, 1 for action =1 and action = 0  
-            -- DONE 
-    --- 4. share weights and embeddings between LSTMs
-            -- DONE 
-    --- 5. threshold applied to rougue delta
-            -- DONE
-    --- 6. RMS prop in optim package
-            -- Started looking into this, will require more review
-    --- 7. adjust sampling methodology and backpropogation 
-            -- DONE-ish
-    --- 8. Map tokens below some threshold to unknown -- Need to modify inputs
-            --- NOT DONE
-    --- 9. Not meant to do but did anyways: trying a sampling method to skip
-            --- DONE
+    --- 1. RMS prop in optim package
+            -- NOT DONE
+    --- 2. Map tokens below some threshold to unknown -- Need to modify inputs
+            -- NOT DONE
 
 function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs, 
                             nn_model, crit, thresh, embed_dim, epsilon, delta, 
@@ -222,6 +207,7 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
             --- Note setting the skip_rate = 0 means no random skipping of delta calculation
             yrougue = score_model(action_list, 
                             xtdm,
+                            nuggets,
                             thresh, 
                             skiprate, 
                             emetric)
