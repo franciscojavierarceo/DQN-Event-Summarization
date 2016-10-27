@@ -230,28 +230,30 @@ And the updates are computed using the following gradient update of $L_i(\theta_
 \begin{algorithm}
     \bf{Input:} { \rm  \{$X_q$: Input sentences, $N$: Number of iterations, $\epsilon$: Mixture parameter\} } \\
     \underline{$\bf{Output: }$ \rm \{$\hat{\pi}$: policy\} }
-  \begin{algorithmic}[1]
-  \STATE \rm Initialize action-value function $\mathcal{Q}$ with random weights
-   \FOR{$i \in \{1,.., N\} $}
-      \FOR{$q \in \mathcal{Q}$}
-      \FOR{$x_t \in X_q  $}
-      \STATE \textrm{Execute} $\pi_t$ $\forall$ $s(X_{\le t},\tilde{Y}_{\le t}, q)$
-        \FOR{$a \in \mathcal{A}(s_t) $}
-        		\STATE \rm With probability $\epsilon$ set $\pi^0 = \pi^{*}_q$, else $\pi_i$
-		\STATE Compute $c_t(a)$ by executing $\pi^0$
-		\STATE $\Gamma \leftarrow \Gamma \cup \{ [\phi(s_t), a, c_t(a)]\}$
-        \ENDFOR
-        \ENDFOR
-        \STATE Sample random minibatches of transitions $\gamma_j$ from $\Gamma$
-        \STATE \[ 		\textrm{Set } y_j= 
-			\begin{cases}
-				r_j              								& \text{for terminal } \phi_{j+1} \\
-			     	r_j + \gamma $max$_{a'}Q(\phi_{j+1}, a'; \theta) 	& \text{for non-terminal } \phi_{j+1}
-			\end{cases} 
-			\]
-        \STATE Perform gradient step on $(y_j - Q(\phi_j, a_j; \theta))^2$
-      \ENDFOR
-    \ENDFOR
+\begin{algorithmic}[1]
+\STATE \rm Initialize action-value function $\mathcal{Q}$ with random weights
+\FOR{$i \in \{1,.., N\} $}
+	\FOR{$q \in \mathcal{Q}$}
+		\STATE  $X_q$ = \{Extract sentences for query $q$\}
+		\FOR{$x_t \in X_q  $}
+			\STATE  \textrm{Compute} $Q(s(x_t, \tilde{y}_t, q))$ for all $a_t \in \mathcal{A}(s_t)$
+			\STATE Select $a^{*}_t =$ argmax $Q(s(x_t, \tilde{y}_t, q))$
+			\IF{$a^{*}_t = select$} 
+				\STATE $\tilde{y}_{t+1} = \tilde{y} \cup  \{ x_t \} $
+			\ENDIF
+		\ENDFOR
+		\STATE Execute action $a^{*}_t$ and observe reward $r_t$ and new state $s_{t+1}$
+		\STATE Store transition $\Gamma \leftarrow \Gamma \cup \{ [s(x_t, \tilde{y}_t, q), a, r_t ]\}$
+		\STATE Sample random minibatches of transitions $\gamma_j$ from $\Gamma$
+		\STATE 	\[ 		\textrm{Set } y_j= 
+					\begin{cases}
+						r_j              								& \text{if $s_{j+1}$ is terminal } \\
+					     	r_j + \gamma $max$_{a'}Q(\phi_{j+1}, a'; \theta) 	& \text{if $s_{j+1}$ is non-terminal } 
+					\end{cases} 
+					\]
+        		\STATE Perform gradient step on $(y_j - Q(\phi_j, a_j; \theta))^2$
+	\ENDFOR
+\ENDFOR
   \end{algorithmic}
     \caption{DQN-LSTM for Event Summarization Training Procedure}
 \end{algorithm}
