@@ -96,14 +96,15 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
     --- This version differs in that we output 2 units from the MLP and only the 3 LSTMs
     --- and simply map {0 - action_{t-1}} as the outcome that wasnt't selected
     if use_cuda then
-      Tensor = torch.CudaTensor
-      LongTensor = torch.CudaLongTensor
-      crit = crit:cuda()
-      print("...running on GPU")
+        Tensor = torch.CudaTensor
+        LongTensor = torch.CudaLongTensor
+        crit = crit:cuda()
+        print("...running on GPU")
     else
-      Tensor = torch.Tensor
-      LongTensor = torch.LongTensor
-      print("...running on CPU")
+        torch.setnumthreads(8)
+        Tensor = torch.Tensor
+        LongTensor = torch.LongTensor
+        print("...running on CPU")
     end
 
     print_string = string.format(
@@ -183,7 +184,7 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
                 --- Retrieve intermediate optimal action in model.get(3).output
                 local pred_rougue = model:forward({sentence, summary, query})   
                 local pred_actions = torch.totable(model:get(3).output)
-
+                --- Epsilon greedy strategy
                 if torch.rand(1)[1] < epsilon then 
                     opt_action = torch.round(torch.rand(1))[1]
                 else 

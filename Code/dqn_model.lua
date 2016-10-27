@@ -33,7 +33,6 @@ dofile("utils.lua")
 dofile("model_utils.lua")
 
 torch.manualSeed(420)
-torch.setnumthreads(8)
 math.randomseed(420)
 
 data_path = '~/GitHub/DeepNLPQLearning/DO_NOT_UPLOAD_THIS_DATA/0-output/'
