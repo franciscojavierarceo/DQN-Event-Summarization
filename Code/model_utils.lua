@@ -1,15 +1,31 @@
-function score_model(opt_action, sentence_xs, epsilon, thresh, skip_rate, metric)
+function score_model(opt_action, input_nuggets, sentence_xs, thresh, skip_rate, metric)
+    --- Scores the model given the list of optimal actions, input sentences, and nuggets
+        --- Note: we calculate *change* in rougue from time t-1 to t for each sentence
+        --- The skip_rate controls this delta calculation
+            --- skip_rate == 0 turns skip_rate off ==> always updates the lag 
+                --- means we are computing s_t - s_{t-1}
+            --- skip_rate >= 1 turns skip_rate always ==> never updates the lag
+                --- means we are computing s_t - s_{t_0} and s_{t_0} == 0 ==> s_t
     local s_t1 = 0.
     local scores = {}
+    if metric=='f1' then
+        eval_func = rougeF1
+    end
     for i=1, #opt_action do
         local curr_summary= buildPredSummary(geti_n(opt_action, 1, i), 
                                            geti_n(sentence_xs, 1, i),  nil)
 
-        scores[i] = rougeF1({curr_summary[i]}, nuggets ) - s_t1
+        scores[i] = threshold(eval_func({curr_summary[i]}, input_nuggets ) - s_t1, thresh)
         s_t1 = scores[i]
-        -- if skip_rate <= torch.rand(1)[1] then  
-        --     s_t1 = scores[i] + s_t1
-        -- end
+        --- Skip rate controls how often we skip updating the lag
+        --- e.g., if skip_rate = 0.25 <= [0, 1] ==> update lag 75% of the time
+        if skip_rate > 0 then 
+            if skip_rate <= torch.rand(1)[1] then
+                s_t1 = scores[i] + s_t1
+            end 
+        else 
+            s_t1 = scores[i] + s_t1
+        end
     end
     return scores
 end
@@ -206,7 +222,6 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
             --- Note setting the skip_rate = 0 means no random skipping of delta calculation
             yrougue = score_model(action_list, 
                             xtdm,
-                            epsilon, 
                             thresh, 
                             skiprate, 
                             emetric)
@@ -266,10 +281,11 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
                 print(perf_string)
             end
         end -- ends the query level loop
-        if (epsilon - delta) <= base_explore_rate then                --- and leaving a random exploration rate
+        --- Reducing epsilon-greedy search linearly and setting it to the base rate
+        if (epsilon - delta) <= base_explore_rate then
             epsilon = base_explore_rate
         else 
-            epsilon = epsilon - delta           --- Decreasing the epsilon greedy strategy
+            epsilon = epsilon - delta
         end
     end -- ends the epoch level loop
     return model, summary_query_list, action_query_list, yrougue_query_list

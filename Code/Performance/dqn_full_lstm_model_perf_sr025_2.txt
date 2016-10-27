@@ -24,3 +24,8 @@ Epoch 18, epsilon = 0.280, sum(y)/len(y) = 146/999, {Recall = 0.465261, Precisio
 Epoch 19, epsilon = 0.240, sum(y)/len(y) = 110/999, {Recall = 0.414950, Precision = 0.550540, F1 = 0.473224}, query = aurora	
 Epoch 20, epsilon = 0.200, sum(y)/len(y) = 107/999, {Recall = 0.419262, Precision = 0.570776, F1 = 0.483425}, query = aurora	
 Epoch 21, epsilon = 0.160, sum(y)/len(y) = 527/999, {Recall = 0.722568, Precision = 0.206293, F1 = 0.320953}, query = aurora	
+Epoch 22, epsilon = 0.120, sum(y)/len(y) = 940/999, {Recall = 0.793963, Precision = 0.125454, F1 = 0.216672}, query = aurora	
+Epoch 23, epsilon = 0.080, sum(y)/len(y) = 636/999, {Recall = 0.754193, Precision = 0.180857, F1 = 0.291752}, query = aurora	
+Epoch 24, epsilon = 0.040, sum(y)/len(y) = 976/999, {Recall = 0.796838, Precision = 0.121007, F1 = 0.210107}, query = aurora	
+Epoch 25, epsilon = 0.000, sum(y)/len(y) = 957/999, {Recall = 0.793483, Precision = 0.123758, F1 = 0.214119}, query = aurora	
+Epoch 26, epsilon = 0.000, sum(y)/len(y) = 999/999, {Recall = 0.797317, Precision = 0.118764, F1 = 0.206734}, query = aurora	
