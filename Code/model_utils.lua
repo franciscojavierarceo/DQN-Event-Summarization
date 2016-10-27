@@ -1,5 +1,4 @@
 function score_model(opt_action, sentence_xs, epsilon, thresh, skip_rate, metric)
-    local opt_action = {}
     local f_t1, r_t1, p_t1 = 0., 0., 0.
     local fscores, rscores, pscores = {}, {}, {}
     for i=1, #opt_action do
@@ -7,31 +6,31 @@ function score_model(opt_action, sentence_xs, epsilon, thresh, skip_rate, metric
                                            geti_n(sentence_xs, 1, i),  nil) 
         fscores[i] = rougeF1({curr_summary[i]}, nuggets )
         rscores[i] = rougeRecall({curr_summary[i]}, nuggets )
-        pscores[i] = rougePrecision({curr_summary[i]}, nuggets )
+        pscores[i] = rougePrecision({curr_summary[i]}, nuggets )        
         if skip_rate <= torch.rand(1)[1] then  
             f_t1, r_t1, p_t1 = fscores[i], rscores[i], pscores[i]
         end
     end
-    return Tensor(fscores), opt_action
+    return fscores
 end
 
 
-function build_bowmlp(nn_vocab_module, embed_dim)
+function build_bowmlp(nn_vocab_module, edim)
     local model = nn.Sequential()
     :add(nn_vocab_module)            -- returns a sequence-length x batch-size x embedDim tensor
-    :add(nn.Sum(1, embed_dim, true)) -- splits into a sequence-length table with batch-size x embedDim entries
-    :add(nn.Linear(embed_dim, embed_dim)) -- map last state to a score for classification
+    :add(nn.Sum(1, edim, true)) -- splits into a sequence-length table with batch-size x embedDim entries
+    :add(nn.Linear(edim, edim)) -- map last state to a score for classification
     :add(nn.Tanh())                     ---     :add(nn.ReLU()) <- this one did worse
    return model
 end
 
-function build_lstm(nn_vocab_module, embed_dim)
+function build_lstm(nn_vocab_module, edim)
     local model = nn.Sequential()
     :add(nn_vocab_module)            -- returns a sequence-length x batch-size x embedDim tensor
-    :add(nn.SplitTable(1, embed_dim)) -- splits into a sequence-length table with batch-size x embedDim entries
-    :add(nn.Sequencer(nn.LSTM(embed_dim, embed_dim)))
+    :add(nn.SplitTable(1, edim)) -- splits into a sequence-length table with batch-size x embedDim entries
+    :add(nn.Sequencer(nn.LSTM(edim, edim)))
     :add(nn.SelectTable(-1)) -- selects last state of the LSTM
-    :add(nn.Linear(embed_dim, embed_dim)) -- map last state to a score for classification
+    :add(nn.Linear(edim, edim)) -- map last state to a score for classification
     :add(nn.Tanh())                     ---     :add(nn.ReLU()) <- this one did worse
    return model
 end
@@ -40,21 +39,20 @@ function build_model(model, vocab_size, embed_dim, use_cuda)
     local nn_vocab = nn.LookupTableMaskZero(vocab_size, embed_dim)
     if model == 'bow' then
         print("Running BOW model")
-        local mod1 = build_bowmlp(nn_vocab, embed_dim)
-        -- mod2 = build_bowmlp(nn_vocab, embed_dim)
-        -- mod3 = build_bowmlp(nn_vocab, embed_dim)
+        mod1 = build_bowmlp(nn_vocab, embed_dim)
     end
     if model == 'lstm' then         
         print("Running LSTM model")
-        local mod1 = build_lstm(nn_vocab, embed_dim)
-        -- mod2 = build_lstm(nn_vocab, embed_dim)
-        -- mod3 = build_lstm(nn_vocab, embed_dim)
+        mod1 = build_lstm(nn_vocab, embed_dim)
     end
+
+    mod2 = mod1:clone()
+    mod3 = mod1:clone()
 
     local ParallelModel = nn.ParallelTable()
     ParallelModel:add(mod1)
-    ParallelModel:add(mod1:clone())
-    ParallelModel:add(mod1:clone())
+    ParallelModel:add(mod2)
+    ParallelModel:add(mod3)
 
     local FinalMLP = nn.Sequential()
     FinalMLP:add(ParallelModel)
