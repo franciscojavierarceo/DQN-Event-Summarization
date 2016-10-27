@@ -8,7 +8,7 @@ require 'cunnx'
 
 cmd = torch.CmdLine()
 --- setting the parameter defaults
-cmd:option('--model', 'lstm', 'using LSTM instead of BOW')
+cmd:option('--nn_model', 'lstm', 'using LSTM instead of BOW')
 cmd:option('--nepochs', 200, 'running for 50 epochs')
 cmd:option('--K_tokens', 20, 'using the first 10 tokens to extract data')
 cmd:option('--J_sentences', 10, 'using last 10 sentences to calculate rougue')
@@ -70,7 +70,7 @@ delta = 1./(opt.nepochs/opt.cuts)
 crit = nn.MSECriterion()
 
 out = iterateModelQueries(data_path, query_file, opt.batch_size, opt.nepochs, inputs, 
-                            opt.model, crit, opt.thresh, opt.embed_dim, opt.epsilon, delta, 
+                            opt.nn_model, crit, opt.thresh, opt.embed_dim, opt.epsilon, delta, 
                             opt.base_explore_rate, opt.print_every,
                             opt.learning_rate, opt.J_sentences, opt.K_tokens, opt.usecuda,
                             opt.skip_rate, opt.metric)

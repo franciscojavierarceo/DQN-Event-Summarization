@@ -40,13 +40,13 @@ function build_model(model, vocab_size, embed_dim, use_cuda)
     local nn_vocab = nn.LookupTableMaskZero(vocab_size, embed_dim)
     if model == 'bow' then
         print("Running BOW model")
-        mod1 = build_bowmlp(nn_vocab, embed_dim)
+        local mod1 = build_bowmlp(nn_vocab, embed_dim)
         -- mod2 = build_bowmlp(nn_vocab, embed_dim)
         -- mod3 = build_bowmlp(nn_vocab, embed_dim)
     end
     if model == 'lstm' then         
         print("Running LSTM model")
-        mod1 = build_lstm(nn_vocab, embed_dim)
+        local mod1 = build_lstm(nn_vocab, embed_dim)
         -- mod2 = build_lstm(nn_vocab, embed_dim)
         -- mod3 = build_lstm(nn_vocab, embed_dim)
     end
@@ -92,7 +92,7 @@ end
             --- NOT DONE
     --- 9. Not meant to do but did anyways: trying a sampling method to skip
 function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs, 
-                            model, crit, thresh, embed_dim, epsilon, delta, 
+                            nn_model, crit, thresh, embed_dim, epsilon, delta, 
                             base_explore_rate, print_every,
                             learning_rate, J_sentences, K_tokens, use_cuda,
                             skiprate, emetric)
@@ -149,7 +149,7 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
         pred_query_list[query_id] = torch.totable(torch.zeros(#input_file, 1))    --- Predicted
     end
 
-    model  = build_model(model, vocab_size, embed_dim, use_cuda)
+    model  = build_model(nn_model, vocab_size, embed_dim, use_cuda)
 
     for epoch=0, nepochs, 1 do
         loss = 0.                    --- Compute a new MSE loss each time
