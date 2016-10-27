@@ -1,19 +1,17 @@
 function score_model(opt_action, sentence_xs, epsilon, thresh, skip_rate, metric)
-    local f_t1, r_t1, p_t1 = 0., 0., 0.
-    local fscores, rscores, pscores = {}, {}, {}
+    local s_t1 = 0.
+    local scores = {}
     for i=1, #opt_action do
         local curr_summary= buildPredSummary(geti_n(opt_action, 1, i), 
-                                           geti_n(sentence_xs, 1, i),  nil) 
-        fscores[i] = rougeF1({curr_summary[i]}, nuggets )
-        rscores[i] = rougeRecall({curr_summary[i]}, nuggets )
-        pscores[i] = rougePrecision({curr_summary[i]}, nuggets )        
+                                           geti_n(sentence_xs, 1, i),  nil)
+
+        scores[i] = rougeF1({curr_summary[i]}, nuggets ) - s_t1
         if skip_rate <= torch.rand(1)[1] then  
-            f_t1, r_t1, p_t1 = fscores[i], rscores[i], pscores[i]
+            s_t1 = scores[i] + s_t1
         end
     end
-    return fscores
+    return scores
 end
-
 
 function build_bowmlp(nn_vocab_module, edim)
     local model = nn.Sequential()
@@ -173,7 +171,9 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
             --- Loop over file to execute forward pass to estimate expected rougue
             for minibatch = 1, #xtdm do
                 --- Notice that the actionlist is optimized at after each iteration
-                local summaries = padZeros(buildCurrentSummary(action_list, xtdm, 
+                --- using geti_n to reduce computing time...though it ends up being O(n) either way
+                local summaries = padZeros(buildCurrentSummary(geti_n(action_list, 1, minibatch), 
+                                                               geti_n(xtdm, 1, minibatch), 
                                         K_tokens * J_sentences), 
                                         K_tokens * J_sentences)
                 sentence = LongTensor(padZeros( {xtdm[minibatch]}, K_tokens) ):t()
@@ -183,7 +183,12 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
                 --- Retrieve intermediate optimal action in model.get(3).output
                 local pred_rougue = model:forward({sentence, summary, query})   
                 local pred_actions = torch.totable(model:get(3).output)
-                opt_action = (pred_actions[1][1] > pred_actions[1][2]) and 1 or 0
+
+                if torch.rand(1)[1] < epsilon then 
+                    opt_action = torch.round(torch.rand(1))[1]
+                else 
+                    opt_action = (pred_actions[1][1] > pred_actions[1][2]) and 1 or 0
+                end 
                 
                 -- Updating our book-keeping tables
                 preds[minibatch] = pred_rougue[1]
