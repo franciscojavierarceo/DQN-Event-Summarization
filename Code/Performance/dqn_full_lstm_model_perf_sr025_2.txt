@@ -1,0 +1,26 @@
+...Utils file loaded	
+...running on CPU	
+training model with metric = f1, learning rate = 0.100, K = 20, J = 10, threshold = 0.000, embedding size = 50	
+Running LSTM model	
+Epoch 0, epsilon = 1.000, sum(y)/len(y) = 496/999, {Recall = 0.703402, Precision = 0.213186, F1 = 0.327204}, query = aurora	
+Epoch 1, epsilon = 0.960, sum(y)/len(y) = 490/999, {Recall = 0.702923, Precision = 0.214442, F1 = 0.328629}, query = aurora	
+Epoch 2, epsilon = 0.920, sum(y)/len(y) = 515/999, {Recall = 0.712027, Precision = 0.207195, F1 = 0.320985}, query = aurora	
+Epoch 3, epsilon = 0.880, sum(y)/len(y) = 430/999, {Recall = 0.699569, Precision = 0.239344, F1 = 0.356663}, query = aurora	
+Epoch 4, epsilon = 0.840, sum(y)/len(y) = 439/999, {Recall = 0.686152, Precision = 0.233567, F1 = 0.348503}, query = aurora	
+Epoch 5, epsilon = 0.800, sum(y)/len(y) = 412/999, {Recall = 0.681361, Precision = 0.241672, F1 = 0.356793}, query = aurora	
+Epoch 6, epsilon = 0.760, sum(y)/len(y) = 515/999, {Recall = 0.724485, Precision = 0.210409, F1 = 0.326108}, query = aurora	
+Epoch 7, epsilon = 0.720, sum(y)/len(y) = 641/999, {Recall = 0.745089, Precision = 0.171823, F1 = 0.279249}, query = aurora	
+Epoch 8, epsilon = 0.680, sum(y)/len(y) = 652/999, {Recall = 0.738860, Precision = 0.169618, F1 = 0.275899}, query = aurora	
+Epoch 9, epsilon = 0.640, sum(y)/len(y) = 689/999, {Recall = 0.747005, Precision = 0.160639, F1 = 0.264417}, query = aurora	
+Epoch 10, epsilon = 0.600, sum(y)/len(y) = 688/999, {Recall = 0.758505, Precision = 0.162476, F1 = 0.267625}, query = aurora	
+Epoch 11, epsilon = 0.560, sum(y)/len(y) = 517/999, {Recall = 0.700527, Precision = 0.200604, F1 = 0.311893}, query = aurora	
+Epoch 12, epsilon = 0.520, sum(y)/len(y) = 746/999, {Recall = 0.763297, Precision = 0.153335, F1 = 0.255370}, query = aurora	
+Epoch 13, epsilon = 0.480, sum(y)/len(y) = 745/999, {Recall = 0.764734, Precision = 0.152991, F1 = 0.254972}, query = aurora	
+Epoch 14, epsilon = 0.440, sum(y)/len(y) = 782/999, {Recall = 0.772401, Precision = 0.148162, F1 = 0.248631}, query = aurora	
+Epoch 15, epsilon = 0.400, sum(y)/len(y) = 808/999, {Recall = 0.772880, Precision = 0.142014, F1 = 0.239940}, query = aurora	
+Epoch 16, epsilon = 0.360, sum(y)/len(y) = 500/999, {Recall = 0.716339, Precision = 0.213145, F1 = 0.328535}, query = aurora	
+Epoch 17, epsilon = 0.320, sum(y)/len(y) = 144/999, {Recall = 0.465261, Precision = 0.474353, F1 = 0.469763}, query = aurora	
+Epoch 18, epsilon = 0.280, sum(y)/len(y) = 146/999, {Recall = 0.465261, Precision = 0.487450, F1 = 0.476097}, query = aurora	
+Epoch 19, epsilon = 0.240, sum(y)/len(y) = 110/999, {Recall = 0.414950, Precision = 0.550540, F1 = 0.473224}, query = aurora	
+Epoch 20, epsilon = 0.200, sum(y)/len(y) = 107/999, {Recall = 0.419262, Precision = 0.570776, F1 = 0.483425}, query = aurora	
+Epoch 21, epsilon = 0.160, sum(y)/len(y) = 527/999, {Recall = 0.722568, Precision = 0.206293, F1 = 0.320953}, query = aurora	
