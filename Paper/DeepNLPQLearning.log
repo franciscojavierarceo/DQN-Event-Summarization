@@ -1,8 +1,9 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015) (preloaded format=pdflatex 2015.5.24)  28 OCT 2016 09:23
+This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015) (preloaded format=pdflatex 2015.5.24)  28 OCT 2016 17:35
 entering extended mode
  restricted \write18 enabled.
+ file:line:error style messages enabled.
  %&-line parsing enabled.
-**DeepNLPQLearning
+**DeepNLPQLearning.tex
 (./DeepNLPQLearning.tex
 LaTeX2e <2015/01/01>
 Babel <3.9l> and hyphenation patterns for 79 languages loaded.
@@ -815,13 +816,13 @@ Package rerunfilecheck Info: File `DeepNLPQLearning.out' has not changed.
 Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 286.
  ) 
 Here is how much of TeX's memory you used:
- 19148 strings out of 493089
- 380832 string characters out of 6134842
+ 19147 strings out of 493089
+ 380822 string characters out of 6134842
  479574 words of memory out of 5000000
- 22219 multiletter control sequences out of 15000+600000
+ 22218 multiletter control sequences out of 15000+600000
  21864 words of font info for 81 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 55i,14n,82p,719b,762s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 55i,14n,82p,723b,762s stack positions out of 5000i,500n,10000p,200000b,80000s
 </usr/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb
 ></usr/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb>
 </usr/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb><
@@ -838,7 +839,7 @@ e/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/local/texlive
 015/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/local/texlive/201
 5/texmf-dist/fonts/type1/public/amsfonts/cm/cmti12.pfb></usr/local/texlive/2015
 /texmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb>
-Output written on DeepNLPQLearning.pdf (7 pages, 207696 bytes).
+Output written on DeepNLPQLearning.pdf (7 pages, 208382 bytes).
 PDF statistics:
  216 PDF objects out of 1000 (max. 8388607)
  173 compressed objects within 2 object streams

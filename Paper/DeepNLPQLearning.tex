@@ -237,12 +237,12 @@ And the updates are computed using the following gradient update of $L_i(\theta_
 	\FOR{$q \in \mathcal{Q}$}
 		\STATE $X_q$= \{Extract sentences for query $q$\}
 		\STATE $\tilde{Y}_q$ = \{Extract summary for query $q$\}
-		\FOR{$\tilde{y}_t, x_t \in (X_q, \tilde{Y}_q) $}
+		\FOR{$(x_t, \tilde{y}_t) \in (X_q, \tilde{Y}_q), $ $ \forall t =1,..,T_q$}
 			\STATE Set $s_t = s(x_t, \tilde{y}_t, q)$
-			\STATE  \textrm{Compute} $Q(s_t)$,  $ \forall a_t \in \mathcal{A}(s_t) = \{select, skip\}$
-			\STATE Select $a^{*}_t =$ argmax$_{a}Q(s_t)$
+			\STATE $ \forall a_t \in \mathcal{A}(s_t) = \{select, skip\}$ \textrm{compute} $Q(s_t, a_t)$
+			\STATE Select $a^{*}_t =$ argmax$_{a_{t}}Q(s_t, a_t)$
 			\IF{$random() < \epsilon$}
-				\STATE  Set $a^{*}_t $ to random action with $\Pr(a_t) =0.5$
+				\STATE  Set $a^{*}_t $ to random action with $\Pr(a_t) =\frac{1}{| \mathcal{A} |} $
 			\ENDIF
 			\IF{$a^{*}_t = \{select\}$}
 				\STATE $\tilde{y}_{t+1} = \tilde{y}_t \cup  \{ x_t \} $
