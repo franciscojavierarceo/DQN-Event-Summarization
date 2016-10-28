@@ -1,6 +1,6 @@
 function score_model(opt_action, sentence_xs, input_nuggets, thresh, skip_rate, metric)
     --- Scores the model given the list of optimal actions, input sentences, and nuggets
-        --- Note: we calculate *change* in rougue from time t-1 to t for each sentence
+        --- Note: we calculate *change* in rouge from time t-1 to t for each sentence
         --- The skip_rate controls this delta calculation
             --- skip_rate == 0 turns skip_rate off ==> always updates the lag 
                 --- means we are computing s_t - s_{t-1}
@@ -10,6 +10,10 @@ function score_model(opt_action, sentence_xs, input_nuggets, thresh, skip_rate, 
     local scores = {}
     if metric=='f1' then
         eval_func = rougeF1
+    elseif metric=='recall' then
+        eval_func = rougeRecall
+    elseif metric=='precision' then
+        eval_func = rougePrecision
     end
     for i=1, #opt_action do
         local curr_summary= buildPredSummary(geti_n(opt_action, 1, i), 
@@ -119,7 +123,7 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
     maxseqlenq = getMaxseq(query_file)
 
     action_query_list = {}
-    yrougue_query_list = {}
+    yrouge_query_list = {}
     pred_query_list = {}
 
     --- Initializing query book-keeping 
@@ -142,7 +146,7 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
 
         --- initialize the query specific lists
         action_query_list[query_id] = action_list
-        yrougue_query_list[query_id] = torch.totable(torch.randn(#input_file, 1)) --- Actual
+        yrouge_query_list[query_id] = torch.totable(torch.randn(#input_file, 1)) --- Actual
         pred_query_list[query_id] = torch.totable(torch.zeros(#input_file, 1))    --- Predicted
     end
 
@@ -170,7 +174,7 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
 
             --- Extracting the query specific actions, labels, and predictions
             action_list = action_query_list[query_id]
-            yrougue = yrougue_query_list[query_id] 
+            yrouge = yrouge_query_list[query_id] 
             preds = pred_query_list[query_id]
             
             --- Forward pass
@@ -187,7 +191,7 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
                 query = LongTensor( padZeros({qs}, 5) ):t()
 
                 --- Retrieve intermediate optimal action in model.get(3).output
-                local pred_rougue = model:forward({sentence, summary, query})   
+                local pred_rouge = model:forward({sentence, summary, query})   
                 local pred_actions = torch.totable(model:get(3).output)         --- has 2 output units
                 
                 --- Epsilon greedy strategy
@@ -195,16 +199,16 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
                     opt_action = torch.round(torch.rand(1))[1]
                 else 
                     --- Notice that pred_actions gives us our optimal action by returning
-                    ---  E[ROUGUE | Select ] > E[ROUGUE | Skip]
+                    ---  E[rouge | Select ] > E[rouge | Skip]
                     opt_action = (pred_actions[1][1] > pred_actions[1][2]) and 1 or 0
                 end 
                 
                 -- Updating book-keeping tables at sentence level
-                preds[minibatch] = pred_rougue[1]
+                preds[minibatch] = pred_rouge[1]
                 action_list[minibatch] = opt_action
             end --- ends the sentence level loop
             --- Note setting the skip_rate = 0 means no random skipping of delta calculation
-            yrougue = score_model(action_list, 
+            yrouge = score_model(action_list, 
                             xtdm,
                             nuggets,
                             thresh, 
@@ -213,11 +217,11 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
 
             --- Updating book-keeping tables at query level
             pred_query_list[query_id] = preds
-            yrougue_query_list[query_id] = yrougue
+            yrouge_query_list[query_id] = yrouge
             action_query_list[query_id] = action_list
 
             --- Rerunning the scoring on the full data and rescoring cumulatively
-            --- Execute policy and evaluation based on our E[ROUGUE] after all of the minibatches
+            --- Execute policy and evaluation based on our E[rouge] after all of the minibatches
             predsummary = buildPredSummary(action_list, xtdm, nil)
             predsummary = predsummary[#predsummary]
 
@@ -244,12 +248,12 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
                 sentence = LongTensor(padZeros( {xtdm[xindices[i]]}, K_tokens) ):t()
                 summary = LongTensor({summaries[xindices[i]]}):t()
                 query = LongTensor(padZeros({qs}, 5)):t()
-                labels = Tensor({yrougue[xindices[i]]})
-                pred_rougue = Tensor({preds[xindices[i]]})
+                labels = Tensor({yrouge[xindices[i]]})
+                pred_rouge = Tensor({preds[xindices[i]]})
 
-                loss = loss + crit:forward(pred_rougue, labels)
+                loss = loss + crit:forward(pred_rouge, labels)
                 --- Backprop model 
-                local grads = crit:backward(pred_rougue, labels)
+                local grads = crit:backward(pred_rouge, labels)
                 model:zeroGradParameters()
                 --- For some reason runnign the :forward() makes the backward pass work
                 --- spent a lot of time trying to debug why :backward() didn't work without it
@@ -260,7 +264,7 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
                 model:updateParameters(learning_rate)
             end
             print(geti_n(preds, 1,5))
-            print(geti_n(yrougue, 1,5))
+            print(geti_n(yrouge, 1,5))
             if (epoch % print_every)==0 then
                 perf_string = string.format(
                     "Epoch %i, loss  = %.3f, epsilon = %.3f, sum(y)/len(y) = %i/%i, {Recall = %.6f, Precision = %.6f, F1 = %.6f}, query = %s", 
@@ -276,5 +280,5 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
             epsilon = epsilon - delta
         end
     end -- ends the epoch level loop
-    return model, summary_query_list, action_query_list, yrougue_query_list
+    return model, summary_query_list, action_query_list, yrouge_query_list
 end 

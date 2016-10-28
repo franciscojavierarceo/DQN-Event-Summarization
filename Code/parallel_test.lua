@@ -90,14 +90,14 @@ for epoch = 1, 100 do
         summary = LongTensor({summaries[minibatch]}):t()
         query = LongTensor({queries[minibatch]}):t()
         
-        yrougue = Tensor({scores[minibatch]}):cuda()
+        yrouge = Tensor({scores[minibatch]}):cuda()
         preds = FinalMLP:forward({sentence, summary, query})
         --- storing predictions
         fullpreds[minibatch] = torch.totable(preds)
         
-        loss = criterion:forward(preds, yrougue)
+        loss = criterion:forward(preds, yrouge)
         FinalMLP:zeroGradParameters()
-        grads = criterion:backward(preds, yrougue)
+        grads = criterion:backward(preds, yrouge)
         FinalMLP:backward({sentence, summary, query}, grads)
         FinalMLP:updateParameters(learning_rate)
 
