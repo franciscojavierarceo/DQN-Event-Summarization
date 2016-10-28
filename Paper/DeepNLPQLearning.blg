@@ -9,37 +9,37 @@ Warning--empty journal in kedzieextractive
 Warning--empty year in kedzieextractive
 You've used 9 entries,
             2118 wiz_defined-function locations,
-            543 strings with 5694 characters,
-and the built_in function-call counts, 3240 in all, are:
+            543 strings with 5725 characters,
+and the built_in function-call counts, 3272 in all, are:
 = -- 320
 > -- 151
 < -- 3
 + -- 60
 - -- 50
-* -- 209
+* -- 210
 := -- 522
 add.period$ -- 28
 call.type$ -- 9
 change.case$ -- 52
 chr.to.int$ -- 0
 cite$ -- 13
-duplicate$ -- 136
-empty$ -- 252
+duplicate$ -- 140
+empty$ -- 263
 format.name$ -- 50
-if$ -- 694
+if$ -- 705
 int.to.chr$ -- 0
 int.to.str$ -- 9
 missing$ -- 9
 newline$ -- 46
 num.names$ -- 18
-pop$ -- 71
+pop$ -- 75
 preamble$ -- 1
 purify$ -- 43
 quote$ -- 0
 skip$ -- 98
 stack$ -- 0
 substring$ -- 181
-swap$ -- 40
+swap$ -- 41
 text.length$ -- 3
 text.prefix$ -- 0
 top$ -- 0
