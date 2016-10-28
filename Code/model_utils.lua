@@ -39,7 +39,8 @@ function build_bowmlp(nn_vocab_module, edim)
     :add(nn_vocab_module)           -- returns a (sequence-length x batch-size x edim) tensor
     :add(nn.Sum(1, edim, true))     -- splits into a sequence-length table with (batch-size x edim) entries
     :add(nn.Linear(edim, edim))     -- map last state to a score for classification
-    :add(nn.Tanh())                 --     :add(nn.ReLU()) <- this one did worse
+    :add(nn.ReLU())
+    -- :add(nn.Tanh())                 --     :add(nn.ReLU()) <- this one did worse
    return model
 end
 
@@ -50,7 +51,8 @@ function build_lstm(nn_vocab_module, edim)
     :add(nn.Sequencer(nn.LSTM(edim, edim)))
     :add(nn.SelectTable(-1))            -- selects last state of the LSTM
     :add(nn.Linear(edim, edim))         -- map last state to a score for classification
-    :add(nn.Tanh())                     --     :add(nn.ReLU()) <- this one did worse
+    -- :add(nn.ReLU())
+    -- :add(nn.Tanh())                     --     :add(nn.ReLU()) <- this one did worse
    return model
 end
 
@@ -146,8 +148,8 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
 
         --- initialize the query specific lists
         action_query_list[query_id] = action_list
-        yrouge_query_list[query_id] = torch.totable(torch.randn(#input_file, 1)) --- Actual
-        pred_query_list[query_id] = torch.totable(torch.zeros(#input_file, 1))    --- Predicted
+        yrouge_query_list[query_id] = torch.totable(torch.rand(#input_file, 1)) --- Actual
+        pred_query_list[query_id] = torch.totable(torch.zeros(#input_file, 1))  --- Predicted
     end
 
     --- Specify model
@@ -199,11 +201,18 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
                     opt_action = torch.round(torch.rand(1))[1]
                 else 
                     --- Notice that pred_actions gives us our optimal action by returning
-                    ---  E[rouge | Select ] > E[rouge | Skip]
-                    opt_action = (pred_actions[1][1] > pred_actions[1][2]) and 1 or 0
+                    ---  E[rouge | Skip]  > E[rouge | Select ] then skip {0} else select {1}
+                    opt_action = (pred_actions[1][1] > pred_actions[1][2]) and 0 or 1
                 end 
                 
                 -- Updating book-keeping tables at sentence level
+                if minibatch < 5 then
+                    x = string.format(
+                        "pred rougue = %.8f, action0 = %.8f, action1 = %.8f, optaction = %i",
+                            pred_rouge[1], pred_actions[1][1], pred_actions[1][2], opt_action
+                            )
+                    print(x)
+                end
                 preds[minibatch] = pred_rouge[1]
                 action_list[minibatch] = opt_action
             end --- ends the sentence level loop
@@ -250,8 +259,12 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
                 query = LongTensor(padZeros({qs}, 5)):t()
                 labels = Tensor({yrouge[xindices[i]]})
                 pred_rouge = Tensor({preds[xindices[i]]})
-
-                loss = loss + crit:forward(pred_rouge, labels)
+                if i == 1 then
+                    print(labels, pred_rouge)
+                    print(string.format('loss = %.10f',crit:forward(pred_rouge, labels)))
+                end
+                err = crit:forward(pred_rouge, labels)
+                loss = loss + err
                 --- Backprop model 
                 local grads = crit:backward(pred_rouge, labels)
                 model:zeroGradParameters()
@@ -261,11 +274,20 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
                 --- I'll ask Chris about this and see what he thinks
                 local tmp = model:forward({sentence, summary, query})
                 model:backward({sentence, summary, query}, grads)
+                local norm = model:gradParamClip(-1)
                 model:updateParameters(learning_rate)
             end
             print(geti_n(preds, 1,5))
             print(geti_n(yrouge, 1,5))
             if (epoch % print_every)==0 then
+                pmin = math.min(table.unpack(preds))
+                pmax = math.max(table.unpack(preds))
+                pmean = sumTable(preds) / #yrouge
+                ymin = math.min(table.unpack(yrouge))
+                ymax = math.max(table.unpack(yrouge))
+                ymean = sumTable(yrouge) / #yrouge
+                print(string.format("Predicted {min = %.6f, mean = %.6f, max = %.6f}", pmin, pmax, pmean))
+                print(string.format("Actual    {min = %.6f, mean = %.6f, max = %.6f}", ymin, ymax, ymean))
                 perf_string = string.format(
                     "Epoch %i, loss  = %.3f, epsilon = %.3f, sum(y)/len(y) = %i/%i, {Recall = %.6f, Precision = %.6f, F1 = %.6f}, query = %s", 
                     epoch, loss, epsilon, sumTable(action_list), #action_list, rscore, pscore, fscore, inputs[query_id]['query_name']
