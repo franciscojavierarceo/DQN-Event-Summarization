@@ -151,7 +151,6 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
 
     --- This is the main training function
     for epoch=0, nepochs, 1 do
-        loss = 0.                    --- Compute a new MSE loss each time
         --- Looping over each bach of sentences for a given query
         for query_id = 1, #inputs do
             --- Grabbing all of the input data
@@ -239,6 +238,7 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
             local summaries = padZeros(buildCurrentSummary(action_list, xtdm, 
                                         K_tokens * J_sentences), 
                                         K_tokens * J_sentences)
+            loss = 0.
             --- Backward pass
             for i= 1, batch_size do
                 sentence = LongTensor(padZeros( {xtdm[xindices[i]]}, K_tokens) ):t()
@@ -259,6 +259,8 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
                 model:backward({sentence, summary, query}, grads)
                 model:updateParameters(learning_rate)
             end
+            print(geti_n(preds, 1,5))
+            print(geti_n(yrougue, 1,5))
             if (epoch % print_every)==0 then
                 perf_string = string.format(
                     "Epoch %i, loss  = %.3f, epsilon = %.3f, sum(y)/len(y) = %i/%i, {Recall = %.6f, Precision = %.6f, F1 = %.6f}, query = %s", 
