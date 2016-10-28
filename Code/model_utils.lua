@@ -206,12 +206,14 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
                 end 
                 
                 -- Updating book-keeping tables at sentence level
-                if minibatch < 5 then
+                if minibatch < 3 then
                     x = string.format(
                         "pred rougue = %.8f, action0 = %.8f, action1 = %.8f, optaction = %i",
                             pred_rouge[1], pred_actions[1][1], pred_actions[1][2], opt_action
                             )
                     print(x)
+                    -- print(xtdm[minibatch], unpackZeros(summaries[minibatch]))
+                    print(unpackZeros(summaries[minibatch]))
                 end
                 preds[minibatch] = pred_rouge[1]
                 action_list[minibatch] = opt_action

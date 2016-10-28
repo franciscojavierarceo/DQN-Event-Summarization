@@ -237,29 +237,6 @@ function buildPredSummary(preds, xs, K)
     return out
 end
 
-function buildSentenceSummary(preds, xs, K)
-    --- This method was used to map the sentence indices to extract the summary
-    --- and produceds {sentence_id, 0, sentence_id} 
-    --- No longer using this method, instead, I'm keeping this here in case we 
-    --- Decide to try it this way later on
-    local out = {}
-    local out2 = {}
-    for i=1, #xs do
-        if i == 1 then 
-            out[i] = x_or_zero(preds[i], {0} )
-        else 
-            --- Update it by adding xs_i and out_{i-1}
-            out[i] = tableConcat( out[i-1], x_or_zero(preds[i], xs[i]) )
-        end
-    end
-    local maxlen = 0
-    for i=1, #out do
-        out2[i] = getLastKElements(out[i], K)
-        maxlen = math.max(maxlen, #out2[i])
-    end    
-    return padZeros(out2, maxlen)
-end
-
 function Tokenize(inputdic, remove_stopwords)
     local out = {}
     --- these can be found in the total_corpus_summary.csv file
