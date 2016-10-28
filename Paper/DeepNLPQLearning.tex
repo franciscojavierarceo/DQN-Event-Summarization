@@ -231,20 +231,25 @@ And the updates are computed using the following gradient update of $L_i(\theta_
     \bf{Input:} { \rm  \{$X_q$: Input sentences, $N$: Number of iterations, $\epsilon$: Mixture parameter\} } \\
     \underline{$\bf{Output: }$ \rm \{$\hat{\pi}$: policy\} }
 \begin{algorithmic}[1]
-\STATE \rm Initialize action-value function $\mathcal{Q}$ with random weights
+\STATE \rm Initialize action-value function $Q$ with random weights
+\STATE \rm Initialize $\tilde{Y}_q = \{\} $, $\forall q \in \mathcal{Q}$
 \FOR{$epoch=1, N\ $}
 	\FOR{$q \in \mathcal{Q}$}
-		\STATE  $X_q$ = \{Extract sentences for query $q$\}
-		\FOR{$x_t \in X_q $}
-			\STATE $s_t \leftarrow  s(x_t, \tilde{y}_t, q)$
-			\STATE  \textrm{Compute} $Q(s_t)$,  $ \forall a_t \in \mathcal{A}(s_t)$
+		\STATE $X_q$= \{Extract sentences for query $q$\}
+		\STATE $\tilde{Y}_q$ = \{Extract summary for query $q$\}
+		\FOR{$\tilde{y}_t, x_t \in (X_q, \tilde{Y}_q) $}
+			\STATE Set $s_t = s(x_t, \tilde{y}_t, q)$
+			\STATE  \textrm{Compute} $Q(s_t)$,  $ \forall a_t \in \mathcal{A}(s_t) = \{select, skip\}$
 			\STATE Select $a^{*}_t =$ argmax$_{a}Q(s_t)$
-			\IF{$a^{*}_t = select$} 
-				\STATE $\tilde{y}_{t+1} = \tilde{y} \cup  \{ x_t \} $
+			\IF{$random() < \epsilon$}
+				\STATE  Set $a^{*}_t $ to random action with $\Pr(a_t) =0.5$
 			\ENDIF
+			\IF{$a^{*}_t = \{select\}$}
+				\STATE $\tilde{y}_{t+1} = \tilde{y}_t \cup  \{ x_t \} $
+			\ENDIF	
 			\STATE Execute action $a^{*}_t$ and observe reward $r_t$ and new state $s_{t+1}$
-			\STATE Store transition $\Gamma \leftarrow \Gamma \cup \{ [s_t, a, r_t, s_{t+1}]\}$
-	\ENDFOR
+%			\STATE Update $\Gamma = \Gamma \cup \{ [s_t, a, r_t, s_{t+1}]\}$
+		\ENDFOR
 	\ENDFOR
 		\STATE Sample random minibatches of transitions $\gamma_j$ from $\Gamma$
 		\STATE 	\[ 		\textrm{Set } y_j= 
@@ -253,7 +258,7 @@ And the updates are computed using the following gradient update of $L_i(\theta_
 					     	r_j + \gamma $max$_{a'}Q(s_{j+1}, a'; \theta) 	& \text{if $s_{j+1}$ is non-terminal } 
 					\end{cases} 
 					\]
-        		\STATE Perform gradient step on $(y_j - Q(s_j, a_j; \theta))^2$
+        		\STATE Perform gradient step on $\mathcal{L}(\theta) = (y_j - Q(s_j, a_j; \theta))^2$
 \ENDFOR
   \end{algorithmic}
     \caption{DQN-LSTM for Event Summarization Training Procedure}
