@@ -148,7 +148,7 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
 
         --- initialize the query specific lists
         action_query_list[query_id] = action_list
-        yrouge_query_list[query_id] = torch.totable(torch.rand(#input_file))    --- Actual
+        yrouge_query_list[query_id] = torch.totable( (torch.rand(#input_file))     --- Actual
         pred_query_list[query_id] = torch.totable(torch.zeros(#input_file))     --- Predicted
     end
 
