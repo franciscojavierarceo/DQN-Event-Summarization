@@ -148,8 +148,8 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
 
         --- initialize the query specific lists
         action_query_list[query_id] = action_list
-        yrouge_query_list[query_id] = torch.totable(torch.rand(#input_file, 1)) --- Actual
-        pred_query_list[query_id] = torch.totable(torch.zeros(#input_file, 1))  --- Predicted
+        yrouge_query_list[query_id] = torch.totable(torch.rand(#input_file))    --- Actual
+        pred_query_list[query_id] = torch.totable(torch.zeros(#input_file))     --- Predicted
     end
 
     --- Specify model
@@ -203,32 +203,40 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
                     --- Notice that pred_actions gives us our optimal action by returning
                     ---  E[rouge | Skip]  > E[rouge | Select ] then skip {0} else select {1}
                     opt_action = (pred_actions[1][1] > pred_actions[1][2]) and 0 or 1
-                end 
-                
+                end
+
                 -- Updating book-keeping tables at sentence level
                 if minibatch < 3 then
                     x = string.format(
                         "pred rougue = %.8f, action0 = %.8f, action1 = %.8f, optaction = %i",
                             pred_rouge[1], pred_actions[1][1], pred_actions[1][2], opt_action
                             )
-                    print(x)
                     -- print(xtdm[minibatch], unpackZeros(summaries[minibatch]))
-                    print(unpackZeros(summaries[minibatch]))
                 end
                 preds[minibatch] = pred_rouge[1]
                 action_list[minibatch] = opt_action
             end --- ends the sentence level loop
+            
+            local pfile = io.open(string.format("plotdata/%i_preds.txt", epoch), 'w')
+            local yfile = io.open(string.format("plotdata/%i_actual.txt", epoch), 'w')
+            for i=1,#preds do
+                pfile:write(string.format("%.6f\n", preds[i] ) )
+                yfile:write(string.format("%.6f\n", yrouge[i] ) )
+            end
+            pfile:close()
+            yfile:close()
             --- Note setting the skip_rate = 0 means no random skipping of delta calculation
-            yrouge = score_model(action_list, 
-                            xtdm,
-                            nuggets,
-                            thresh, 
-                            skiprate, 
-                            emetric)
+            --- Let's stop updating th yrouge for now to see if the model will learn something
+            -- yrouge = score_model(action_list, 
+            --                 xtdm,
+            --                 nuggets,
+            --                 thresh, 
+            --                 skiprate, 
+            --                 emetric)
 
             --- Updating book-keeping tables at query level
             pred_query_list[query_id] = preds
-            yrouge_query_list[query_id] = yrouge
+            -- yrouge_query_list[query_id] = yrouge
             action_query_list[query_id] = action_list
 
             --- Rerunning the scoring on the full data and rescoring cumulatively
@@ -261,12 +269,12 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
                 query = LongTensor(padZeros({qs}, 5)):t()
                 labels = Tensor({yrouge[xindices[i]]})
                 pred_rouge = Tensor({preds[xindices[i]]})
-                if i == 1 then
-                    print(labels, pred_rouge)
-                    print(string.format('loss = %.10f',crit:forward(pred_rouge, labels)))
-                end
                 err = crit:forward(pred_rouge, labels)
                 loss = loss + err
+                if i < 3 then
+                    print(string.format("loss = %.6f; actual = %.6f; predicted = %.6f", err, labels[1], pred_rouge[1]))
+                    print(pred_rouge)
+                end
                 --- Backprop model 
                 local grads = crit:backward(pred_rouge, labels)
                 model:zeroGradParameters()
@@ -276,20 +284,20 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
                 --- I'll ask Chris about this and see what he thinks
                 local tmp = model:forward({sentence, summary, query})
                 model:backward({sentence, summary, query}, grads)
-                local norm = model:gradParamClip(-1)
                 model:updateParameters(learning_rate)
             end
             print(geti_n(preds, 1,5))
             print(geti_n(yrouge, 1,5))
             if (epoch % print_every)==0 then
+                print(string.format('there are %i sentences with 0 out of 1000', c))
                 pmin = math.min(table.unpack(preds))
                 pmax = math.max(table.unpack(preds))
                 pmean = sumTable(preds) / #yrouge
                 ymin = math.min(table.unpack(yrouge))
                 ymax = math.max(table.unpack(yrouge))
                 ymean = sumTable(yrouge) / #yrouge
-                print(string.format("Predicted {min = %.6f, mean = %.6f, max = %.6f}", pmin, pmax, pmean))
-                print(string.format("Actual    {min = %.6f, mean = %.6f, max = %.6f}", ymin, ymax, ymean))
+                print(string.format("Predicted {min = %.6f, mean = %.6f, max = %.6f}", pmin, pmean, pmax))
+                print(string.format("Actual    {min = %.6f, mean = %.6f, max = %.6f}", ymin, ymean, ymax))
                 perf_string = string.format(
                     "Epoch %i, loss  = %.3f, epsilon = %.3f, sum(y)/len(y) = %i/%i, {Recall = %.6f, Precision = %.6f, F1 = %.6f}, query = %s", 
                     epoch, loss, epsilon, sumTable(action_list), #action_list, rscore, pscore, fscore, inputs[query_id]['query_name']
@@ -306,3 +314,4 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
     end -- ends the epoch level loop
     return model, summary_query_list, action_query_list, yrouge_query_list
 end 
+os.execute(string.format("python make_density_gif.py %i", nepochs))

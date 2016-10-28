@@ -1,3 +1,4 @@
+require 'io'
 require 'torch'
 require 'nn'
 require 'rnn'
