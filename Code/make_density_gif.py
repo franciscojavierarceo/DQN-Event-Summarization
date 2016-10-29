@@ -39,7 +39,7 @@ def main(nepochs, model):
     images = []
     for filename in file_names:
         images.append(imageio.imread(filename))
-    imageio.mimsave('./density.gif', images, duration=0.75)
+    imageio.mimsave('./avp_density.gif', images, duration=0.75)
 
 if __name__ == '__main__':
     main(sys.argv[1], sys.argv[2])
