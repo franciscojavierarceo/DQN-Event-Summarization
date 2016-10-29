@@ -5,13 +5,13 @@ import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
 
-def main(nepochs):
+def main(nepochs, model):
     if type(nepochs) == str:
         nepochs = int(nepochs)
     
     # Pulling in the images that were exported
-    afile_names = [('./plotdata/00%i_actual.txt' % x) for x in range(nepochs) ] 
-    pfile_names = [('./plotdata/00%i_preds.txt' % x) for x in range(nepochs) ] 
+    afile_names = [('./plotdata/%s/00%i_actual.txt' % (model, x) ) for x in range(nepochs) ] 
+    pfile_names = [('./plotdata/%s/00%i_preds.txt' % (model, x)) for x in range(nepochs) ] 
 
     llow, lhigh = 0., 0.
     for (afile, pfile, epoch) in zip(afile_names, pfile_names, range(nepochs)):
@@ -42,4 +42,4 @@ def main(nepochs):
     imageio.mimsave('./density.gif', images, duration=0.75)
 
 if __name__ == '__main__':
-    main(sys.argv[1])
+    main(sys.argv[1], sys.argv[2])

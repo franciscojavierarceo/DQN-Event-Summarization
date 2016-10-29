@@ -218,8 +218,8 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
             end --- ends the sentence level loop
             
             if export then 
-                local pfile = io.open(string.format("plotdata/%i_preds.txt", epoch), 'w')
-                local yfile = io.open(string.format("plotdata/%i_actual.txt", epoch), 'w')
+                local pfile = io.open(string.format("plotdata/%s/%i_preds.txt", nn_model, epoch), 'w')
+                local yfile = io.open(string.format("plotdata/%s/%i_actual.txt", nn_model, epoch), 'w')
                 for i=1,#preds do
                     pfile:write(string.format("%.6f\n", preds[i] ) )
                     yfile:write(string.format("%.6f\n", yrouge[i] ) )
@@ -316,7 +316,7 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
     end -- ends the epoch level loop
     if export_ then
         print(string.format("Exporting density of predictions to ./density.gif"))
-        os.execute(string.format("python make_density_gif.py %i", nepochs))
+        os.execute(string.format("python make_density_gif.py %i %s", nepochs, nn_model))
     end
     return model, summary_query_list, action_query_list, yrouge_query_list
 end
