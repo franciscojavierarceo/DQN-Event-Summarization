@@ -99,7 +99,7 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
                             nn_model, crit, thresh, embed_dim, epsilon, delta, 
                             base_explore_rate, print_every,
                             learning_rate, J_sentences, K_tokens, use_cuda,
-                            skiprate, emetric)
+                            skiprate, emetric, export)
     --- This function iterates over the epochs, queries, and sentences to learn the model
     if use_cuda then
         Tensor = torch.CudaTensor
@@ -148,7 +148,7 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
 
         --- initialize the query specific lists
         action_query_list[query_id] = action_list
-        yrouge_query_list[query_id] = torch.totable( (torch.rand(#input_file))     --- Actual
+        yrouge_query_list[query_id] = torch.totable(torch.rand(#input_file))     --- Actual
         pred_query_list[query_id] = torch.totable(torch.zeros(#input_file))     --- Predicted
     end
 
@@ -217,14 +217,16 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
                 action_list[minibatch] = opt_action
             end --- ends the sentence level loop
             
-            local pfile = io.open(string.format("plotdata/%i_preds.txt", epoch), 'w')
-            local yfile = io.open(string.format("plotdata/%i_actual.txt", epoch), 'w')
-            for i=1,#preds do
-                pfile:write(string.format("%.6f\n", preds[i] ) )
-                yfile:write(string.format("%.6f\n", yrouge[i] ) )
-            end
-            pfile:close()
-            yfile:close()
+            if export then 
+                local pfile = io.open(string.format("plotdata/%i_preds.txt", epoch), 'w')
+                local yfile = io.open(string.format("plotdata/%i_actual.txt", epoch), 'w')
+                for i=1,#preds do
+                    pfile:write(string.format("%.6f\n", preds[i] ) )
+                    yfile:write(string.format("%.6f\n", yrouge[i] ) )
+                end
+                pfile:close()
+                yfile:close()
+            end 
             --- Note setting the skip_rate = 0 means no random skipping of delta calculation
             --- Let's stop updating th yrouge for now to see if the model will learn something
             -- yrouge = score_model(action_list, 
@@ -312,6 +314,9 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
             epsilon = epsilon - delta
         end
     end -- ends the epoch level loop
+    if export_ then
+        print(string.format("Exporting density of predictions to ./density.gif"))
+        os.execute(string.format("python make_density_gif.py %i", nepochs))
+    end
     return model, summary_query_list, action_query_list, yrouge_query_list
-end 
-os.execute(string.format("python make_density_gif.py %i", nepochs))
+end

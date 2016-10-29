@@ -24,6 +24,7 @@ cmd:option('--cuts', 4, 'using epsilon-greedy strategy 1/4 of the time')
 cmd:option('--base_explore_rate', 0.0, 'base exploration rate of 0.10')
 cmd:option('--skip_rate', 0., 'skipping rate of cumulative rouge calculation')
 cmd:option('--metric', "f1", 'skipping rate of cumulative rouge calculation')
+cmd:option('--export', false, 'write predictions and labels to a file')
 cmd:text()
 
 --- this retrieves the commands and stores them in opt.variable (e.g., opt.model)
@@ -74,4 +75,4 @@ out = iterateModelQueries(data_path, query_file, opt.batch_size, opt.nepochs, in
                             opt.model, crit, opt.thresh, opt.embed_dim, opt.epsilon, delta, 
                             opt.base_explore_rate, opt.print_every,
                             opt.learning_rate, opt.J_sentences, opt.K_tokens, opt.usecuda,
-                            opt.skip_rate, opt.metric)
+                            opt.skip_rate, opt.metric, opt.export)
