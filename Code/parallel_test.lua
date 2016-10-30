@@ -9,11 +9,11 @@ dofile("model_utils.lua")
 
 usecuda = true
 model = 'lstm'
-metric = 'f1'
+metric = 'recall'
 batch_size = 2
 embed_dim = 10
 outputSize = 1
-learning_rate = 0.1
+learning_rate = 0.001
 epsilon = 1
 start_epsilon = epsilon
 nepochs = 100
@@ -23,14 +23,28 @@ delta = 1./(nepochs/cuts)
 base_explore_rate = 0.1
 nsims = 10
 
--- sentences = {{0, 1, 3, 4}, {0, 0, 0 ,0}, {0, 2, 4, 3}, {1, 4, 3, 2} }
-sentences = {{0, 1, 3, 4}, {7, 6, 5 ,8}, {0, 2, 4, 3}, {1, 4, 3, 2}, {13, 14, 15, 16} }
-queries = {0, 1, 4, 3}
+queries   = {0, 1, 4, 3}
+sentences = {
+            {0, 1, 3, 4}, 
+            {7, 6, 5 ,8}, 
+            {0, 2, 4, 3}, 
+            {0, 0, 0, 0}, 
+            {1, 4, 3, 2}, 
+            {13, 14, 15, 16} 
+        }
+true_action_list = {
+                    1, 
+                    0, 
+                    1, 
+                    0, 
+                    1, 
+                    0
+                }
 --- Let's say these are the true ones we need to pick
-nuggets = {sentences[1], sentences[3], sentences[4], {9, 10, 12, 11}} 
+nuggets = {sentences[1], sentences[3], sentences[5], {9, 10, 12, 11}} 
 
-vocab_size = 12
--- vocab_size = 4
+vocab_size = 16
+-- vocab_size = 12
 criterion = nn.MSECriterion()
 
 if usecuda then
@@ -50,9 +64,8 @@ elseif metric=='precision' then
     eval_func = rougePrecision
 end
 
-fullpreds = {0, 0, 0, 0}
-action_list = {0, 0, 0, 0, 0}
-true_action_list = {1, 0, 1, 1, 0}
+fullpreds = {0, 0, 0, 0, 0, 0}
+action_list = torch.totable(torch.zeros(#sentences))
 --- Theoretical limit
 predsummary = buildPredSummary(true_action_list, sentences, nil)
 predsummary = predsummary[#predsummary]
@@ -65,6 +78,7 @@ modzero = 0.
 modbest = 0.
 mod = 0.
 for sims = 1, nsims do
+-- while sims < nsims and epsilon=0
     torch.manualSeed(sims)
     FinalMLP  = build_model(model, vocab_size, embed_dim, outputSize, usecuda)
     for epoch = 1, nepochs do
@@ -72,7 +86,7 @@ for sims = 1, nsims do
         yrouge = score_model(action_list, 
                     sentences,
                     nuggets,
-                    0.0, 
+                    0, 
                     0, 
                     metric)
         predsummary = buildPredSummary(action_list, sentences, nil)
@@ -115,13 +129,14 @@ for sims = 1, nsims do
             FinalMLP:backward({sentence, summary, query}, grads)
             FinalMLP:updateParameters(learning_rate)
         end
+
         pmin = math.min(table.unpack(fullpreds))
         pmax = math.max(table.unpack(fullpreds))
         pmean = sumTable(fullpreds) / #yrouge
 
         -- print(string.format("Predicted {min = %.6f, mean = %.6f, max = %.6f}", pmin, pmean, pmax))    
-        print(string.format("epoch = %i, epsilon = %.3f, rouge-%s = %.6f, loss = %.6f, action = {%i, %i, %i ,%i} ", 
-                epoch, epsilon, metric, score, loss, action_list[1], action_list[2], action_list[3], action_list[4])
+        print(string.format("epoch = %i, epsilon = %.3f, rouge-%s = %.6f, loss = %.6f, action = {%i, %i, %i ,%i, %i, %i}, Predicted: {min=%.6f, mean=%.6f, max=%.6f}", 
+                epoch, epsilon, metric, score, loss, action_list[1], action_list[2], action_list[3], action_list[4], action_list[5], action_list[6], pmin, pmean, pmax )
         )
 
         if (epsilon - delta) <= base_explore_rate then
