@@ -240,7 +240,7 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
 
             --- Updating book-keeping tables at query level
             pred_query_list[query_id] = preds
-            -- yrouge_query_list[query_id] = yrouge
+            yrouge_query_list[query_id] = yrouge
             action_query_list[query_id] = action_list
 
             --- Rerunning the scoring on the full data and rescoring cumulatively
