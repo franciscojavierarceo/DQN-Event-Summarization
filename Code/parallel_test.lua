@@ -11,25 +11,27 @@ usecuda = true
 model = 'lstm'
 metric = 'f1'
 batch_size = 2
-vocab_size = 4
 embed_dim = 10
 outputSize = 1
 learning_rate = 0.1
 epsilon = 1
-nepochs = 100
-cuts = 2.
+start_epsilon = epsilon
+nepochs = 200
+cuts = 10
 gamma = 0.3
 delta = 1./(nepochs/cuts) 
 base_explore_rate = 0.
 
-FinalMLP  = build_model(model, vocab_size, embed_dim, outputSize, usecuda)
-criterion = nn.MSECriterion()
-
-sentences = {{0, 1, 3, 4}, {0, 0, 0 ,0}, {0, 2, 4, 3}, {1, 4, 3, 2} }
-summaries = {{0, 0, 0, 0}, {0, 1, 3, 4}, {}, {} }
+-- sentences = {{0, 1, 3, 4}, {0, 0, 0 ,0}, {0, 2, 4, 3}, {1, 4, 3, 2} }
+sentences = {{0, 1, 3, 4}, {7, 6, 5 ,8}, {0, 2, 4, 3}, {1, 4, 3, 2}, {13, 14, 15, 16} }
 queries = {0, 1, 4, 3}
 --- Let's say these are the true ones we need to pick
-nuggets = {sentences[1], sentences[3], sentences[4], {5, 7, 3, 1}} 
+nuggets = {sentences[1], sentences[3], sentences[4], {9, 10, 12, 11}} 
+
+vocab_size = 12
+-- vocab_size = 4
+FinalMLP  = build_model(model, vocab_size, embed_dim, outputSize, usecuda)
+criterion = nn.MSECriterion()
 
 if usecuda then
   Tensor = torch.CudaTensor
@@ -49,10 +51,10 @@ elseif metric=='precision' then
 end
 
 fullpreds = {0, 0, 0, 0}
-action_list = {0, 0, 0, 0}
-true_action_list = {1, 0, 1, 1}
+action_list = {0, 0, 0, 0, 0}
+true_action_list = {1, 0, 1, 1, 0}
 --- Theoretical limit
-predsummary = buildPredSummary({1, 0, 1, 1}, sentences, nil)
+predsummary = buildPredSummary(true_action_list, sentences, nil)
 predsummary = predsummary[#predsummary]
 -- score = rougeF1({predsummary}, nuggets)
 score = eval_func({predsummary}, nuggets)
@@ -60,13 +62,23 @@ print(string.format('Best possible Score = %.6f', score))
 print(true_action_list)
 
 for epoch = 1, nepochs do
+    --- Score the model with random actions first
+    yrouge = score_model(action_list, 
+                sentences,
+                nuggets,
+                0.1, 
+                0, 
+                metric)
+    predsummary = buildPredSummary(action_list, sentences, nil)
+    predsummary = predsummary[#predsummary]
+    score = eval_func({predsummary}, nuggets)
+
     --- Forward step
     for minibatch = 1, #sentences do
         summary, sentence, query = BuildTensors(action_list, sentences, queries, minibatch, 4, 4)
         -- forward pass
         preds = FinalMLP:forward({sentence, summary, query})
         pred_actions = torch.totable(FinalMLP:get(3).output)
-
         if torch.rand(1)[1] < epsilon then 
             opt_action = torch.round(torch.rand(1))[1]
         else 
@@ -74,18 +86,8 @@ for epoch = 1, nepochs do
         end
         --- Updating bookeeping variables
         action_list[minibatch] = opt_action
-        fullpreds[minibatch] = torch.totable(preds)
+        fullpreds[minibatch] = torch.totable(preds)[1]
     end
-    --- Score after forward pass
-    scores = score_model(action_list, 
-                sentences,
-                nuggets,
-                0, 
-                0, 
-                metric)
-    predsummary = buildPredSummary(action_list, sentences, nil)
-    predsummary = predsummary[#predsummary]
-    score = eval_func({predsummary}, nuggets)
 
     summaries = padZeros(buildCurrentSummary(action_list, sentences, 4 * 4), 4 * 4)
     --- Backward step
@@ -94,12 +96,12 @@ for epoch = 1, nepochs do
         sentence = LongTensor({sentences[minibatch]}):t()
         query = LongTensor({queries}):t()        
         if (minibatch) < #sentences then
-            labels = Tensor({scores[minibatch] + gamma * scores[minibatch + 1] })
+            labels = Tensor({yrouge[minibatch] + gamma * yrouge[minibatch + 1] })
         else 
-            labels = Tensor({scores[minibatch]})
+            labels = Tensor({yrouge[minibatch]})
         end
         preds = Tensor(fullpreds[minibatch])
-        --- Backward pass        
+        --- Backward pass
         preds = FinalMLP:forward({sentence, summary, query})
         loss = criterion:forward(preds, labels)
         FinalMLP:zeroGradParameters()
@@ -107,7 +109,11 @@ for epoch = 1, nepochs do
         FinalMLP:backward({sentence, summary, query}, grads)
         FinalMLP:updateParameters(learning_rate)
     end
+    pmin = math.min(table.unpack(fullpreds))
+    pmax = math.max(table.unpack(fullpreds))
+    pmean = sumTable(fullpreds) / #yrouge
 
+    -- print(string.format("Predicted {min = %.6f, mean = %.6f, max = %.6f}", pmin, pmean, pmax))    
     print_str = string.format("epoch = %i, epsilon = %.3f, rouge-%s = %.6f, loss = %.6f, action = {%i, %i, %i ,%i} ", 
             epoch, epsilon, metric, score, loss, action_list[1], action_list[2], action_list[3], action_list[4])
     print(print_str)
@@ -115,5 +121,8 @@ for epoch = 1, nepochs do
         epsilon = base_explore_rate
     else 
         epsilon = epsilon - delta
+    end
+    if score == 0. and epoch > torch.round(nepochs/cuts) then 
+        epsilon = start_epsilon/2.
     end
 end
