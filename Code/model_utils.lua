@@ -281,7 +281,7 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
                 err = crit:forward(pred_rouge, labels)
                 loss = loss + err
                 if i < 3 then
-                    print(string.format("loss = %.6f; actual = %.6f; predicted = %.6f predicted_t-1 = %.6f", err, labels[1],preds[xindices[i]],preds[xindices[i] + 1]  ))
+                    print(string.format("loss = %.6f; actual = %.6f; predicted = %.6f predicted_t-1 = %.6f", err, labels[1], preds[xindices[i]], preds[xindices[i] + 1]  ))
                     print(pred_rouge)
                 end
                 --- Backprop model 
