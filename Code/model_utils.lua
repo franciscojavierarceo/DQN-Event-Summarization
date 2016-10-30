@@ -274,12 +274,12 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
                 sentence = LongTensor(padZeros( {xtdm[xindices[i]]}, K_tokens) ):t()
                 summary = LongTensor({summaries[xindices[i]]}):t()
                 query = LongTensor(padZeros({qs}, 5)):t()
-                labels = Tensor({yrouge[xindices[i]]})
+                pred_rouge = Tensor({preds[xindices[i]]})
                 --- Line 23 in algorithm
                 if (xindices[i]) < #xtdm then
-                    pred_rouge = Tensor({preds[xindices[i]] + gamma * preds[xindices[i] + 1] })
+                    labels = Tensor({yrouge[xindices[i]] + gamma * yrouge[xindices[i] + 1] })
                 else 
-                    pred_rouge = Tensor({preds[xindices[i]]})
+                    labels = Tensor({yrouge[xindices[i]]})
                 end
                 err = crit:forward(pred_rouge, labels)
                 loss = loss + err
