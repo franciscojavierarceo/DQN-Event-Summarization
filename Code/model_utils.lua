@@ -39,7 +39,7 @@ function build_bowmlp(nn_vocab_module, edim)
     :add(nn_vocab_module)           -- returns a (sequence-length x batch-size x edim) tensor
     :add(nn.Sum(1, edim, true))     -- splits into a sequence-length table with (batch-size x edim) entries
     :add(nn.Linear(edim, edim))     -- map last state to a score for classification
-    :add(nn.ReLU())
+    -- :add(nn.ReLU())
     -- :add(nn.Tanh())                 --     :add(nn.ReLU()) <- this one did worse
    return model
 end
@@ -80,7 +80,7 @@ function build_model(model, vocab_size, embed_dim, use_cuda)
     :add(nn.JoinTable(2))       --- Joining the components back together
     :add(nn.Linear(embed_dim * 3, 2) )      --- Adding linear layer to output 2 units
     :add(nn.Max(2) )            --- Max over the 2 units (action) dimension
-    :add(nn.Tanh())             --- Adding a non-linearity
+    -- :add(nn.Tanh())             --- Adding a non-linearity
 
     if use_cuda then
         return FinalMLP:cuda()
@@ -89,6 +89,17 @@ function build_model(model, vocab_size, embed_dim, use_cuda)
     end
 end
 
+
+function BuildTensors(actions, sentences, queries, sindex, K, J)
+    local tmp_actions = geti_n(actions, 1, sindex)
+    local tmp_sentences = geti_n(sentences, 1, sindex)
+    local summaries = buildCurrentSummary(tmp_actions, tmp_sentences, K * J)
+    -- Building the tensors         
+    local query = LongTensor(padZeros({queries}, 5) ):t()
+    local sentence = LongTensor(padZeros({sentences[sindex]}, K) ):t()
+    local summary =  LongTensor(padZeros({summaries[sindex]}, K) ):t()
+    return summary, sentence, query
+end
 --- To do list:
     --- 1. RMS prop in optim package
             -- NOT DONE
@@ -99,7 +110,7 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
                             nn_model, crit, thresh, embed_dim, epsilon, delta, 
                             base_explore_rate, print_every,
                             learning_rate, J_sentences, K_tokens, use_cuda,
-                            skiprate, emetric, export)
+                            skiprate, emetric, export, gamma)
     --- This function iterates over the epochs, queries, and sentences to learn the model
     if use_cuda then
         Tensor = torch.CudaTensor
@@ -182,19 +193,13 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
             --- Forward pass
             for minibatch = 1, #xtdm do
                 --- Notice that the actionlist is optimized at after each iteration
-                --- using geti_n to reduce computing time...though its still O(n) either way
-                local summaries = padZeros(buildCurrentSummary(geti_n(action_list, 1, minibatch), 
-                                                               geti_n(xtdm, 1, minibatch), 
-                                        K_tokens * J_sentences), 
-                                        K_tokens * J_sentences)
-                --- Creating data into tensors
-                sentence = LongTensor(padZeros( {xtdm[minibatch]}, K_tokens) ):t()
-                summary = LongTensor({ summaries[minibatch] }):t()
-                query = LongTensor( padZeros({qs}, 5) ):t()
+                --- Building the input data
+                summary, sentence, query = BuildTensors(action_list, xtdm, qs, minibatch, 
+                                                        K_tokens, J_sentences)
 
                 --- Retrieve intermediate optimal action in model.get(3).output
                 local pred_rouge = model:forward({sentence, summary, query})   
-                local pred_actions = torch.totable(model:get(3).output)         --- has 2 output units
+                local pred_actions = torch.totable(model:get(3).output)     -- outputs the actions
                 
                 --- Epsilon greedy strategy
                 if torch.rand(1)[1] < epsilon then 
@@ -270,11 +275,16 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
                 summary = LongTensor({summaries[xindices[i]]}):t()
                 query = LongTensor(padZeros({qs}, 5)):t()
                 labels = Tensor({yrouge[xindices[i]]})
-                pred_rouge = Tensor({preds[xindices[i]]})
+                --- Line 23 in algorithm
+                if (xindices[i]) < #xtdm then
+                    pred_rouge = Tensor({preds[xindices[i]] + gamma * preds[xindices[i] + 1] })
+                else 
+                    pred_rouge = Tensor({preds[xindices[i]]})
+                end
                 err = crit:forward(pred_rouge, labels)
                 loss = loss + err
                 if i < 3 then
-                    print(string.format("loss = %.6f; actual = %.6f; predicted = %.6f", err, labels[1], pred_rouge[1]))
+                    print(string.format("loss = %.6f; actual = %.6f; predicted = %.6f predicted_t-1 = %.6f", err, labels[1],preds[xindices[i]],preds[xindices[i] + 1]  ))
                     print(pred_rouge)
                 end
                 --- Backprop model 
@@ -288,8 +298,8 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
                 model:backward({sentence, summary, query}, grads)
                 model:updateParameters(learning_rate)
             end
-            print(geti_n(preds, 1,5))
-            print(geti_n(yrouge, 1,5))
+            -- print(geti_n(preds, 1,5))
+            -- print(geti_n(yrouge, 1,5))
             if (epoch % print_every)==0 then
                 print(string.format('there are %i sentences with 0 out of 1000', c))
                 pmin = math.min(table.unpack(preds))

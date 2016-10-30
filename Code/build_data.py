@@ -3,6 +3,7 @@ import re
 import sys
 import pickle
 import csv
+import numpy as np
 from bs4 import BeautifulSoup
 import pandas as pd
 from gensim import corpora
@@ -139,6 +140,9 @@ def TokenizeData(infile_list, qfilename, outfile_list, word2idx, top_n, qtexts, 
                 ]
             )
     tfdf.drop_duplicates(inplace=True)
+    # This is the unknown text id
+    maxidv = tfdf['id'].max() + 1
+    tfdf = pd.concat( [tfdf, pd.Series([maxidv, 'UNKNOWN', np.nan])], axis=1)
     token_ss = dict(zip(tfdf['token'], tfdf['id']))
 
     for idx, (infilename, outfilename) in enumerate(zip(infile_list, outfile_list)):
@@ -159,7 +163,7 @@ def TokenizeData(infile_list, qfilename, outfile_list, word2idx, top_n, qtexts, 
 
 
         # if (qfilename not in infilename) and 'nuggets' not in infilename:
-        text_numindex = [ [word2idx[i] for i in t if i in token_ss] for t in texts]
+        text_numindex = [ [word2idx[i] if i in token_ss else maxidv for i in t] for t in texts]
 
         # Exporting files
         print('...file exported to %s.csv' % outfilename+ '_numtext.csv')

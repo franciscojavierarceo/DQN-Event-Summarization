@@ -262,8 +262,8 @@ function Tokenize(inputdic, remove_stopwords)
     return out
 end
 
---- Now we can calculate ROUGE
-function rougeRecall(pred_summary, ref_summaries)
+--- Precision
+function rougePrecision(pred_summary, ref_summaries)
     rsd = Tokenize(ref_summaries, true)
     sws = Tokenize(pred_summary, true)
     for k, v in pairs(rsd) do
@@ -285,8 +285,8 @@ function rougeRecall(pred_summary, ref_summaries)
     end
     return (den > 0) and num/den or 0
 end
----- Precision
-function rougePrecision(pred_summary, ref_summaries)
+---- Recall
+function rougeRecall(pred_summary, ref_summaries)
     rsd = Tokenize(ref_summaries, true)
     sws = Tokenize(pred_summary, true)
     for k, v in pairs(rsd) do

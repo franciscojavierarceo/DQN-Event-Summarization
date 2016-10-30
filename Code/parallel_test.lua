@@ -4,60 +4,8 @@ require 'cutorch'
 require 'cunn'
 require 'cunnx'
 
-function build_bowmlp(nn_vocab_module, embed_dim)
-    local model = nn.Sequential()
-    :add(nn_vocab_module)            -- returns a sequence-length x batch-size x embedDim tensor
-    :add(nn.Sum(1, embed_dim, true)) -- splits into a sequence-length table with batch-size x embedDim entries
-    :add(nn.Linear(embed_dim, embed_dim)) -- map last state to a score for classification
-    :add(nn.Tanh())                     ---     :add(nn.ReLU()) <- this one did worse
-   return model
-end
-
-function build_lstm(nn_vocab_module, embed_dim)
-    local model = nn.Sequential()
-    :add(nn_vocab_module)            -- returns a sequence-length x batch-size x embedDim tensor
-    :add(nn.SplitTable(1, embed_dim)) -- splits into a sequence-length table with batch-size x embedDim entries
-    :add(nn.Sequencer(nn.LSTM(embed_dim, embed_dim)))
-    :add(nn.SelectTable(-1)) -- selects last state of the LSTM
-    :add(nn.Linear(embed_dim, embed_dim)) -- map last state to a score for classification
-    :add(nn.Tanh())                     ---     :add(nn.ReLU()) <- this one did worse
-   return model
-end
-
-function build_model(model, vocab_size, embed_dim, outputSize, use_cuda)
-    local nn_vocab = nn.LookupTableMaskZero(vocab_size, embed_dim)
-    if model == 'bow' then
-        print("Running BOW model")
-        mod1 = build_bowmlp(nn_vocab, embed_dim)
-        mod2 = build_bowmlp(nn_vocab, embed_dim)
-        mod3 = build_bowmlp(nn_vocab, embed_dim)
-    end
-    if model == 'lstm' then         
-        print("Running LSTM model")
-        mod1 = build_lstm(nn_vocab, embed_dim)
-        mod2 = build_lstm(nn_vocab, embed_dim)
-        mod3 = build_lstm(nn_vocab, embed_dim)
-    end
-
-    local ParallelModel = nn.ParallelTable()
-    ParallelModel:add(mod1)
-    ParallelModel:add(mod2)
-    ParallelModel:add(mod3)
-
-    local FinalMLP = nn.Sequential()
-    :add(ParallelModel)
-    :add(nn.JoinTable(2))
-    :add(nn.Linear(embed_dim * 3, 2) )
-    FinalMLP:add(nn.Max(2) )
-    FinalMLP:add(nn.Tanh())
-
-    if use_cuda then
-        return FinalMLP:cuda()
-    else
-        return FinalMLP
-    end
-end
-
+dofile("utils.lua")
+dofile("model_utils.lua")
 
 usecuda = true
 model = 'lstm'
@@ -66,43 +14,94 @@ vocab_size = 4
 embed_dim = 10
 outputSize = 1
 learning_rate = 0.2
+epsilon = 1
+nepochs = 30
+cuts = 2.
+delta = 1./(nepochs/cuts) 
+base_explore_rate = 0.1
 
 FinalMLP  = build_model(model, vocab_size, embed_dim, outputSize, usecuda)
-criterion = nn.MSECriterion():cuda()
+criterion = nn.MSECriterion()
 
-sentences = {{0, 1, 3, 4}, {0, 2, 4, 3}}
-summaries = {{0, 0, 1, 4}, {0, 2, 3, 1}}
-queries = {{0, 1, 4, 3}, {0, 1, 4, 3}}
-scores = {0.74, -0.24}
+sentences = {{0, 1, 3, 4}, {0, 0, 0 ,0}, {0, 2, 4, 3}, {1, 4, 3, 2} }
+summaries = {{0, 0, 0, 0}, {0, 1, 3, 4}, {}, {} }
+queries = {{0, 1, 4, 3}, {0, 1, 4, 3}, {0, 1, 4, 3}, {0, 1, 4, 3}}
+--- Let's say these are the true ones we need to pick
+nuggets = {sentences[1], sentences[3], sentences[4], {5, 7, 3, 1}} 
 
-if use_cuda then
+if usecuda then
   Tensor = torch.CudaTensor
   LongTensor = torch.CudaLongTensor
+  criterion = criterion:cuda()
 else
   Tensor = torch.Tensor
   LongTensor = torch.LongTensor
 end
 
-fullpreds = {0, 0}
-for epoch = 1, 100 do
-    for minibatch = 1, 2 do
+
+fullpreds = {0, 0, 0, 0}
+action_list = {0, 0, 0, 0}
+--- Theoretical limit
+predsummary = buildPredSummary({1, 0, 1, 1}, sentences, nil)
+predsummary = predsummary[#predsummary]
+fscore = rougeF1({predsummary}, nuggets)
+print(string.format('Best possible F1 = %.6f', fscore))
+
+for epoch = 1, nepochs do
+    --- Forward step
+    for minibatch = 1, #sentences do
+        summaries = padZeros(buildCurrentSummary(geti_n(action_list, 1, minibatch), 
+                                               geti_n(sentences, 1, minibatch), nil), 9)
+
+        summary  = LongTensor({summaries[minibatch]}):t()
         sentence = LongTensor({sentences[minibatch]}):t()
-        summary = LongTensor({summaries[minibatch]}):t()
         query = LongTensor({queries[minibatch]}):t()
-        
-        yrouge = Tensor({scores[minibatch]}):cuda()
+        -- forward pass
         preds = FinalMLP:forward({sentence, summary, query})
-        --- storing predictions
+        pred_actions = torch.totable(FinalMLP:get(3).output)
+        if torch.rand(1)[1] < epsilon then 
+            opt_action = torch.round(torch.rand(1))[1]
+        else 
+            opt_action = (pred_actions[1][1] > pred_actions[1][2]) and 0 or 1
+        end
+        --- Updating bookeeping variables
+        action_list[minibatch] = opt_action
         fullpreds[minibatch] = torch.totable(preds)
-        
+    end
+    --- Score after forward pass
+    scores = score_model(action_list, 
+                sentences,
+                nuggets,
+                0, 
+                0, 
+                'f1')
+    predsummary = buildPredSummary(action_list, sentences, nil)
+    predsummary = predsummary[#predsummary]
+    fscore = rougeF1({predsummary}, nuggets)
+
+    --- Backward step
+    for minibatch = 1, #sentences do
+        summary  = LongTensor({summaries[minibatch]}):t()
+        sentence = LongTensor({sentences[minibatch]}):t()
+        query = LongTensor({queries[minibatch]}):t()        
+        yrouge = Tensor({scores[minibatch]}):cuda()
+        preds = Tensor(fullpreds[minibatch])
+        --- Backward pass        
+        preds = FinalMLP:forward({sentence, summary, query})
         loss = criterion:forward(preds, yrouge)
         FinalMLP:zeroGradParameters()
         grads = criterion:backward(preds, yrouge)
         FinalMLP:backward({sentence, summary, query}, grads)
         FinalMLP:updateParameters(learning_rate)
-
+        -- if minibatch > 1 then
+        --     print(epsilon, minibatch, fscore, table.unpack(summaries[minibatch]))
+        -- end
     end
-    if (epoch % 10)==0 then 
-        print(string.format("Epoch %i, loss =%6f", epoch, loss))
+    print(epoch, fscore, table.unpack(unpackZeros(predsummary)))
+    --- Random part
+    if (epsilon - delta) <= base_explore_rate then
+        epsilon = base_explore_rate
+    else 
+        epsilon = epsilon - delta
     end
 end
