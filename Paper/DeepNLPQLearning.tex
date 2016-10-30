@@ -252,14 +252,16 @@ And the updates are computed using the following gradient update of $L_i(\theta_
 			\STATE Update $\Gamma_q = \Gamma_q \cup \{ [s_t, a^{*}_t, r_t, s_{t+1}]\}$
 		\ENDFOR
 	\ENDFOR
-		\STATE Sample transitions from $\Gamma$ $\forall j= 1,..,J$
-		\STATE 	\[ 		\textrm{Set } y_j= 
+		\STATE Sample $J$ transitions from
+		\FOR{ $j=1,...,J$}
+		\STATE \[\textrm{Set } y_j= 
 					\begin{cases}
 						r_j              								& \text{if $s_{j+1}$ is terminal } \\
 					     	r_j + \gamma $max$_{a'}Q(s_{j+1}, a'; \theta) 	& \text{if $s_{j+1}$ is non-terminal } 
 					\end{cases} 
 					\]
         		\STATE Perform gradient step on $\mathcal{L}(\theta) = (y_j - Q(s_j, a_j; \theta))^2$
+		\ENDFOR
 \ENDFOR
   \end{algorithmic}
     \caption{DQN-LSTM for Event Summarization Training Procedure}
