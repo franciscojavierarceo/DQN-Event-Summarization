@@ -103,8 +103,6 @@ end
 --- To do list:
     --- 1. RMS prop in optim package
             -- NOT DONE
-    --- 2. Map tokens below some threshold to unknown -- Need to modify inputs
-            -- NOT DONE
 
 function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs, 
                             nn_model, crit, thresh, embed_dim, epsilon, delta, 
