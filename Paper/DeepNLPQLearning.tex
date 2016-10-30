@@ -236,9 +236,9 @@ And the updates are computed using the following gradient update of $L_i(\theta_
 \STATE \rm Initialize action-value function $Q$ with random weights
 \FOR{$epoch=1, N\ $}
 	\FOR{$q \in \mathcal{Q}$}
-		\STATE $X_q$= \{Extract sentences for query $q$\}
-		\STATE $\tilde{Y}_q$ = \{Extract summary for query $q$\}
-		\FOR{$(x_t, \tilde{y}_t) \in (X_q, \tilde{Y}_q), $ $ \forall t =1,..,T_q$}
+		\STATE $X^{T}_q$= \{Extract $t=1,...,T_q$ sentences for query $q$\}
+		\STATE $\tilde{Y}^{T}_q$ = \{Extract $t=1,...,T_q$ summaries for query $q$\}
+		\FOR{$(x_t, \tilde{y}_t) \in (X^{T}_q, \tilde{Y}^{T}_q), $ }
 			\STATE Set $s_t = s(x_t, \tilde{y}_t, q)$
 			\STATE $ \forall a_t \in \mathcal{A}(s_t) = \{select, skip\}$ \textrm{compute} $Q(s_t, a_t)$
 			\STATE Select $a^{*}_t =$ argmax$_{a_{t}}Q(s_t, a_t)$
@@ -252,7 +252,7 @@ And the updates are computed using the following gradient update of $L_i(\theta_
 			\STATE Update $\Gamma_q = \Gamma_q \cup \{ [s_t, a^{*}_t, r_t, s_{t+1}]\}$
 		\ENDFOR
 	\ENDFOR
-		\STATE Sample random minibatches of transitions $\gamma_j$ from $\Gamma$
+		\STATE Sample transitions from $\Gamma$ $\forall j= 1,..,J$
 		\STATE 	\[ 		\textrm{Set } y_j= 
 					\begin{cases}
 						r_j              								& \text{if $s_{j+1}$ is terminal } \\
