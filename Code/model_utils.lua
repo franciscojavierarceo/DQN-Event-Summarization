@@ -231,13 +231,12 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
                 yfile:close()
             end 
             --- Note setting the skip_rate = 0 means no random skipping of delta calculation
-            --- Let's stop updating th yrouge for now to see if the model will learn something
-            -- yrouge = score_model(action_list, 
-            --                 xtdm,
-            --                 nuggets,
-            --                 thresh, 
-            --                 skiprate, 
-            --                 emetric)
+            yrouge = score_model(action_list, 
+                            xtdm,
+                            nuggets,
+                            thresh, 
+                            skiprate, 
+                            emetric)
 
             --- Updating book-keeping tables at query level
             pred_query_list[query_id] = preds
