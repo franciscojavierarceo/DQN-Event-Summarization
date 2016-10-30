@@ -237,7 +237,7 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
                             thresh, 
                             skiprate, 
                             emetric)
-
+            print(geti_n(yrouge, 1, 5))
             --- Updating book-keeping tables at query level
             pred_query_list[query_id] = preds
             yrouge_query_list[query_id] = yrouge
@@ -281,8 +281,8 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
                 err = crit:forward(pred_rouge, labels)
                 loss = loss + err
                 if i < 3 then
-                    print(string.format("loss = %.6f; actual = %.6f; predicted = %.6f predicted_t-1 = %.6f", err, labels[1], preds[xindices[i]], preds[xindices[i] + 1]  ))
-                    print(pred_rouge)
+                    print(yrouge[xindices[i]])
+                    -- print(string.format("loss = %.6f; actual = %.6f; predicted = %.6f predicted_t-1 = %.6f", err, labels[1], preds[xindices[i]], preds[xindices[i] + 1]  ))
                 end
                 --- Backprop model 
                 local grads = crit:backward(pred_rouge, labels)
