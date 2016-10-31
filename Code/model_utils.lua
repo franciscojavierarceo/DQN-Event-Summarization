@@ -109,7 +109,7 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
                             nn_model, crit, thresh, embed_dim, epsilon, delta, 
                             base_explore_rate, print_every,
                             learning_rate, J_sentences, K_tokens, use_cuda,
-                            skiprate, emetric, export, gamma)
+                            skiprate, emetric, export, gamma, rmsprop)
     --- This function iterates over the epochs, queries, and sentences to learn the model
     if use_cuda then
         Tensor = torch.CudaTensor
@@ -258,18 +258,36 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
                 else 
                     labels = Tensor({yrouge[xindices[i]]})
                 end
-                local pred_rouge = model:forward({sentence, summary, query})
-                --- Backprop model 
-                err = crit:forward(pred_rouge, labels)
-                loss = loss + err
-                model:zeroGradParameters()
-                local grads = crit:backward(pred_rouge, labels)
-                --- For some reason runnign the :forward() makes the backward pass work
-                --- spent a lot of time trying to debug why :backward() didn't work without it
-                --- but I couldn't figure it out, then I tried this and it works...seems wrong.
-                --- I'll ask Chris about this and see what he thinks
-                model:backward({sentence, summary, query}, grads)
-                model:updateParameters(learning_rate)
+
+                if rmsprop==false then
+                    local pred_rouge = model:forward({sentence, summary, query})
+                    --- Backprop model 
+                    err = crit:forward(pred_rouge, labels)
+                    loss = loss + err
+                    model:zeroGradParameters()
+                    local grads = crit:backward(pred_rouge, labels)
+                    model:backward({sentence, summary, query}, grads)
+                    model:updateParameters(learning_rate)
+                end
+                if rmsprop==true then
+
+                    config = {
+                       learningRate = learning_rate,
+                       momentum = 0.5
+                    }
+                    params, gradParams = model:getParameters()
+                    local optimState = {learning_rate}
+
+                    function feval(params)
+                      gradParams:zero()
+                      local pred_rouge = model:forward({sentence, summary, query})
+                      local loss = crit:forward(pred_rouge, labels)
+                      local grads = crit:backward(pred_rouge, labels)
+                      model:backward({sentence, summary, query}, grads)
+                      return loss, gradParams
+                    end                        
+                    optim.sgd(feval, params, optimState)
+                end
             end
 
             --- Rerunning the scoring on the full data and rescoring cumulatively
@@ -279,15 +297,6 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
             pscore = rougePrecision({predsummary}, nuggets)
             fscore = rougeF1({predsummary}, nuggets)
             if (epoch % print_every)==0 then
-                print(string.format('there are %i sentences with 0 out of 1000', c))
-                pmin = math.min(table.unpack(preds))
-                pmax = math.max(table.unpack(preds))
-                pmean = sumTable(preds) / #preds
-                ymin = math.min(table.unpack(yrouge))
-                ymax = math.max(table.unpack(yrouge))
-                ymean = sumTable(yrouge) / #yrouge
-                print(string.format("Predicted {min = %.6f, mean = %.6f, max = %.6f}", pmin, pmean, pmax))
-                print(string.format("Actual    {min = %.6f, mean = %.6f, max = %.6f}", ymin, ymean, ymax))
                 perf_string = string.format(
                     "Epoch %i, loss  = %.3f, epsilon = %.3f, sum(y)/len(y) = %i/%i, {Recall = %.6f, Precision = %.6f, F1 = %.6f}, query = %s", 
                     epoch, loss, epsilon, sumTable(action_list), #action_list, rscore, pscore, fscore, inputs[query_id]['query_name']
@@ -302,9 +311,8 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
             epsilon = epsilon - delta
         end
     end -- ends the epoch level loop
-    if export_ then
+    if export then
         print(string.format("Exporting %s density of predictions to ./density.gif", nn_model))
         os.execute(string.format("python make_density_gif.py %i %s", nepochs, nn_model))
     end
-    return model, summary_query_list, action_query_list, yrouge_query_list
 end

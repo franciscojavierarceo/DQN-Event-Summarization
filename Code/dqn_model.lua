@@ -1,3 +1,4 @@
+require 'optim'
 require 'io'
 require 'torch'
 require 'nn'
@@ -26,6 +27,7 @@ cmd:option('--base_explore_rate', 0.1, 'base exploration rate of 0.10')
 cmd:option('--skip_rate', 0., 'skipping rate of cumulative rouge calculation')
 cmd:option('--metric', "f1", 'skipping rate of cumulative rouge calculation')
 cmd:option('--export', false, 'write predictions and labels to a file')
+cmd:option('--rmsprop', false, 'Flag for rmsprop')
 cmd:text()
 
 --- this retrieves the commands and stores them in opt.variable (e.g., opt.model)

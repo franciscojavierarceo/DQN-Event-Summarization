@@ -1,0 +1,46 @@
+Running rmsprop on gpu
+	
+	
+Usage: [options] 
+  --model             using LSTM instead of BOW [lstm]
+  --nepochs           running for 50 epochs [50]
+  --K_tokens          using the first 10 tokens to extract data [20]
+  --J_sentences       using last 10 sentences to calculate rouge [10]
+  --gamma             Discount rate parameter in backprop step [0.1]
+  --batch_size        batch size of 500 [200]
+  --thresh            rouge improvement threshold [0]
+  --embed_dim         using an embedding dimension of 10 [50]
+  --learning_rate     using a learning rate of 0.01 [0.1]
+  --print_every       printing every 1 epoch [1]
+  --usecuda           running on cuda [false]
+  --epsilon           starting with epsilon = 1 [1]
+  --cuts              using epsilon-greedy strategy 1/4 of the time [4]
+  --base_explore_rate base exploration rate of 0.10 [0.1]
+  --skip_rate         skipping rate of cumulative rouge calculation [0]
+  --metric            skipping rate of cumulative rouge calculation [f1]
+  --export            write predictions and labels to a file [false]
+  --rmsprop           Flag for rmsprop [false]
+
+Running rmsprop on cpu
+...Utils file loaded	
+...running on CPU	
+training model with metric = f1, learning rate = 0.100, K = 20, J = 10, threshold = 0.000, embedding size = 50	
+Running LSTM model	
+Running sgd on gpu
+...Utils file loaded	
+...running on GPU	
+training model with metric = f1, learning rate = 0.100, K = 20, J = 10, threshold = 0.000, embedding size = 50	
+Running LSTM model	
+Running sgd on cpu
+Running rmsprop on gpu
+...Utils file loaded	
+...running on GPU	
+training model with metric = f1, learning rate = 0.100, K = 20, J = 10, threshold = 0.000, embedding size = 50	
+Running LSTM model	
+Epoch 0, loss  = 0.000, epsilon = 1.000, sum(y)/len(y) = 485/999, {Recall = 0.232641, Precision = 0.728918, F1 = 0.352711}, query = aurora	
+Epoch 1, loss  = 0.000, epsilon = 0.100, sum(y)/len(y) = 344/999, {Recall = 0.315480, Precision = 0.682711, F1 = 0.431544}, query = aurora	
+Running rmsprop on cpu
+...Utils file loaded	
+...running on CPU	
+training model with metric = f1, learning rate = 0.100, K = 20, J = 10, threshold = 0.000, embedding size = 50	
+Running LSTM model	
