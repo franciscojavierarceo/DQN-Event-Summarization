@@ -316,8 +316,8 @@ function rougeF1(pred_summary, ref_summaries)
     return f1
 end
 
---- Meant to cumuatively extract the elements of a table for the rouge scoring
 function geti_n(x, i, n)
+    --- This function returns the i^{th} - n^{th} (inclusive) elements from a table
     local out = {}
     local c = 1
     for k,v in pairs(x) do

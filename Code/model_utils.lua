@@ -20,14 +20,15 @@ function score_model(opt_action, sentence_xs, input_nuggets, thresh, skip_rate, 
                                            geti_n(sentence_xs, 1, i),  nil)
 
         scores[i] = threshold(eval_func({curr_summary[i]}, input_nuggets ) - s_t1, thresh)
-        s_t1 = scores[i]
         --- Skip rate controls how often we skip updating the lag
         --- e.g., if skip_rate = 0.25 <= [0, 1] ==> update lag 75% of the time
         if skip_rate > 0 then 
             if skip_rate <= torch.rand(1)[1] then
+                -- Keeping a lag
                 s_t1 = scores[i] + s_t1
             end 
         else 
+            -- Keeping a lag
             s_t1 = scores[i] + s_t1
         end
     end
@@ -219,6 +220,7 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
                 preds[minibatch] = pred_rouge[1]
                 action_list[minibatch] = opt_action
             end --- ends the sentence level loop
+            --- Note setting the skip_rate = 0 means no random skipping of delta calculation
             yrouge = score_model(action_list, 
                             xtdm,
                             nuggets,
@@ -235,8 +237,6 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
                 pfile:close()
                 yfile:close()
             end 
-            --- Note setting the skip_rate = 0 means no random skipping of delta calculation
-            print(geti_n(yrouge, 1, 5))
             --- Updating book-keeping tables at query level
             pred_query_list[query_id] = preds
             yrouge_query_list[query_id] = yrouge
@@ -252,58 +252,47 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
             fscore = rougeF1({predsummary}, nuggets)
 
             -- --- creating randomly sampled query and input indices
-            -- local xindices = {}
-            -- for i=1, batch_size do
-            --     xindices[i] = math.random(1, #xtdm)
-            --     -- xindices[i] = math.random(1, #xtdm)
-            -- end
-            -- --- Building summaries on full set of input data then sampling after
-            -- --- Need to do summaries first b/c if you build after sampling 
-            -- --- you'll get incorrect summaries, also need to padZeros for empty summaries
-            -- local summaries = padZeros(buildCurrentSummary(action_list, xtdm, 
-            --                             K_tokens * J_sentences), 
-            --                             K_tokens * J_sentences)
-            -- loss = 0.
-            -- --- Backward pass
-            -- for i= 1, batch_size do
-            --     sentence = LongTensor(padZeros( {xtdm[xindices[i]]}, K_tokens) ):t()
-            --     summary = LongTensor({summaries[xindices[i]]}):t()
-            --     query = LongTensor(padZeros({qs}, 5)):t()
-            --     -- pred_rouge = Tensor({preds[xindices[i]]})
-            --     --- Line 23 in algorithm
-            --     if (xindices[i]) < #xtdm then
-            --         labels = Tensor({yrouge[xindices[i]] + gamma * yrouge[xindices[i] + 1] })
-            --     else 
-            --         labels = Tensor({yrouge[xindices[i]]})
-            --     end
-            --     if i < 3 then
-            --         print(xindices[i], yrouge[xindices[i]])
-            --         -- print(string.format("loss = %.6f; actual = %.6f; predicted = %.6f predicted_t-1 = %.6f", err, labels[1], preds[xindices[i]], preds[xindices[i] + 1]  ))
-            --     end
-            --     local pred_rouge = model:forward({sentence, summary, query})
-            --     --- Backprop model 
-            --     err = crit:forward(pred_rouge, labels)
-            --     loss = loss + err
-            --     model:zeroGradParameters()
-            --     local grads = crit:backward(pred_rouge, labels)
-            --     --- For some reason runnign the :forward() makes the backward pass work
-            --     --- spent a lot of time trying to debug why :backward() didn't work without it
-            --     --- but I couldn't figure it out, then I tried this and it works...seems wrong.
-            --     --- I'll ask Chris about this and see what he thinks
-            --     model:backward({sentence, summary, query}, grads)
-            --     model:updateParameters(learning_rate)
-            -- end
-            -- print(geti_n(preds, 1,5))
-            -- print(geti_n(yrouge, 1,5))
-            maxy = 0.
-            yindx = 0
-            for i=1, #yrouge do
-                if yrouge[i] > maxy then 
-                    maxy = yrouge[i] 
-                    yindx = i
-                end
+            local xindices = {}
+            for i=1, batch_size do
+                xindices[i] = math.random(1, #xtdm)
+                -- xindices[i] = math.random(1, #xtdm)
             end
-            print(string.format("max pred_i = %i; pred = %.6f; predy = %.6f ", yindx, maxy, yrouge[yindx]))
+            --- Building summaries on full set of input data then sampling after
+            --- Need to do summaries first b/c if you build after sampling 
+            --- you'll get incorrect summaries, also need to padZeros for empty summaries
+            local summaries = padZeros(buildCurrentSummary(action_list, xtdm, 
+                                        K_tokens * J_sentences), 
+                                        K_tokens * J_sentences)
+            loss = 0.
+            --- Backward pass
+            for i= 1, batch_size do
+                sentence = LongTensor(padZeros( {xtdm[xindices[i]]}, K_tokens) ):t()
+                summary = LongTensor({summaries[xindices[i]]}):t()
+                query = LongTensor(padZeros({qs}, 5)):t()
+                -- pred_rouge = Tensor({preds[xindices[i]]})
+                --- Line 23 in algorithm
+                if (xindices[i]) < #xtdm then
+                    labels = Tensor({yrouge[xindices[i]] + gamma * yrouge[xindices[i] + 1] })
+                else 
+                    labels = Tensor({yrouge[xindices[i]]})
+                end
+                if i < 3 then
+                    print(xindices[i], yrouge[xindices[i]])
+                    -- print(string.format("loss = %.6f; actual = %.6f; predicted = %.6f predicted_t-1 = %.6f", err, labels[1], preds[xindices[i]], preds[xindices[i] + 1]  ))
+                end
+                local pred_rouge = model:forward({sentence, summary, query})
+                --- Backprop model 
+                err = crit:forward(pred_rouge, labels)
+                loss = loss + err
+                model:zeroGradParameters()
+                local grads = crit:backward(pred_rouge, labels)
+                --- For some reason runnign the :forward() makes the backward pass work
+                --- spent a lot of time trying to debug why :backward() didn't work without it
+                --- but I couldn't figure it out, then I tried this and it works...seems wrong.
+                --- I'll ask Chris about this and see what he thinks
+                model:backward({sentence, summary, query}, grads)
+                model:updateParameters(learning_rate)
+            end
             if (epoch % print_every)==0 then
                 print(string.format('there are %i sentences with 0 out of 1000', c))
                 pmin = math.min(table.unpack(preds))
@@ -315,13 +304,9 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
                 print(string.format("Predicted {min = %.6f, mean = %.6f, max = %.6f}", pmin, pmean, pmax))
                 print(string.format("Actual    {min = %.6f, mean = %.6f, max = %.6f}", ymin, ymean, ymax))
                 perf_string = string.format(
-                    "Epoch %i, epsilon = %.3f, sum(y)/len(y) = %i/%i, {Recall = %.6f, Precision = %.6f, F1 = %.6f}, query = %s", 
-                    epoch, epsilon, sumTable(action_list), #action_list, rscore, pscore, fscore, inputs[query_id]['query_name']
+                    "Epoch %i, loss  = %.3f, epsilon = %.3f, sum(y)/len(y) = %i/%i, {Recall = %.6f, Precision = %.6f, F1 = %.6f}, query = %s", 
+                    epoch, loss, epsilon, math.sum(table.unpack(action_list)), #action_list, rscore, pscore, fscore, inputs[query_id]['query_name']
                     )
-                -- perf_string = string.format(
-                --     "Epoch %i, loss  = %.3f, epsilon = %.3f, sum(y)/len(y) = %i/%i, {Recall = %.6f, Precision = %.6f, F1 = %.6f}, query = %s", 
-                --     epoch, loss, epsilon, sumTable(action_list), #action_list, rscore, pscore, fscore, inputs[query_id]['query_name']
-                --     )
                 print(perf_string)
             end
         end -- ends the query level loop
