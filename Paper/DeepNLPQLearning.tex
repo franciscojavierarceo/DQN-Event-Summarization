@@ -186,7 +186,7 @@ The architecture for our DQN-LSTM is nearly identical to that of  \cite{narasimh
 
 where 
 \begin{equation}
-y_i = \textrm{E}_{\hat{s}, \hat{a}}[ r + \gamma \textrm{max}_{a'} Q(s', a' ; \theta_{i-1}) | s', a' ]
+y_i = \textrm{E}_{\hat{s}, \hat{a}}[ r_i + \gamma \textrm{max}_{a'} Q(s', a' ; \theta_{i-1}) | s', a' ]
 \end{equation}
 
 And the updates are computed using the following gradient update of $L_i(\theta_i)$:
