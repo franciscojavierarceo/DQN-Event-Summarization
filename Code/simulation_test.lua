@@ -43,8 +43,8 @@ true_action_list = {
 --- Let's say these are the true ones we need to pick
 nuggets = {sentences[1], sentences[3], sentences[5], {9, 10, 12, 11}} 
 
-vocab_size = 16
--- vocab_size = 12
+-- vocab_size = 16
+vocab_size = 12
 criterion = nn.MSECriterion()
 
 if usecuda then
