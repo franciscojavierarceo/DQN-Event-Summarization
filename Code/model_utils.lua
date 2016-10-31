@@ -208,15 +208,7 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
                     ---  E[rouge | Skip]  > E[rouge | Select ] then skip {0} else select {1}
                     opt_action = (pred_actions[1][1] > pred_actions[1][2]) and 0 or 1
                 end
-
                 -- Updating book-keeping tables at sentence level
-                if minibatch < 3 then
-                    x = string.format(
-                        "pred rougue = %.8f, action0 = %.8f, action1 = %.8f, optaction = %i",
-                            pred_rouge[1], pred_actions[1][1], pred_actions[1][2], opt_action
-                            )
-                    -- print(xtdm[minibatch], unpackZeros(summaries[minibatch]))
-                end
                 preds[minibatch] = pred_rouge[1]
                 action_list[minibatch] = opt_action
             end --- ends the sentence level loop
@@ -276,10 +268,6 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
                 else 
                     labels = Tensor({yrouge[xindices[i]]})
                 end
-                if i < 3 then
-                    print(xindices[i], yrouge[xindices[i]])
-                    -- print(string.format("loss = %.6f; actual = %.6f; predicted = %.6f predicted_t-1 = %.6f", err, labels[1], preds[xindices[i]], preds[xindices[i] + 1]  ))
-                end
                 local pred_rouge = model:forward({sentence, summary, query})
                 --- Backprop model 
                 err = crit:forward(pred_rouge, labels)
@@ -318,7 +306,7 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
         end
     end -- ends the epoch level loop
     if export_ then
-        print(string.format("Exporting density of predictions to ./density.gif"))
+        print(string.format("Exporting %s density of predictions to ./density.gif", nn_model))
         os.execute(string.format("python make_density_gif.py %i %s", nepochs, nn_model))
     end
     return model, summary_query_list, action_query_list, yrouge_query_list
