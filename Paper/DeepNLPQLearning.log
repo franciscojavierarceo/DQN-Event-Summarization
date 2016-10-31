@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015) (preloaded format=pdflatex 2015.5.24)  31 OCT 2016 09:35
+This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015) (preloaded format=pdflatex 2015.5.24)  31 OCT 2016 11:52
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -802,10 +802,19 @@ File: omscmr.fd 2014/09/29 v2.5h Standard LaTeX font definitions
 )
 LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <12> not available
 (Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 231.
+
+Underfull \hbox (badness 10000) in paragraph at lines 231--233
+[]$
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 231--233
+
+ []
+
 Package hyperref Info: bookmark level for unknown algorithm defaults to 0 on in
 put line 267.
- [4] [5] [6]
-(./DeepNLPQLearning.bbl) [7]
+[4] [5] [6] (./DeepNLPQLearning.bbl) [7]
 Package atveryend Info: Empty hook `BeforeClearDocument' on input line 290.
 Package atveryend Info: Empty hook `AfterLastShipout' on input line 290.
  (./DeepNLPQLearning.aux)
@@ -839,7 +848,7 @@ e/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/local/texlive
 015/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/local/texlive/201
 5/texmf-dist/fonts/type1/public/amsfonts/cm/cmti12.pfb></usr/local/texlive/2015
 /texmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb>
-Output written on DeepNLPQLearning.pdf (7 pages, 209076 bytes).
+Output written on DeepNLPQLearning.pdf (7 pages, 209714 bytes).
 PDF statistics:
  221 PDF objects out of 1000 (max. 8388607)
  178 compressed objects within 2 object streams
