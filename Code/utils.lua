@@ -19,6 +19,7 @@ function split(pString)
 end
 
 function threshold(x, thresh)
+    --- Threshold function written mostly for clarity
     if x <= thresh and x > 0 then
         return 0
     else 
@@ -26,6 +27,7 @@ function threshold(x, thresh)
     end
 end
 function repeatTable(input_table, n)
+    --- Repeats a lua table n times
     local out = {}
     for i=1, n do
         out[i] = input_table
@@ -34,6 +36,7 @@ function repeatTable(input_table, n)
 end
 
 function updateTable(orig_table, insert_table, n_i)
+    -- Updates the original table by inserting a subpart of the table starting at n_i
     local out_table = {}
     for k, v in pairs(orig_table) do
         out_table[k] = v 
@@ -44,7 +47,9 @@ function updateTable(orig_table, insert_table, n_i)
     end
     return out_table
 end
+
 function makeInt(x)
+    --- Casts string values into integers when reading in the data
     local out = {}
     for k,v in pairs(x) do
         table.insert(out, tonumber(v))
@@ -53,6 +58,7 @@ function makeInt(x)
 end
 
 function buildTermDocumentTable(x, K)
+    --- This builds the data into tables after reading in from a csv
     --- If K == nil then getFirstKtokens() returns x
     local out = {}
     for k,v in pairs(x) do
@@ -62,6 +68,7 @@ function buildTermDocumentTable(x, K)
 end
 
 function getMaxseq(x)
+    -- This gets the max sequence length of a table
     local maxval = 0
     for k, v in pairs(x) do
         if k > 1 then 
@@ -163,6 +170,7 @@ function x_or_zero(pred_action, xs)
 end
 
 function x_or_pass(pred_action, xs)
+    --- Another simple function meant for readability
     if pred_action==1 then
         return xs
     else
@@ -205,6 +213,8 @@ function getLastKElements(x, K)
 end
 
 function buildCurrentSummary(preds, xs, K)
+    --- This is the main function used to build the current summary given our inputs
+    --- Notice that this differs from buildPredSummary below
     local out = {}
     for i = 1, #xs do
         if i == 1 then
@@ -222,7 +232,7 @@ end
 
 function buildPredSummary(preds, xs, K)
     --- This function is used to map the token indices to extract the summary
-    --- and produceds {token_id, 0, token_id} from any given *selected* sentence
+    --- and produces {token_id, 0, token_id} from any given *selected* sentence
     local out = {}
     for i=1, #xs do
         if i == 1 then 
@@ -237,7 +247,25 @@ function buildPredSummary(preds, xs, K)
     return out
 end
 
+function buildFinalSummary(preds, xs, K)
+    --- This is used for the final evaluation of the model to 
+    --- compute the total performance of the summary
+    local out = {}
+    for i=1, #xs do
+        if i == 1 then 
+            out = x_or_pass(preds[i], unpackZeros(xs[i]))
+        else 
+            --- Update it by adding xs_i and out_{i-1}
+            local tmp = tableConcat(out, x_or_pass(preds[i], unpackZeros(xs[i])))
+            --- Getting the last K tokens because we want to keep last K tokens
+            out =  getLastKElements(tmp, K)
+        end
+    end
+    return out
+end
+
 function Tokenize(inputdic, remove_stopwords)
+    --- This function tokenizes the words into a unigram dictionary
     local out = {}
     --- these can be found in the total_corpus_summary.csv file
     local stopwordlist = {1, 3, 6, 23, 24, 28, 31, 54, 57, 62, 103}
@@ -330,6 +358,7 @@ function geti_n(x, i, n)
 end
 
 function sumTable(x)
+    --- math.sum(table.unpack(x)) doesn't work, so I just use this, lol.
     local o = 0
     for k, v in pairs(x) do
         o = o + v

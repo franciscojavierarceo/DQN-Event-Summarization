@@ -236,9 +236,7 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
 
             --- Rerunning the scoring on the full data and rescoring cumulatively
             --- Execute policy and evaluation based on our E[rouge] after all of the minibatches
-            predsummary = buildPredSummary(action_list, xtdm, nil)
-            predsummary = predsummary[#predsummary]
-
+            predsummary = buildFinalSummary(action_list, xtdm, nil)
             rscore = rougeRecall({predsummary}, nuggets)
             pscore = rougePrecision({predsummary}, nuggets)
             fscore = rougeF1({predsummary}, nuggets)
@@ -293,7 +291,7 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
                 print(string.format("Actual    {min = %.6f, mean = %.6f, max = %.6f}", ymin, ymean, ymax))
                 perf_string = string.format(
                     "Epoch %i, loss  = %.3f, epsilon = %.3f, sum(y)/len(y) = %i/%i, {Recall = %.6f, Precision = %.6f, F1 = %.6f}, query = %s", 
-                    epoch, loss, epsilon, math.sum(table.unpack(action_list)), #action_list, rscore, pscore, fscore, inputs[query_id]['query_name']
+                    epoch, loss, epsilon, sumTable(action_list), #action_list, rscore, pscore, fscore, inputs[query_id]['query_name']
                     )
                 print(perf_string)
             end
