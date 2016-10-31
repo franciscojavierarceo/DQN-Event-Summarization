@@ -234,18 +234,10 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
             yrouge_query_list[query_id] = yrouge
             action_query_list[query_id] = action_list
 
-            --- Rerunning the scoring on the full data and rescoring cumulatively
-            --- Execute policy and evaluation based on our E[rouge] after all of the minibatches
-            predsummary = buildFinalSummary(action_list, xtdm, nil)
-            rscore = rougeRecall({predsummary}, nuggets)
-            pscore = rougePrecision({predsummary}, nuggets)
-            fscore = rougeF1({predsummary}, nuggets)
-
             -- --- creating randomly sampled query and input indices
             local xindices = {}
             for i=1, batch_size do
                 xindices[i] = math.random(1, #xtdm)
-                -- xindices[i] = math.random(1, #xtdm)
             end
             --- Building summaries on full set of input data then sampling after
             --- Need to do summaries first b/c if you build after sampling 
@@ -279,6 +271,13 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
                 model:backward({sentence, summary, query}, grads)
                 model:updateParameters(learning_rate)
             end
+
+            --- Rerunning the scoring on the full data and rescoring cumulatively
+            --- Execute policy and evaluation based on our E[rouge] after all of the minibatches
+            predsummary = buildFinalSummary(action_list, xtdm, nil)
+            rscore = rougeRecall({predsummary}, nuggets)
+            pscore = rougePrecision({predsummary}, nuggets)
+            fscore = rougeF1({predsummary}, nuggets)
             if (epoch % print_every)==0 then
                 print(string.format('there are %i sentences with 0 out of 1000', c))
                 pmin = math.min(table.unpack(preds))

@@ -19,8 +19,8 @@ function split(pString)
 end
 
 function threshold(x, thresh)
-    --- Threshold function written mostly for clarity
-    if x <= thresh and x > 0 then
+    --- Threshold function written mostly for clarity :note: done on absolute value
+    if math.abs(x) <= thresh then
         return 0
     else 
         return x 
@@ -290,39 +290,16 @@ function Tokenize(inputdic, remove_stopwords)
     return out
 end
 
---- Precision
-function rougePrecision(pred_summary, ref_summaries)
-    rsd = Tokenize(ref_summaries, true)
-    sws = Tokenize(pred_summary, true)
-    for k, v in pairs(rsd) do
-        if sws[k] == nil then
-            sws[k] = 0
-        end
-    end
-
-    for k, v in pairs(sws) do
-        if rsd[k] == nil then
-            rsd[k] = 0 
-        end
-    end
-    num = 0.
-    den = 0.
-    for k, v in pairs(rsd) do
-        num = num + math.min(rsd[k], sws[k])
-        den = den + rsd[k]
-    end
-    return (den > 0) and num/den or 0
-end
 ---- Recall
 function rougeRecall(pred_summary, ref_summaries)
     rsd = Tokenize(ref_summaries, true)
-    sws = Tokenize(pred_summary, true)
+    psd = Tokenize(pred_summary, true)
     for k, v in pairs(rsd) do
-        if sws[k] == nil then
-            sws[k] = 0
+        if psd[k] == nil then
+            psd[k] = 0
         end
     end
-    for k, v in pairs(sws) do
+    for k, v in pairs(psd) do
         if rsd[k] == nil then
             rsd[k] = 0
         end
@@ -330,8 +307,32 @@ function rougeRecall(pred_summary, ref_summaries)
     num = 0.
     den = 0.
     for k, v in pairs(rsd) do
-        num = num + math.min(rsd[k], sws[k])
-        den = den + sws[k]
+        num = num + math.min(rsd[k], psd[k])
+        den = den + psd[k]
+    end
+    return (den > 0) and num/den or 0
+end
+--- Precision
+function rougePrecision(pred_summary, ref_summaries)
+    rsd = Tokenize(ref_summaries, true)
+    psd = Tokenize(pred_summary, true)
+    for k, v in pairs(rsd) do
+        if psd[k] == nil then
+            psd[k] = 0
+        end
+    end
+
+    for k, v in pairs(psd) do
+        if rsd[k] == nil then
+            rsd[k] = 0 
+        end
+    end
+    -- For Recall we normalize by the prediction dictionary
+    num = 0.
+    den = 0.
+    for k, v in pairs(rsd) do
+        num = num + math.min(rsd[k], psd[k])
+        den = den + rsd[k]
     end
     return (den > 0) and num/den or 0
 end
