@@ -134,7 +134,6 @@ for sims = 1, nsims do
         pmax = math.max(table.unpack(fullpreds))
         pmean = sumTable(fullpreds) / #yrouge
 
-        -- print(string.format("Predicted {min = %.6f, mean = %.6f, max = %.6f}", pmin, pmean, pmax))    
         print(string.format("epoch = %i, epsilon = %.3f, rouge-%s = %.6f, loss = %.6f, action = {%i, %i, %i ,%i, %i, %i}, Predicted: {min=%.6f, mean=%.6f, max=%.6f}", 
                 epoch, epsilon, metric, score, loss, action_list[1], action_list[2], action_list[3], action_list[4], action_list[5], action_list[6], pmin, pmean, pmax )
         )
