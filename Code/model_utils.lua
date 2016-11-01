@@ -20,14 +20,15 @@ function score_model(opt_action, sentence_xs, input_nuggets, thresh, skip_rate, 
                                            geti_n(sentence_xs, 1, i),  nil)
 
         scores[i] = threshold(eval_func({curr_summary[i]}, input_nuggets ) - s_t1, thresh)
-        s_t1 = scores[i]
         --- Skip rate controls how often we skip updating the lag
         --- e.g., if skip_rate = 0.25 <= [0, 1] ==> update lag 75% of the time
         if skip_rate > 0 then 
             if skip_rate <= torch.rand(1)[1] then
+                -- Keeping a lag
                 s_t1 = scores[i] + s_t1
             end 
         else 
+            -- Keeping a lag
             s_t1 = scores[i] + s_t1
         end
     end
@@ -39,7 +40,7 @@ function build_bowmlp(nn_vocab_module, edim)
     :add(nn_vocab_module)           -- returns a (sequence-length x batch-size x edim) tensor
     :add(nn.Sum(1, edim, true))     -- splits into a sequence-length table with (batch-size x edim) entries
     :add(nn.Linear(edim, edim))     -- map last state to a score for classification
-    -- :add(nn.ReLU())
+    :add(nn.ReLU())
     -- :add(nn.Tanh())                 --     :add(nn.ReLU()) <- this one did worse
    return model
 end
@@ -51,7 +52,7 @@ function build_lstm(nn_vocab_module, edim)
     :add(nn.Sequencer(nn.LSTM(edim, edim)))
     :add(nn.SelectTable(-1))            -- selects last state of the LSTM
     :add(nn.Linear(edim, edim))         -- map last state to a score for classification
-    -- :add(nn.ReLU())
+    :add(nn.ReLU())
     -- :add(nn.Tanh())                     --     :add(nn.ReLU()) <- this one did worse
    return model
 end
@@ -80,6 +81,7 @@ function build_model(model, vocab_size, embed_dim, use_cuda)
     :add(nn.JoinTable(2))       --- Joining the components back together
     :add(nn.Linear(embed_dim * 3, 2) )      --- Adding linear layer to output 2 units
     :add(nn.Max(2) )            --- Max over the 2 units (action) dimension
+    -- :add(nn.ReLU())
     -- :add(nn.Tanh())             --- Adding a non-linearity
 
     if use_cuda then
@@ -108,7 +110,7 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
                             nn_model, crit, thresh, embed_dim, epsilon, delta, 
                             base_explore_rate, print_every,
                             learning_rate, J_sentences, K_tokens, use_cuda,
-                            skiprate, emetric, export, gamma)
+                            skiprate, emetric, export, gamma, rmsprop)
     --- This function iterates over the epochs, queries, and sentences to learn the model
     if use_cuda then
         Tensor = torch.CudaTensor
@@ -207,29 +209,10 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
                     ---  E[rouge | Skip]  > E[rouge | Select ] then skip {0} else select {1}
                     opt_action = (pred_actions[1][1] > pred_actions[1][2]) and 0 or 1
                 end
-
                 -- Updating book-keeping tables at sentence level
-                if minibatch < 3 then
-                    x = string.format(
-                        "pred rougue = %.8f, action0 = %.8f, action1 = %.8f, optaction = %i",
-                            pred_rouge[1], pred_actions[1][1], pred_actions[1][2], opt_action
-                            )
-                    -- print(xtdm[minibatch], unpackZeros(summaries[minibatch]))
-                end
                 preds[minibatch] = pred_rouge[1]
                 action_list[minibatch] = opt_action
             end --- ends the sentence level loop
-            
-            if export then 
-                local pfile = io.open(string.format("plotdata/%s/%i_preds.txt", nn_model, epoch), 'w')
-                local yfile = io.open(string.format("plotdata/%s/%i_actual.txt", nn_model, epoch), 'w')
-                for i=1,#preds do
-                    pfile:write(string.format("%.6f\n", preds[i] ) )
-                    yfile:write(string.format("%.6f\n", yrouge[i] ) )
-                end
-                pfile:close()
-                yfile:close()
-            end 
             --- Note setting the skip_rate = 0 means no random skipping of delta calculation
             yrouge = score_model(action_list, 
                             xtdm,
@@ -237,26 +220,24 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
                             thresh, 
                             skiprate, 
                             emetric)
-
+            if export then 
+                local pfile = io.open(string.format("plotdata/%s/%i_preds.txt", nn_model, epoch), 'w')
+                local yfile = io.open(string.format("plotdata/%s/%i_actual.txt", nn_model, epoch), 'w')
+                for i=1,#yrouge do
+                    pfile:write(string.format("%.6f\n", preds[i] ) )
+                    yfile:write(string.format("%.6f\n", yrouge[i] ) )
+                end
+                pfile:close()
+                yfile:close()
+            end 
             --- Updating book-keeping tables at query level
             pred_query_list[query_id] = preds
             yrouge_query_list[query_id] = yrouge
             action_query_list[query_id] = action_list
 
-            --- Rerunning the scoring on the full data and rescoring cumulatively
-            --- Execute policy and evaluation based on our E[rouge] after all of the minibatches
-            predsummary = buildPredSummary(action_list, xtdm, nil)
-            predsummary = predsummary[#predsummary]
-
-            rscore = rougeRecall({predsummary}, nuggets)
-            pscore = rougePrecision({predsummary}, nuggets)
-            fscore = rougeF1({predsummary}, nuggets)
-
-            --- creating randomly sampled query and input indices
-            local qindices = {}
+            -- --- creating randomly sampled query and input indices
             local xindices = {}
             for i=1, batch_size do
-                qindices[i] = math.random(1, #inputs)
                 xindices[i] = math.random(1, #xtdm)
             end
             --- Building summaries on full set of input data then sampling after
@@ -271,42 +252,48 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
                 sentence = LongTensor(padZeros( {xtdm[xindices[i]]}, K_tokens) ):t()
                 summary = LongTensor({summaries[xindices[i]]}):t()
                 query = LongTensor(padZeros({qs}, 5)):t()
-                pred_rouge = Tensor({preds[xindices[i]]})
                 --- Line 23 in algorithm
                 if (xindices[i]) < #xtdm then
                     labels = Tensor({yrouge[xindices[i]] + gamma * yrouge[xindices[i] + 1] })
                 else 
                     labels = Tensor({yrouge[xindices[i]]})
                 end
-                err = crit:forward(pred_rouge, labels)
-                loss = loss + err
-                if i < 3 then
-                    print(string.format("loss = %.6f; actual = %.6f; predicted = %.6f predicted_t-1 = %.6f", err, labels[1], preds[xindices[i]], preds[xindices[i] + 1]  ))
-                    print(pred_rouge)
+
+                if rmsprop==false then
+                    local pred_rouge = model:forward({sentence, summary, query})
+                    --- Backprop model 
+                    err = crit:forward(pred_rouge, labels)
+                    loss = loss + err
+                    model:zeroGradParameters()
+                    local grads = crit:backward(pred_rouge, labels)
+                    model:backward({sentence, summary, query}, grads)
+                    model:updateParameters(learning_rate)
                 end
-                --- Backprop model 
-                local grads = crit:backward(pred_rouge, labels)
-                model:zeroGradParameters()
-                --- For some reason runnign the :forward() makes the backward pass work
-                --- spent a lot of time trying to debug why :backward() didn't work without it
-                --- but I couldn't figure it out, then I tried this and it works...seems wrong.
-                --- I'll ask Chris about this and see what he thinks
-                local tmp = model:forward({sentence, summary, query})
-                model:backward({sentence, summary, query}, grads)
-                model:updateParameters(learning_rate)
+                if rmsprop==true then
+                    params, gradParams = model:getParameters()
+                    local optimState = {learning_rate}
+
+                    function feval(params)
+                      gradParams:zero()
+                      local pred_rouge = model:forward({sentence, summary, query})
+                      local loss = crit:forward(pred_rouge, labels)
+                      local grads = crit:backward(pred_rouge, labels)
+                      model:backward({sentence, summary, query}, grads)
+                      return loss, gradParams
+                    end                        
+                    optim.sgd(feval, params, optimState)
+                end
             end
-            -- print(geti_n(preds, 1,5))
-            -- print(geti_n(yrouge, 1,5))
+
+            --- Rerunning the scoring on the full data and rescoring cumulatively
+            --- Execute policy and evaluation based on our E[rouge] after all of the minibatches
+            predsummary = buildFinalSummary(action_list, xtdm, nil)
+
+            rscore = rougeRecall({predsummary}, nuggets)
+            pscore = rougePrecision({predsummary}, nuggets)
+            fscore = rougeF1({predsummary}, nuggets)
+
             if (epoch % print_every)==0 then
-                print(string.format('there are %i sentences with 0 out of 1000', c))
-                pmin = math.min(table.unpack(preds))
-                pmax = math.max(table.unpack(preds))
-                pmean = sumTable(preds) / #yrouge
-                ymin = math.min(table.unpack(yrouge))
-                ymax = math.max(table.unpack(yrouge))
-                ymean = sumTable(yrouge) / #yrouge
-                print(string.format("Predicted {min = %.6f, mean = %.6f, max = %.6f}", pmin, pmean, pmax))
-                print(string.format("Actual    {min = %.6f, mean = %.6f, max = %.6f}", ymin, ymean, ymax))
                 perf_string = string.format(
                     "Epoch %i, loss  = %.3f, epsilon = %.3f, sum(y)/len(y) = %i/%i, {Recall = %.6f, Precision = %.6f, F1 = %.6f}, query = %s", 
                     epoch, loss, epsilon, sumTable(action_list), #action_list, rscore, pscore, fscore, inputs[query_id]['query_name']
@@ -321,9 +308,8 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
             epsilon = epsilon - delta
         end
     end -- ends the epoch level loop
-    if export_ then
-        print(string.format("Exporting density of predictions to ./density.gif"))
+    if export then
+        print(string.format("Exporting %s density of predictions to ./density.gif", nn_model))
         os.execute(string.format("python make_density_gif.py %i %s", nepochs, nn_model))
     end
-    return model, summary_query_list, action_query_list, yrouge_query_list
 end

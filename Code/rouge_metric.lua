@@ -12,16 +12,16 @@ function Tokenize(inputdic)
     end
     return out
 end--- Now we can calculate ROUGE
-function rougeRecall(pred_summary, ref_summaries)
+function rougePrecision(pred_summary, ref_summaries)
     rsd = Tokenize(ref_summaries)
-    sws = Tokenize(pred_summary)
+    psd = Tokenize(pred_summary)
     for k,v in pairs(rsd) do
-        if sws[k] == nil then
-            sws[k] = 0
+        if psd[k] == nil then
+            psd[k] = 0
         end
     end
 
-    for k,v in pairs(sws) do
+    for k,v in pairs(psd) do
         if rsd[k] == nil then
             rsd[k] = 0 
         end
@@ -29,21 +29,21 @@ function rougeRecall(pred_summary, ref_summaries)
     num = 0.
     den = 0.
     for k,v in pairs(rsd) do
-        num = num + math.min(rsd[k], sws[k])
+        num = num + math.min(rsd[k], psd[k])
         den = den + rsd[k]
     end
     return num/den
 end
----- Precision
-function rougePrecision(pred_summary, ref_summaries)
+---- Recall
+function rougeRecall(pred_summary, ref_summaries)
     rsd = Tokenize(ref_summaries)
-    sws = Tokenize(pred_summary)
+    psd = Tokenize(pred_summary)
     for k,v in pairs(rsd) do
-        if sws[k] == nil then
-            sws[k] = 0
+        if psd[k] == nil then
+            psd[k] = 0
         end
     end
-    for k,v in pairs(sws) do
+    for k,v in pairs(psd) do
         if rsd[k] == nil then
             rsd[k] = 0
         end
@@ -51,8 +51,8 @@ function rougePrecision(pred_summary, ref_summaries)
     num = 0.
     den = 0.
     for k,v in pairs(rsd) do
-        num = num + math.min(rsd[k], sws[k])
-        den = den + sws[k]
+        num = num + math.min(rsd[k], psd[k])
+        den = den + psd[k]
     end
     return num/den
 end
@@ -70,17 +70,21 @@ ref_texts2 = {{1}, {1,2}}           --- Two Reference Documents with varying wor
 ref_texts3 = {{1}, {1,2}, {3,2}}    --- Three Reference documents with varying words
 summary_pred = {3, 1}
 
+print("Predicted summary is", summary_pred)
 print("Rouge Recall scores are")
 for k,v in pairs({ref_texts0, ref_texts1, ref_texts2, ref_texts3}) do
+    print("Reference summary is", v)
     print(rougeRecall({summary_pred},v))
 end
 
 print("Rouge Precision scores are")
 for k,v in pairs({ref_texts0, ref_texts1, ref_texts2, ref_texts3}) do
+    print("Reference summary is", v)
     print(rougePrecision({summary_pred},v))
 end
 
 print("Rouge F1 scores are")
 for k,v in pairs({ref_texts0, ref_texts1, ref_texts2, ref_texts3}) do
+    print("Reference summary is", v)
     print(rougeF1({summary_pred},v))
 end

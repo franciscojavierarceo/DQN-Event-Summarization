@@ -1,205 +1,185 @@
 ...Utils file loaded	
-...running on GPU	
-training model with learning rate = 0.050, K = 10, J = 20, threshold = 0.010, embedding size = 50, and batch size = 200...	
+...running on CPU	
+training model with metric = f1, learning rate = 0.200, K = 20, J = 10, threshold = 0.000, embedding size = 50	
 Running LSTM model	
-Epoch 0, epsilon = 1.000, sum(y)/len(y) = 465/1000, {Recall = 0.611404, Precision = 0.335260, F1 = 0.433056}, query = aurora	
-Epoch 1, epsilon = 0.980, sum(y)/len(y) = 504/1000, {Recall = 0.624341, Precision = 0.319050, F1 = 0.422298}, query = aurora	
-Epoch 2, epsilon = 0.960, sum(y)/len(y) = 491/1000, {Recall = 0.631049, Precision = 0.331905, F1 = 0.435012}, query = aurora	
-Epoch 3, epsilon = 0.940, sum(y)/len(y) = 490/1000, {Recall = 0.617154, Precision = 0.322403, F1 = 0.423545}, query = aurora	
-Epoch 4, epsilon = 0.920, sum(y)/len(y) = 526/1000, {Recall = 0.634883, Precision = 0.311179, F1 = 0.417652}, query = aurora	
-Epoch 5, epsilon = 0.900, sum(y)/len(y) = 492/1000, {Recall = 0.620029, Precision = 0.322131, F1 = 0.423984}, query = aurora	
-Epoch 6, epsilon = 0.880, sum(y)/len(y) = 510/1000, {Recall = 0.629612, Precision = 0.317929, F1 = 0.422508}, query = aurora	
-Epoch 7, epsilon = 0.860, sum(y)/len(y) = 482/1000, {Recall = 0.637758, Precision = 0.338763, F1 = 0.442487}, query = aurora	
-Epoch 8, epsilon = 0.840, sum(y)/len(y) = 523/1000, {Recall = 0.632008, Precision = 0.308610, F1 = 0.414715}, query = aurora	
-Epoch 9, epsilon = 0.820, sum(y)/len(y) = 493/1000, {Recall = 0.625299, Precision = 0.323741, F1 = 0.426610}, query = aurora	
-Epoch 10, epsilon = 0.800, sum(y)/len(y) = 454/1000, {Recall = 0.611883, Precision = 0.342543, F1 = 0.439209}, query = aurora	
-Epoch 11, epsilon = 0.780, sum(y)/len(y) = 514/1000, {Recall = 0.624341, Precision = 0.307529, F1 = 0.412081}, query = aurora	
-Epoch 12, epsilon = 0.760, sum(y)/len(y) = 495/1000, {Recall = 0.632008, Precision = 0.326324, F1 = 0.430413}, query = aurora	
-Epoch 13, epsilon = 0.740, sum(y)/len(y) = 515/1000, {Recall = 0.645424, Precision = 0.318289, F1 = 0.426333}, query = aurora	
-Epoch 14, epsilon = 0.720, sum(y)/len(y) = 541/1000, {Recall = 0.636799, Precision = 0.297848, F1 = 0.405863}, query = aurora	
-Epoch 15, epsilon = 0.700, sum(y)/len(y) = 516/1000, {Recall = 0.636799, Precision = 0.316881, F1 = 0.423181}, query = aurora	
-Epoch 16, epsilon = 0.680, sum(y)/len(y) = 467/1000, {Recall = 0.609487, Precision = 0.336152, F1 = 0.433316}, query = aurora	
-Epoch 17, epsilon = 0.660, sum(y)/len(y) = 515/1000, {Recall = 0.638716, Precision = 0.314090, F1 = 0.421103}, query = aurora	
-Epoch 18, epsilon = 0.640, sum(y)/len(y) = 501/1000, {Recall = 0.634883, Precision = 0.316758, F1 = 0.422648}, query = aurora	
-Epoch 19, epsilon = 0.620, sum(y)/len(y) = 509/1000, {Recall = 0.627216, Precision = 0.315118, F1 = 0.419484}, query = aurora	
-Epoch 20, epsilon = 0.600, sum(y)/len(y) = 481/1000, {Recall = 0.627216, Precision = 0.332825, F1 = 0.434884}, query = aurora	
-Epoch 21, epsilon = 0.580, sum(y)/len(y) = 485/1000, {Recall = 0.623383, Precision = 0.326229, F1 = 0.428313}, query = aurora	
-Epoch 22, epsilon = 0.560, sum(y)/len(y) = 473/1000, {Recall = 0.624820, Precision = 0.329793, F1 = 0.431717}, query = aurora	
-Epoch 23, epsilon = 0.540, sum(y)/len(y) = 468/1000, {Recall = 0.620508, Precision = 0.332819, F1 = 0.433255}, query = aurora	
-Epoch 24, epsilon = 0.520, sum(y)/len(y) = 454/1000, {Recall = 0.627695, Precision = 0.349613, F1 = 0.449092}, query = aurora	
-Epoch 25, epsilon = 0.500, sum(y)/len(y) = 427/1000, {Recall = 0.619070, Precision = 0.365385, F1 = 0.459541}, query = aurora	
-Epoch 26, epsilon = 0.480, sum(y)/len(y) = 450/1000, {Recall = 0.616675, Precision = 0.350204, F1 = 0.446720}, query = aurora	
-Epoch 27, epsilon = 0.460, sum(y)/len(y) = 485/1000, {Recall = 0.618591, Precision = 0.326670, F1 = 0.427554}, query = aurora	
-Epoch 28, epsilon = 0.440, sum(y)/len(y) = 413/1000, {Recall = 0.599425, Precision = 0.363980, F1 = 0.452933}, query = aurora	
-Epoch 29, epsilon = 0.420, sum(y)/len(y) = 471/1000, {Recall = 0.623862, Precision = 0.335308, F1 = 0.436181}, query = aurora	
-Epoch 30, epsilon = 0.400, sum(y)/len(y) = 454/1000, {Recall = 0.621945, Precision = 0.345213, F1 = 0.443988}, query = aurora	
-Epoch 31, epsilon = 0.380, sum(y)/len(y) = 478/1000, {Recall = 0.613800, Precision = 0.328883, F1 = 0.428285}, query = aurora	
-Epoch 32, epsilon = 0.360, sum(y)/len(y) = 386/1000, {Recall = 0.583134, Precision = 0.383912, F1 = 0.463002}, query = aurora	
-Epoch 33, epsilon = 0.340, sum(y)/len(y) = 443/1000, {Recall = 0.617154, Precision = 0.351816, F1 = 0.448156}, query = aurora	
-Epoch 34, epsilon = 0.320, sum(y)/len(y) = 417/1000, {Recall = 0.593196, Precision = 0.359361, F1 = 0.447578}, query = aurora	
-Epoch 35, epsilon = 0.300, sum(y)/len(y) = 408/1000, {Recall = 0.594633, Precision = 0.370227, F1 = 0.456334}, query = aurora	
-Epoch 36, epsilon = 0.280, sum(y)/len(y) = 414/1000, {Recall = 0.592717, Precision = 0.361908, F1 = 0.449410}, query = aurora	
-Epoch 37, epsilon = 0.260, sum(y)/len(y) = 413/1000, {Recall = 0.607092, Precision = 0.370902, F1 = 0.460476}, query = aurora	
-Epoch 38, epsilon = 0.240, sum(y)/len(y) = 392/1000, {Recall = 0.577863, Precision = 0.371305, F1 = 0.452109}, query = aurora	
-Epoch 39, epsilon = 0.220, sum(y)/len(y) = 418/1000, {Recall = 0.601821, Precision = 0.364164, F1 = 0.453757}, query = aurora	
-Epoch 40, epsilon = 0.200, sum(y)/len(y) = 396/1000, {Recall = 0.596071, Precision = 0.380196, F1 = 0.464266}, query = aurora	
-Epoch 41, epsilon = 0.180, sum(y)/len(y) = 431/1000, {Recall = 0.606133, Precision = 0.357547, F1 = 0.449778}, query = aurora	
-Epoch 42, epsilon = 0.160, sum(y)/len(y) = 369/1000, {Recall = 0.571155, Precision = 0.390692, F1 = 0.463994}, query = aurora	
-Epoch 43, epsilon = 0.140, sum(y)/len(y) = 385/1000, {Recall = 0.587446, Precision = 0.384447, F1 = 0.464746}, query = aurora	
-Epoch 44, epsilon = 0.120, sum(y)/len(y) = 376/1000, {Recall = 0.581217, Precision = 0.389156, F1 = 0.466180}, query = aurora	
-Epoch 45, epsilon = 0.100, sum(y)/len(y) = 361/1000, {Recall = 0.564447, Precision = 0.395435, F1 = 0.465061}, query = aurora	
-Epoch 46, epsilon = 0.100, sum(y)/len(y) = 409/1000, {Recall = 0.601342, Precision = 0.369879, F1 = 0.458029}, query = aurora	
-Epoch 47, epsilon = 0.100, sum(y)/len(y) = 382/1000, {Recall = 0.582655, Precision = 0.383717, F1 = 0.462709}, query = aurora	
-Epoch 48, epsilon = 0.100, sum(y)/len(y) = 419/1000, {Recall = 0.595592, Precision = 0.362920, F1 = 0.451016}, query = aurora	
-Epoch 49, epsilon = 0.100, sum(y)/len(y) = 410/1000, {Recall = 0.590800, Precision = 0.366855, F1 = 0.452643}, query = aurora	
-Epoch 50, epsilon = 0.100, sum(y)/len(y) = 422/1000, {Recall = 0.597988, Precision = 0.359654, F1 = 0.449163}, query = aurora	
-Epoch 51, epsilon = 0.100, sum(y)/len(y) = 427/1000, {Recall = 0.601821, Precision = 0.355204, F1 = 0.446737}, query = aurora	
-Epoch 52, epsilon = 0.100, sum(y)/len(y) = 437/1000, {Recall = 0.608529, Precision = 0.354254, F1 = 0.447814}, query = aurora	
-Epoch 53, epsilon = 0.100, sum(y)/len(y) = 383/1000, {Recall = 0.586009, Precision = 0.384470, F1 = 0.464313}, query = aurora	
-Epoch 54, epsilon = 0.100, sum(y)/len(y) = 368/1000, {Recall = 0.578821, Precision = 0.400000, F1 = 0.473076}, query = aurora	
-Epoch 55, epsilon = 0.100, sum(y)/len(y) = 386/1000, {Recall = 0.589842, Precision = 0.388819, F1 = 0.468685}, query = aurora	
-Epoch 56, epsilon = 0.100, sum(y)/len(y) = 380/1000, {Recall = 0.586967, Precision = 0.393258, F1 = 0.470973}, query = aurora	
-Epoch 57, epsilon = 0.100, sum(y)/len(y) = 373/1000, {Recall = 0.580738, Precision = 0.395949, F1 = 0.470862}, query = aurora	
-Epoch 58, epsilon = 0.100, sum(y)/len(y) = 477/1000, {Recall = 0.621466, Precision = 0.337672, F1 = 0.437584}, query = aurora	
-Epoch 59, epsilon = 0.100, sum(y)/len(y) = 434/1000, {Recall = 0.607571, Precision = 0.355282, F1 = 0.448373}, query = aurora	
-Epoch 60, epsilon = 0.100, sum(y)/len(y) = 440/1000, {Recall = 0.609487, Precision = 0.354416, F1 = 0.448203}, query = aurora	
-Epoch 61, epsilon = 0.100, sum(y)/len(y) = 450/1000, {Recall = 0.611883, Precision = 0.347862, F1 = 0.443557}, query = aurora	
-Epoch 62, epsilon = 0.100, sum(y)/len(y) = 464/1000, {Recall = 0.617154, Precision = 0.339842, F1 = 0.438319}, query = aurora	
-Epoch 63, epsilon = 0.100, sum(y)/len(y) = 481/1000, {Recall = 0.620029, Precision = 0.327927, F1 = 0.428974}, query = aurora	
-Epoch 64, epsilon = 0.100, sum(y)/len(y) = 466/1000, {Recall = 0.618112, Precision = 0.338761, F1 = 0.437659}, query = aurora	
-Epoch 65, epsilon = 0.100, sum(y)/len(y) = 452/1000, {Recall = 0.613321, Precision = 0.346508, F1 = 0.442830}, query = aurora	
-Epoch 66, epsilon = 0.100, sum(y)/len(y) = 467/1000, {Recall = 0.620987, Precision = 0.339089, F1 = 0.438653}, query = aurora	
-Epoch 67, epsilon = 0.100, sum(y)/len(y) = 468/1000, {Recall = 0.621945, Precision = 0.338462, F1 = 0.438365}, query = aurora	
-Epoch 68, epsilon = 0.100, sum(y)/len(y) = 494/1000, {Recall = 0.632966, Precision = 0.329509, F1 = 0.433399}, query = aurora	
-Epoch 69, epsilon = 0.100, sum(y)/len(y) = 474/1000, {Recall = 0.624820, Precision = 0.335305, F1 = 0.436412}, query = aurora	
-Epoch 70, epsilon = 0.100, sum(y)/len(y) = 504/1000, {Recall = 0.633924, Precision = 0.318949, F1 = 0.424379}, query = aurora	
-Epoch 71, epsilon = 0.100, sum(y)/len(y) = 494/1000, {Recall = 0.626258, Precision = 0.324318, F1 = 0.427334}, query = aurora	
-Epoch 72, epsilon = 0.100, sum(y)/len(y) = 468/1000, {Recall = 0.625779, Precision = 0.340636, F1 = 0.441142}, query = aurora	
-Epoch 73, epsilon = 0.100, sum(y)/len(y) = 486/1000, {Recall = 0.626258, Precision = 0.327077, F1 = 0.429722}, query = aurora	
-Epoch 74, epsilon = 0.100, sum(y)/len(y) = 478/1000, {Recall = 0.625299, Precision = 0.332823, F1 = 0.434421}, query = aurora	
-Epoch 75, epsilon = 0.100, sum(y)/len(y) = 483/1000, {Recall = 0.629133, Precision = 0.331231, F1 = 0.433978}, query = aurora	
-Epoch 76, epsilon = 0.100, sum(y)/len(y) = 478/1000, {Recall = 0.624820, Precision = 0.333163, F1 = 0.434594}, query = aurora	
-Epoch 77, epsilon = 0.100, sum(y)/len(y) = 485/1000, {Recall = 0.628654, Precision = 0.330395, F1 = 0.433146}, query = aurora	
-Epoch 78, epsilon = 0.100, sum(y)/len(y) = 481/1000, {Recall = 0.628174, Precision = 0.332319, F1 = 0.434682}, query = aurora	
-Epoch 79, epsilon = 0.100, sum(y)/len(y) = 474/1000, {Recall = 0.620508, Precision = 0.336364, F1 = 0.436247}, query = aurora	
-Epoch 80, epsilon = 0.100, sum(y)/len(y) = 457/1000, {Recall = 0.618112, Precision = 0.345567, F1 = 0.443299}, query = aurora	
-Epoch 81, epsilon = 0.100, sum(y)/len(y) = 477/1000, {Recall = 0.628174, Precision = 0.340608, F1 = 0.441712}, query = aurora	
-Epoch 82, epsilon = 0.100, sum(y)/len(y) = 453/1000, {Recall = 0.619070, Precision = 0.350325, F1 = 0.447446}, query = aurora	
-Epoch 83, epsilon = 0.100, sum(y)/len(y) = 449/1000, {Recall = 0.616675, Precision = 0.351735, F1 = 0.447964}, query = aurora	
-Epoch 84, epsilon = 0.100, sum(y)/len(y) = 452/1000, {Recall = 0.620029, Precision = 0.354715, F1 = 0.451264}, query = aurora	
-Epoch 85, epsilon = 0.100, sum(y)/len(y) = 445/1000, {Recall = 0.615716, Precision = 0.354483, F1 = 0.449930}, query = aurora	
-Epoch 86, epsilon = 0.100, sum(y)/len(y) = 465/1000, {Recall = 0.618591, Precision = 0.341444, F1 = 0.440014}, query = aurora	
-Epoch 87, epsilon = 0.100, sum(y)/len(y) = 443/1000, {Recall = 0.614758, Precision = 0.355599, F1 = 0.450571}, query = aurora	
-Epoch 88, epsilon = 0.100, sum(y)/len(y) = 443/1000, {Recall = 0.614758, Precision = 0.355500, F1 = 0.450492}, query = aurora	
-Epoch 89, epsilon = 0.100, sum(y)/len(y) = 451/1000, {Recall = 0.619070, Precision = 0.351278, F1 = 0.448222}, query = aurora	
-Epoch 90, epsilon = 0.100, sum(y)/len(y) = 456/1000, {Recall = 0.623383, Precision = 0.348607, F1 = 0.447156}, query = aurora	
-Epoch 91, epsilon = 0.100, sum(y)/len(y) = 432/1000, {Recall = 0.610925, Precision = 0.361600, F1 = 0.454303}, query = aurora	
-Epoch 92, epsilon = 0.100, sum(y)/len(y) = 438/1000, {Recall = 0.611404, Precision = 0.357724, F1 = 0.451362}, query = aurora	
-Epoch 93, epsilon = 0.100, sum(y)/len(y) = 463/1000, {Recall = 0.626258, Precision = 0.344219, F1 = 0.444256}, query = aurora	
-Epoch 94, epsilon = 0.100, sum(y)/len(y) = 448/1000, {Recall = 0.615716, Precision = 0.352151, F1 = 0.448047}, query = aurora	
-Epoch 95, epsilon = 0.100, sum(y)/len(y) = 438/1000, {Recall = 0.607571, Precision = 0.355381, F1 = 0.448453}, query = aurora	
-Epoch 96, epsilon = 0.100, sum(y)/len(y) = 445/1000, {Recall = 0.612841, Precision = 0.352439, F1 = 0.447516}, query = aurora	
-Epoch 97, epsilon = 0.100, sum(y)/len(y) = 447/1000, {Recall = 0.614279, Precision = 0.351811, F1 = 0.447391}, query = aurora	
-Epoch 98, epsilon = 0.100, sum(y)/len(y) = 448/1000, {Recall = 0.615237, Precision = 0.351300, F1 = 0.447231}, query = aurora	
-Epoch 99, epsilon = 0.100, sum(y)/len(y) = 464/1000, {Recall = 0.618112, Precision = 0.338672, F1 = 0.437585}, query = aurora	
-Epoch 100, epsilon = 0.100, sum(y)/len(y) = 445/1000, {Recall = 0.612841, Precision = 0.352439, F1 = 0.447516}, query = aurora	
-Epoch 101, epsilon = 0.100, sum(y)/len(y) = 447/1000, {Recall = 0.613321, Precision = 0.351070, F1 = 0.446538}, query = aurora	
-Epoch 102, epsilon = 0.100, sum(y)/len(y) = 442/1000, {Recall = 0.612362, Precision = 0.354311, F1 = 0.448894}, query = aurora	
-Epoch 103, epsilon = 0.100, sum(y)/len(y) = 443/1000, {Recall = 0.612362, Precision = 0.353527, F1 = 0.448264}, query = aurora	
-Epoch 104, epsilon = 0.100, sum(y)/len(y) = 449/1000, {Recall = 0.617633, Precision = 0.351418, F1 = 0.447958}, query = aurora	
-Epoch 105, epsilon = 0.100, sum(y)/len(y) = 459/1000, {Recall = 0.616675, Precision = 0.344302, F1 = 0.441888}, query = aurora	
-Epoch 106, epsilon = 0.100, sum(y)/len(y) = 469/1000, {Recall = 0.618112, Precision = 0.336375, F1 = 0.435664}, query = aurora	
-Epoch 107, epsilon = 0.100, sum(y)/len(y) = 442/1000, {Recall = 0.612362, Precision = 0.354311, F1 = 0.448894}, query = aurora	
-Epoch 108, epsilon = 0.100, sum(y)/len(y) = 448/1000, {Recall = 0.613800, Precision = 0.353477, F1 = 0.448608}, query = aurora	
-Epoch 109, epsilon = 0.100, sum(y)/len(y) = 439/1000, {Recall = 0.613321, Precision = 0.352326, F1 = 0.447552}, query = aurora	
-Epoch 110, epsilon = 0.100, sum(y)/len(y) = 442/1000, {Recall = 0.612362, Precision = 0.354311, F1 = 0.448894}, query = aurora	
-Epoch 111, epsilon = 0.100, sum(y)/len(y) = 455/1000, {Recall = 0.618112, Precision = 0.348178, F1 = 0.445442}, query = aurora	
-Epoch 112, epsilon = 0.100, sum(y)/len(y) = 456/1000, {Recall = 0.613321, Precision = 0.345852, F1 = 0.442294}, query = aurora	
-Epoch 113, epsilon = 0.100, sum(y)/len(y) = 442/1000, {Recall = 0.612362, Precision = 0.354311, F1 = 0.448894}, query = aurora	
-Epoch 114, epsilon = 0.100, sum(y)/len(y) = 441/1000, {Recall = 0.611404, Precision = 0.354641, F1 = 0.448901}, query = aurora	
-Epoch 115, epsilon = 0.100, sum(y)/len(y) = 440/1000, {Recall = 0.610925, Precision = 0.355252, F1 = 0.449260}, query = aurora	
-Epoch 116, epsilon = 0.100, sum(y)/len(y) = 440/1000, {Recall = 0.610925, Precision = 0.355252, F1 = 0.449260}, query = aurora	
-Epoch 117, epsilon = 0.100, sum(y)/len(y) = 445/1000, {Recall = 0.612841, Precision = 0.348596, F1 = 0.444406}, query = aurora	
-Epoch 118, epsilon = 0.100, sum(y)/len(y) = 454/1000, {Recall = 0.614279, Precision = 0.351908, F1 = 0.447469}, query = aurora	
-Epoch 119, epsilon = 0.100, sum(y)/len(y) = 464/1000, {Recall = 0.625779, Precision = 0.344955, F1 = 0.444747}, query = aurora	
-Epoch 120, epsilon = 0.100, sum(y)/len(y) = 440/1000, {Recall = 0.610925, Precision = 0.355351, F1 = 0.449339}, query = aurora	
-Epoch 121, epsilon = 0.100, sum(y)/len(y) = 440/1000, {Recall = 0.610925, Precision = 0.355351, F1 = 0.449339}, query = aurora	
-Epoch 122, epsilon = 0.100, sum(y)/len(y) = 439/1000, {Recall = 0.610925, Precision = 0.356245, F1 = 0.450053}, query = aurora	
-Epoch 123, epsilon = 0.100, sum(y)/len(y) = 439/1000, {Recall = 0.610925, Precision = 0.356245, F1 = 0.450053}, query = aurora	
-Epoch 124, epsilon = 0.100, sum(y)/len(y) = 434/1000, {Recall = 0.608050, Precision = 0.358779, F1 = 0.451280}, query = aurora	
-Epoch 125, epsilon = 0.100, sum(y)/len(y) = 440/1000, {Recall = 0.611404, Precision = 0.355531, F1 = 0.449612}, query = aurora	
-Epoch 126, epsilon = 0.100, sum(y)/len(y) = 476/1000, {Recall = 0.626737, Precision = 0.336333, F1 = 0.437751}, query = aurora	
-Epoch 127, epsilon = 0.100, sum(y)/len(y) = 444/1000, {Recall = 0.614279, Precision = 0.354732, F1 = 0.449746}, query = aurora	
-Epoch 128, epsilon = 0.100, sum(y)/len(y) = 434/1000, {Recall = 0.601342, Precision = 0.353621, F1 = 0.445351}, query = aurora	
-Epoch 129, epsilon = 0.100, sum(y)/len(y) = 447/1000, {Recall = 0.617154, Precision = 0.353555, F1 = 0.449564}, query = aurora	
-Epoch 130, epsilon = 0.100, sum(y)/len(y) = 447/1000, {Recall = 0.617154, Precision = 0.353555, F1 = 0.449564}, query = aurora	
-Epoch 131, epsilon = 0.100, sum(y)/len(y) = 447/1000, {Recall = 0.617154, Precision = 0.353555, F1 = 0.449564}, query = aurora	
-Epoch 132, epsilon = 0.100, sum(y)/len(y) = 447/1000, {Recall = 0.617154, Precision = 0.353555, F1 = 0.449564}, query = aurora	
-Epoch 133, epsilon = 0.100, sum(y)/len(y) = 459/1000, {Recall = 0.621945, Precision = 0.347896, F1 = 0.446201}, query = aurora	
-Epoch 134, epsilon = 0.100, sum(y)/len(y) = 474/1000, {Recall = 0.620987, Precision = 0.335925, F1 = 0.435997}, query = aurora	
-Epoch 135, epsilon = 0.100, sum(y)/len(y) = 447/1000, {Recall = 0.617154, Precision = 0.353555, F1 = 0.449564}, query = aurora	
-Epoch 136, epsilon = 0.100, sum(y)/len(y) = 451/1000, {Recall = 0.618591, Precision = 0.351101, F1 = 0.447953}, query = aurora	
-Epoch 137, epsilon = 0.100, sum(y)/len(y) = 447/1000, {Recall = 0.616675, Precision = 0.352603, F1 = 0.448667}, query = aurora	
-Epoch 138, epsilon = 0.100, sum(y)/len(y) = 454/1000, {Recall = 0.618591, Precision = 0.346391, F1 = 0.444100}, query = aurora	
-Epoch 139, epsilon = 0.100, sum(y)/len(y) = 453/1000, {Recall = 0.620029, Precision = 0.350108, F1 = 0.447519}, query = aurora	
-Epoch 140, epsilon = 0.100, sum(y)/len(y) = 451/1000, {Recall = 0.618591, Precision = 0.351006, F1 = 0.447875}, query = aurora	
-Epoch 141, epsilon = 0.100, sum(y)/len(y) = 441/1000, {Recall = 0.613800, Precision = 0.351730, F1 = 0.447198}, query = aurora	
-Epoch 142, epsilon = 0.100, sum(y)/len(y) = 449/1000, {Recall = 0.616675, Precision = 0.351447, F1 = 0.447730}, query = aurora	
-Epoch 143, epsilon = 0.100, sum(y)/len(y) = 448/1000, {Recall = 0.616195, Precision = 0.352039, F1 = 0.448084}, query = aurora	
-Epoch 144, epsilon = 0.100, sum(y)/len(y) = 450/1000, {Recall = 0.617633, Precision = 0.351226, F1 = 0.447803}, query = aurora	
-Epoch 145, epsilon = 0.100, sum(y)/len(y) = 451/1000, {Recall = 0.618112, Precision = 0.350829, F1 = 0.447606}, query = aurora	
-Epoch 146, epsilon = 0.100, sum(y)/len(y) = 450/1000, {Recall = 0.617633, Precision = 0.351226, F1 = 0.447803}, query = aurora	
-Epoch 147, epsilon = 0.100, sum(y)/len(y) = 451/1000, {Recall = 0.618112, Precision = 0.350829, F1 = 0.447606}, query = aurora	
-Epoch 148, epsilon = 0.100, sum(y)/len(y) = 450/1000, {Recall = 0.617633, Precision = 0.351418, F1 = 0.447958}, query = aurora	
-Epoch 149, epsilon = 0.100, sum(y)/len(y) = 449/1000, {Recall = 0.617154, Precision = 0.352105, F1 = 0.448390}, query = aurora	
-Epoch 150, epsilon = 0.100, sum(y)/len(y) = 447/1000, {Recall = 0.616195, Precision = 0.353200, F1 = 0.449022}, query = aurora	
-Epoch 151, epsilon = 0.100, sum(y)/len(y) = 444/1000, {Recall = 0.613321, Precision = 0.354276, F1 = 0.449123}, query = aurora	
-Epoch 152, epsilon = 0.100, sum(y)/len(y) = 462/1000, {Recall = 0.620508, Precision = 0.344507, F1 = 0.443038}, query = aurora	
-Epoch 153, epsilon = 0.100, sum(y)/len(y) = 477/1000, {Recall = 0.624341, Precision = 0.334360, F1 = 0.435495}, query = aurora	
-Epoch 154, epsilon = 0.100, sum(y)/len(y) = 448/1000, {Recall = 0.616675, Precision = 0.352506, F1 = 0.448588}, query = aurora	
-Epoch 155, epsilon = 0.100, sum(y)/len(y) = 448/1000, {Recall = 0.616675, Precision = 0.352506, F1 = 0.448588}, query = aurora	
-Epoch 156, epsilon = 0.100, sum(y)/len(y) = 453/1000, {Recall = 0.613800, Precision = 0.344355, F1 = 0.441192}, query = aurora	
-Epoch 157, epsilon = 0.100, sum(y)/len(y) = 452/1000, {Recall = 0.618591, Precision = 0.350244, F1 = 0.447254}, query = aurora	
-Epoch 158, epsilon = 0.100, sum(y)/len(y) = 445/1000, {Recall = 0.614279, Precision = 0.353655, F1 = 0.448880}, query = aurora	
-Epoch 159, epsilon = 0.100, sum(y)/len(y) = 448/1000, {Recall = 0.615237, Precision = 0.351684, F1 = 0.447543}, query = aurora	
-Epoch 160, epsilon = 0.100, sum(y)/len(y) = 447/1000, {Recall = 0.615237, Precision = 0.352554, F1 = 0.448246}, query = aurora	
-Epoch 161, epsilon = 0.100, sum(y)/len(y) = 465/1000, {Recall = 0.621466, Precision = 0.340509, F1 = 0.439959}, query = aurora	
-Epoch 162, epsilon = 0.100, sum(y)/len(y) = 447/1000, {Recall = 0.615237, Precision = 0.352554, F1 = 0.448246}, query = aurora	
-Epoch 163, epsilon = 0.100, sum(y)/len(y) = 447/1000, {Recall = 0.615237, Precision = 0.352554, F1 = 0.448246}, query = aurora	
-Epoch 164, epsilon = 0.100, sum(y)/len(y) = 460/1000, {Recall = 0.618591, Precision = 0.343991, F1 = 0.442123}, query = aurora	
-Epoch 165, epsilon = 0.100, sum(y)/len(y) = 470/1000, {Recall = 0.631049, Precision = 0.342523, F1 = 0.444032}, query = aurora	
-Epoch 166, epsilon = 0.100, sum(y)/len(y) = 460/1000, {Recall = 0.618591, Precision = 0.343991, F1 = 0.442123}, query = aurora	
-Epoch 167, epsilon = 0.100, sum(y)/len(y) = 460/1000, {Recall = 0.618591, Precision = 0.343991, F1 = 0.442123}, query = aurora	
-Epoch 168, epsilon = 0.100, sum(y)/len(y) = 460/1000, {Recall = 0.618591, Precision = 0.343991, F1 = 0.442123}, query = aurora	
-Epoch 169, epsilon = 0.100, sum(y)/len(y) = 455/1000, {Recall = 0.616675, Precision = 0.346247, F1 = 0.443487}, query = aurora	
-Epoch 170, epsilon = 0.100, sum(y)/len(y) = 455/1000, {Recall = 0.616675, Precision = 0.346247, F1 = 0.443487}, query = aurora	
-Epoch 171, epsilon = 0.100, sum(y)/len(y) = 473/1000, {Recall = 0.612841, Precision = 0.331949, F1 = 0.430640}, query = aurora	
-Epoch 172, epsilon = 0.100, sum(y)/len(y) = 455/1000, {Recall = 0.616675, Precision = 0.346247, F1 = 0.443487}, query = aurora	
-Epoch 173, epsilon = 0.100, sum(y)/len(y) = 475/1000, {Recall = 0.618591, Precision = 0.336023, F1 = 0.435487}, query = aurora	
-Epoch 174, epsilon = 0.100, sum(y)/len(y) = 454/1000, {Recall = 0.616675, Precision = 0.346900, F1 = 0.444023}, query = aurora	
-Epoch 175, epsilon = 0.100, sum(y)/len(y) = 471/1000, {Recall = 0.631529, Precision = 0.342160, F1 = 0.443846}, query = aurora	
-Epoch 176, epsilon = 0.100, sum(y)/len(y) = 455/1000, {Recall = 0.616675, Precision = 0.346247, F1 = 0.443487}, query = aurora	
-Epoch 177, epsilon = 0.100, sum(y)/len(y) = 455/1000, {Recall = 0.616675, Precision = 0.346247, F1 = 0.443487}, query = aurora	
-Epoch 178, epsilon = 0.100, sum(y)/len(y) = 455/1000, {Recall = 0.616675, Precision = 0.346247, F1 = 0.443487}, query = aurora	
-Epoch 179, epsilon = 0.100, sum(y)/len(y) = 455/1000, {Recall = 0.616675, Precision = 0.346247, F1 = 0.443487}, query = aurora	
-Epoch 180, epsilon = 0.100, sum(y)/len(y) = 477/1000, {Recall = 0.620987, Precision = 0.337061, F1 = 0.436952}, query = aurora	
-Epoch 181, epsilon = 0.100, sum(y)/len(y) = 455/1000, {Recall = 0.616675, Precision = 0.346247, F1 = 0.443487}, query = aurora	
-Epoch 182, epsilon = 0.100, sum(y)/len(y) = 455/1000, {Recall = 0.616675, Precision = 0.346247, F1 = 0.443487}, query = aurora	
-Epoch 183, epsilon = 0.100, sum(y)/len(y) = 454/1000, {Recall = 0.616195, Precision = 0.346911, F1 = 0.443907}, query = aurora	
-Epoch 184, epsilon = 0.100, sum(y)/len(y) = 470/1000, {Recall = 0.622425, Precision = 0.338369, F1 = 0.438407}, query = aurora	
-Epoch 185, epsilon = 0.100, sum(y)/len(y) = 467/1000, {Recall = 0.619070, Precision = 0.337073, F1 = 0.436486}, query = aurora	
-Epoch 186, epsilon = 0.100, sum(y)/len(y) = 455/1000, {Recall = 0.617633, Precision = 0.346878, F1 = 0.444253}, query = aurora	
-Epoch 187, epsilon = 0.100, sum(y)/len(y) = 455/1000, {Recall = 0.617633, Precision = 0.346878, F1 = 0.444253}, query = aurora	
-Epoch 188, epsilon = 0.100, sum(y)/len(y) = 447/1000, {Recall = 0.612841, Precision = 0.350795, F1 = 0.446189}, query = aurora	
-Epoch 189, epsilon = 0.100, sum(y)/len(y) = 447/1000, {Recall = 0.612841, Precision = 0.350795, F1 = 0.446189}, query = aurora	
-Epoch 190, epsilon = 0.100, sum(y)/len(y) = 438/1000, {Recall = 0.604696, Precision = 0.354494, F1 = 0.446963}, query = aurora	
-Epoch 191, epsilon = 0.100, sum(y)/len(y) = 445/1000, {Recall = 0.611883, Precision = 0.351791, F1 = 0.446738}, query = aurora	
-Epoch 192, epsilon = 0.100, sum(y)/len(y) = 471/1000, {Recall = 0.628654, Precision = 0.340161, F1 = 0.441454}, query = aurora	
-Epoch 193, epsilon = 0.100, sum(y)/len(y) = 451/1000, {Recall = 0.617633, Precision = 0.351513, F1 = 0.448036}, query = aurora	
-Epoch 194, epsilon = 0.100, sum(y)/len(y) = 445/1000, {Recall = 0.611883, Precision = 0.351791, F1 = 0.446738}, query = aurora	
-Epoch 195, epsilon = 0.100, sum(y)/len(y) = 445/1000, {Recall = 0.611883, Precision = 0.351791, F1 = 0.446738}, query = aurora	
-Epoch 196, epsilon = 0.100, sum(y)/len(y) = 466/1000, {Recall = 0.609487, Precision = 0.334737, F1 = 0.432139}, query = aurora	
-Epoch 197, epsilon = 0.100, sum(y)/len(y) = 445/1000, {Recall = 0.611883, Precision = 0.351791, F1 = 0.446738}, query = aurora	
-Epoch 198, epsilon = 0.100, sum(y)/len(y) = 445/1000, {Recall = 0.611883, Precision = 0.351791, F1 = 0.446738}, query = aurora	
-Epoch 199, epsilon = 0.100, sum(y)/len(y) = 445/1000, {Recall = 0.611883, Precision = 0.351791, F1 = 0.446738}, query = aurora	
-Epoch 200, epsilon = 0.100, sum(y)/len(y) = 445/1000, {Recall = 0.611883, Precision = 0.351791, F1 = 0.446738}, query = aurora	
+Epoch 0, loss  = 0.101, epsilon = 1.000, sum(y)/len(y) = 485/999, {Recall = 0.232641, Precision = 0.728918, F1 = 0.352711}, query = aurora	
+Epoch 1, loss  = 0.043, epsilon = 0.980, sum(y)/len(y) = 497/999, {Recall = 0.231448, Precision = 0.737389, F1 = 0.352313}, query = aurora	
+Epoch 2, loss  = 0.046, epsilon = 0.960, sum(y)/len(y) = 500/999, {Recall = 0.231629, Precision = 0.734309, F1 = 0.352170}, query = aurora	
+Epoch 3, loss  = 0.037, epsilon = 0.940, sum(y)/len(y) = 539/999, {Recall = 0.211780, Precision = 0.732384, F1 = 0.328554}, query = aurora	
+Epoch 4, loss  = 0.039, epsilon = 0.920, sum(y)/len(y) = 509/999, {Recall = 0.226003, Precision = 0.728918, F1 = 0.345029}, query = aurora	
+Epoch 5, loss  = 0.025, epsilon = 0.900, sum(y)/len(y) = 575/999, {Recall = 0.203298, Precision = 0.750096, F1 = 0.319895}, query = aurora	
+Epoch 6, loss  = 0.021, epsilon = 0.880, sum(y)/len(y) = 498/999, {Recall = 0.230853, Precision = 0.737004, F1 = 0.351580}, query = aurora	
+Epoch 7, loss  = 0.025, epsilon = 0.860, sum(y)/len(y) = 460/999, {Recall = 0.248721, Precision = 0.730073, F1 = 0.371037}, query = aurora	
+Epoch 8, loss  = 0.020, epsilon = 0.840, sum(y)/len(y) = 502/999, {Recall = 0.228266, Precision = 0.731998, F1 = 0.348009}, query = aurora	
+Epoch 9, loss  = 0.020, epsilon = 0.820, sum(y)/len(y) = 532/999, {Recall = 0.213662, Precision = 0.734694, F1 = 0.331049}, query = aurora	
+Epoch 10, loss  = 0.017, epsilon = 0.800, sum(y)/len(y) = 579/999, {Recall = 0.205588, Precision = 0.750866, F1 = 0.322794}, query = aurora	
+Epoch 11, loss  = 0.015, epsilon = 0.780, sum(y)/len(y) = 489/999, {Recall = 0.232701, Precision = 0.731613, F1 = 0.353094}, query = aurora	
+Epoch 12, loss  = 0.013, epsilon = 0.760, sum(y)/len(y) = 544/999, {Recall = 0.213410, Precision = 0.743935, F1 = 0.331674}, query = aurora	
+Epoch 13, loss  = 0.013, epsilon = 0.740, sum(y)/len(y) = 525/999, {Recall = 0.220905, Precision = 0.738930, F1 = 0.340128}, query = aurora	
+Epoch 14, loss  = 0.011, epsilon = 0.720, sum(y)/len(y) = 621/999, {Recall = 0.190490, Precision = 0.758953, F1 = 0.304543}, query = aurora	
+Epoch 15, loss  = 0.016, epsilon = 0.700, sum(y)/len(y) = 590/999, {Recall = 0.198821, Precision = 0.753177, F1 = 0.314596}, query = aurora	
+Epoch 16, loss  = 0.012, epsilon = 0.680, sum(y)/len(y) = 649/999, {Recall = 0.183346, Precision = 0.764729, F1 = 0.295778}, query = aurora	
+Epoch 17, loss  = 0.011, epsilon = 0.660, sum(y)/len(y) = 642/999, {Recall = 0.185823, Precision = 0.765114, F1 = 0.299022}, query = aurora	
+Epoch 18, loss  = 0.010, epsilon = 0.640, sum(y)/len(y) = 622/999, {Recall = 0.190238, Precision = 0.762418, F1 = 0.304498}, query = aurora	
+Epoch 19, loss  = 0.009, epsilon = 0.620, sum(y)/len(y) = 610/999, {Recall = 0.193052, Precision = 0.753177, F1 = 0.307330}, query = aurora	
+Epoch 20, loss  = 0.008, epsilon = 0.600, sum(y)/len(y) = 649/999, {Recall = 0.183668, Precision = 0.761263, F1 = 0.295936}, query = aurora	
+Epoch 21, loss  = 0.008, epsilon = 0.580, sum(y)/len(y) = 561/999, {Recall = 0.204601, Precision = 0.739700, F1 = 0.320541}, query = aurora	
+Epoch 22, loss  = 0.007, epsilon = 0.560, sum(y)/len(y) = 663/999, {Recall = 0.183261, Precision = 0.768964, F1 = 0.295983}, query = aurora	
+Epoch 23, loss  = 0.010, epsilon = 0.540, sum(y)/len(y) = 719/999, {Recall = 0.169402, Precision = 0.778976, F1 = 0.278286}, query = aurora	
+Epoch 24, loss  = 0.007, epsilon = 0.520, sum(y)/len(y) = 679/999, {Recall = 0.177651, Precision = 0.770119, F1 = 0.288704}, query = aurora	
+Epoch 25, loss  = 0.007, epsilon = 0.500, sum(y)/len(y) = 721/999, {Recall = 0.168397, Precision = 0.774355, F1 = 0.276635}, query = aurora	
+Epoch 26, loss  = 0.006, epsilon = 0.480, sum(y)/len(y) = 711/999, {Recall = 0.170117, Precision = 0.775125, F1 = 0.279002}, query = aurora	
+Epoch 27, loss  = 0.006, epsilon = 0.460, sum(y)/len(y) = 738/999, {Recall = 0.165494, Precision = 0.778591, F1 = 0.272967}, query = aurora	
+Epoch 28, loss  = 0.006, epsilon = 0.440, sum(y)/len(y) = 718/999, {Recall = 0.169742, Precision = 0.779361, F1 = 0.278769}, query = aurora	
+Epoch 29, loss  = 0.005, epsilon = 0.420, sum(y)/len(y) = 703/999, {Recall = 0.171104, Precision = 0.772045, F1 = 0.280126}, query = aurora	
+Epoch 30, loss  = 0.005, epsilon = 0.400, sum(y)/len(y) = 748/999, {Recall = 0.164448, Precision = 0.784752, F1 = 0.271915}, query = aurora	
+Epoch 31, loss  = 0.006, epsilon = 0.380, sum(y)/len(y) = 796/999, {Recall = 0.152200, Precision = 0.780516, F1 = 0.254728}, query = aurora	
+Epoch 32, loss  = 0.005, epsilon = 0.360, sum(y)/len(y) = 684/999, {Recall = 0.175882, Precision = 0.771660, F1 = 0.286470}, query = aurora	
+Epoch 33, loss  = 0.005, epsilon = 0.340, sum(y)/len(y) = 815/999, {Recall = 0.152564, Precision = 0.792838, F1 = 0.255888}, query = aurora	
+Epoch 34, loss  = 0.004, epsilon = 0.320, sum(y)/len(y) = 698/999, {Recall = 0.173625, Precision = 0.776665, F1 = 0.283805}, query = aurora	
+Epoch 35, loss  = 0.005, epsilon = 0.300, sum(y)/len(y) = 817/999, {Recall = 0.151311, Precision = 0.788602, F1 = 0.253905}, query = aurora	
+Epoch 36, loss  = 0.006, epsilon = 0.280, sum(y)/len(y) = 803/999, {Recall = 0.154391, Precision = 0.789372, F1 = 0.258268}, query = aurora	
+Epoch 37, loss  = 0.004, epsilon = 0.260, sum(y)/len(y) = 807/999, {Recall = 0.152606, Precision = 0.787062, F1 = 0.255644}, query = aurora	
+Epoch 38, loss  = 0.005, epsilon = 0.240, sum(y)/len(y) = 850/999, {Recall = 0.146122, Precision = 0.795148, F1 = 0.246877}, query = aurora	
+Epoch 39, loss  = 0.005, epsilon = 0.220, sum(y)/len(y) = 871/999, {Recall = 0.142051, Precision = 0.794763, F1 = 0.241023}, query = aurora	
+Epoch 40, loss  = 0.004, epsilon = 0.200, sum(y)/len(y) = 813/999, {Recall = 0.151917, Precision = 0.793223, F1 = 0.254998}, query = aurora	
+Epoch 41, loss  = 0.005, epsilon = 0.180, sum(y)/len(y) = 763/999, {Recall = 0.160277, Precision = 0.785522, F1 = 0.266232}, query = aurora	
+Epoch 42, loss  = 0.004, epsilon = 0.160, sum(y)/len(y) = 888/999, {Recall = 0.140522, Precision = 0.800924, F1 = 0.239094}, query = aurora	
+Epoch 43, loss  = 0.004, epsilon = 0.140, sum(y)/len(y) = 831/999, {Recall = 0.149349, Precision = 0.794763, F1 = 0.251447}, query = aurora	
+Epoch 44, loss  = 0.004, epsilon = 0.120, sum(y)/len(y) = 898/999, {Recall = 0.139283, Precision = 0.801694, F1 = 0.237333}, query = aurora	
+Epoch 45, loss  = 0.003, epsilon = 0.100, sum(y)/len(y) = 866/999, {Recall = 0.144226, Precision = 0.799769, F1 = 0.244382}, query = aurora	
+Epoch 46, loss  = 0.004, epsilon = 0.100, sum(y)/len(y) = 918/999, {Recall = 0.137274, Precision = 0.807470, F1 = 0.234656}, query = aurora	
+Epoch 47, loss  = 0.003, epsilon = 0.100, sum(y)/len(y) = 853/999, {Recall = 0.145378, Precision = 0.796303, F1 = 0.245869}, query = aurora	
+Epoch 48, loss  = 0.003, epsilon = 0.100, sum(y)/len(y) = 904/999, {Recall = 0.138920, Precision = 0.803620, F1 = 0.236890}, query = aurora	
+Epoch 49, loss  = 0.004, epsilon = 0.100, sum(y)/len(y) = 885/999, {Recall = 0.141334, Precision = 0.801309, F1 = 0.240286}, query = aurora	
+Epoch 50, loss  = 0.002, epsilon = 0.100, sum(y)/len(y) = 905/999, {Recall = 0.138080, Precision = 0.801309, F1 = 0.235567}, query = aurora	
+Epoch 51, loss  = 0.004, epsilon = 0.100, sum(y)/len(y) = 901/999, {Recall = 0.138989, Precision = 0.800539, F1 = 0.236856}, query = aurora	
+Epoch 52, loss  = 0.003, epsilon = 0.100, sum(y)/len(y) = 944/999, {Recall = 0.132876, Precision = 0.805545, F1 = 0.228123}, query = aurora	
+Epoch 53, loss  = 0.003, epsilon = 0.100, sum(y)/len(y) = 919/999, {Recall = 0.135610, Precision = 0.799769, F1 = 0.231899}, query = aurora	
+Epoch 54, loss  = 0.003, epsilon = 0.100, sum(y)/len(y) = 916/999, {Recall = 0.136681, Precision = 0.798614, F1 = 0.233414}, query = aurora	
+Epoch 55, loss  = 0.003, epsilon = 0.100, sum(y)/len(y) = 863/999, {Recall = 0.143879, Precision = 0.797459, F1 = 0.243776}, query = aurora	
+Epoch 56, loss  = 0.003, epsilon = 0.100, sum(y)/len(y) = 932/999, {Recall = 0.134525, Precision = 0.805545, F1 = 0.230549}, query = aurora	
+Epoch 57, loss  = 0.003, epsilon = 0.100, sum(y)/len(y) = 837/999, {Recall = 0.148140, Precision = 0.795918, F1 = 0.249789}, query = aurora	
+Epoch 58, loss  = 0.003, epsilon = 0.100, sum(y)/len(y) = 938/999, {Recall = 0.133726, Precision = 0.804005, F1 = 0.229312}, query = aurora	
+Epoch 59, loss  = 0.003, epsilon = 0.100, sum(y)/len(y) = 951/999, {Recall = 0.132421, Precision = 0.808240, F1 = 0.227559}, query = aurora	
+Epoch 60, loss  = 0.003, epsilon = 0.100, sum(y)/len(y) = 862/999, {Recall = 0.143992, Precision = 0.795918, F1 = 0.243865}, query = aurora	
+Epoch 61, loss  = 0.003, epsilon = 0.100, sum(y)/len(y) = 929/999, {Recall = 0.135828, Precision = 0.807855, F1 = 0.232556}, query = aurora	
+Epoch 62, loss  = 0.003, epsilon = 0.100, sum(y)/len(y) = 905/999, {Recall = 0.138417, Precision = 0.802464, F1 = 0.236107}, query = aurora	
+Epoch 63, loss  = 0.003, epsilon = 0.100, sum(y)/len(y) = 933/999, {Recall = 0.134084, Precision = 0.802079, F1 = 0.229760}, query = aurora	
+Epoch 64, loss  = 0.003, epsilon = 0.100, sum(y)/len(y) = 923/999, {Recall = 0.136269, Precision = 0.803235, F1 = 0.233008}, query = aurora	
+Epoch 65, loss  = 0.002, epsilon = 0.100, sum(y)/len(y) = 903/999, {Recall = 0.138652, Precision = 0.799769, F1 = 0.236332}, query = aurora	
+Epoch 66, loss  = 0.003, epsilon = 0.100, sum(y)/len(y) = 887/999, {Recall = 0.141029, Precision = 0.802079, F1 = 0.239880}, query = aurora	
+Epoch 67, loss  = 0.002, epsilon = 0.100, sum(y)/len(y) = 920/999, {Recall = 0.136058, Precision = 0.803620, F1 = 0.232716}, query = aurora	
+Epoch 68, loss  = 0.003, epsilon = 0.100, sum(y)/len(y) = 880/999, {Recall = 0.141746, Precision = 0.800154, F1 = 0.240830}, query = aurora	
+Epoch 69, loss  = 0.002, epsilon = 0.100, sum(y)/len(y) = 896/999, {Recall = 0.139277, Precision = 0.798229, F1 = 0.237172}, query = aurora	
+Epoch 70, loss  = 0.003, epsilon = 0.100, sum(y)/len(y) = 926/999, {Recall = 0.135116, Precision = 0.801694, F1 = 0.231256}, query = aurora	
+Epoch 71, loss  = 0.003, epsilon = 0.100, sum(y)/len(y) = 914/999, {Recall = 0.137400, Precision = 0.803235, F1 = 0.234659}, query = aurora	
+Epoch 72, loss  = 0.002, epsilon = 0.100, sum(y)/len(y) = 931/999, {Recall = 0.134278, Precision = 0.802464, F1 = 0.230060}, query = aurora	
+Epoch 73, loss  = 0.002, epsilon = 0.100, sum(y)/len(y) = 846/999, {Recall = 0.145733, Precision = 0.794378, F1 = 0.246284}, query = aurora	
+Epoch 74, loss  = 0.002, epsilon = 0.100, sum(y)/len(y) = 877/999, {Recall = 0.142621, Precision = 0.798229, F1 = 0.242003}, query = aurora	
+Epoch 75, loss  = 0.003, epsilon = 0.100, sum(y)/len(y) = 944/999, {Recall = 0.133185, Precision = 0.805160, F1 = 0.228562}, query = aurora	
+Epoch 76, loss  = 0.002, epsilon = 0.100, sum(y)/len(y) = 960/999, {Recall = 0.131131, Precision = 0.807085, F1 = 0.225607}, query = aurora	
+Epoch 77, loss  = 0.003, epsilon = 0.100, sum(y)/len(y) = 951/999, {Recall = 0.132381, Precision = 0.806315, F1 = 0.227423}, query = aurora	
+Epoch 78, loss  = 0.002, epsilon = 0.100, sum(y)/len(y) = 954/999, {Recall = 0.132326, Precision = 0.809395, F1 = 0.227465}, query = aurora	
+Epoch 79, loss  = 0.003, epsilon = 0.100, sum(y)/len(y) = 952/999, {Recall = 0.131745, Precision = 0.804775, F1 = 0.226423}, query = aurora	
+Epoch 80, loss  = 0.004, epsilon = 0.100, sum(y)/len(y) = 940/999, {Recall = 0.134222, Precision = 0.806315, F1 = 0.230135}, query = aurora	
+Epoch 81, loss  = 0.002, epsilon = 0.100, sum(y)/len(y) = 926/999, {Recall = 0.135437, Precision = 0.803235, F1 = 0.231791}, query = aurora	
+Epoch 82, loss  = 0.002, epsilon = 0.100, sum(y)/len(y) = 832/999, {Recall = 0.147805, Precision = 0.792068, F1 = 0.249122}, query = aurora	
+Epoch 83, loss  = 0.003, epsilon = 0.100, sum(y)/len(y) = 928/999, {Recall = 0.135310, Precision = 0.804775, F1 = 0.231669}, query = aurora	
+Epoch 84, loss  = 0.002, epsilon = 0.100, sum(y)/len(y) = 854/999, {Recall = 0.145795, Precision = 0.797074, F1 = 0.246502}, query = aurora	
+Epoch 85, loss  = 0.002, epsilon = 0.100, sum(y)/len(y) = 923/999, {Recall = 0.135826, Precision = 0.804390, F1 = 0.232408}, query = aurora	
+Epoch 86, loss  = 0.002, epsilon = 0.100, sum(y)/len(y) = 896/999, {Recall = 0.139754, Precision = 0.800154, F1 = 0.237948}, query = aurora	
+Epoch 87, loss  = 0.002, epsilon = 0.100, sum(y)/len(y) = 906/999, {Recall = 0.137648, Precision = 0.799384, F1 = 0.234855}, query = aurora	
+Epoch 88, loss  = 0.002, epsilon = 0.100, sum(y)/len(y) = 935/999, {Recall = 0.134518, Precision = 0.804775, F1 = 0.230506}, query = aurora	
+Epoch 89, loss  = 0.002, epsilon = 0.100, sum(y)/len(y) = 876/999, {Recall = 0.142075, Precision = 0.798999, F1 = 0.241251}, query = aurora	
+Epoch 90, loss  = 0.003, epsilon = 0.100, sum(y)/len(y) = 901/999, {Recall = 0.139158, Precision = 0.802849, F1 = 0.237201}, query = aurora	
+Epoch 91, loss  = 0.002, epsilon = 0.100, sum(y)/len(y) = 863/999, {Recall = 0.144200, Precision = 0.797459, F1 = 0.244236}, query = aurora	
+Epoch 92, loss  = 0.003, epsilon = 0.100, sum(y)/len(y) = 949/999, {Recall = 0.132350, Precision = 0.805160, F1 = 0.227332}, query = aurora	
+Epoch 93, loss  = 0.002, epsilon = 0.100, sum(y)/len(y) = 905/999, {Recall = 0.137865, Precision = 0.803620, F1 = 0.235354}, query = aurora	
+Epoch 94, loss  = 0.002, epsilon = 0.100, sum(y)/len(y) = 859/999, {Recall = 0.144562, Precision = 0.797459, F1 = 0.244756}, query = aurora	
+Epoch 95, loss  = 0.002, epsilon = 0.100, sum(y)/len(y) = 877/999, {Recall = 0.141968, Precision = 0.798999, F1 = 0.241097}, query = aurora	
+Epoch 96, loss  = 0.003, epsilon = 0.100, sum(y)/len(y) = 892/999, {Recall = 0.140154, Precision = 0.801309, F1 = 0.238578}, query = aurora	
+Epoch 97, loss  = 0.002, epsilon = 0.100, sum(y)/len(y) = 919/999, {Recall = 0.136764, Precision = 0.806315, F1 = 0.233862}, query = aurora	
+Epoch 98, loss  = 0.002, epsilon = 0.100, sum(y)/len(y) = 863/999, {Recall = 0.144341, Precision = 0.797459, F1 = 0.244438}, query = aurora	
+Epoch 99, loss  = 0.002, epsilon = 0.100, sum(y)/len(y) = 933/999, {Recall = 0.134874, Precision = 0.804775, F1 = 0.231029}, query = aurora	
+Epoch 100, loss  = 0.003, epsilon = 0.100, sum(y)/len(y) = 942/999, {Recall = 0.133091, Precision = 0.805160, F1 = 0.228425}, query = aurora	
+Epoch 101, loss  = 0.002, epsilon = 0.100, sum(y)/len(y) = 952/999, {Recall = 0.132134, Precision = 0.805930, F1 = 0.227043}, query = aurora	
+Epoch 102, loss  = 0.002, epsilon = 0.100, sum(y)/len(y) = 945/999, {Recall = 0.132205, Precision = 0.802849, F1 = 0.227025}, query = aurora	
+Epoch 103, loss  = 0.002, epsilon = 0.100, sum(y)/len(y) = 950/999, {Recall = 0.132535, Precision = 0.805930, F1 = 0.227636}, query = aurora	
+Epoch 104, loss  = 0.002, epsilon = 0.100, sum(y)/len(y) = 944/999, {Recall = 0.133274, Precision = 0.804005, F1 = 0.228647}, query = aurora	
+Epoch 105, loss  = 0.002, epsilon = 0.100, sum(y)/len(y) = 920/999, {Recall = 0.136696, Precision = 0.805545, F1 = 0.233730}, query = aurora	
+Epoch 106, loss  = 0.002, epsilon = 0.100, sum(y)/len(y) = 937/999, {Recall = 0.133756, Precision = 0.803620, F1 = 0.229341}, query = aurora	
+Epoch 107, loss  = 0.002, epsilon = 0.100, sum(y)/len(y) = 899/999, {Recall = 0.139219, Precision = 0.802079, F1 = 0.237257}, query = aurora	
+Epoch 108, loss  = 0.002, epsilon = 0.100, sum(y)/len(y) = 910/999, {Recall = 0.138198, Precision = 0.804390, F1 = 0.235872}, query = aurora	
+Epoch 109, loss  = 0.002, epsilon = 0.100, sum(y)/len(y) = 922/999, {Recall = 0.135769, Precision = 0.802849, F1 = 0.232260}, query = aurora	
+Epoch 110, loss  = 0.002, epsilon = 0.100, sum(y)/len(y) = 936/999, {Recall = 0.134038, Precision = 0.805160, F1 = 0.229818}, query = aurora	
+Epoch 111, loss  = 0.001, epsilon = 0.100, sum(y)/len(y) = 910/999, {Recall = 0.137526, Precision = 0.801694, F1 = 0.234777}, query = aurora	
+Epoch 112, loss  = 0.002, epsilon = 0.100, sum(y)/len(y) = 915/999, {Recall = 0.137294, Precision = 0.803620, F1 = 0.234521}, query = aurora	
+Epoch 113, loss  = 0.002, epsilon = 0.100, sum(y)/len(y) = 890/999, {Recall = 0.140028, Precision = 0.797844, F1 = 0.238243}, query = aurora	
+Epoch 114, loss  = 0.002, epsilon = 0.100, sum(y)/len(y) = 910/999, {Recall = 0.137303, Precision = 0.803620, F1 = 0.234534}, query = aurora	
+Epoch 115, loss  = 0.002, epsilon = 0.100, sum(y)/len(y) = 932/999, {Recall = 0.134423, Precision = 0.804005, F1 = 0.230336}, query = aurora	
+Epoch 116, loss  = 0.002, epsilon = 0.100, sum(y)/len(y) = 919/999, {Recall = 0.136596, Precision = 0.804005, F1 = 0.233518}, query = aurora	
+Epoch 117, loss  = 0.002, epsilon = 0.100, sum(y)/len(y) = 901/999, {Recall = 0.138768, Precision = 0.800924, F1 = 0.236552}, query = aurora	
+Epoch 118, loss  = 0.002, epsilon = 0.100, sum(y)/len(y) = 918/999, {Recall = 0.136781, Precision = 0.803620, F1 = 0.233772}, query = aurora	
+Epoch 119, loss  = 0.002, epsilon = 0.100, sum(y)/len(y) = 927/999, {Recall = 0.135703, Precision = 0.805545, F1 = 0.232277}, query = aurora	
+Epoch 120, loss  = 0.002, epsilon = 0.100, sum(y)/len(y) = 913/999, {Recall = 0.137339, Precision = 0.803620, F1 = 0.234587}, query = aurora	
+Epoch 121, loss  = 0.002, epsilon = 0.100, sum(y)/len(y) = 955/999, {Recall = 0.131690, Precision = 0.804390, F1 = 0.226327}, query = aurora	
+Epoch 122, loss  = 0.002, epsilon = 0.100, sum(y)/len(y) = 934/999, {Recall = 0.134289, Precision = 0.804390, F1 = 0.230155}, query = aurora	
+Epoch 123, loss  = 0.002, epsilon = 0.100, sum(y)/len(y) = 900/999, {Recall = 0.139272, Precision = 0.801309, F1 = 0.237300}, query = aurora	
+Epoch 124, loss  = 0.001, epsilon = 0.100, sum(y)/len(y) = 918/999, {Recall = 0.136795, Precision = 0.804390, F1 = 0.233826}, query = aurora	
+Epoch 125, loss  = 0.002, epsilon = 0.100, sum(y)/len(y) = 914/999, {Recall = 0.137324, Precision = 0.805545, F1 = 0.234648}, query = aurora	
+Epoch 126, loss  = 0.002, epsilon = 0.100, sum(y)/len(y) = 901/999, {Recall = 0.139068, Precision = 0.803620, F1 = 0.237105}, query = aurora	
+Epoch 127, loss  = 0.002, epsilon = 0.100, sum(y)/len(y) = 917/999, {Recall = 0.137047, Precision = 0.804390, F1 = 0.234193}, query = aurora	
+Epoch 128, loss  = 0.002, epsilon = 0.100, sum(y)/len(y) = 907/999, {Recall = 0.137883, Precision = 0.800539, F1 = 0.235248}, query = aurora	
+Epoch 129, loss  = 0.001, epsilon = 0.100, sum(y)/len(y) = 901/999, {Recall = 0.138843, Precision = 0.800924, F1 = 0.236659}, query = aurora	
+Epoch 130, loss  = 0.002, epsilon = 0.100, sum(y)/len(y) = 900/999, {Recall = 0.138830, Precision = 0.800154, F1 = 0.236607}, query = aurora	
+Epoch 131, loss  = 0.002, epsilon = 0.100, sum(y)/len(y) = 915/999, {Recall = 0.137472, Precision = 0.803235, F1 = 0.234765}, query = aurora	
+Epoch 132, loss  = 0.002, epsilon = 0.100, sum(y)/len(y) = 925/999, {Recall = 0.134988, Precision = 0.800154, F1 = 0.231004}, query = aurora	
+Epoch 133, loss  = 0.002, epsilon = 0.100, sum(y)/len(y) = 925/999, {Recall = 0.135793, Precision = 0.803620, F1 = 0.232328}, query = aurora	
+Epoch 134, loss  = 0.002, epsilon = 0.100, sum(y)/len(y) = 807/999, {Recall = 0.151841, Precision = 0.789372, F1 = 0.254690}, query = aurora	
+Epoch 135, loss  = 0.002, epsilon = 0.100, sum(y)/len(y) = 890/999, {Recall = 0.140247, Precision = 0.800924, F1 = 0.238696}, query = aurora	
+Epoch 136, loss  = 0.002, epsilon = 0.100, sum(y)/len(y) = 905/999, {Recall = 0.138662, Precision = 0.803620, F1 = 0.236514}, query = aurora	
+Epoch 137, loss  = 0.002, epsilon = 0.100, sum(y)/len(y) = 841/999, {Recall = 0.147249, Precision = 0.796688, F1 = 0.248558}, query = aurora	
+Epoch 138, loss  = 0.001, epsilon = 0.100, sum(y)/len(y) = 937/999, {Recall = 0.133576, Precision = 0.804390, F1 = 0.229107}, query = aurora	
+Epoch 139, loss  = 0.001, epsilon = 0.100, sum(y)/len(y) = 957/999, {Recall = 0.131667, Precision = 0.807085, F1 = 0.226399}, query = aurora	
+Epoch 140, loss  = 0.002, epsilon = 0.100, sum(y)/len(y) = 943/999, {Recall = 0.132908, Precision = 0.802464, F1 = 0.228046}, query = aurora	
+Epoch 141, loss  = 0.003, epsilon = 0.100, sum(y)/len(y) = 942/999, {Recall = 0.132769, Precision = 0.803620, F1 = 0.227888}, query = aurora	
+Epoch 142, loss  = 0.002, epsilon = 0.100, sum(y)/len(y) = 950/999, {Recall = 0.131755, Precision = 0.803620, F1 = 0.226393}, query = aurora	
+Epoch 143, loss  = 0.001, epsilon = 0.100, sum(y)/len(y) = 899/999, {Recall = 0.139084, Precision = 0.800924, F1 = 0.237010}, query = aurora	
+Epoch 144, loss  = 0.001, epsilon = 0.100, sum(y)/len(y) = 909/999, {Recall = 0.137534, Precision = 0.800154, F1 = 0.234723}, query = aurora	
+Epoch 145, loss  = 0.002, epsilon = 0.100, sum(y)/len(y) = 861/999, {Recall = 0.143951, Precision = 0.796303, F1 = 0.243825}, query = aurora	
+Epoch 146, loss  = 0.002, epsilon = 0.100, sum(y)/len(y) = 919/999, {Recall = 0.136759, Precision = 0.804390, F1 = 0.233774}, query = aurora	
+Epoch 147, loss  = 0.002, epsilon = 0.100, sum(y)/len(y) = 911/999, {Recall = 0.137154, Precision = 0.801694, F1 = 0.234235}, query = aurora	
+Epoch 148, loss  = 0.002, epsilon = 0.100, sum(y)/len(y) = 879/999, {Recall = 0.141957, Precision = 0.798229, F1 = 0.241047}, query = aurora	
+Epoch 149, loss  = 0.002, epsilon = 0.100, sum(y)/len(y) = 905/999, {Recall = 0.138502, Precision = 0.801309, F1 = 0.236182}, query = aurora	
+Epoch 150, loss  = 0.002, epsilon = 0.100, sum(y)/len(y) = 889/999, {Recall = 0.141088, Precision = 0.802849, F1 = 0.240000}, query = aurora	
+Epoch 151, loss  = 0.001, epsilon = 0.100, sum(y)/len(y) = 912/999, {Recall = 0.137430, Precision = 0.800924, F1 = 0.234604}, query = aurora	
+Epoch 152, loss  = 0.003, epsilon = 0.100, sum(y)/len(y) = 936/999, {Recall = 0.134087, Precision = 0.804005, F1 = 0.229842}, query = aurora	
+Epoch 153, loss  = 0.002, epsilon = 0.100, sum(y)/len(y) = 931/999, {Recall = 0.134651, Precision = 0.805160, F1 = 0.230718}, query = aurora	
+Epoch 154, loss  = 0.002, epsilon = 0.100, sum(y)/len(y) = 898/999, {Recall = 0.139300, Precision = 0.801309, F1 = 0.237340}, query = aurora	
+Epoch 155, loss  = 0.002, epsilon = 0.100, sum(y)/len(y) = 891/999, {Recall = 0.140916, Precision = 0.802849, F1 = 0.239752}, query = aurora	
+Epoch 156, loss  = 0.002, epsilon = 0.100, sum(y)/len(y) = 900/999, {Recall = 0.138625, Precision = 0.798229, F1 = 0.236226}, query = aurora	
+Epoch 157, loss  = 0.002, epsilon = 0.100, sum(y)/len(y) = 859/999, {Recall = 0.145400, Precision = 0.798999, F1 = 0.246028}, query = aurora	
+Epoch 158, loss  = 0.002, epsilon = 0.100, sum(y)/len(y) = 922/999, {Recall = 0.136028, Precision = 0.802079, F1 = 0.232607}, query = aurora	
+Epoch 159, loss  = 0.002, epsilon = 0.100, sum(y)/len(y) = 910/999, {Recall = 0.137895, Precision = 0.802464, F1 = 0.235347}, query = aurora	
+Epoch 160, loss  = 0.002, epsilon = 0.100, sum(y)/len(y) = 918/999, {Recall = 0.136545, Precision = 0.804390, F1 = 0.233460}, query = aurora	
+Epoch 161, loss  = 0.002, epsilon = 0.100, sum(y)/len(y) = 926/999, {Recall = 0.135722, Precision = 0.806700, F1 = 0.232352}, query = aurora	
+Epoch 162, loss  = 0.001, epsilon = 0.100, sum(y)/len(y) = 928/999, {Recall = 0.135426, Precision = 0.804005, F1 = 0.231807}, query = aurora	
+Epoch 163, loss  = 0.002, epsilon = 0.100, sum(y)/len(y) = 913/999, {Recall = 0.137584, Precision = 0.805160, F1 = 0.235010}, query = aurora	
+Epoch 164, loss  = 0.003, epsilon = 0.100, sum(y)/len(y) = 916/999, {Recall = 0.137354, Precision = 0.805930, F1 = 0.234707}, query = aurora	
+Epoch 165, loss  = 0.002, epsilon = 0.100, sum(y)/len(y) = 923/999, {Recall = 0.135943, Precision = 0.802464, F1 = 0.232498}, query = aurora	
+Epoch 166, loss  = 0.002, epsilon = 0.100, sum(y)/len(y) = 927/999, {Recall = 0.135371, Precision = 0.804775, F1 = 0.231759}, query = aurora	
+Epoch 167, loss  = 0.002, epsilon = 0.100, sum(y)/len(y) = 913/999, {Recall = 0.136979, Precision = 0.802464, F1 = 0.234013}, query = aurora	
+Epoch 168, loss  = 0.001, epsilon = 0.100, sum(y)/len(y) = 956/999, {Recall = 0.131609, Precision = 0.807085, F1 = 0.226313}, query = aurora	
+Epoch 169, loss  = 0.002, epsilon = 0.100, sum(y)/len(y) = 926/999, {Recall = 0.135349, Precision = 0.803235, F1 = 0.231662}, query = aurora	
+Epoch 170, loss  = 0.002, epsilon = 0.100, sum(y)/len(y) = 881/999, {Recall = 0.141706, Precision = 0.798999, F1 = 0.240719}, query = aurora	
+Epoch 171, loss  = 0.001, epsilon = 0.100, sum(y)/len(y) = 875/999, {Recall = 0.142582, Precision = 0.798229, F1 = 0.241947}, query = aurora	
+Epoch 172, loss  = 0.002, epsilon = 0.100, sum(y)/len(y) = 920/999, {Recall = 0.136644, Precision = 0.803235, F1 = 0.233555}, query = aurora	
+Epoch 173, loss  = 0.002, epsilon = 0.100, sum(y)/len(y) = 935/999, {Recall = 0.133817, Precision = 0.802079, F1 = 0.229367}, query = aurora	
+Epoch 174, loss  = 0.002, epsilon = 0.100, sum(y)/len(y) = 913/999, {Recall = 0.137569, Precision = 0.801309, F1 = 0.234823}, query = aurora	
+Epoch 175, loss  = 0.001, epsilon = 0.100, sum(y)/len(y) = 879/999, {Recall = 0.142407, Precision = 0.800924, F1 = 0.241818}, query = aurora	
+Epoch 176, loss  = 0.002, epsilon = 0.100, sum(y)/len(y) = 936/999, {Recall = 0.134190, Precision = 0.804005, F1 = 0.229994}, query = aurora	
+Epoch 177, loss  = 0.001, epsilon = 0.100, sum(y)/len(y) = 915/999, {Recall = 0.136869, Precision = 0.800924, F1 = 0.233787}, query = aurora	
+Epoch 178, loss  = 0.001, epsilon = 0.100, sum(y)/len(y) = 893/999, {Recall = 0.139958, Precision = 0.799384, F1 = 0.238210}, query = aurora	
+Epoch 179, loss  = 0.002, epsilon = 0.100, sum(y)/len(y) = 903/999, {Recall = 0.138828, Precision = 0.801694, F1 = 0.236672}, query = aurora	
+Epoch 180, loss  = 0.001, epsilon = 0.100, sum(y)/len(y) = 927/999, {Recall = 0.135321, Precision = 0.804005, F1 = 0.231653}, query = aurora	

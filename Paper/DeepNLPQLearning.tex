@@ -29,7 +29,7 @@
 \maketitle
 
 \begin{abstract}
-We present a streaming extraction policy for massive document summarization using a deep reinforcement learning recurrent neural network architecture to learn state representations and action policies. The rewards of our network are evaluated through manually reviewed summaries, which allow us to specify an end-to-end framework to optimize our extractive policy.  By extracting the raw text from our articles, we are able to map words into a higher embedding dimension to learn a more robust representation. We benchmark our model against random decisions, bag-of-words, and bag-of-bigrams models.\footnote{ \url{https://github.com/franciscojavierarceo/DQN-Event-Summarization} }
+We present a streaming extraction policy for massive document summarization learned using a deep reinforcement learning recurrent neural network architecture. The rewards of our network are evaluated through manually reviewed summaries, which allow us to specify an end-to-end framework to optimize our extractive policy.  By using raw text from our articles and mapping words into a higher embedding dimension through our recurrent neural network, we are able to learn a more robust representation than traditional n-gram models. We benchmark our model against random decisions, bag-of-words, and bag-of-bigrams models.\footnote{ \url{https://github.com/franciscojavierarceo/DQN-Event-Summarization} }
 \end{abstract}
 
 \bibliographystyle{plain}
@@ -39,11 +39,11 @@ We present a streaming extraction policy for massive document summarization usin
 
 \section{Introduction}
 
-Crisis informatics is becoming an increasingly popular area of study in machine learning with more recent research focusing on extractive summarization (e.g., \cite{kedzie2015predicting} and \cite{kedzieextractive}) of multi-document summarization. The approach by \cite{kedzie2015predicting}  has shown that it is possible to select relevant sentences from a massive number of documents on the web to create summaries with meaningful content by adapting classifiers to maximize search policies. These systems operate in a streaming fashion and are capable of evaluating each sentence within each article to decide whether or not to select or skip the sentence. 
+Crisis informatics is becoming an increasingly popular area of study in machine learning with more recent research focusing on extractive summarization (e.g., \cite{kedzie2015predicting} and \cite{kedzieextractive}) of multi-document summarization. The approach by \cite{kedzie2015predicting}  has shown that it is possible to select relevant sentences from a massive number of documents on the web to create summaries with meaningful content by adapting classifiers to maximize search policies. These systems operate in a streaming fashion and are capable of evaluating each sentence within each article to decide whether or not to include or ignore the sentence. 
 
-Unfortunately, these systems have still been shown to fall short of heuristic algorithms [citation needed], which may be due to inadequate capturing of the rich structure and often idiosyncractic information by traditional n-gram models  in language modeling. \cite{bengio2003neural} have shown that natural language processing can be mapped to a higher order dimension to represent more powerful features for various language modeling tasks. These embeddings have proven incredibly powerful on a variety of different natural language processing tasks [citations needed].
+Unfortunately, these systems have still been shown to fall short of heuristic algorithms [citation needed], which may be due to inadequate capturing of the rich structure and often idiosyncratic information by traditional n-gram language models. \cite{bengio2003neural} have shown that natural language processing can be mapped to a higher order dimension to represent more powerful features for various language modeling tasks. These embeddings have proven incredibly powerful on a variety of different natural language processing tasks [citations needed].
 
-In this paper we show that a deep recurrent neural network (DQN) with a long short term memory (LSTM) is able to successfully learn an extractive summary policy by encoding the action, state, and reward into our DQN-LSTM similar to that of  \cite{hausknecht2015deep}. We show that on a variety of different metrics, our specification is able to reach state-of-the-art performance.
+In this paper we show that a deep recurrent neural network with a long short term memory (LSTM) is able to successfully learn an extractive summary policy by encoding the action, state, and reward into a Q-Learning model, similar to that of  \cite{hausknecht2015deep}. We show that on a variety of different metrics, our specification is able to reach state-of-the-art performance.
 
 \section{Related Work}
 
@@ -101,11 +101,11 @@ In this paper we show that a deep recurrent neural network (DQN) with a long sho
     from and used to estimate the true Q function.
 
     \textbf{States} 
-    In our setup a state $s(X_{\le t},\tilde{Y}_{\le t}, q)$ is a function
+    In our setup a state $s(x_{t},\tilde{y}_{t}, q)$ is a function
     of the stream $X$ observed up to the current system time $t$, the state
     of the current summary $\tilde{Y}$ at system time $t$, and the query $q$.
     For brevity we will use $s(t,q)$ where the dependence on 
-    $X_{\le t},\tilde{Y}_{\le t}$ is assumed.
+    $x_{t},\tilde{Y}_{t}$ is assumed.
     $s(t,q)$ is itself three recurrent neural networks, one for encoding 
     the summary, the stream, and the query respectively.
 
@@ -115,20 +115,20 @@ In this paper we show that a deep recurrent neural network (DQN) with a long sho
     current sentence $x_t$ to the summary and incrementing the current system
     time, 
     \begin{align*}
-        \tilde{Y}_{\le t + 1} &= \tilde{Y}_{\le t} \cup \{ x_t \} \\
+        \tilde{y}_{t + 1} &= \tilde{Y}_{t} \cup \{ x_t \} \\
         t &= t + 1    
     \end{align*}
     or $skip$ where only $t$ is incremented without changing the current 
     summary
     \begin{align*}
-        \tilde{Y}_{\le t + 1} &= \tilde{Y}_{\le t}  \\
+        \tilde{y}_{t + 1} &= \tilde{y}_{ t}  \\
         t &= t + 1.
     \end{align*}
 
 
     \textbf{Reward} 
     The reward for a given action will be measured by relative gain in 
-    ROUGE-2 F1 score of the predicted summary $\tilde{Y}_{\le t}$ measured
+    ROUGE-2 F1 score of the predicted summary $\tilde{y}_{t}$ measured
     against a gold standard summary $Y$.
 
 
@@ -136,9 +136,9 @@ In this paper we show that a deep recurrent neural network (DQN) with a long sho
     When only one gold summary reference is used, ROUGE-N Recall is calculated
     as 
 
-    \[ \textrm{ROUGE-NR}(\tilde{Y}, Y) = 
+    \[ \textrm{ROUGE-NR}(\tilde{y}, Y) = 
         \frac{\sum_{g \in \textrm{ngrams}(Y,N)} 
-        \min \left(\textrm{count}(g, \tilde{Y}), \textrm{count}(g, Y)\right)}{
+        \min \left(\textrm{count}(g, \tilde{y}), \textrm{count}(g, Y)\right)}{
         \sum_{g \in \textrm{ngrams}(Y,N)} 
         \textrm{count}(g, Y)
         }
@@ -161,106 +161,148 @@ In this paper we show that a deep recurrent neural network (DQN) with a long sho
     \[ \textrm{ROUGE-NF1}(\tilde{Y}, Y) = \frac{ 2 \times 
     \textrm{ROUGE-NP}(\tilde{Y}, Y) \times \textrm{ROUGE-NR}(\tilde{Y}, Y)
     }{ \textrm{ROUGE-NP}(\tilde{Y}, Y) + \textrm{ROUGE-NR}(\tilde{Y}, Y) } \]
-              %\textrm{ROUGE-NP}(\tilde{Y}, Y) \times 
-              %\textrm{ROUGE-NR}(\tilde{Y}, Y)
-             %   }{
-             % \textrm{ROUGE-NP}(\tilde{Y}, Y) +
-             % \textrm{ROUGE-NR}(\tilde{Y}, Y)
-        
-       % }
 
 
     The reward $r$ at time $t$ is then:
-    \[ r_t = \textrm{ROUGE-NF1}(\tilde{Y}_{\le t+1}, Y) - 
-    \textrm{ROUGE-NF1}(\tilde{Y}_{\le t}, Y) \]
+    \[ r_t = \textrm{ROUGE-NF1}(\tilde{y}_{t}, Y) - 
+    \textrm{ROUGE-NF1}(\tilde{y}_{t-1}, Y) \]
 
 %    TODO: Think about how to incorporate a time penalty into the reward.
 
 \subsection{Architecture}
 
-The architecture for our DQN-LSTM is nearly identical to that of  \cite{narasimhan2015language} with modifications where appropriate. We learn the parameters using stochastic gradient descent with RMSprop \cite{hinton2012lecture}, where we minimize the following loss function: 
+The architecture for our DQN-LSTM is nearly identical to that of  \cite{narasimhan2015language} with modifications where appropriate. We learn the parameters using stochastic gradient descent with RMSprop \cite{hinton2012lecture}, where we minimize the loss function below: 
 
 \begin{equation}
-\mathcal{L}_i(\theta_i) =  \textrm{E}_{\hat{s}, \hat{a}}[ \big (y_i - Q(\hat{s}, \hat{a}; \theta_i) \big )^2].
+\mathcal{L}_i(\theta_i) =  \textrm{E}_{\hat{s}, \hat{a}}[ \big (y_i - Q(\hat{s}, \hat{a}; \theta_i) \big )^2]
 \end{equation}
 
 where 
 \begin{equation}
-y_i = \textrm{E}_{\hat{s}, \hat{a}}[ r + \gamma \textrm{max}_{a'} Q(s', a' ; \theta_{i-1}) | s', a' ]
+y_i = \textrm{E}_{\hat{s}, \hat{a}}[ r_i + \gamma \textrm{max}_{a'} Q(s', a' ; \theta_{i-1}) | s', a' ].
 \end{equation}
 
-And the updates are computed using the following gradient update of $L_i(\theta_i)$:
+The updates are computed using the gradient update for $L_i(\theta_i)$
 
 \begin{equation}
 \Delta L_i(\theta_i) = \textrm{E}_{\hat{s}, \hat{a}}[ 2  \big (y_i - Q(\hat{s}, \hat{a}; \theta_i) \big ) \Delta_{\theta_{i}}  Q(\hat{s}, \hat{a}; \theta_i)].
 \end{equation}
 
 
+
 \center
-    % Define the layers to draw the diagram
+% Define the layers to draw the diagram
 \pgfdeclarelayer{background}
 \pgfdeclarelayer{foreground}
 \pgfsetlayers{background,main,foreground}
-    \tikzstyle{sensor}=[draw, fill=blue!20, text width=5em,  text centered, minimum height=2.5em,drop shadow]
-    \tikzstyle{term}=[draw, fill=gray!20, text width=5em,  text centered, minimum height=2.5em,drop shadow]
-    \tikzstyle{wa} = [sensor, text width=10em, fill=red!20,  minimum height=3em, rounded corners, drop shadow]
-    \def\blockdist{2.3}
-    \def\edgedist{2.5}
+    \tikzstyle{sensor}=[draw, fill=blue!10, text width=5em,  text centered, minimum height=2.0em,drop shadow]
+    \tikzstyle{term}=[draw, fill=gray!10, text width=5em,  text centered, minimum height=2.0em,drop shadow]
+    \tikzstyle{wa} = [sensor, fill=gray!10, text width=5em,  minimum height=2em, rounded corners, drop shadow]
+    \tikzstyle{wa2} = [sensor, fill=gray!10, text width=6em,  minimum height=12em, rounded corners, drop shadow]
+    \tikzstyle{om} = [draw, fill=green!05, text width=5em,  text centered, minimum height=2.0em,drop shadow]
+
     \begin{tikzpicture}
-        \node (wa) [wa] {\textbf{Linear} };
-        \path (wa.west)+(-3.2 ,  2.0) node (asr1)[sensor] {$LSTM$};
-        \path (wa.west)+(-3.2 ,  0.0) node (asr2)[sensor] {$LSTM$};
-        \path (wa.west)+(-3.2 , -2.0) node (asr3)[sensor] {$LSTM$};
-        \path (wa.east)+(\blockdist,0) node (vote) [term] {\textbf{ReLU}};
+        \node (wa) [wa2] {Joined \textbf{Linear Layer}  \\ \scriptsize (3 x Embedding) };
+        \path (wa.west)+(-3.0 ,  2.0) node (asr1)[sensor] {$Query$ \textbf{LSTM}};
+        \path (wa.west)+(-3.0 ,  0.0) node (asr2)[sensor] {$Sentence_t$  \textbf{LSTM}};
+        \path (wa.west)+(-3.0 , -2.0) node (asr3)[sensor] {$Summary_t$  \textbf{LSTM}};
+        \path (wa.east)+(3.0,  1) node (vote) [term] {\textbf{ReLU} \\ \scriptsize $\{Select\}$ };
+        \path (wa.east)+(3.0, -1) node (vote2) [term] {\textbf{ReLU} \\ \scriptsize $\{Skip\}$ } ;
+        \path (wa.east)+(6.5,  0) node (output) [om] {\textbf{Max} \\ \scriptsize E[Rouge]} ;
 
-        \path [draw, ->] (asr1.east) -- node [above] {}         (wa.175) ;
-        \path [draw, ->] (asr2.east) -- node [above] {}         (wa.180);
-        \path [draw, ->] (asr3.east) -- node [above] {}         (wa.185);
+        \path [draw, ->] (asr1.south) -- node [above] {}     (asr2.north) ;
+        \path [draw, ->] (asr2.north) -- node [above] {}     (asr1.south) ;
+        \path [draw, ->] (asr2.south) -- node [above] {}     (asr3.north) ;
+        \path [draw, ->] (asr3.north) -- node [above] {}     (asr2.south) ;
+        \path [draw, ->] (asr1.east) -- node [above] {}     (wa.125) ;
+        \path [draw, ->] (asr2.east) -- node [above] {}     (wa.180);
+        \path [draw, ->] (asr3.east) -- node [above] {}     (wa.235);
         \path [draw, ->] (wa.east) -- node [above] {}       (vote.west);
+        \path [draw, ->] (wa.east) -- node [above] {}       (vote2.west);
+        \path [draw, ->] (vote.east) -- node [above] {}     (output.175);
+        \path [draw, ->] (vote2.east) -- node [above] {}   (output.185);
 
-     \begin{pgfonlayer}{background}
-            \path (asr1.north  |- asr1.south)+(-2.5, 1.5) node (a) {};
-            \path (asr3.west  |- vote.east)+(+13.0, -3.5) node (d) {};
-            \path[fill=white!20,rounded corners, draw=black!50, dashed]         (a) rectangle (d);
+     \begin{pgfonlayer}{background}[transparency group,opacity=.5]
+            \path (asr1.north  |- asr1.south)+(-2.0, 1.6) node (a) {};
+            \path (asr3.west  |- vote.east)+(+10.0, -3.5) node (b) {};
+            \path (asr3.west  |- vote.east)+(+10.0, -2.5) node (c) {};
+            \path (asr3.east  |- output.east)+(+13, -4.50) node (d) {};
+            \path[fill=white!20,rounded corners, draw=black!100, dashed]         (a) rectangle (d);
         \end{pgfonlayer}
-        \path (wa.east) + (-2.3, -3.0)  node (vote.east) {DQN-LSTM for Event Summarization};
+
+     \begin{pgfonlayer}{background}[transparency group,opacity=.5]
+            \path (asr1.north  |- asr1.south)+(-1.7, 1.3) node (a) {};
+            \path (asr3.west  |- asr3.east)+(+10.0, -3.5) node (b) {};
+            \path (asr3.west  |- asr3.east)+(+10.0, -2.5) node (c) {};
+            \path (asr3.west  |- asr3.east)+(+2.9, -1.50) node (d) {};
+            \path[fill=white!20,rounded corners, draw=blue!100, dashed]         (a) rectangle (d);
+        \end{pgfonlayer}
+
+     \begin{pgfonlayer}{background}[transparency group,opacity=.5]
+            \path (asr1.north  |- asr1.south)+(2.7, 1.3) node (a) {};
+            \path (asr3.west  |- asr3.east)+(+10.0, -3.5) node (b) {};
+            \path (asr3.west  |- asr3.east)+(+10.0, -2.5) node (c) {};
+            \path (asr3.west  |- asr3.east)+(+11.5, -1.50) node (d) {};
+            \path[fill=white!20,rounded corners, draw=gray!100, dashed]         (a) rectangle (d);
+        \end{pgfonlayer}
+
+     \begin{pgfonlayer}{background}[transparency group,opacity=.5]
+            \path (asr1.north  |- asr1.south)+(7.4, 1.0) node (a) {};
+            \path (asr3.west  |- asr3.east)+(+10.0, -3.5) node (b) {};
+            \path (asr3.west  |- asr3.east)+(+10.0, -2.5) node (c) {};
+            \path (asr3.west  |- asr3.east)+(+11.3, -0.50) node (d) {};
+            \path[fill=red!05,rounded corners, draw=black!100, dashed]         (a) rectangle (d);
+        \end{pgfonlayer}
+
+     \begin{pgfonlayer}{background}[transparency group,opacity=.5]
+            \path (asr1.north  |- asr1.south)+(10.7, 1.3) node (a) {};
+            \path (asr3.west  |- asr3.east)+(+10.0, -3.5) node (b) {};
+            \path (asr3.west  |- asr3.east)+(+10.0, -2.5) node (c) {};
+            \path (asr3.west  |- asr3.east)+(+15.1, -1.50) node (d) {};
+            \path[fill=white!20,rounded corners, draw=green!100, dashed]         (a) rectangle (d);
+        \end{pgfonlayer}
+
+        \path (wa.west) + (5.8,    2.25)  node (vote.east) {\scriptsize \textbf{Action} }; %{\textbf{Summary-Action Representation} };
+        \path (wa.west) + (5.8,    1.95)  node (vote.east) {\scriptsize $\{argmax(a_t)$\}}; %{\textbf{Summary-Action Representation} };
+        \path (wa.west) + (-2.90, -3.2)  node (vote.east) {Input State}; %{\textbf{Input State}};
+        \path (wa.west) + (3.5,    -3.2)  node (vote.east) {Summary-Action Representation }; %{\textbf{Summary-Action Representation} };
+        \path (wa.west) + (9.30,  -3.2)  node (vote.east) {Output State}; %{\textbf{Output State}};
+        \path (wa.east) + (0.5, -4.2)  node (vote.east) {\textbf{Figure 1: DQN-LSTM Architecture}};
 \end{tikzpicture}
 
-
 \begin{algorithm}
-    \bf{Input:} { \rm  \{$X_q$: Input sentences, $N$: Number of iterations, $\epsilon$: Mixture parameter\} } \\
-    \underline{$\bf{Output: }$ \rm \{$\hat{\pi}$: policy\} }
+    \bf{Input:} { \rm  \{$\mathcal{Q}$: Event queries, $X_q$: Input sentences, $N$: Number of epochs\} } \\
+    \underline{$\bf{Output: }$ \rm \{$\hat{\pi}$: extraction policy, $\tilde{Y}$: event summary for query $q$\} }
 \begin{algorithmic}[1]
-\STATE \rm Initialize memory $\Gamma_q = \{\} $, $\forall q \in \mathcal{Q}$
-\STATE \rm Initialize current summary $\tilde{Y}_q = \{\} $, $\forall q \in \mathcal{Q}$
-\STATE \rm Initialize action-value function $Q$ with random weights
-\FOR{$epoch=1, N\ $}
+\STATE \rm Initialize memory $\Gamma =  \{\emptyset \}^{\mathcal{|Q|}}_{q=1}$
+\STATE \rm Initialize summaries $\tilde{Y} = \{\emptyset \}^{\mathcal{|Q|}}_{q=1} $
+\STATE \rm Initialize action-value function $\hat{Q}$ with random weights
+\FOR{$epoch=1,..,N\ $}
 	\FOR{$q \in \mathcal{Q}$}
-		\STATE $X^{T}_q$= \{Extract $t=1,...,T_q$ sentences for query $q$\}
-		\STATE $\tilde{Y}^{T}_q$ = \{Extract $t=1,...,T_q$ summaries for query $q$\}
-		\FOR{$(x_t, \tilde{y}_t) \in (X^{T}_q, \tilde{Y}^{T}_q), $ }
+		\STATE $X_{q}$= \{Extract $t=1,...,T_q$ sentences for query $q$\}
+		\STATE $\tilde{Y}_{q}$= \{Extract $t=1,...,T_q$ summaries for query $q$\}
+		\FOR{$(x_t, \tilde{y}_t) \in (X_q, \tilde{Y}_q), $ }
 			\STATE Set $s_t = s(x_t, \tilde{y}_t, q)$
-			\STATE $ \forall a_t \in \mathcal{A}(s_t) = \{select, skip\}$ \textrm{compute} $Q(s_t, a_t)$
-			\STATE Select $a^{*}_t =$ argmax$_{a_{t}}Q(s_t, a_t)$
+			\STATE $ \forall a_t \in \mathcal{A}(s_t) = \{select, skip\}$ \textrm{compute} $\hat{Q}(s_t, a_t)$
+			\STATE Select $a^{*}_t =$ argmax$_{a_{t}}\hat{Q}(s_t, a_t)$
 			\IF{$random() < \epsilon$}
 				\STATE  Set $a^{*}_t $ to random action with $\Pr(a_t) =\frac{1}{| \mathcal{A} |} $
 			\ENDIF
 			\IF{$a^{*}_t = \{select\}$}
-				\STATE $\tilde{y}_{t+1} = \tilde{y}_t \cup  \{ x_t \} $
+				\STATE Update $\tilde{y}_{t+1} = \tilde{y}_t \cup  \{ x_t \} $
 			\ENDIF	
 			\STATE Execute action $a^{*}_t$ and observe reward $r_t$ and new state $s_{t+1}$
 			\STATE Update $\Gamma_q = \Gamma_q \cup \{ [s_t, a^{*}_t, r_t, s_{t+1}]\}$
 		\ENDFOR
 	\ENDFOR
-		\STATE Sample $J$ transitions from
-		\FOR{ $j=1,...,J$}
+		\FOR{ $j=1,...,J$ transitions sampled from $\Gamma$}
 		\STATE \[\textrm{Set } y_j= 
 					\begin{cases}
 						r_j              								& \text{if $s_{j+1}$ is terminal } \\
-					     	r_j + \gamma $max$_{a'}Q(s_{j+1}, a'; \theta) 	& \text{if $s_{j+1}$ is non-terminal } 
+					     	r_j + \gamma $max$_{a'}\hat{Q}(s_{j+1}, a'; \theta) 	& \text{if $s_{j+1}$ is non-terminal } 
 					\end{cases} 
 					\]
-        		\STATE Perform gradient step on $\mathcal{L}(\theta) = (y_j - Q(s_j, a_j; \theta))^2$
+        		\STATE Perform gradient step on $\mathcal{L}(\theta) = (y_j - \hat{Q}(s_j, a_j; \theta))^2$
 		\ENDFOR
 \ENDFOR
   \end{algorithmic}
@@ -275,9 +317,10 @@ And the updates are computed using the following gradient update of $L_i(\theta_
   	ROUGUE-1F1 & DQN-BOW  & X \\
   	ROUGUE-1F1 & DQN-BiBOW  & X \\
   	ROUGUE-1F1 & Random  & X \\ \hline
-  	OTHER METRIC & DQN-LSTM  & X \\
-  	OTHER METRIC & DQN-BOW  & X \\
-  	OTHER METRIC & Random  & X \\ \hline
+  	ROUGUE-2F1 & DQN-LSTM  & X \\
+  	ROUGUE-2F1 & DQN-BOW  & X \\
+  	ROUGUE-2F1 & DQN-BiBOW  & X \\
+  	ROUGUE-2F1 & Random  & X \\ \hline
 	\hline
 \end{tabular}
 

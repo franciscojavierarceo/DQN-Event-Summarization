@@ -19,13 +19,15 @@ function split(pString)
 end
 
 function threshold(x, thresh)
-    if x <= thresh and x > 0 then
+    --- Threshold function written mostly for clarity :note: done on absolute value
+    if math.abs(x) <= thresh then
         return 0
     else 
         return x 
     end
 end
 function repeatTable(input_table, n)
+    --- Repeats a lua table n times
     local out = {}
     for i=1, n do
         out[i] = input_table
@@ -34,6 +36,7 @@ function repeatTable(input_table, n)
 end
 
 function updateTable(orig_table, insert_table, n_i)
+    -- Updates the original table by inserting a subpart of the table starting at n_i
     local out_table = {}
     for k, v in pairs(orig_table) do
         out_table[k] = v 
@@ -44,7 +47,9 @@ function updateTable(orig_table, insert_table, n_i)
     end
     return out_table
 end
+
 function makeInt(x)
+    --- Casts string values into integers when reading in the data
     local out = {}
     for k,v in pairs(x) do
         table.insert(out, tonumber(v))
@@ -53,6 +58,7 @@ function makeInt(x)
 end
 
 function buildTermDocumentTable(x, K)
+    --- This builds the data into tables after reading in from a csv
     --- If K == nil then getFirstKtokens() returns x
     local out = {}
     for k,v in pairs(x) do
@@ -62,6 +68,7 @@ function buildTermDocumentTable(x, K)
 end
 
 function getMaxseq(x)
+    -- This gets the max sequence length of a table
     local maxval = 0
     for k, v in pairs(x) do
         if k > 1 then 
@@ -163,6 +170,7 @@ function x_or_zero(pred_action, xs)
 end
 
 function x_or_pass(pred_action, xs)
+    --- Another simple function meant for readability
     if pred_action==1 then
         return xs
     else
@@ -205,6 +213,8 @@ function getLastKElements(x, K)
 end
 
 function buildCurrentSummary(preds, xs, K)
+    --- This is the main function used to build the current summary given our inputs
+    --- Notice that this differs from buildPredSummary below
     local out = {}
     for i = 1, #xs do
         if i == 1 then
@@ -222,7 +232,7 @@ end
 
 function buildPredSummary(preds, xs, K)
     --- This function is used to map the token indices to extract the summary
-    --- and produceds {token_id, 0, token_id} from any given *selected* sentence
+    --- and produces {token_id, 0, token_id} from any given *selected* sentence
     local out = {}
     for i=1, #xs do
         if i == 1 then 
@@ -237,7 +247,25 @@ function buildPredSummary(preds, xs, K)
     return out
 end
 
+function buildFinalSummary(preds, xs, K)
+    --- This is used for the final evaluation of the model to 
+    --- compute the total performance of the summary
+    local out = {}
+    for i=1, #xs do
+        if i == 1 then 
+            out = x_or_pass(preds[i], unpackZeros(xs[i]))
+        else 
+            --- Update it by adding xs_i and out_{i-1}
+            local tmp = tableConcat(out, x_or_pass(preds[i], unpackZeros(xs[i])))
+            --- Getting the last K tokens because we want to keep last K tokens
+            out =  getLastKElements(tmp, K)
+        end
+    end
+    return out
+end
+
 function Tokenize(inputdic, remove_stopwords)
+    --- This function tokenizes the words into a unigram dictionary
     local out = {}
     --- these can be found in the total_corpus_summary.csv file
     local stopwordlist = {1, 3, 6, 23, 24, 28, 31, 54, 57, 62, 103}
@@ -262,39 +290,16 @@ function Tokenize(inputdic, remove_stopwords)
     return out
 end
 
---- Precision
-function rougePrecision(pred_summary, ref_summaries)
-    rsd = Tokenize(ref_summaries, true)
-    sws = Tokenize(pred_summary, true)
-    for k, v in pairs(rsd) do
-        if sws[k] == nil then
-            sws[k] = 0
-        end
-    end
-
-    for k, v in pairs(sws) do
-        if rsd[k] == nil then
-            rsd[k] = 0 
-        end
-    end
-    num = 0.
-    den = 0.
-    for k, v in pairs(rsd) do
-        num = num + math.min(rsd[k], sws[k])
-        den = den + rsd[k]
-    end
-    return (den > 0) and num/den or 0
-end
 ---- Recall
 function rougeRecall(pred_summary, ref_summaries)
     rsd = Tokenize(ref_summaries, true)
-    sws = Tokenize(pred_summary, true)
+    psd = Tokenize(pred_summary, true)
     for k, v in pairs(rsd) do
-        if sws[k] == nil then
-            sws[k] = 0
+        if psd[k] == nil then
+            psd[k] = 0
         end
     end
-    for k, v in pairs(sws) do
+    for k, v in pairs(psd) do
         if rsd[k] == nil then
             rsd[k] = 0
         end
@@ -302,8 +307,32 @@ function rougeRecall(pred_summary, ref_summaries)
     num = 0.
     den = 0.
     for k, v in pairs(rsd) do
-        num = num + math.min(rsd[k], sws[k])
-        den = den + sws[k]
+        num = num + math.min(rsd[k], psd[k])
+        den = den + psd[k]
+    end
+    return (den > 0) and num/den or 0
+end
+--- Precision
+function rougePrecision(pred_summary, ref_summaries)
+    rsd = Tokenize(ref_summaries, true)
+    psd = Tokenize(pred_summary, true)
+    for k, v in pairs(rsd) do
+        if psd[k] == nil then
+            psd[k] = 0
+        end
+    end
+
+    for k, v in pairs(psd) do
+        if rsd[k] == nil then
+            rsd[k] = 0 
+        end
+    end
+    -- For Recall we normalize by the prediction dictionary
+    num = 0.
+    den = 0.
+    for k, v in pairs(rsd) do
+        num = num + math.min(rsd[k], psd[k])
+        den = den + rsd[k]
     end
     return (den > 0) and num/den or 0
 end
@@ -316,8 +345,8 @@ function rougeF1(pred_summary, ref_summaries)
     return f1
 end
 
---- Meant to cumuatively extract the elements of a table for the rouge scoring
 function geti_n(x, i, n)
+    --- This function returns the i^{th} - n^{th} (inclusive) elements from a table
     local out = {}
     local c = 1
     for k,v in pairs(x) do
@@ -330,6 +359,7 @@ function geti_n(x, i, n)
 end
 
 function sumTable(x)
+    --- math.sum(table.unpack(x)) doesn't work, so I just use this, lol.
     local o = 0
     for k, v in pairs(x) do
         o = o + v
