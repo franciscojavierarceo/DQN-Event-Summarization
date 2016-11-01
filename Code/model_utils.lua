@@ -81,6 +81,7 @@ function build_model(model, vocab_size, embed_dim, use_cuda)
     :add(nn.JoinTable(2))       --- Joining the components back together
     :add(nn.Linear(embed_dim * 3, 2) )      --- Adding linear layer to output 2 units
     :add(nn.Max(2) )            --- Max over the 2 units (action) dimension
+    -- :add(nn.ReLU())
     -- :add(nn.Tanh())             --- Adding a non-linearity
 
     if use_cuda then
@@ -269,11 +270,6 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
                     model:updateParameters(learning_rate)
                 end
                 if rmsprop==true then
-
-                    config = {
-                       learningRate = learning_rate,
-                       momentum = 0.5
-                    }
                     params, gradParams = model:getParameters()
                     local optimState = {learning_rate}
 

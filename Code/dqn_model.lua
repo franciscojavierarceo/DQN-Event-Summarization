@@ -78,4 +78,4 @@ out = iterateModelQueries(data_path, query_file, opt.batch_size, opt.nepochs, in
                             opt.model, crit, opt.thresh, opt.embed_dim, opt.epsilon, delta, 
                             opt.base_explore_rate, opt.print_every,
                             opt.learning_rate, opt.J_sentences, opt.K_tokens, opt.usecuda,
-                            opt.skip_rate, opt.metric, opt.export, opt.gamma)
+                            opt.skip_rate, opt.metric, opt.export, opt.gamma, opt.rmsprop)
