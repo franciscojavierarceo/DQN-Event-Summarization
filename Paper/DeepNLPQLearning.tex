@@ -203,41 +203,47 @@ And the updates are computed using the following gradient update of $L_i(\theta_
 \pgfsetlayers{background,main,foreground}
     \tikzstyle{sensor}=[draw, fill=blue!20, text width=5em,  text centered, minimum height=2.0em,drop shadow]
     \tikzstyle{term}=[draw, fill=gray!20, text width=5em,  text centered, minimum height=2.0em,drop shadow]
-    \tikzstyle{wa} = [sensor, text width=8em, fill=red!20,  minimum height=2em, rounded corners, drop shadow]
-    \def\edgedist{2.5}
-    \begin{tikzpicture}
-        \node (wa) [wa] {\textbf{Linear} };
-        \path (wa.west)+(-2.0 ,  2.0) node (asr1)[sensor] {$LSTM$};
-        \path (wa.west)+(-2.0 ,  0.0) node (asr2)[sensor] {$LSTM$};
-        \path (wa.west)+(-2.0 , -2.0) node (asr3)[sensor] {$LSTM$};
-        \path (wa.east)+(2.0,  1) node (vote) [term] {\textbf{ReLU}};
-        \path (wa.east)+(2.0, -1) node (vote2) [term] {\textbf{ReLU}};
-        \path (wa.east)+(4.0,  0) node (output) [term] {\textbf{E[Rouge]}} ;
+    \tikzstyle{wa} = [sensor, fill=gray!20, text width=5em,  minimum height=2em, rounded corners, drop shadow]
+    \tikzstyle{wa2} = [sensor, fill=gray!20, text width=6em,  minimum height=12em, rounded corners, drop shadow]
+    \tikzstyle{om} = [draw, fill=red!20, text width=5em,  text centered, minimum height=2.0em,drop shadow]
 
-        \path [draw, ->] (asr1.east) -- node [above] {}         (wa.175) ;
-        \path [draw, ->] (asr2.east) -- node [above] {}         (wa.180);
-        \path [draw, ->] (asr3.east) -- node [above] {}         (wa.185);
+    \begin{tikzpicture}
+        \node (wa) [wa2] {Joined \textbf{Linear Layer}  \\ \scriptsize (3 x Embedding) };
+        \path (wa.west)+(-3.0 ,  2.0) node (asr1)[sensor] {$Query$ \textbf{LSTM}};
+        \path (wa.west)+(-3.0 ,  0.0) node (asr2)[sensor] {$Sentence_t$  \textbf{LSTM}};
+        \path (wa.west)+(-3.0 , -2.0) node (asr3)[sensor] {$Summary_t$  \textbf{LSTM}};
+        \path (wa.east)+(3.0,  1) node (vote) [term] {\textbf{ReLU}};
+        \path (wa.east)+(3.0, -1) node (vote2) [term] {\textbf{ReLU}} ;
+        \path (wa.east)+(6.5,  0) node (vote3) [om] {\textbf{E[Rouge]}} ;
+
+        \path [draw, ->] (asr1.east) -- node [above] {}     (wa.125) ;
+        \path [draw, ->] (asr2.east) -- node [above] {}     (wa.180);
+        \path [draw, ->] (asr3.east) -- node [above] {}     (wa.235);
         \path [draw, ->] (wa.east) -- node [above] {}       (vote.west);
         \path [draw, ->] (wa.east) -- node [above] {}       (vote2.west);
+        \path [draw, ->] (vote.east) -- node [above] {}     (vote3.175);
+        \path [draw, ->] (vote2.east) -- node [above] {}   (vote3.185);
 
      \begin{pgfonlayer}{background}
-            \path (asr1.north  |- asr1.south)+(-2.5, 1.5) node (a) {};
-            \path (asr3.west  |- vote.east)+(+13.0, -3.5) node (d) {};
-            \path (asr3.west  |- vote.east)+(+13.0, -2.5) node (d) {};
-            \path (asr3.west  |- vote2.east)+(+13.0, -2.5) node (d) {};
+            \path (asr1.north  |- asr1.south)+(-2.0, 1.5) node (a) {};
+            \path (asr3.west  |- vote.east)+(+10.0, -3.5) node (b) {};
+            \path (asr3.west  |- vote.east)+(+10.0, -2.5) node (c) {};
+            \path (asr3.east  |- vote3.east)+(+12.5, -3.5) node (d) {};
             \path[fill=white!20,rounded corners, draw=black!50, dashed]         (a) rectangle (d);
         \end{pgfonlayer}
-        \path (wa.east) + (-2.3, -3.0)  node (vote.east) {DQN-LSTM for Event Summarization};
+        
+        \path (wa.east) + (0.5, -3.0)  node (vote.east) {DQN-LSTM for Event Summarization};
+        
 \end{tikzpicture}
 
 \begin{algorithm}
-    \bf{Input:} { \rm  \{$X_q$: Input sentences, $N$: Number of iterations, $\epsilon$: Mixture parameter\} } \\
+    \bf{Input:} { \rm  \{$\mathcal{Q}$: Event queries, $X_q$: Input sentences, $N$: Number of epochs\} } \\
     \underline{$\bf{Output: }$ \rm \{$\hat{\pi}$: extraction policy, $\tilde{Y}$: event summary for query $q$\} }
 \begin{algorithmic}[1]
-\STATE \rm Initialize memory $\Gamma =  \{\emptyset \}^{\mathcal{Q}}_{q=1}$
-\STATE \rm Initialize summaries $\tilde{Y} = \{\emptyset \}^{\mathcal{Q}}_{q=1} $
+\STATE \rm Initialize memory $\Gamma =  \{\emptyset \}^{\mathcal{|Q|}}_{q=1}$
+\STATE \rm Initialize summaries $\tilde{Y} = \{\emptyset \}^{\mathcal{|Q|}}_{q=1} $
 \STATE \rm Initialize action-value function $\hat{Q}$ with random weights
-\FOR{$epoch=1, N\ $}
+\FOR{$epoch=1,..,N\ $}
 	\FOR{$q \in \mathcal{Q}$}
 		\STATE $X_{q}$= \{Extract $t=1,...,T_q$ sentences for query $q$\}
 		\STATE $\tilde{Y}_{q}$= \{Extract $t=1,...,T_q$ summaries for query $q$\}
@@ -255,8 +261,7 @@ And the updates are computed using the following gradient update of $L_i(\theta_
 			\STATE Update $\Gamma_q = \Gamma_q \cup \{ [s_t, a^{*}_t, r_t, s_{t+1}]\}$
 		\ENDFOR
 	\ENDFOR
-		\STATE Sample $J$ transitions from $\Gamma$
-		\FOR{ $j=1,...,J$}
+		\FOR{ $j=1,...,J$ transitions sampled from $\Gamma$}
 		\STATE \[\textrm{Set } y_j= 
 					\begin{cases}
 						r_j              								& \text{if $s_{j+1}$ is terminal } \\
