@@ -6,3 +6,17 @@ Epoch 0, loss  = 0.101, epsilon = 1.000, sum(y)/len(y) = 485/999, {Recall = 0.23
 Epoch 1, loss  = 0.043, epsilon = 0.980, sum(y)/len(y) = 497/999, {Recall = 0.231448, Precision = 0.737389, F1 = 0.352313}, query = aurora	
 Epoch 2, loss  = 0.046, epsilon = 0.960, sum(y)/len(y) = 500/999, {Recall = 0.231629, Precision = 0.734309, F1 = 0.352170}, query = aurora	
 Epoch 3, loss  = 0.037, epsilon = 0.940, sum(y)/len(y) = 539/999, {Recall = 0.211780, Precision = 0.732384, F1 = 0.328554}, query = aurora	
+Epoch 4, loss  = 0.039, epsilon = 0.920, sum(y)/len(y) = 509/999, {Recall = 0.226003, Precision = 0.728918, F1 = 0.345029}, query = aurora	
+Epoch 5, loss  = 0.025, epsilon = 0.900, sum(y)/len(y) = 575/999, {Recall = 0.203298, Precision = 0.750096, F1 = 0.319895}, query = aurora	
+Epoch 6, loss  = 0.021, epsilon = 0.880, sum(y)/len(y) = 498/999, {Recall = 0.230853, Precision = 0.737004, F1 = 0.351580}, query = aurora	
+Epoch 7, loss  = 0.025, epsilon = 0.860, sum(y)/len(y) = 460/999, {Recall = 0.248721, Precision = 0.730073, F1 = 0.371037}, query = aurora	
+Epoch 8, loss  = 0.020, epsilon = 0.840, sum(y)/len(y) = 502/999, {Recall = 0.228266, Precision = 0.731998, F1 = 0.348009}, query = aurora	
+Epoch 9, loss  = 0.020, epsilon = 0.820, sum(y)/len(y) = 532/999, {Recall = 0.213662, Precision = 0.734694, F1 = 0.331049}, query = aurora	
+Epoch 10, loss  = 0.017, epsilon = 0.800, sum(y)/len(y) = 579/999, {Recall = 0.205588, Precision = 0.750866, F1 = 0.322794}, query = aurora	
+Epoch 11, loss  = 0.015, epsilon = 0.780, sum(y)/len(y) = 489/999, {Recall = 0.232701, Precision = 0.731613, F1 = 0.353094}, query = aurora	
+Epoch 12, loss  = 0.013, epsilon = 0.760, sum(y)/len(y) = 544/999, {Recall = 0.213410, Precision = 0.743935, F1 = 0.331674}, query = aurora	
+Epoch 13, loss  = 0.013, epsilon = 0.740, sum(y)/len(y) = 525/999, {Recall = 0.220905, Precision = 0.738930, F1 = 0.340128}, query = aurora	
+Epoch 14, loss  = 0.011, epsilon = 0.720, sum(y)/len(y) = 621/999, {Recall = 0.190490, Precision = 0.758953, F1 = 0.304543}, query = aurora	
+Epoch 15, loss  = 0.016, epsilon = 0.700, sum(y)/len(y) = 590/999, {Recall = 0.198821, Precision = 0.753177, F1 = 0.314596}, query = aurora	
+Epoch 16, loss  = 0.012, epsilon = 0.680, sum(y)/len(y) = 649/999, {Recall = 0.183346, Precision = 0.764729, F1 = 0.295778}, query = aurora	
+Epoch 17, loss  = 0.011, epsilon = 0.660, sum(y)/len(y) = 642/999, {Recall = 0.185823, Precision = 0.765114, F1 = 0.299022}, query = aurora	
