@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015) (preloaded format=pdflatex 2015.5.24)  1 NOV 2016 08:53
+This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015) (preloaded format=pdflatex 2015.5.24)  1 NOV 2016 09:15
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -984,7 +984,7 @@ Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 333.
 Here is how much of TeX's memory you used:
  19211 strings out of 493089
  381919 string characters out of 6134842
- 490033 words of memory out of 5000000
+ 490044 words of memory out of 5000000
  22279 multiletter control sequences out of 15000+600000
  21864 words of font info for 81 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
@@ -1006,7 +1006,7 @@ ve/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/local/texlive/
 5/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/local/texlive/2015/
 texmf-dist/fonts/type1/public/amsfonts/cm/cmti12.pfb></usr/local/texlive/2015/t
 exmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb>
-Output written on DeepNLPQLearning.pdf (7 pages, 223696 bytes).
+Output written on DeepNLPQLearning.pdf (7 pages, 223708 bytes).
 PDF statistics:
  223 PDF objects out of 1000 (max. 8388607)
  179 compressed objects within 2 object streams

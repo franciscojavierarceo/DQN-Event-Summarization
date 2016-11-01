@@ -199,7 +199,7 @@ The updates are computed using the gradient update for $L_i(\theta_i)$
     \tikzstyle{term}=[draw, fill=gray!10, text width=5em,  text centered, minimum height=2.0em,drop shadow]
     \tikzstyle{wa} = [sensor, fill=gray!10, text width=5em,  minimum height=2em, rounded corners, drop shadow]
     \tikzstyle{wa2} = [sensor, fill=gray!10, text width=6em,  minimum height=12em, rounded corners, drop shadow]
-    \tikzstyle{om} = [draw, fill=red!10, text width=5em,  text centered, minimum height=2.0em,drop shadow]
+    \tikzstyle{om} = [draw, fill=green!05, text width=5em,  text centered, minimum height=2.0em,drop shadow]
 
     \begin{tikzpicture}
         \node (wa) [wa2] {Joined \textbf{Linear Layer}  \\ \scriptsize (3 x Embedding) };
@@ -251,7 +251,7 @@ The updates are computed using the gradient update for $L_i(\theta_i)$
             \path (asr3.west  |- asr3.east)+(+10.0, -3.5) node (b) {};
             \path (asr3.west  |- asr3.east)+(+10.0, -2.5) node (c) {};
             \path (asr3.west  |- asr3.east)+(+11.3, -0.50) node (d) {};
-            \path[fill=white!20,rounded corners, draw=red!50, dashed]         (a) rectangle (d);
+            \path[fill=red!05,rounded corners, draw=black!100, dashed]         (a) rectangle (d);
         \end{pgfonlayer}
 
      \begin{pgfonlayer}{background}[transparency group,opacity=.5]
@@ -259,11 +259,11 @@ The updates are computed using the gradient update for $L_i(\theta_i)$
             \path (asr3.west  |- asr3.east)+(+10.0, -3.5) node (b) {};
             \path (asr3.west  |- asr3.east)+(+10.0, -2.5) node (c) {};
             \path (asr3.west  |- asr3.east)+(+15.1, -1.50) node (d) {};
-            \path[fill=white!20,rounded corners, draw=red!50, dashed]         (a) rectangle (d);
+            \path[fill=white!20,rounded corners, draw=green!100, dashed]         (a) rectangle (d);
         \end{pgfonlayer}
 
         \path (wa.west) + (5.8,    2.25)  node (vote.east) {\scriptsize \textbf{Action} }; %{\textbf{Summary-Action Representation} };
-        \path (wa.west) + (5.8,    1.95)  node (vote.east) {\scriptsize $\{argmax(\theta)$\}}; %{\textbf{Summary-Action Representation} };
+        \path (wa.west) + (5.8,    1.95)  node (vote.east) {\scriptsize $\{argmax(a_t)$\}}; %{\textbf{Summary-Action Representation} };
         \path (wa.west) + (-2.90, -3.2)  node (vote.east) {Input State}; %{\textbf{Input State}};
         \path (wa.west) + (3.5,    -3.2)  node (vote.east) {Summary-Action Representation }; %{\textbf{Summary-Action Representation} };
         \path (wa.west) + (9.30,  -3.2)  node (vote.east) {Output State}; %{\textbf{Output State}};
