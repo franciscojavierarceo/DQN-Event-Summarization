@@ -16,12 +16,12 @@ outputSize = 1
 learning_rate = 0.001
 epsilon = 1
 start_epsilon = epsilon
-nepochs = 100
-cuts = 50
+nepochs = 500
+cuts = 100
 gamma = 0.3
 delta = 1./(nepochs/cuts) 
-base_explore_rate = 0.1
-nsims = 10
+base_explore_rate = 0.0
+nsims = 1
 
 queries   = {0, 1, 4, 3}
 sentences = {
@@ -82,17 +82,6 @@ for sims = 1, nsims do
     torch.manualSeed(sims)
     FinalMLP  = build_model(model, vocab_size, embed_dim, outputSize, usecuda)
     for epoch = 1, nepochs do
-        --- Score the model with random actions first
-        yrouge = score_model(action_list, 
-                    sentences,
-                    nuggets,
-                    0, 
-                    0, 
-                    metric)
-        predsummary = buildPredSummary(action_list, sentences, nil)
-        predsummary = predsummary[#predsummary]
-        score = eval_func({predsummary}, nuggets)
-
         --- Forward step
         for minibatch = 1, #sentences do
             summary, sentence, query = BuildTensors(action_list, sentences, queries, minibatch, 4, 4)
@@ -109,12 +98,23 @@ for sims = 1, nsims do
             fullpreds[minibatch] = torch.totable(preds)[1]
         end
 
+        --- Score the model with random actions first
+        yrouge = score_model(action_list, 
+                    sentences,
+                    nuggets,
+                    0, 
+                    0, 
+                    metric)
+        predsummary = buildPredSummary(action_list, sentences, nil)
+        predsummary = predsummary[#predsummary]
+        score = eval_func({predsummary}, nuggets)
+
         summaries = padZeros(buildCurrentSummary(action_list, sentences, 4 * 4), 4 * 4)
         --- Backward step
         for minibatch = 1, #sentences do
             summary  = LongTensor({summaries[minibatch]}):t()
             sentence = LongTensor({sentences[minibatch]}):t()
-            query = LongTensor({queries}):t()        
+            query = LongTensor({queries}):t()
             if (minibatch) < #sentences then
                 labels = Tensor({yrouge[minibatch] + gamma * yrouge[minibatch + 1] })
             else 
