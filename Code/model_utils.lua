@@ -40,7 +40,7 @@ function build_bowmlp(nn_vocab_module, edim)
     :add(nn_vocab_module)           -- returns a (sequence-length x batch-size x edim) tensor
     :add(nn.Sum(1, edim, true))     -- splits into a sequence-length table with (batch-size x edim) entries
     :add(nn.Linear(edim, edim))     -- map last state to a score for classification
-    -- :add(nn.ReLU())
+    :add(nn.ReLU())
     -- :add(nn.Tanh())                 --     :add(nn.ReLU()) <- this one did worse
    return model
 end
@@ -52,7 +52,7 @@ function build_lstm(nn_vocab_module, edim)
     :add(nn.Sequencer(nn.LSTM(edim, edim)))
     :add(nn.SelectTable(-1))            -- selects last state of the LSTM
     :add(nn.Linear(edim, edim))         -- map last state to a score for classification
-    -- :add(nn.ReLU())
+    :add(nn.ReLU())
     -- :add(nn.Tanh())                     --     :add(nn.ReLU()) <- this one did worse
    return model
 end
@@ -251,7 +251,6 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
                 sentence = LongTensor(padZeros( {xtdm[xindices[i]]}, K_tokens) ):t()
                 summary = LongTensor({summaries[xindices[i]]}):t()
                 query = LongTensor(padZeros({qs}, 5)):t()
-                -- pred_rouge = Tensor({preds[xindices[i]]})
                 --- Line 23 in algorithm
                 if (xindices[i]) < #xtdm then
                     labels = Tensor({yrouge[xindices[i]] + gamma * yrouge[xindices[i] + 1] })
@@ -293,9 +292,11 @@ function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs
             --- Rerunning the scoring on the full data and rescoring cumulatively
             --- Execute policy and evaluation based on our E[rouge] after all of the minibatches
             predsummary = buildFinalSummary(action_list, xtdm, nil)
+
             rscore = rougeRecall({predsummary}, nuggets)
             pscore = rougePrecision({predsummary}, nuggets)
             fscore = rougeF1({predsummary}, nuggets)
+
             if (epoch % print_every)==0 then
                 perf_string = string.format(
                     "Epoch %i, loss  = %.3f, epsilon = %.3f, sum(y)/len(y) = %i/%i, {Recall = %.6f, Precision = %.6f, F1 = %.6f}, query = %s", 

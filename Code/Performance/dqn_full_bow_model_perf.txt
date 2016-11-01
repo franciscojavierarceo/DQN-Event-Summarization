@@ -203,3 +203,8 @@ Epoch 197, epsilon = 0.100, sum(y)/len(y) = 716/1000, {Recall = 0.681840, Precis
 Epoch 198, epsilon = 0.100, sum(y)/len(y) = 711/1000, {Recall = 0.682798, Precision = 0.250176, F1 = 0.366183}, query = aurora	
 Epoch 199, epsilon = 0.100, sum(y)/len(y) = 712/1000, {Recall = 0.682798, Precision = 0.248171, F1 = 0.364031}, query = aurora	
 Epoch 200, epsilon = 0.100, sum(y)/len(y) = 762/1000, {Recall = 0.689986, Precision = 0.234681, F1 = 0.350237}, query = aurora	
+...Utils file loaded	
+...running on CPU	
+training model with metric = f1, learning rate = 0.200, K = 20, J = 10, threshold = 0.000, embedding size = 50	
+Running BOW model	
+Epoch 0, loss  = 0.000, epsilon = 1.000, sum(y)/len(y) = 495/999, {Recall = 0.228951, Precision = 0.730843, F1 = 0.348673}, query = aurora	
