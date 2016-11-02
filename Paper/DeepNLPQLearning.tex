@@ -115,7 +115,7 @@ In this paper we show that a deep recurrent neural network with a long short ter
     current sentence $x_t$ to the summary and incrementing the current system
     time, 
     \begin{align*}
-        \tilde{y}_{t + 1} &= \tilde{Y}_{t} \cup \{ x_t \} \\
+        \tilde{y}_{t + 1} &= \tilde{y}_{t} \cup \{ x_t \} \\
         t &= t + 1    
     \end{align*}
     or $skip$ where only $t$ is incremented without changing the current 
@@ -208,12 +208,8 @@ The updates are computed using the gradient update for $L_i(\theta_i)$
         \path (wa.west)+(-3.0 , -2.0) node (asr3)[sensor] {$Summary_t$  \textbf{LSTM}};
         \path (wa.east)+(3.0,  1) node (vote) [term] {\textbf{ReLU} \\ \scriptsize $\{Select\}$ };
         \path (wa.east)+(3.0, -1) node (vote2) [term] {\textbf{ReLU} \\ \scriptsize $\{Skip\}$ } ;
-        \path (wa.east)+(6.5,  0) node (output) [om] {\textbf{Max} \\ \scriptsize E[Rouge]} ;
+        \path (wa.east)+(6.5,  0) node (output) [om] {\textbf{Linear} \\ \scriptsize E[Rouge]} ;
 
-        \path [draw, ->] (asr1.south) -- node [above] {}     (asr2.north) ;
-        \path [draw, ->] (asr2.north) -- node [above] {}     (asr1.south) ;
-        \path [draw, ->] (asr2.south) -- node [above] {}     (asr3.north) ;
-        \path [draw, ->] (asr3.north) -- node [above] {}     (asr2.south) ;
         \path [draw, ->] (asr1.east) -- node [above] {}     (wa.125) ;
         \path [draw, ->] (asr2.east) -- node [above] {}     (wa.180);
         \path [draw, ->] (asr3.east) -- node [above] {}     (wa.235);
