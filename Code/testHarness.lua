@@ -8,13 +8,14 @@ SELECT = 2
 local vocabSize = 16
 local embeddingSize = 64
 local gamma = .0
-
+local nepochs = 250
 
 local sentenceLookup = nn.Sequential():add(
     nn.LookupTableMaskZero(vocabSize, embeddingSize)):add(
     nn.Sum(2, 3, false))
 local queryLookup = sentenceLookup:clone() --"weight", "gradWeight")
 local summaryLookup = sentenceLookup:clone() --"weight", "gradWeight")
+
 local model = nn.Sequential():add(
     nn.ParallelTable():add(
         sentenceLookup):add(
@@ -26,12 +27,9 @@ local model = nn.Sequential():add(
     --nn.Tanh()):add(
     --nn.Linear(embeddingSize, 2))
 local criterion = nn.MSECriterion()
-
 local params, gradParams = model:getParameters()
 
-
 local function buildSummary(actions, sentences, buffer)
-
     buffer:zero()
 
     local bufferSize = buffer:size(2)
@@ -70,11 +68,10 @@ end
 
 
 function rougeScores(genSummary, refSummary)
-    
     local genTotal = 0
     local refTotal = 0
     local intersection = 0
-    for k,refCount in pairs(refSummary) do
+    for k, refCount in pairs(refSummary) do
         local genCount = genSummary[k]
         if genCount == nil then genCount = 0 end
         intersection = intersection + math.min(refCount, genCount)
@@ -84,21 +81,23 @@ function rougeScores(genSummary, refSummary)
         genTotal = genTotal + genCount
     end
 
-    if genTotal == 0 then genTotal = 1 end
+    if genTotal == 0 then 
+        genTotal = 1 
+    end
     local recall = intersection / refTotal
     local prec = intersection / genTotal
-    local f1 = 0 
     if recall > 0 and prec > 0 then
         f1 = 2 * recall * prec / (recall + prec)
+    else 
+        f1 = 0
     end
     return recall, prec, f1
-
 end
 
 
 
 local optimParams = {
-    learningRate = 1e-5,
+    learningRate = 1e-3,
 }
 
 local maxSummarySize = 36
@@ -119,7 +118,7 @@ local streamSize = sentenceStream:size(1)
 local bestActions = torch.ByteTensor{{0,1},{1,0},{0,1},{1,0},{0,1},{1,0}}
 
 
-local buffer = torch.Tensor(1,maxSummarySize):zero()
+local buffer = torch.Tensor(1, maxSummarySize):zero()
 local bestSummary = buildSummary(
         bestActions:narrow(1, 1, 6), 
         sentenceStream:narrow(1, 1, 6),
@@ -128,15 +127,26 @@ local bestSummary = buildSummary(
 
 local generatedCounts = buildTokenCounts(bestSummary) 
 local recall, prec, f1 = rougeScores(generatedCounts, refCounts)
-print("BEST POSSIBLE RECALL, PREC, F1")
-print(recall, prec, f1)
+print(string.format("TRUE {RECALL = %.6f, PREC = %.6f, F1 = %.6f}", recall, prec, f1))
+print(string.format("{%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i}  * Best Actions", 
+        bestActions[1][1], 
+        bestActions[1][2], 
+        bestActions[2][1], 
+        bestActions[2][2], 
+        bestActions[3][1], 
+        bestActions[3][2], 
+        bestActions[4][1],
+        bestActions[4][2],
+        bestActions[5][1], 
+        bestActions[5][2], 
+        bestActions[6][1], 
+        bestActions[6][2] 
+        ))
 
-
-for epoch=1,1500 do
+for epoch=1,nepochs do
     local actions = torch.ByteTensor(streamSize,2):fill(0)
     local exploreDraws = torch.Tensor(streamSize)
-    local summaryBuffer = torch.LongTensor(
-        streamSize + 1, maxSummarySize):zero()
+    local summaryBuffer = torch.LongTensor(streamSize + 1, maxSummarySize):zero()
     local qValues = torch.Tensor(streamSize, 2):zero()
     local rouge = torch.Tensor(streamSize + 1):zero()
 
@@ -144,11 +154,7 @@ for epoch=1,1500 do
     exploreDraws:uniform(0, 1)
 
     local summary = summaryBuffer:zero():narrow(1,1,1)
-
-
     for i=1,streamSize do
-       
-
         local sentence = sentenceStream:narrow(1, i, 1)
         qValues[i]:copy(model:forward({sentence, query, summary}))
 
@@ -162,27 +168,26 @@ for epoch=1,1500 do
             end
         end
 
+        if epoch == 150 and i==5 then 
+            print(actions, summary, sentence, qValues)
+        end
         summary = buildSummary(
             actions:narrow(1, 1, i), 
             sentenceStream:narrow(1, 1, i),
-            summaryBuffer:narrow(1, i + 1, 1))
+            summaryBuffer:narrow(1, i + 1, 1)
+            )
 
         local generatedCounts = buildTokenCounts(summary) 
         local recall, prec, f1 = rougeScores(generatedCounts, refCounts)
         rouge[i + 1] = f1
-
     end
 
     local max, argmax = torch.max(qValues, 2)
-    local reward = rouge:narrow(1,2, streamSize) 
-        - rouge:narrow(1,1, streamSize)
+    local reward = rouge:narrow(1,2, streamSize) - rouge:narrow(1,1, streamSize)
         
-    reward:narrow(1, 1, streamSize - 1):add(
-        torch.mul(max, gamma):narrow(1, 2, streamSize - 1))
-
+    -- reward:narrow(1, 1, streamSize - 1):add(torch.mul(max, gamma):narrow(1, 2, streamSize - 1))
     --local reward:narrow(1, 1, streamSize - 1):add(
     --    torch.mul(reward:narrow(1, 2, streamSize - 1), gamma))
-
 
     local querySize = query:size(2)
     local summaryBatch = summaryBuffer:narrow(1, 1, streamSize)
@@ -199,24 +204,32 @@ for epoch=1,1500 do
         local loss = criterion:forward(predQOnActions, reward)
         local gradOutput = criterion(predQOnActions, reward)
         local gradMaskLayer = maskLayer:backward({predQ, actions}, gradOutput)
-        model:backward(input,
-            gradMaskLayer[1])
+        model:backward(input, gradMaskLayer[1])
         return loss, gradParams    
     end
-   
+
     local _, loss = optim.adam(feval, params, optimParams)
-    print(epoch, rouge[streamSize + 1], loss[1])
-    print(epsilon)
-    print(qValues)
-    print(actions)
-    print(rouge)
-    print(qValues:maskedSelect(actions))
-    print(reward)
+    print(string.format("{epoch = %i; epsilon = %.3f; loss = %.6f; rouge = %.6f; actual={min=%.3f, max=%.3f}; pred={min=%.3f, max=%.3f}; {%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i}", 
+        epoch, epsilon, loss[1], rouge[streamSize + 1],
+        reward:min(), reward:max(),
+        qValues:min(), qValues:max(),
+        actions[1][1], 
+        actions[1][2], 
+        actions[2][1], 
+        actions[2][2], 
+        actions[3][1], 
+        actions[3][2], 
+        actions[4][1],
+        actions[4][2],
+        actions[5][1], 
+        actions[5][2], 
+        actions[6][1], 
+        actions[6][2] 
+        ))
 
-    --print(qValues:maskedSelect(actions))
-    --print(reward)
-    --print(actions)
-    
-
-    epsilon = epsilon / 1.001
+    if (epsilon - 0.05) > 0 then
+        epsilon = epsilon - 0.05
+    else 
+        epsilon = 0
+    end
 end
