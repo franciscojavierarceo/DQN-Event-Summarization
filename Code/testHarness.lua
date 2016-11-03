@@ -3,11 +3,13 @@ require 'rnn'
 require 'optim'
 cmd = torch.CmdLine()
 
-cmd:option('--nepochs', 250, 'running for 50 epochs')
+cmd:option('--nepochs', 5, 'running for 50 epochs')
 cmd:option('--learning_rate', 1e-5, 'using a learning rate of 1e-5')
 cmd:option('--gamma', 0., 'Discount rate parameter in backprop step')
 cmd:option('--cuts', 4, 'Discount rate parameter in backprop step')
 cmd:option('--base_explore_rate', 0.1, 'Base rate')
+cmd:option('--n_rand', 5, 'Base rate')
+cmd:option('--mem_size', 25, 'Memory size')
 cmd:text()
 --- this retrieves the commands and stores them in opt.variable (e.g., opt.model)
 local opt = cmd:parse(arg or {})
@@ -17,6 +19,8 @@ learning_rate = opt.learning_rate
 gamma = opt.gamma
 delta = 1./(opt.nepochs/opt.cuts) 
 base_explore_rate = opt.base_explore_rate
+n_rand = opt.n_rand
+mem_size = opt.mem_size
 
 SKIP = 1
 SELECT = 2
@@ -54,8 +58,7 @@ local function buildSummary(actions, sentences, buffer)
     local actionsSize = actions:size(1)
     local sentencesSize = sentences:size(2)
 
-    local mask1 = torch.eq(actions:select(2,2), 1):view(actionsSize, 1):expand(
-        actionsSize, sentencesSize)
+    local mask1 = torch.eq(actions:select(2,2), 1):view(actionsSize, 1):expand(actionsSize, sentencesSize)
     local allTokens = sentences:maskedSelect(mask1)
     local mask2 = torch.gt(allTokens,0)
     local allTokens = allTokens:maskedSelect(mask2)
@@ -64,7 +67,8 @@ local function buildSummary(actions, sentences, buffer)
         local copySize = math.min(bufferSize, allTokens:size(1))
 
         buffer[1]:narrow(1, bufferSize - copySize + 1, copySize):copy(
-            allTokens:narrow(1, allTokens:size(1) - copySize + 1, copySize))
+            allTokens:narrow(1, allTokens:size(1) - copySize + 1, copySize)
+            )
     end
     return buffer
 end
@@ -109,6 +113,29 @@ function rougeScores(genSummary, refSummary)
         f1 = 0
     end
     return recall, prec, f1
+end
+
+function buildMemory(newinput, memory_hist, memsize)
+    local sentMemory = torch.cat(newinput[1][1], memory_hist[1][1], 1)
+    local queryMemory = torch.cat(newinput[1][2], memory_hist[1][2], 1)
+    local sumryMemory = torch.cat(newinput[1][3], memory_hist[1][3], 1)
+    local rewardMemory = torch.cat(newinput[2], memory_hist[2], 1)
+    --- specifying rows to index 
+    if sentMemory:size(1) < memsize then
+        nend = sentMemory:size(1)
+        nstart = 1
+    else 
+        nend = memsize
+        nstart = math.max(memsize - sentMemory:size(1), 1)
+    end
+    --- Selecting n last data points
+    sentMemory = sentMemory[{{n0, n}}]
+    queryMemory= queryMemory[{{n0, n}}]
+    sumryMemory= sumryMemory[{{n0, n}}]
+    rewardMemory = rewardMemory[{{n0, n}}]
+    local inputMemory = {sentMemory, queryMemory, sumryMemory}
+    out = {inputMemory, rewardMemory}
+    return out
 end
 
 local maxSummarySize = 36
@@ -194,14 +221,21 @@ for epoch=1,nepochs do
 
     local input = {sentenceStream, queryBatch, summaryBatch}
     --- Storing the data
-    memory[epoch] = {input, reward}
+    memory = {input, reward}
+
+    if epoch == 1 then
+        fullmemory = memory 
+    else
+        tmp = buildMemory(memory, fullmemory, mem_size)
+        fullmemory = tmp
+    end
 
     local optimParams = {
         learningRate = learning_rate,
     }
-    function backProp(memory, params, model, criterion)
-        local input = memory[1]
-        local reward = memory[2]
+    function backProp(input_memory, params, model, criterion)
+        local input = input_memory[1]
+        local reward = input_memory[2]
         local function feval(params)
             gradParams:zero()
             local predQ = model:forward(input)
@@ -218,7 +252,12 @@ for epoch=1,nepochs do
         return loss
     end
     --- Running backprop
-    loss = backProp(memory[epoch], params, model, criterion)
+    if(epoch > n_rand) then 
+        loss = backProp(memory, params, model, criterion)
+    else 
+        loss = {0.}
+
+    end
 
     if epoch==1 then
         out = string.format("epoch;epsilon;loss;rouge;actual;pred;actions\n")
