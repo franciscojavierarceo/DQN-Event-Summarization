@@ -1,3 +1,4 @@
+local dl = require 'dataload'
 require 'nn'
 require 'rnn'
 require 'optim'
@@ -8,8 +9,9 @@ cmd:option('--learning_rate', 1e-5, 'using a learning rate of 1e-5')
 cmd:option('--gamma', 0., 'Discount rate parameter in backprop step')
 cmd:option('--cuts', 4, 'Discount rate parameter in backprop step')
 cmd:option('--base_explore_rate', 0.1, 'Base rate')
-cmd:option('--n_rand', 5, 'Base rate')
+cmd:option('--n_rand', 0, 'Base rate')
 cmd:option('--mem_size', 25, 'Memory size')
+cmd:option('--batch_size', 10,'Batch Size')
 cmd:text()
 --- this retrieves the commands and stores them in opt.variable (e.g., opt.model)
 local opt = cmd:parse(arg or {})
@@ -21,6 +23,7 @@ delta = 1./(opt.nepochs/opt.cuts)
 base_explore_rate = opt.base_explore_rate
 n_rand = opt.n_rand
 mem_size = opt.mem_size
+batch_size = opt.batch_size
 
 SKIP = 1
 SELECT = 2
@@ -120,6 +123,7 @@ function buildMemory(newinput, memory_hist, memsize)
     local queryMemory = torch.cat(newinput[1][2], memory_hist[1][2], 1)
     local sumryMemory = torch.cat(newinput[1][3], memory_hist[1][3], 1)
     local rewardMemory = torch.cat(newinput[2], memory_hist[2], 1)
+    local actionMemory = torch.cat(newinput[3], memory_hist[3], 1)
     --- specifying rows to index 
     if sentMemory:size(1) < memsize then
         nend = sentMemory:size(1)
@@ -133,9 +137,42 @@ function buildMemory(newinput, memory_hist, memsize)
     queryMemory= queryMemory[{{n0, n}}]
     sumryMemory= sumryMemory[{{n0, n}}]
     rewardMemory = rewardMemory[{{n0, n}}]
+    actionMemory = actionMemory[{{n0, n}}]
     local inputMemory = {sentMemory, queryMemory, sumryMemory}
-    out = {inputMemory, rewardMemory}
-    return out
+    return {inputMemory, rewardMemory, actionMemory}
+end
+
+local optimParams = {
+    learningRate = learning_rate,
+}
+function backProp(input_memory, params, model, criterion, batch_size, memsize)
+    -- local input = input_memory[1]
+    -- local reward = input_memory[2]
+    local inputs = {input_memory[1], input_memory[3]}
+    local rewards = input_memory[2]
+    local dataloader = dl.TensorLoader(inputs, rewards)
+    local err = 0.    
+
+    den = 1
+    for k, xin, reward in dataloader:sampleiter(batch_size, memsize) do
+        xinput = xin[1]
+        actions_in = xin[2]
+        local function feval(params)
+            gradParams:zero()
+            local predQ = model:forward(xinput)
+            local maskLayer = nn.MaskedSelect()
+            local predQOnActions = maskLayer:forward({predQ, actions_in})
+
+            local lossf = criterion:forward(predQOnActions, reward)
+            local gradOutput = criterion(predQOnActions, reward)
+            local gradMaskLayer = maskLayer:backward({predQ, actions_in}, gradOutput)
+            model:backward(xinput, gradMaskLayer[1])
+            return lossf, gradParams
+        end
+        --- This is confusing to me...
+        _, lossv  = optim.rmsprop(feval, params, optimParams)   
+    end
+    return lossv[1]
 end
 
 local maxSummarySize = 36
@@ -170,7 +207,7 @@ print(string.format("TRUE {RECALL = %.6f, PREC = %.6f, F1 = %.6f}", bestrecall, 
 local perf = io.open("sim_perf.txt", 'w')
 memory = {}
 for epoch=1,nepochs do
-    actions = torch.ByteTensor(streamSize,2):fill(0)
+    actions = torch.ByteTensor(streamSize, 2):fill(0)
     local exploreDraws = torch.Tensor(streamSize)
     local summaryBuffer = torch.LongTensor(streamSize + 1, maxSummarySize):zero()
     local qValues = torch.Tensor(streamSize, 2):zero()
@@ -221,51 +258,27 @@ for epoch=1,nepochs do
 
     local input = {sentenceStream, queryBatch, summaryBatch}
     --- Storing the data
-    memory = {input, reward}
+    memory = {input, reward, actions}
 
     if epoch == 1 then
         fullmemory = memory 
     else
-        tmp = buildMemory(memory, fullmemory, mem_size)
+        tmp = buildMemory(memory, fullmemory, mem_size, batch_size)
         fullmemory = tmp
-    end
-
-    local optimParams = {
-        learningRate = learning_rate,
-    }
-    function backProp(input_memory, params, model, criterion)
-        local input = input_memory[1]
-        local reward = input_memory[2]
-        local function feval(params)
-            gradParams:zero()
-            local predQ = model:forward(input)
-            local maskLayer = nn.MaskedSelect()
-            local predQOnActions = maskLayer:forward({predQ, actions})
-
-            local loss = criterion:forward(predQOnActions, reward)
-            local gradOutput = criterion(predQOnActions, reward)
-            local gradMaskLayer = maskLayer:backward({predQ, actions}, gradOutput)
-            model:backward(input, gradMaskLayer[1])
-            return loss, gradParams    
-        end
-        local _, loss = optim.rmsprop(feval, params, optimParams)
-        return loss
     end
     --- Running backprop
     if(epoch > n_rand) then 
-        loss = backProp(memory, params, model, criterion)
+        loss = backProp(memory, params, model, criterion, batch_size, mem_size)
     else 
         loss = {0.}
-
     end
 
     if epoch==1 then
         out = string.format("epoch;epsilon;loss;rouge;actual;pred;actions\n")
         perf:write(out)
     end
-
     out = string.format("%i; %.3f;%.6f;%.6f; {min=%.3f, max=%.3f}; {min=%.3f, max=%.3f}; {%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i}\n", 
-        epoch, epsilon, loss[1], rouge[streamSize + 1],
+        epoch, epsilon, loss, rouge[streamSize + 1],
         reward:min(), reward:max(),
         qValues:min(), qValues:max(),
         actions[1][1], 
