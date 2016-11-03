@@ -24,7 +24,6 @@ SELECT = 2
 local vocabSize = 16
 local embeddingSize = 64
 
-
 torch.manualSeed(420)
 math.randomseed(420)
 
@@ -43,7 +42,7 @@ local model = nn.Sequential():add(
     nn.JoinTable(2)):add(
     nn.Tanh()):add(
     nn.Linear(embeddingSize * 3, 2)) --:add(
-    --nn.Tanh()):add(
+    -- nn.Tanh()):add(
     --nn.Linear(embeddingSize, 2))
 local criterion = nn.MSECriterion()
 local params, gradParams = model:getParameters()
@@ -147,28 +146,13 @@ local generatedCounts = buildTokenCounts(bestSummary)
 local bestrecall, bestprec, bestf1 = rougeScores(generatedCounts, refCounts)
 print(string.format("TRUE {RECALL = %.6f, PREC = %.6f, F1 = %.6f}", bestrecall, bestprec, bestf1))
 
--- print(string.format("{%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i}  * Best Actions", 
---         bestActions[1][1], 
---         bestActions[1][2], 
---         bestActions[2][1], 
---         bestActions[2][2], 
---         bestActions[3][1], 
---         bestActions[3][2], 
---         bestActions[4][1],
---         bestActions[4][2],
---         bestActions[5][1], 
---         bestActions[5][2], 
---         bestActions[6][1], 
---         bestActions[6][2] 
---         ))
-
 local perf = io.open("sim_perf.txt", 'w')
 for epoch=1,nepochs do
-    local actions = torch.ByteTensor(streamSize,2):fill(0)
+    actions = torch.ByteTensor(streamSize,2):fill(0)
     local exploreDraws = torch.Tensor(streamSize)
     local summaryBuffer = torch.LongTensor(streamSize + 1, maxSummarySize):zero()
     local qValues = torch.Tensor(streamSize, 2):zero()
-    local rouge = torch.Tensor(streamSize + 1):zero()
+    rouge = torch.Tensor(streamSize + 1):zero()
 
     rouge[1] = 1
     exploreDraws:uniform(0, 1)
@@ -201,21 +185,22 @@ for epoch=1,nepochs do
     end
 
     local max, argmax = torch.max(qValues, 2)
-    local reward = rouge:narrow(1,2, streamSize) - rouge:narrow(1,1, streamSize)
-    -- local reward0 = rouge:narrow(1,2, streamSize) - rouge:narrow(1,1, streamSize)
-    -- local reward_tp1 = gamma * reward0:narrow(1, 2, streamSize - 1):resize(streamSize)
-    -- local reward = reward0:add(reward_tp1) 
-    -- print(epoch, reward:sum(), reward_tp1:sum())
-    print(epoch, reward:sum())
+    local reward0 = rouge:narrow(1,2, streamSize) - rouge:narrow(1,1, streamSize)
+    local reward_tp1 = gamma * reward0:narrow(1, 2, streamSize - 1):resize(streamSize)
+    --- occasionally the zeros result in a nan, which is strange
+    reward_tp1[reward_tp1:ne(reward_tp1)] = 0
+    reward_tp1 = torch.clamp(reward_tp1, -1, 1)
+    local reward = reward0 + reward_tp1
+    -- print(epoch, reward0:sum(), reward_tp1:sum(), reward:sum())
     
-        local querySize = query:size(2)
+    local querySize = query:size(2)
     local summaryBatch = summaryBuffer:narrow(1, 1, streamSize)
     local queryBatch = query:view(1, querySize):expand(streamSize, querySize) 
 
     local input = {sentenceStream, queryBatch, summaryBatch}
-    if epoch == 1 then
-        print(input)
-    end
+    -- if epoch == 1 then
+    --     print(input)
+    -- end
 
     local function feval(params)
         gradParams:zero()
@@ -235,23 +220,7 @@ for epoch=1,nepochs do
         out = string.format("epoch;epsilon;loss;rouge;actual;pred;actions\n")
         perf:write(out)
     end
-    -- out = string.format("epoch = %i; epsilon = %.3f; loss = %.6f; rouge = %.6f; actual={min=%.3f, max=%.3f}; pred={min=%.3f, max=%.3f}; {%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i} \n", 
-    --     epoch, epsilon, loss[1], rouge[streamSize + 1],
-    --     reward:min(), reward:max(),
-    --     qValues:min(), qValues:max(),
-    --     actions[1][1], 
-    --     actions[1][2], 
-    --     actions[2][1], 
-    --     actions[2][2], 
-    --     actions[3][1], 
-    --     actions[3][2], 
-    --     actions[4][1],
-    --     actions[4][2],
-    --     actions[5][1], 
-    --     actions[5][2], 
-    --     actions[6][1], 
-    --     actions[6][2] 
-    --     )
+
     out = string.format("%i; %.3f;%.6f;%.6f; {min=%.3f, max=%.3f}; {min=%.3f, max=%.3f}; {%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i}\n", 
         epoch, epsilon, loss[1], rouge[streamSize + 1],
         reward:min(), reward:max(),
@@ -277,4 +246,33 @@ for epoch=1,nepochs do
     end
 end
 
+print(string.format("{%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i} * Learned Actions", actions[1][1], 
+    actions[1][2], 
+    actions[2][1], 
+    actions[2][2], 
+    actions[3][1], 
+    actions[3][2], 
+    actions[4][1],
+    actions[4][2],
+    actions[5][1], 
+    actions[5][2], 
+    actions[6][1], 
+    actions[6][2] 
+    ))
+print(string.format("{%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i} * Optimal Actions", 
+    bestActions[1][1], 
+    bestActions[1][2], 
+    bestActions[2][1], 
+    bestActions[2][2], 
+    bestActions[3][1], 
+    bestActions[3][2], 
+    bestActions[4][1],
+    bestActions[4][2],
+    bestActions[5][1], 
+    bestActions[5][2], 
+    bestActions[6][1], 
+    bestActions[6][2] 
+    ))
+
+print(string.format("Model rouge = %.6f; Best rouge = %.6f; Ratio = %.6f", rouge[streamSize+1], bestf1, rouge[streamSize+1]/bestf1))
 -- os.execute(string.format("python plotsim.py %i %s", nepochs, nn_model))
