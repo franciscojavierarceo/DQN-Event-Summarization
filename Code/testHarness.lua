@@ -111,12 +111,6 @@ function rougeScores(genSummary, refSummary)
     return recall, prec, f1
 end
 
-
-
-local optimParams = {
-    learningRate = learning_rate,
-}
-
 local maxSummarySize = 36
 local epsilon = 1.0
 local query = torch.LongTensor{{0, 1, 4, 3}}
@@ -147,6 +141,7 @@ local bestrecall, bestprec, bestf1 = rougeScores(generatedCounts, refCounts)
 print(string.format("TRUE {RECALL = %.6f, PREC = %.6f, F1 = %.6f}", bestrecall, bestprec, bestf1))
 
 local perf = io.open("sim_perf.txt", 'w')
+memory = {}
 for epoch=1,nepochs do
     actions = torch.ByteTensor(streamSize,2):fill(0)
     local exploreDraws = torch.Tensor(streamSize)
@@ -198,24 +193,33 @@ for epoch=1,nepochs do
     local queryBatch = query:view(1, querySize):expand(streamSize, querySize) 
 
     local input = {sentenceStream, queryBatch, summaryBatch}
-    -- if epoch == 1 then
-    --     print(input)
-    -- end
+    --- Storing the data
+    memory[epoch] = {input, reward}
 
-    local function feval(params)
-        gradParams:zero()
-        local predQ = model:forward(input)
-        local maskLayer = nn.MaskedSelect()
-        local predQOnActions = maskLayer:forward({predQ, actions})
+    local optimParams = {
+        learningRate = learning_rate,
+    }
+    function backProp(memory, params, model, criterion)
+        local input = memory[1]
+        local reward = memory[2]
+        local function feval(params)
+            gradParams:zero()
+            local predQ = model:forward(input)
+            local maskLayer = nn.MaskedSelect()
+            local predQOnActions = maskLayer:forward({predQ, actions})
 
-        local loss = criterion:forward(predQOnActions, reward)
-        local gradOutput = criterion(predQOnActions, reward)
-        local gradMaskLayer = maskLayer:backward({predQ, actions}, gradOutput)
-        model:backward(input, gradMaskLayer[1])
-        return loss, gradParams    
+            local loss = criterion:forward(predQOnActions, reward)
+            local gradOutput = criterion(predQOnActions, reward)
+            local gradMaskLayer = maskLayer:backward({predQ, actions}, gradOutput)
+            model:backward(input, gradMaskLayer[1])
+            return loss, gradParams    
+        end
+        local _, loss = optim.rmsprop(feval, params, optimParams)
+        return loss
     end
+    --- Running backprop
+    loss = backProp(memory[epoch], params, model, criterion)
 
-    local _, loss = optim.rmsprop(feval, params, optimParams)
     if epoch==1 then
         out = string.format("epoch;epsilon;loss;rouge;actual;pred;actions\n")
         perf:write(out)
