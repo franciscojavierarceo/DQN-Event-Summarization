@@ -267,17 +267,17 @@ The updates are computed using the gradient update for $L_i(\theta_i)$
 \end{tikzpicture}
 
 \begin{algorithm}
-    \bf{Input:} { \rm  \{$\mathcal{Q}$: Event queries, $X_q$: Input sentences, $N$: Number of epochs\} } \\
+    \bf{Input:} { \rm  \{$\mathcal{D}$: Event queries, $X_q$: Input sentences, $N$: Number of epochs\} } \\
     \underline{$\bf{Output: }$ \rm \{$\hat{\pi}$: extraction policy, $\tilde{Y}$: event summary for query $q$\} }
 \begin{algorithmic}[1]
-\STATE \rm Initialize memory $\Gamma =  \{\emptyset \}^{\mathcal{|Q|}}_{q=1}$
-\STATE \rm Initialize summaries $\tilde{Y} = \{\emptyset \}^{\mathcal{|Q|}}_{q=1} $
+\STATE \rm Initialize memory $\Gamma =  \{\emptyset \}^{\mathcal{|D|}}_{d=1}$
+\STATE \rm Initialize summaries $\tilde{Y} = \{\emptyset \}^{\mathcal{|D|}}_{d=1} $
 \STATE \rm Initialize action-value function $\hat{Q}$ with random weights
 \FOR{$epoch=1,..,N\ $}
-	\FOR{$q \in \mathcal{Q}$}
-		\STATE $X_{q}$= \{Extract $t=1,...,T_q$ sentences for query $q$\}
-		\STATE $\tilde{Y}_{q}$= \{Extract $t=1,...,T_q$ summaries for query $q$\}
-		\FOR{$(x_t, \tilde{y}_t) \in (X_q, \tilde{Y}_q), $ }
+	\FOR{$d \in \mathcal{D}$}
+		\STATE $X_{d}$= \{Extract $t=1,...,T_d$ sentences for query $d$\}
+		\STATE $\tilde{Y}_{d}$= \{Extract $t=1,...,T_q$ summaries for query $d$\}
+		\FOR{$(x_t, \tilde{y}_t) \in (X_d, \tilde{Y}_d), $ }
 			\STATE Set $s_t = s(x_t, \tilde{y}_t, q)$
 			\STATE $ \forall a_t \in \mathcal{A}(s_t) = \{select, skip\}$ \textrm{compute} $\hat{Q}(s_t, a_t)$
 			\STATE Select $a^{*}_t =$ argmax$_{a_{t}}\hat{Q}(s_t, a_t)$
@@ -288,7 +288,7 @@ The updates are computed using the gradient update for $L_i(\theta_i)$
 				\STATE Update $\tilde{y}_{t+1} = \tilde{y}_t \cup  \{ x_t \} $
 			\ENDIF	
 			\STATE Execute action $a^{*}_t$ and observe reward $r_t$ and new state $s_{t+1}$
-			\STATE Update $\Gamma_q = \Gamma_q \cup \{ [s_t, a^{*}_t, r_t, s_{t+1}]\}$
+			\STATE Update $\Gamma_d = \Gamma_d \cup \{ [s_t, a^{*}_t, r_t, s_{t+1}]\}$
 		\ENDFOR
 	\ENDFOR
 		\FOR{ $j=1,...,J$ transitions sampled from $\Gamma$}
