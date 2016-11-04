@@ -10,7 +10,7 @@ cmd:option('--gamma', 0., 'Discount rate parameter in backprop step')
 cmd:option('--cuts', 4, 'Discount rate parameter in backprop step')
 cmd:option('--base_explore_rate', 0.1, 'Base rate')
 cmd:option('--n_rand', 0, 'Base rate')
-cmd:option('--mem_size', 25, 'Memory size')
+cmd:option('--mem_size', 500, 'Memory size')
 cmd:option('--batch_size', 10,'Batch Size')
 cmd:text()
 --- this retrieves the commands and stores them in opt.variable (e.g., opt.model)
@@ -27,30 +27,40 @@ batch_size = opt.batch_size
 
 SKIP = 1
 SELECT = 2
-
+bow = false
 local vocabSize = 16
 local embeddingSize = 64
 
 torch.manualSeed(420)
 math.randomseed(420)
 
-local sentenceLookup = nn.Sequential():add(
-    nn.LookupTableMaskZero(vocabSize, embeddingSize)):add(
-    nn.Sum(2, 3, false))
+if bow then
+    sentenceLookup = nn.Sequential()
+                :add(nn.LookupTableMaskZero(vocabSize, embeddingSize))
+                :add(nn.Sum(2, 3, false))
+else
+    sentenceLookup = nn.Sequential()
+                :add(nn.LookupTableMaskZero(vocabSize, embeddingSize))
+                :add(nn.SplitTable(2))
+                :add(nn.Sequencer(nn.LSTM(embeddingSize, embeddingSize)))
+                :add(nn.SelectTable(-1))            -- selects last state of the LSTM
+                :add(nn.Linear(embeddingSize, embeddingSize))
+                :add(nn.ReLU())
+end
+local queryLookup = sentenceLookup:clone("weight", "gradWeight") 
+local summaryLookup = sentenceLookup:clone("weight", "gradWeight")
 
-local queryLookup = sentenceLookup:clone() --"weight", "gradWeight")
-local summaryLookup = sentenceLookup:clone() --"weight", "gradWeight")
+local pmodule = nn.ParallelTable()
+            :add(sentenceLookup)
+            :add(queryLookup)
+            :add(summaryLookup)
 
-local model = nn.Sequential():add(
-    nn.ParallelTable():add(
-        sentenceLookup):add(
-        queryLookup):add(
-        summaryLookup)):add(
-    nn.JoinTable(2)):add(
-    nn.Tanh()):add(
-    nn.Linear(embeddingSize * 3, 2)) --:add(
-    -- nn.Tanh()):add(
-    --nn.Linear(embeddingSize, 2))
+local model = nn.Sequential()
+        :add(pmodule)
+        :add(nn.JoinTable(2))
+        :add(nn.Tanh())
+        :add(nn.Linear(embeddingSize * 3, 2))
+
 local criterion = nn.MSECriterion()
 local params, gradParams = model:getParameters()
 
