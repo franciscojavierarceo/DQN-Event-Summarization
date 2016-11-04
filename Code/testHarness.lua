@@ -8,44 +8,53 @@ cmd:option('--nepochs', 5, 'running for 50 epochs')
 cmd:option('--learning_rate', 1e-5, 'using a learning rate of 1e-5')
 cmd:option('--gamma', 0., 'Discount rate parameter in backprop step')
 cmd:option('--cuts', 4, 'Discount rate parameter in backprop step')
-cmd:option('--base_explore_rate', 0.1, 'Base rate')
+cmd:option('--base_explore_rate', 0.0, 'Base rate')
 cmd:option('--n_rand', 0, 'Base rate')
-cmd:option('--mem_size', 500, 'Memory size')
+cmd:option('--mem_size', 50, 'Memory size')
 cmd:option('--batch_size', 10,'Batch Size')
+cmd:option('--nnmod','bow','BOW/LSTM option')
+cmd:option('--edim', 64,'Embedding dimension')
 cmd:text()
 --- this retrieves the commands and stores them in opt.variable (e.g., opt.model)
 local opt = cmd:parse(arg or {})
 
 nepochs = opt.nepochs
-learning_rate = opt.learning_rate
 gamma = opt.gamma
 delta = 1./(opt.nepochs/opt.cuts) 
 base_explore_rate = opt.base_explore_rate
 n_rand = opt.n_rand
 mem_size = opt.mem_size
 batch_size = opt.batch_size
+nnmod = opt.nnmod
+embeddingSize = opt.edim
 
 SKIP = 1
 SELECT = 2
 bow = false
 local vocabSize = 16
-local embeddingSize = 64
+
+local optimParams = {
+    learningRate = opt.learning_rate,
+}
 
 torch.manualSeed(420)
 math.randomseed(420)
 
-if bow then
+if nnmod=='bow' then
+    print("Running bag-of-words model")
     sentenceLookup = nn.Sequential()
                 :add(nn.LookupTableMaskZero(vocabSize, embeddingSize))
                 :add(nn.Sum(2, 3, false))
+                :add(nn.Tanh())
 else
+    print("Running LSTM model")
     sentenceLookup = nn.Sequential()
                 :add(nn.LookupTableMaskZero(vocabSize, embeddingSize))
                 :add(nn.SplitTable(2))
                 :add(nn.Sequencer(nn.LSTM(embeddingSize, embeddingSize)))
                 :add(nn.SelectTable(-1))            -- selects last state of the LSTM
                 :add(nn.Linear(embeddingSize, embeddingSize))
-                :add(nn.ReLU())
+                :add(nn.Tanh())
 end
 local queryLookup = sentenceLookup:clone("weight", "gradWeight") 
 local summaryLookup = sentenceLookup:clone("weight", "gradWeight")
@@ -152,9 +161,6 @@ function buildMemory(newinput, memory_hist, memsize)
     return {inputMemory, rewardMemory, actionMemory}
 end
 
-local optimParams = {
-    learningRate = learning_rate,
-}
 function backProp(input_memory, params, model, criterion, batch_size, memsize)
     -- local input = input_memory[1]
     -- local reward = input_memory[2]
@@ -234,7 +240,7 @@ for epoch=1,nepochs do
 
         if exploreDraws[i] <= epsilon then
             actions[i][torch.random(SKIP, SELECT)] = 1
-        else 
+        else
             if qValues[i][SKIP] > qValues[i][SELECT] then
                 actions[i][SKIP] = 1
             else
@@ -259,8 +265,8 @@ for epoch=1,nepochs do
     --- occasionally the zeros result in a nan, which is strange
     reward_tp1[reward_tp1:ne(reward_tp1)] = 0
     reward_tp1 = torch.clamp(reward_tp1, -1, 1)
+    -- local reward = rouge:narrow(1,2, streamSize)
     local reward = reward0 + reward_tp1
-    -- print(epoch, reward0:sum(), reward_tp1:sum(), reward:sum())
     
     local querySize = query:size(2)
     local summaryBatch = summaryBuffer:narrow(1, 1, streamSize)
@@ -273,14 +279,14 @@ for epoch=1,nepochs do
     if epoch == 1 then
         fullmemory = memory 
     else
-        tmp = buildMemory(memory, fullmemory, mem_size, batch_size)
+        local tmp = buildMemory(memory, fullmemory, mem_size, batch_size)
         fullmemory = tmp
     end
     --- Running backprop
     if(epoch > n_rand) then 
         loss = backProp(memory, params, model, criterion, batch_size, mem_size)
     else 
-        loss = {0.}
+        loss = 0.
     end
 
     if epoch==1 then
