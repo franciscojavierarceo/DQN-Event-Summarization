@@ -1,3 +1,4 @@
+
 local dl = require 'dataload'
 require 'nn'
 require 'rnn'
@@ -180,7 +181,7 @@ function backProp(input_memory, params, model, criterion, batch_size, memsize)
             local predQOnActions = maskLayer:forward({predQ, actions_in})
 
             local lossf = criterion:forward(predQOnActions, reward)
-            local gradOutput = criterion(predQOnActions, reward)
+            local gradOutput = criterion:backward(predQOnActions, reward)
             local gradMaskLayer = maskLayer:backward({predQ, actions_in}, gradOutput)
             model:backward(xinput, gradMaskLayer[1])
             return lossf, gradParams
