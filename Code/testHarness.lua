@@ -1,4 +1,3 @@
-
 local dl = require 'dataload'
 require 'nn'
 require 'rnn'
@@ -163,8 +162,6 @@ function buildMemory(newinput, memory_hist, memsize)
 end
 
 function backProp(input_memory, params, model, criterion, batch_size, memsize)
-    -- local input = input_memory[1]
-    -- local reward = input_memory[2]
     local inputs = {input_memory[1], input_memory[3]}
     local rewards = input_memory[2]
     local dataloader = dl.TensorLoader(inputs, rewards)
@@ -186,7 +183,7 @@ function backProp(input_memory, params, model, criterion, batch_size, memsize)
             model:backward(xinput, gradMaskLayer[1])
             return lossf, gradParams
         end
-        --- This is confusing to me...
+        --- optim.rmsprop returns \theta, f(\theta):= loss function
         _, lossv  = optim.rmsprop(feval, params, optimParams)   
     end
     return lossv[1]
@@ -204,7 +201,6 @@ local sentenceStream = torch.Tensor{{0, 1, 3, 4},
 
 local refSummary = torch.Tensor{{1,3,4,2,4,3,1,4,3,2,9,10,12,11}}
 local refCounts = buildTokenCounts(refSummary)
-
 
 local streamSize = sentenceStream:size(1)
 local bestActions = torch.ByteTensor{{0,1},{1,0},{0,1},{1,0},{0,1},{1,0}}
