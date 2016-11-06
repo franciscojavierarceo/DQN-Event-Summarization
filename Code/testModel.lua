@@ -21,7 +21,7 @@ cmd:option('--mem_size', 100, 'Memory size')
 cmd:option('--batch_size', 200,'Batch Size')
 cmd:option('--nnmod','bow','BOW/LSTM option')
 cmd:option('--edim', 64,'Embedding dimension')
-cmd:option('--usecuda', true, 'running on cuda')
+cmd:option('--usecuda', false, 'running on cuda')
 cmd:text()
 --- this retrieves the commands and stores them in opt.variable (e.g., opt.model)
 local opt = cmd:parse(arg or {})
@@ -124,9 +124,14 @@ else
     print("...running on CPU")
 end
 
-local function buildSummary(actions, sentences, buffer)
+local function buildSummary(actions, sentences, buffer, use_cuda)
     buffer:zero()
 
+    if use_cuda then 
+        actions = actions:double()
+        sentences = sentences:double()
+        buffer = buffer:double()
+    end
     local bufferSize = buffer:size(2)
     local actionsSize = actions:size(1)
     local sentencesSize = sentences:size(2)
@@ -142,6 +147,9 @@ local function buildSummary(actions, sentences, buffer)
         buffer[1]:narrow(1, bufferSize - copySize + 1, copySize):copy(
             allTokens:narrow(1, allTokens:size(1) - copySize + 1, copySize)
             )
+    end
+    if use_cuda then
+        buffer = buffer:cuda()
     end
     return buffer
 end
@@ -292,7 +300,8 @@ for epoch=1, nepochs do
         summary = buildSummary(
             actions:narrow(1, 1, i), 
             sentenceStream:narrow(1, 1, i),
-            summaryBuffer:narrow(1, i + 1, 1)
+            summaryBuffer:narrow(1, i + 1, 1),
+            use_cuda
             )
 
         local generatedCounts = buildTokenCounts(summary) 
