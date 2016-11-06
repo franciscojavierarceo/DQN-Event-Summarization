@@ -22,6 +22,7 @@ cmd:option('--batch_size', 200,'Batch Size')
 cmd:option('--nnmod','bow','BOW/LSTM option')
 cmd:option('--edim', 64,'Embedding dimension')
 cmd:option('--usecuda', false, 'running on cuda')
+cmd:option('--metric', "f1", 'Metric to learn')
 cmd:text()
 --- this retrieves the commands and stores them in opt.variable (e.g., opt.model)
 local opt = cmd:parse(arg or {})
@@ -36,10 +37,10 @@ batch_size = opt.batch_size
 nnmod = opt.nnmod
 embeddingSize = opt.edim
 use_cuda = opt.usecuda
+metric = opt.metric
 SKIP = 1
 SELECT = 2
 bow = false
-
 local optimParams = {
     learningRate = opt.learning_rate,
 }
@@ -78,13 +79,13 @@ for i=1, #nuggets do
 end
 
 if nnmod=='bow' then
-    print("Running bag-of-words model")
+    print(string.format("Running bag-of-words model to learn %s", metric))
     sentenceLookup = nn.Sequential()
                 :add(nn.LookupTableMaskZero(vocabSize, embeddingSize))
                 :add(nn.Sum(2, 3, false))
                 :add(nn.Tanh())
 else
-    print("Running LSTM model")
+    print(string.format("Running LSTM model to learn %s", metric))
     sentenceLookup = nn.Sequential()
                 :add(nn.LookupTableMaskZero(vocabSize, embeddingSize))
                 :add(nn.SplitTable(2))
@@ -306,7 +307,20 @@ for epoch=1, nepochs do
 
         local generatedCounts = buildTokenCounts(summary) 
         local recall, prec, f1 = rougeScores(generatedCounts, refCounts)
-        rouge[i + 1] = f1
+
+        if metric == "f1" then
+            rouge[i + 1]  = f1
+        elseif metric == "recall" then
+            rouge[i + 1]  = recall
+        elseif metric == "precision" then
+            rouge[i + 1] = prec
+        end
+
+        if i==streamSize then
+            rougeRecall = recall
+            rougePrecision = prec
+            rougeF1 = f1
+        end
     end
 
     local max, argmax = torch.max(qValues, 2)
@@ -340,11 +354,12 @@ for epoch=1, nepochs do
     end
 
     if epoch==1 then
-        out = string.format("epoch;epsilon;loss;rouge;actual;pred\n")
+        out = string.format("epoch;epsilon;loss;rougeF1;rougeRecall;rougePrecision;actual;pred\n")
         perf:write(out)
     end
-    out = string.format("%i; %.3f;%.6f;%.6f; {min=%.3f, max=%.3f}; {min=%.3f, max=%.3f}\n", 
-        epoch, epsilon, loss, rouge[streamSize + 1],
+
+    out = string.format("%i; %.3f; %.6f; %.6f; %.6f; %.6f; {min=%.3f, max=%.3f}; {min=%.3f, max=%.3f}\n", 
+        epoch, epsilon, loss, rougeF1, rougeRecall, rougePrecision,
         reward:min(), reward:max(),
         qValues:min(), qValues:max()
         )
