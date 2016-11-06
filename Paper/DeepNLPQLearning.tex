@@ -3,7 +3,7 @@
 \usepackage{graphicx}
 \usepackage{amssymb}
 \usepackage{ bm }
-\usepackage{amsmath }
+\usepackage{amsmath}
 \usepackage{hyperref}
 
 \usepackage{tikz}
@@ -42,8 +42,6 @@ Unfortunately, these systems have still been shown to fall short of heuristic al
 
 In this paper we show that a deep recurrent neural network with a long short term memory (LSTM) is able to successfully learn an extractive summary policy by encoding the action, state, and reward into a Q-Learning model, similar to that of  \cite{hausknecht2015deep}. We show that on a variety of different metrics, our specification is able to reach state-of-the-art performance.
 
-\section{Related Work}
-
 % Section 3
 \section{Extractive Streaming Summarization}
 
@@ -57,32 +55,31 @@ a fully online setting \cite{guo2013updating,kedzie2016real}. In both cases expl
 
 Additionally, the structured nature of the sentence selection task (sentence selection is highly dependent on the current summary state) suggests that imitation or reinforcement learning are necessary to obtain parity between training and testing feature distributions. 
 
-This leads us to explore deep Q networks (DQN) for two reasons. First, both the representation and mode of interaction between the stream, summary, and 
+This leads us to explore Deep Q-Networks (DQN) for two reasons. First, both the representation and mode of interaction between the stream, summary, and 
 query can be learned. Second, the learned Q function (plus random noise) controls the state space that is explored, ensuring more consistency between train and test 
 distributions than for example naive imitation learning (possibly -- I'm not totally happy with this sentence).
 
-\subsection{Problem Definition}
+\section{Background}
   
 DQN learns by using an a $\epsilon$-greedy search policy to generate a  sequence of state, action, next state, reward 4-tuples using the current learned Q-network to evaluate candidate actions. These tuples are sampled from and used to estimate the true Q function. 
 
-\textbf{States}  In our setup a state $s(x_{t},\tilde{y}_{t}, q)$ is a function of the stream $X$ observed up to the current system time $t$, the state of the current summary $\tilde{Y}$ at system time $t$, and the query $q$. For brevity we will use $s(t,q)$ where the dependence on $x_{t},\tilde{Y}_{t}$ is assumed. $s(t,q)$ is itself three recurrent neural networks, one for encoding  the summary, the stream, and the query respectively.
+\subsection{States}  
 
-\textbf{Actions} 
-The set of possible actions at each time step is $\mathcal{A} = \{select, skip\}$ where $select$ corresponds to adding the current sentence $x_t$ to the summary and incrementing the current system time, 
-\begin{align*}
-    \tilde{y}_{t + 1} &= \tilde{y}_{t} \cup \{ x_t \}
-\end{align*}
-or $skip$ where only $t$ is incremented without changing the current 
-summary
-\begin{align*}
-    \tilde{y}_{t + 1} &= \tilde{y}_{ t}.
-\end{align*}
+In our setup a state $s(x_{t},\tilde{y}_{t}, q)$ is a function of the stream $X$ observed up to the current system time $t$, the state of the current summary $\tilde{Y}$ at system time $t$, and the query $q$. For brevity we will use $s(t,q)$ where the dependence on $x_{t},\tilde{Y}_{t}$ is assumed. $s(t,q)$ is itself three recurrent neural networks, one for encoding  the summary, the stream, and the query respectively. 
 
+\subsection{Actions} 
+The set of possible actions $a_t$ at each time step is $\mathcal{A} = \{select, skip\}$ where $select$ corresponds to adding the current sentence $x_t$ to the summary and incrementing the current system time, or $skip$ where only $t$ is incremented without changing the current summary. Thus, our current predicted summary at time $t$ is defined as
 
-\textbf{Reward} 
-The reward for a given action will be measured by relative gain in ROUGE-2 F1 score of the predicted summary $\tilde{y}_{t}$ measured against a gold standard summary $Y$.
- 
-When only one gold summary reference is used, ROUGE-N Recall is calculated as 
+\begin{equation}
+	\tilde{y}_{t + 1} =
+\begin{cases}
+	\tilde{y}_{t} \cup \{ x_t \},	& \text{if } a_t = select  \\
+	\tilde{y}_{t}, 			& \text{if } a_t = skip.
+\end{cases}
+\end{equation}
+
+\subsection{Reward} 
+The reward for a given action is measured by relative gain in ROUGE-2 F1 score of the predicted summary $\tilde{y}_{t}$ measured against a gold standard summary $Y$. When only one gold summary reference is used, ROUGE-N Recall is calculated as 
 
 \[ \textrm{ROUGE-NR}(\tilde{y}, Y) = 
     \frac{\sum_{g \in \textrm{ngrams}(Y,N)} 
@@ -113,11 +110,11 @@ The reward $r$ at time $t$ is then:
 \[ r_t = \textrm{ROUGE-NF1}(\tilde{y}_{t}, Y) - 
 \textrm{ROUGE-NF1}(\tilde{y}_{t-1}, Y) \]
 
-%  TODO: Think about how to incorporate a time penalty into the reward.
+\subsection{Q-Learning}
 
-\subsection{Architecture}
+Deep reinforcement learning is an an increasingly popular framework used to learn action-value functions by specifying the Q-learner as a neural network. Early successes of deep reinforcement learning used convolutional neural networks for video games (e.g., \cite{MnihBMGLHSK16} and \cite{MnihKSGAWR13}) but recent work has leveraged recurrent neural networks for both video-based and text-based gaming environments (e.g. \cite{hausknecht2015deep} and \cite{narasimhan2015language}). 
 
-The architecture for our DQN-LSTM is nearly identical to that of  \cite{narasimhan2015language} with modifications where appropriate. We learn the parameters using stochastic gradient descent with RMSprop \cite{hinton2012lecture}, where we minimize the loss function below: 
+We modify the architecture of \cite{narasimhan2015language} to map a query, sentence, and current predicted summary into LSTMs representations. We learn the parameters using stochastic gradient descent with RMSprop \cite{hinton2012lecture}, where we minimize the loss function below: 
 
 \begin{equation}
 	\mathcal{L}_i(\theta_i) =  \textrm{E}_{\hat{s}, \hat{a}}[ \big (y_i - Q(\hat{s}, \hat{a}; \theta_i) \big )^2]
@@ -133,6 +130,10 @@ The updates are computed using the gradient update for $L_i(\theta_i)$
 \begin{equation}
 	\Delta L_i(\theta_i) = \textrm{E}_{\hat{s}, \hat{a}}[ 2  \big (y_i - Q(\hat{s}, \hat{a}; \theta_i) \big ) \Delta_{\theta_{i}}  Q(\hat{s}, \hat{a}; \theta_i)].
 \end{equation}
+
+%  TODO: Think about how to incorporate a time penalty into the reward.
+\subsection{Deep Q-Network}
+\section{Learning an Extraction Policy}
 
 \center
 % Define the layers to draw the diagram

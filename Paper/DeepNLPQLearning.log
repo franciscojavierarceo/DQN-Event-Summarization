@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015) (preloaded format=pdflatex 2015.5.24)  6 NOV 2016 16:04
+This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015) (preloaded format=pdflatex 2015.5.24)  6 NOV 2016 18:48
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -944,48 +944,48 @@ Missing character: There is no = in font nullfont!
 Missing character: There is no . in font nullfont!
 Missing character: There is no 5 in font nullfont!
 Missing character: There is no ] in font nullfont!
-LaTeX Font Info:    Try loading font information for OMS+cmr on input line 206.
+LaTeX Font Info:    Try loading font information for OMS+cmr on input line 207.
 
 
 (/usr/local/texlive/2015/texmf-dist/tex/latex/base/omscmr.fd
 File: omscmr.fd 2014/09/29 v2.5h Standard LaTeX font definitions
 )
 LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <8> not available
-(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 206.
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 207.
 
-Overfull \hbox (38.10982pt too wide) in paragraph at lines 211--212
+Overfull \hbox (38.10982pt too wide) in paragraph at lines 212--213
  [] 
  []
 
 LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <12> not available
-(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 214.
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 215.
 
-Underfull \hbox (badness 10000) in paragraph at lines 214--216
+Underfull \hbox (badness 10000) in paragraph at lines 215--217
 []$
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 214--216
+Underfull \hbox (badness 10000) in paragraph at lines 215--217
 
  []
 
 Package hyperref Info: bookmark level for unknown algorithm defaults to 0 on in
-put line 249.
-[4] [5] [6] (./DeepNLPQLearning.bbl) [7]
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 273.
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 273.
+put line 250.
+[4] [5] [6] (./DeepNLPQLearning.bbl [7]) [8]
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 274.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 274.
  (./DeepNLPQLearning.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 273.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 273.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 274.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 274.
 Package rerunfilecheck Info: File `DeepNLPQLearning.out' has not changed.
-(rerunfilecheck)             Checksum: 03B18C7AD3D3BB98E0F9B26BD462BB94;291.
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 273.
+(rerunfilecheck)             Checksum: 927EBAE85FA9334AB6F8F3FFE73CB2BE;513.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 274.
  ) 
 Here is how much of TeX's memory you used:
- 19211 strings out of 493089
- 381919 string characters out of 6134842
- 487697 words of memory out of 5000000
- 22279 multiletter control sequences out of 15000+600000
+ 19227 strings out of 493089
+ 382127 string characters out of 6134842
+ 489634 words of memory out of 5000000
+ 22287 multiletter control sequences out of 15000+600000
  21864 words of font info for 81 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  55i,14n,82p,765b,764s stack positions out of 5000i,500n,10000p,200000b,80000s
@@ -1006,10 +1006,10 @@ ve/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/local/texlive/
 5/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/local/texlive/2015/
 texmf-dist/fonts/type1/public/amsfonts/cm/cmti12.pfb></usr/local/texlive/2015/t
 exmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb>
-Output written on DeepNLPQLearning.pdf (7 pages, 223160 bytes).
+Output written on DeepNLPQLearning.pdf (8 pages, 225230 bytes).
 PDF statistics:
- 223 PDF objects out of 1000 (max. 8388607)
- 179 compressed objects within 2 object streams
- 54 named destinations out of 1000 (max. 500000)
- 149 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 253 PDF objects out of 1000 (max. 8388607)
+ 207 compressed objects within 3 object streams
+ 62 named destinations out of 1000 (max. 500000)
+ 181 words of extra memory for PDF output out of 10000 (max. 10000000)
 

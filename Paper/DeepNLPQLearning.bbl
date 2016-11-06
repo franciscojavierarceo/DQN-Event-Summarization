@@ -1,4 +1,4 @@
-\begin{thebibliography}{1}
+\begin{thebibliography}{10}
 
 \bibitem{bengio2003neural}
 Yoshua Bengio, R{\'e}jean Ducharme, Pascal Vincent, and Christian Jauvin.
@@ -46,6 +46,18 @@ Richard McCreadie, Craig Macdonald, and Iadh Ounis.
 \newblock In {\em Proceedings of the 23rd ACM International Conference on
   Conference on Information and Knowledge Management}, pages 301--310. ACM,
   2014.
+
+\bibitem{MnihBMGLHSK16}
+Volodymyr Mnih, Adri{\`{a}}~Puigdom{\`{e}}nech Badia, Mehdi Mirza, Alex Graves,
+  Timothy~P. Lillicrap, Tim Harley, David Silver, and Koray Kavukcuoglu.
+\newblock Asynchronous methods for deep reinforcement learning.
+\newblock {\em CoRR}, abs/1602.01783, 2016.
+
+\bibitem{MnihKSGAWR13}
+Volodymyr Mnih, Koray Kavukcuoglu, David Silver, Alex Graves, Ioannis
+  Antonoglou, Daan Wierstra, and Martin~A. Riedmiller.
+\newblock Playing atari with deep reinforcement learning.
+\newblock {\em CoRR}, abs/1312.5602, 2013.
 
 \bibitem{narasimhan2015language}
 Karthik Narasimhan, Tejas~D Kulkarni, and Regina Barzilay.
