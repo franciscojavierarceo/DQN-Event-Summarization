@@ -61,13 +61,15 @@ inputs = {
 }
 query_id = 1
 K_tokens = 25
-
+n = 200
 qs = inputs['query']
 input_file = csvigo.load({path = data_path .. inputs['inputs'], mode = "large", verbose = false})
 nugget_file = csvigo.load({path = data_path .. inputs['nuggets'], mode = "large", verbose = false})
-input_file = geti_n(input_file, 2, #input_file) 
+input_file = geti_n(input_file, 2, n) 
+-- input_file = geti_n(input_file, 2, #input_file) 
 local vocabSize = getVocabSize(input_file)
-nugget_file = geti_n(nugget_file, 2, #nugget_file) 
+nugget_file = geti_n(nugget_file, 2, n)
+-- nugget_file = geti_n(nugget_file, 2, #nugget_file) 
 K_nuggs = getMaxseq(nugget_file)
 
 nuggets = buildTermDocumentTable(nugget_file, nil)
