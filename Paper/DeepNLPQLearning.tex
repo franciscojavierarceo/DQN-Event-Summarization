@@ -114,7 +114,7 @@ The reward $r$ at time $t$ is then:
 
 Deep reinforcement learning is an an increasingly popular framework used to learn action-value functions by specifying the Q-learner as a neural network. Early successes of deep reinforcement learning used convolutional neural networks for video games (e.g., \cite{MnihBMGLHSK16} and \cite{MnihKSGAWR13}) but recent work has leveraged recurrent neural networks for both video-based and text-based gaming environments (e.g. \cite{hausknecht2015deep} and \cite{narasimhan2015language}). 
 
-We modify the architecture of \cite{narasimhan2015language} to map a query, sentence, and current predicted summary into LSTMs representations. We learn the parameters using stochastic gradient descent with RMSprop \cite{hinton2012lecture}, where we minimize the loss function below: 
+We modify the architecture of \cite{narasimhan2015language} to map a query, sentence, and current predicted summary into LSTMs embeddings according to Figure 1. Using our rewards outlined in the previous section, we minimize the loss function
 
 \begin{equation}
 	\mathcal{L}_i(\theta_i) =  \textrm{E}_{\hat{s}, \hat{a}}[ \big (y_i - Q(\hat{s}, \hat{a}; \theta_i) \big )^2]
@@ -125,10 +125,10 @@ where
 	y_i = \textrm{E}_{\hat{s}, \hat{a}}[ r_i + \gamma \textrm{max}_{a'} Q(s', a' ; \theta_{i-1}) | s', a' ].
 \end{equation}
 
-The updates are computed using the gradient update for $L_i(\theta_i)$
+We learn the parameters using stochastic gradient descent with RMSprop \cite{hinton2012lecture}. Simple differentiation yields the following gradient of $L_i(\theta_i)$
 
 \begin{equation}
-	\Delta L_i(\theta_i) = \textrm{E}_{\hat{s}, \hat{a}}[ 2  \big (y_i - Q(\hat{s}, \hat{a}; \theta_i) \big ) \Delta_{\theta_{i}}  Q(\hat{s}, \hat{a}; \theta_i)].
+	\nabla_{\theta_i} L_i(\theta_i) = \textrm{E}_{\hat{s}, \hat{a}}[ 2  \big (y_i - Q(\hat{s}, \hat{a}; \theta_i) \big ) \nabla_{\theta_{i}}  Q(\hat{s}, \hat{a}; \theta_i)].
 \end{equation}
 
 %  TODO: Think about how to incorporate a time penalty into the reward.
