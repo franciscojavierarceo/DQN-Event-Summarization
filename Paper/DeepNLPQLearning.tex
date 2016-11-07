@@ -55,9 +55,9 @@ a fully online setting \cite{guo2013updating,kedzie2016real}. In both cases expl
 
 Additionally, the structured nature of the sentence selection task (sentence selection is highly dependent on the current summary state) suggests that imitation or reinforcement learning are necessary to obtain parity between training and testing feature distributions. 
 
-This leads us to explore Deep Q-Networks (DQN) for two reasons. First, both the representation and mode of interaction between the stream, summary, and 
-query can be learned. Second, the learned Q function (plus random noise) controls the state space that is explored, ensuring more consistency between train and test 
-distributions than for example naive imitation learning (possibly -- I'm not totally happy with this sentence).
+% (I'm not totally happy with this sentence).
+This leads us to explore Deep Q-Networks (DQN) for three reasons: (1) both the representation and mode of interaction between the stream, summary, and 
+query can be learned; (2) the embeddings can learn a more robust semantic representations than classic n-gram models; and (3) by randomly exploring the state space, the $\epsilon$ greedy strategy used in DQN learns a policy that yields more consistency between train and test distributions.
 
 \section{Background}
   
@@ -65,7 +65,7 @@ DQN learns by using an a $\epsilon$-greedy search policy to generate a  sequence
 
 \subsection{States}  
 
-In our setup a state $s(x_{t},\tilde{y}_{t}, q)$ is a function of the stream $X$ observed up to the current system time $t$, the state of the current summary $\tilde{Y}$ at system time $t$, and the query $q$. For brevity we will use $s(t,q)$ where the dependence on $x_{t},\tilde{Y}_{t}$ is assumed. $s(t,q)$ is itself three recurrent neural networks, one for encoding  the summary, the stream, and the query respectively. 
+In our architecture a state $s(x_{t},\tilde{y}_{t}, q)$ is a function of the stream $X$ observed up to the current system time $t$, the state of the current summary $\tilde{Y}$ at system time $t$, and the query $q$. For brevity we will use $s(t,q)$ where the dependence on $x_{t},\tilde{Y}_{t}$ is assumed. $s(t,q)$ is itself three recurrent neural networks, one for encoding  the summary, the stream, and the query respectively. 
 
 \subsection{Actions} 
 The set of possible actions $a_t$ at each time step is $\mathcal{A} = \{select, skip\}$ where $select$ corresponds to adding the current sentence $x_t$ to the summary and incrementing the current system time, or $skip$ where only $t$ is incremented without changing the current summary. Thus, our current predicted summary at time $t$ is defined as
@@ -110,9 +110,9 @@ The reward $r$ at time $t$ is then:
 \[ r_t = \textrm{ROUGE-NF1}(\tilde{y}_{t}, Y) - 
 \textrm{ROUGE-NF1}(\tilde{y}_{t-1}, Y) \]
 
-\subsection{Q-Learning}
+\subsection{Deep Q-Learning}
 
-Deep reinforcement learning is an an increasingly popular framework used to learn action-value functions by specifying the Q-learner as a neural network. Early successes of deep reinforcement learning used convolutional neural networks for video games (e.g., \cite{MnihBMGLHSK16} and \cite{MnihKSGAWR13}) but recent work has leveraged recurrent neural networks for both video-based and text-based gaming environments (e.g. \cite{hausknecht2015deep} and \cite{narasimhan2015language}). 
+Deep reinforcement learning is an an increasingly popular framework used to learn action-value functions by specifying the Q-learner as a deep neural network. Early successes of deep reinforcement learning used convolutional neural networks for video games (e.g., \cite{MnihBMGLHSK16} and \cite{MnihKSGAWR13}) but recent work has leveraged recurrent neural networks for both video-based and text-based gaming environments (e.g. \cite{hausknecht2015deep} and \cite{narasimhan2015language}). 
 
 We modify the architecture of \cite{narasimhan2015language} to map a query, sentence, and current predicted summary into LSTMs embeddings according to Figure 1. Using our rewards outlined in the previous section, we minimize the loss function
 
@@ -132,7 +132,6 @@ We learn the parameters using stochastic gradient descent with RMSprop \cite{hin
 \end{equation}
 
 %  TODO: Think about how to incorporate a time penalty into the reward.
-\subsection{Deep Q-Network}
 \section{Learning an Extraction Policy}
 
 \center
