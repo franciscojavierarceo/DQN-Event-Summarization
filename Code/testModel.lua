@@ -214,11 +214,11 @@ function buildMemory(newinput, memory_hist, memsize, use_cuda)
         nstart = math.max(memsize - sentMemory:size(1), 1)
     end
     --- Selecting n last data points
-    sentMemory = sentMemory[{{n0, n}}]
-    queryMemory= queryMemory[{{n0, n}}]
-    sumryMemory= sumryMemory[{{n0, n}}]
-    rewardMemory = rewardMemory[{{n0, n}}]
-    actionMemory = actionMemory[{{n0, n}}]
+    sentMemory = sentMemory[{{nstart, nend}}]
+    queryMemory= queryMemory[{{nstart, nend}}]
+    sumryMemory= sumryMemory[{{nstart, nend}}]
+    rewardMemory = rewardMemory[{{nstart, nend}}]
+    actionMemory = actionMemory[{{nstart, nend}}]
 
     local inputMemory = {sentMemory, queryMemory, sumryMemory}
 
@@ -265,11 +265,8 @@ local query = LongTensor{qs}
 local sentenceStream = LongTensor(padZeros(xtdm, K_tokens))
 
 local refSummary = Tensor{nuggsdm}
-
 local refCounts = buildTokenCounts(refSummary)
-
 local streamSize = sentenceStream:size(1)
-
 local buffer = Tensor(1, maxSummarySize):zero()
 
 local perf = io.open("perf.txt", 'w')
@@ -281,7 +278,7 @@ for epoch=1, nepochs do
     local qValues = Tensor(streamSize, 2):zero()
     rouge = Tensor(streamSize + 1):zero()
 
-    rouge[1] = 1
+    rouge[1] = 0
     exploreDraws:uniform(0, 1)
 
     local summary = summaryBuffer:zero():narrow(1,1,1)

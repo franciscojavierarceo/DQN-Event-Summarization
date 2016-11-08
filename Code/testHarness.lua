@@ -253,7 +253,13 @@ for epoch=1,nepochs do
 
         local generatedCounts = buildTokenCounts(summary) 
         local recall, prec, f1 = rougeScores(generatedCounts, refCounts)
-        rouge[i + 1] = f1
+        -- rouge[i + 1] = f1
+        rouge[i + 1] = recall
+        if i==streamSize then
+            rougeRecall = recall
+            rougePrecision = prec
+            rougeF1 = f1
+        end
     end
 
     local max, argmax = torch.max(qValues, 2)
@@ -287,25 +293,13 @@ for epoch=1,nepochs do
     end
 
     if epoch==1 then
-        out = string.format("epoch;epsilon;loss;rouge;actual;pred;actions\n")
+        out = string.format("epoch;epsilon;loss;rougeF1;rougeRecall;rougePrecision;actual;pred\n")
         perf:write(out)
     end
-    out = string.format("%i; %.3f;%.6f;%.6f; {min=%.3f, max=%.3f}; {min=%.3f, max=%.3f}; {%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i,%i}\n", 
-        epoch, epsilon, loss, rouge[streamSize + 1],
+     out = string.format("%i; %.3f; %.6f; %.6f; %.6f; %.6f; {min=%.3f, max=%.3f}; {min=%.3f, max=%.3f}\n", 
+        epoch, epsilon, loss, rougeF1, rougeRecall, rougePrecision,
         reward:min(), reward:max(),
-        qValues:min(), qValues:max(),
-        actions[1][1], 
-        actions[1][2], 
-        actions[2][1], 
-        actions[2][2], 
-        actions[3][1], 
-        actions[3][2], 
-        actions[4][1],
-        actions[4][2],
-        actions[5][1], 
-        actions[5][2], 
-        actions[6][1], 
-        actions[6][2] 
+        qValues:min(), qValues:max()
         )
         perf:write(out)
     if (epsilon - delta) <= base_explore_rate then
