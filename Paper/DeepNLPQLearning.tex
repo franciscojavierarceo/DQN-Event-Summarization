@@ -211,9 +211,9 @@ We learn the parameters using stochastic gradient descent with RMSprop \cite{hin
 
         \path (wa.west) + (5.8,    2.25)  node (vote.east) {\scriptsize \textbf{Action} }; %{\textbf{Summary-Action Representation} };
         \path (wa.west) + (5.8,    1.95)  node (vote.east) {\scriptsize $\{argmax(a_t)$\}}; %{\textbf{Summary-Action Representation} };
-        \path (wa.west) + (-2.90, -3.2)  node (vote.east) {Input State}; %{\textbf{Input State}};
-        \path (wa.west) + (3.5,    -3.2)  node (vote.east) {Summary-Action Representation }; %{\textbf{Summary-Action Representation} };
-        \path (wa.west) + (9.30,  -3.2)  node (vote.east) {Output State}; %{\textbf{Output State}};
+        \path (wa.west) + (-2.90, -3.2)  node (vote.east) {Input}; %{\textbf{Input State}};
+        \path (wa.west) + (3.5,    -3.2)  node (vote.east) {State-Action Representation }; %{\textbf{Summary-Action Representation} };
+        \path (wa.west) + (9.30,  -3.2)  node (vote.east) {Output}; %{\textbf{Output State}};
         \path (wa.east) + (0.5, -4.2)  node (vote.east) {\textbf{Figure 1: DQN-LSTM Architecture}};
 \end{tikzpicture}
 
