@@ -61,7 +61,8 @@ inputs = {
 }
 query_id = 1
 K_tokens = 25
-n = 200
+local maxSummarySize = 300
+local n = 100
 qs = inputs['query']
 input_file = csvigo.load({path = data_path .. inputs['inputs'], mode = "large", verbose = false})
 nugget_file = csvigo.load({path = data_path .. inputs['nuggets'], mode = "large", verbose = false})
@@ -259,7 +260,6 @@ function backProp(input_memory, params, model, criterion, batch_size, memsize, u
     return lossv[1]
 end
 
-local maxSummarySize = 100
 local epsilon = 1.0
 local query = LongTensor{qs}
 local sentenceStream = LongTensor(padZeros(xtdm, K_tokens))
