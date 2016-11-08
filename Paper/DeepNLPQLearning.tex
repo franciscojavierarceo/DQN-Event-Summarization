@@ -55,13 +55,16 @@ a fully online setting \cite{guo2013updating,kedzie2016real}. In both cases expl
 
 Additionally, the structured nature of the sentence selection task (sentence selection is highly dependent on the current summary state) suggests that imitation or reinforcement learning are necessary to obtain parity between training and testing feature distributions. 
 
-% (I'm not totally happy with this sentence).
+Early successes of deep reinforcement learning have used convolutional neural networks for video games (e.g., \cite{MnihBMGLHSK16} and \cite{MnihKSGAWR13}) but recent work has leveraged recurrent neural networks for both video-based and text-based gaming environments (e.g. \cite{hausknecht2015deep} and \cite{narasimhan2015language}). 
+
 This leads us to explore Deep Q-Networks (DQN) for three reasons: (1) both the representation and mode of interaction between the stream, summary, and 
 query can be learned; (2) the embeddings can learn a more robust semantic representations than classic n-gram models; and (3) by randomly exploring the state space, the $\epsilon$-greedy strategy used in DQN learns a policy that yields more consistency between train and test distributions.
 
 \section{Background}
+
+In the subsequent sections, we outline the architecture of our DQN and define the parameterization of our Q-function for the multi-document summarization task. Our architecture consists of three components: the (1) input, (2) action, and (3) value representations. By specifying these components into our neural network, we are able to develop an end-to-end extraction policy that fully propagates information both forward and backward.
   
-DQN learns by using an a $\epsilon$-greedy search policy to generate a  sequence of state, action, next state, reward 4-tuples using the current learned Q-network to evaluate candidate actions. These tuples are sampled from and used to estimate the true Q function. 
+%DQN learns by using an a $\epsilon$-greedy search policy to generate a  sequence of state, action, next state, reward 4-tuples using the current learned Q-network to evaluate candidate actions. These tuples are sampled from and used to estimate the true Q function. 
 
 \subsection{States}  
 
@@ -112,9 +115,14 @@ The reward $r$ at time $t$ is then:
 
 \subsection{Deep Q-Learning}
 
-Deep reinforcement learning is an an increasingly popular framework used to learn action-value functions by specifying the Q-learner as a deep neural network. Early successes of deep reinforcement learning used convolutional neural networks for video games (e.g., \cite{MnihBMGLHSK16} and \cite{MnihKSGAWR13}) but recent work has leveraged recurrent neural networks for both video-based and text-based gaming environments (e.g. \cite{hausknecht2015deep} and \cite{narasimhan2015language}). 
+We define an architecture similar to that of \cite{narasimhan2015language} that maps a query, sentence, and current predicted summary into LSTM embeddings according to $\textbf{Figure 1}$. By formulating our extraction task as a Markov Decision Process (MDP) we can specify the state-action tuples as transitions states. Our extraction policy takes as input an action $a_t$ in state $s_t$ at time $t$ and returns the expected reward. We initialize our actions and Q-function at random and by taking the optimal action given our expected reward, we are able to iteratively update our Q-function, which is derived from the Bellman equation \cite{sutton1998reinforcement} satisfying
 
-We modify the architecture of \cite{narasimhan2015language} to map a query, sentence, and current predicted summary into LSTMs embeddings according to Figure 1. Using our rewards outlined in the previous section, we minimize the loss function
+\begin{equation}
+	\hat{Q}_{t+1}(s,a) = \textrm{E}[ r + \gamma \textrm{max}_{a'} \hat{Q}_t(s', a') | s, a]
+\end{equation}
+where $\gamma \in \mathbb{R}$ is the discount rate applied to future rewards and the expectation is taken over transitions in state $s$ and action $a$.
+
+Using our rewards described above, we minimize the loss function
 
 \begin{equation}
 	\mathcal{L}_i(\theta_i) =  \textrm{E}_{\hat{s}, \hat{a}}[ \big (y_i - Q(\hat{s}, \hat{a}; \theta_i) \big )^2]
@@ -132,7 +140,6 @@ We learn the parameters using stochastic gradient descent with RMSprop \cite{hin
 \end{equation}
 
 %  TODO: Think about how to incorporate a time penalty into the reward.
-\section{Learning an Extraction Policy}
 
 \center
 % Define the layers to draw the diagram
@@ -210,6 +217,8 @@ We learn the parameters using stochastic gradient descent with RMSprop \cite{hin
         \path (wa.east) + (0.5, -4.2)  node (vote.east) {\textbf{Figure 1: DQN-LSTM Architecture}};
 \end{tikzpicture}
 
+\section{Learning an Extraction Policy}
+The 
 \begin{algorithm}
     \bf{Input:} { \rm  \{$\mathcal{D}$: Event queries, $X_d$: Input sentences, $N$: Number of epochs\} } \\
     \underline{$\bf{Output: }$ \rm \{$\hat{\pi}$: extraction policy, $\tilde{Y}$: event summary for query $q$\} }

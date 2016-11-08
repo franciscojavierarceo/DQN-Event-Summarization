@@ -11,45 +11,48 @@ Warning--empty journal in hinton2012lecture
 Warning--empty year in hinton2012lecture
 Warning--empty journal in kedzieextractive
 Warning--empty year in kedzieextractive
-You've used 11 entries,
+Warning--can't use both volume and number fields in sutton1998reinforcement
+Warning--empty publisher in sutton1998reinforcement
+Warning--empty year in sutton1998reinforcement
+You've used 12 entries,
             2118 wiz_defined-function locations,
-            554 strings with 6202 characters,
-and the built_in function-call counts, 4103 in all, are:
-= -- 390
-> -- 232
-< -- 3
-+ -- 92
-- -- 80
-* -- 282
-:= -- 682
-add.period$ -- 34
-call.type$ -- 11
-change.case$ -- 73
+            557 strings with 6301 characters,
+and the built_in function-call counts, 4367 in all, are:
+= -- 410
+> -- 245
+< -- 4
++ -- 97
+- -- 84
+* -- 305
+:= -- 724
+add.period$ -- 36
+call.type$ -- 12
+change.case$ -- 77
 chr.to.int$ -- 0
-cite$ -- 15
-duplicate$ -- 160
-empty$ -- 297
-format.name$ -- 80
-if$ -- 858
+cite$ -- 19
+duplicate$ -- 172
+empty$ -- 319
+format.name$ -- 84
+if$ -- 910
 int.to.chr$ -- 0
-int.to.str$ -- 11
-missing$ -- 11
-newline$ -- 56
-num.names$ -- 22
-pop$ -- 92
+int.to.str$ -- 12
+missing$ -- 13
+newline$ -- 60
+num.names$ -- 24
+pop$ -- 102
 preamble$ -- 1
-purify$ -- 62
+purify$ -- 66
 quote$ -- 0
-skip$ -- 113
+skip$ -- 120
 stack$ -- 0
-substring$ -- 191
-swap$ -- 43
-text.length$ -- 3
+substring$ -- 196
+swap$ -- 46
+text.length$ -- 4
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 44
-warning$ -- 4
-while$ -- 33
-width$ -- 13
-write$ -- 115
+type$ -- 46
+warning$ -- 7
+while$ -- 35
+width$ -- 14
+write$ -- 123
 (There was 1 error message)
