@@ -20,14 +20,14 @@ def main(nepochs, model):
     
     # Pulling in the images that were exported
     ofile_names = [('./plotdata/%s/%i_epoch.txt' % (model, x) ) for x in range(nepochs) ] 
-    llow, lhigh = -2., 2.
     for (ofile, epoch) in zip(ofile_names, range(nepochs)):
         if epoch  == 0:
-            llow, lhigh = 
+            llow  = min(odf['actual'].min(), odf['predSelect'].min(), odf['predSkip'].min())
+            lhigh = max(odf['actual'].max(), odf['predSelect'].max(), odf['predSkip'].max())
         # Loading data sets and concatenating them
         odf = pd.read_csv(ofile, sep=';')
         llow  = min(llow, odf['actual'].min(), odf['predSelect'].min(), odf['predSkip'].min())
-        lhigh  = max(lhigh, odf['actual'].max(), odf['predSelect'].max(), odf['predSkip'].max())
+        lhigh = max(lhigh, odf['actual'].max(), odf['predSelect'].max(), odf['predSkip'].max())
 
     for (ofile, epoch) in zip(ofile_names, range(nepochs)):
         # Loading data sets and concatenating them

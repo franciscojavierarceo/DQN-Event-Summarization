@@ -383,5 +383,4 @@ for epoch=0, nepochs do
         epsilon = epsilon - delta
     end
 end
-
-os.execute(string.format("python plotsim.py %i %s", nepochs, nnmod))
+os.execute(string.format("python make_density_gif.py %i %s", nepochs, nnmod))
