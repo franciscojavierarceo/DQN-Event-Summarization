@@ -63,8 +63,6 @@ query can be learned; (2) the embeddings can learn a more robust semantic repres
 \section{Background}
 
 In the subsequent sections, we outline the architecture of our DQN and define the parameterization of our Q-function for the multi-document summarization task. Our architecture consists of three components: the (1) input, (2) action, and (3) value representations. By specifying these components into our neural network, we are able to develop an end-to-end extraction policy that fully propagates information both forward and backward.
-  
-%DQN learns by using an a $\epsilon$-greedy search policy to generate a  sequence of state, action, next state, reward 4-tuples using the current learned Q-network to evaluate candidate actions. These tuples are sampled from and used to estimate the true Q function. 
 
 \subsection{States}  
 
@@ -75,11 +73,12 @@ The set of possible actions $a_t$ at each time step is $\mathcal{A} = \{select, 
 
 \begin{equation}
 	\tilde{y}_{t + 1} =
-\begin{cases}
-	\tilde{y}_{t} \cup \{ x_t \},	& \text{if } a_t = select  \\
-	\tilde{y}_{t}, 			& \text{if } a_t = skip.
-\end{cases}
+	\begin{cases}
+		\tilde{y}_{t} \cup \{ x_t \},	& \text{if } a_t = select  \\
+		\tilde{y}_{t}, 			& \text{if } a_t = skip.
+	\end{cases}
 \end{equation}
+Since $\tilde{y}_t$ grows linearly with the number of selected sentences, we mitigate potential capacity constraints by using a queue to hold the last $K$ elements of the current predicted summary. 
 
 \subsection{Reward} 
 The reward for a given action is measured by relative gain in ROUGE-2 F1 score of the predicted summary $\tilde{y}_{t}$ measured against a gold standard summary $Y$. When only one gold summary reference is used, ROUGE-N Recall is calculated as 
@@ -138,7 +137,7 @@ Differentiation of the loss function yields the update equation,
 \begin{equation}
 	\nabla_{\theta_i} L_i(\theta_i) = \textrm{E}_{\hat{s}, \hat{a}}[ 2  \big (y_i - Q(\hat{s}, \hat{a}; \theta_i) \big ) \nabla_{\theta_{i}}  Q(\hat{s}, \hat{a}; \theta_i)]
 \end{equation}
-that learns the parameters using stochastic gradient descent with RMSprop \cite{hinton2012lecture} on sampled batches of the stored transitions.
+that learns the parameters using stochastic gradient descent with RMSprop \cite{hinton2012lecture} on sampled batches of stored transitions.
 
 \begin{center}
 % Define the layers to draw the diagram
@@ -218,11 +217,11 @@ that learns the parameters using stochastic gradient descent with RMSprop \cite{
 \end{center}
 
 \section{Learning an Extraction Policy}
-The 
+We process our queries and extract the 
 
 \begin{algorithm}
     \bf{Input:} { \rm  \{$\mathcal{D}$: Event queries, $X_d$: Input sentences, $N$: Number of epochs\} } \\
-    \underline{$\bf{Output: }$ \rm \{$\hat{\pi}$: extraction policy, $\tilde{Y}$: event summary for query $q$\} }
+    \underline{$\bf{Output: }$ \rm \{$\hat{Q}$: extraction policy, $\tilde{Y}$: event summary for query $d$\} }
 \begin{algorithmic}[1]
 \STATE \rm Initialize memory $\Gamma =  \{\emptyset \}^{\mathcal{|D|}}_{d=1}$
 \STATE \rm Initialize summaries $\tilde{Y} = \{\emptyset \}^{\mathcal{|D|}}_{d=1} $
@@ -260,24 +259,24 @@ The
 \end{algorithm}
 
 \section{Results}
+\subsection{Evaluation}
+We evaluate our learned extracted summaries on ROUGE-N F1, Recall, and Precision on the full set of nuggets. 
 
 \begin{center}
-\begin{tabular}{ l | c | c  }
+\begin{tabular}{  c | c | c | c  }
 	\hline
-	Metric  & Model  & Performance\\ \hline \hline
-  	ROUGUE-1F1 & DQN-LSTM  & TBD \\
-  	ROUGUE-1F1 & DQN-BOW  & TBD \\
-  	ROUGUE-1F1 & DQN-BiBOW  & TBD \\
-  	ROUGUE-1F1 & Random  & TBD \\ \hline
-  	ROUGUE-2F1 & DQN-LSTM  & TBD \\
-  	ROUGUE-2F1 & DQN-BOW  & TBD \\
-  	ROUGUE-2F1 & DQN-BiBOW  & TBD \\
-  	ROUGUE-2F1 & Random  & TBD \\ \hline
+	Model  & ROUGE-1F1 & ROUGE-1Recall & ROUGE-1Precision  \\ \hline \hline
+	DQN-LSTM  & TBD & TBD  & TBD\\
+	DQN-BOW  & TBD & TBD  & TBD\\
+	DQN-BiBOW  & TBD & TBD  & TBD\\
+	Random  & TBD & TBD \\ \hline
+	\hline
+	\multicolumn{4}{c}{Figure 1. Extracted summary performance on manually reviewed nuggets} \\
 	\hline
 \end{tabular}
 \end{center}
 
-
+\section{Conclusion}
 \newpage
 
 \bibliography{DeepNLPQLearning}
