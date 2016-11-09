@@ -90,7 +90,8 @@ if nnmod=='bow' then
     sentenceLookup = nn.Sequential()
                 :add(nn.LookupTableMaskZero(vocabSize, embeddingSize))
                 :add(nn.Sum(2, 3, false))
-                :add(nn.Tanh())
+                :add(nn.ReLU())
+                -- :add(nn.Tanh())
 else
     print(string.format("Running LSTM model to learn %s", metric))
     sentenceLookup = nn.Sequential()
@@ -112,7 +113,8 @@ local pmodule = nn.ParallelTable()
 local model = nn.Sequential()
         :add(pmodule)
         :add(nn.JoinTable(2))
-        :add(nn.Tanh())
+        :add(nn.ReLU())
+        -- :add(nn.Tanh())
         :add(nn.Linear(embeddingSize * 3, 2))
 
 local criterion = nn.MSECriterion()
@@ -215,9 +217,8 @@ function buildMemory(newinput, memory_hist, memsize, use_cuda)
         nend = sentMemory:size(1)
         nstart = 1
     else 
-        nend = memsize
-        nstart = 1
-        -- nstart = math.max(memsize - sentMemory:size(1), 1)
+        nstart = math.max(memsize - sentMemory:size(1), 1)
+        nend = memsize + nstart
     end
     --- Selecting n last data points
     sentMemory = sentMemory[{{nstart, nend}}]
@@ -358,22 +359,25 @@ for epoch=0, nepochs do
     end
 
     if epoch==0 then
-        out = string.format("epoch;epsilon;loss;rougeF1;rougeRecall;rougePrecision;actual;pred\n")
+        out = string.format("epoch;epsilon;loss;rougeF1;rougeRecall;rougePrecision;actual;pred;nselect;nskip\n")
         perf:write(out)
     end
-
-    out = string.format("%i; %.3f; %.6f; %.6f; %.6f; %.6f; {min=%.3f, max=%.3f}; {min=%.3f, max=%.3f}\n", 
+    nactions = torch.totable(actions:sum(1))[1]
+    out = string.format("%i; %.3f; %.6f; %.6f; %.6f; %.6f; {min=%.3f, max=%.3f}; {min=%.3f, max=%.3f}; %i; %i\n", 
         epoch, epsilon, loss, rougeF1, rougeRecall, rougePrecision,
         reward:min(), reward:max(),
-        qValues:min(), qValues:max()
+        qValues:min(), qValues:max(),
+        nactions[1], nactions[2]
         )
         perf:write(out)
 
     if export then 
         local ofile = io.open(string.format("plotdata/%s/%i_epoch.txt", nnmod, epoch), 'w')
-        ofile:write("predSelect;predSkip;actual;Skip;Select\n")
+        ofile:write("predSkip;predSelect;actual;Skip;Select\n")
         for i=1, streamSize do
-            ofile:write(string.format("%.6f;%.6f;%6f;%i;%i\n", qValues[i][SKIP], qValues[i][SELECT], rouge[i], actions[i][SKIP], actions[i][SELECT]))
+            ofile:write(string.format("%.6f;%.6f;%6f;%i;%i\n", 
+                    qValues[i][SKIP], qValues[i][SELECT], rouge[i], 
+                    actions[i][SKIP], actions[i][SELECT]))
         end
         ofile:close()
     end 
@@ -383,4 +387,4 @@ for epoch=0, nepochs do
         epsilon = epsilon - delta
     end
 end
-os.execute(string.format("python make_density_gif.py %i %s", nepochs, nnmod))
+os.execute(string.format("python make_density_gif.py %i %s %s", nepochs, nnmod, metric))
