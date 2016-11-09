@@ -117,14 +117,12 @@ The reward $r$ at time $t$ is then:
 
 We define an architecture similar to that of \cite{narasimhan2015language} and map our three inputs (query, sentence, and current predicted summary) into LSTM embeddings according to $\textbf{Figure 1}$. By formulating our extraction task as a Markov Decision Process (MDP) we can express the state-action tuples as transitions states. 
 
-Our extraction policy then takes as input an action $a_t$ in state $s_t$ at time $t$ and returns the expected reward. We initialize our actions and Q-function at random and by taking the optimal action given our expected reward, we are able to iteratively update our Q-function, which is derived from the Bellman equation \cite{sutton1998reinforcement} satisfying
+Our extraction policy then takes as input an action $a_t$ in state $s_t$ at time $t$ and returns the expected reward. We initialize our actions and Q-function at random and by taking the optimal action given our expected reward, we are able to iteratively update our Q-function using the Bellman equation \cite{sutton1998reinforcement} satisfying
 
 \begin{equation}
 	\hat{Q}_{t+1}(s,a) = \textrm{E}[ r + \gamma \textrm{max}_{a'} \hat{Q}_t(s', a') | s, a]
 \end{equation}
-where $\gamma \in \mathbb{R}$ is the discount rate applied to future rewards and the expectation is taken over transitions in state $s$ and action $a$.
-
-Using our rewards described above, we minimize the loss function
+where $\gamma \in \mathbb{R}$ is the discount rate applied to future rewards and the expectation is taken over transitions in state $s$ and action $a$. By iterating over the Q-function, it converges asymptotically to the optimal policy, i.e.,  $\hat{Q}_t \rightarrow \hat{Q}^{*}$ as $t \rightarrow \infty$, but in finite iterations we can use a neural network as our function approximator, where our weights our $\theta$ can be optimized using the loss function
 
 \begin{equation}
 	\mathcal{L}_i(\theta_i) =  \textrm{E}_{\hat{s}, \hat{a}}[ \big (y_i - Q(\hat{s}, \hat{a}; \theta_i) \big )^2]
