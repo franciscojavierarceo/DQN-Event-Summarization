@@ -19,57 +19,44 @@ def main(nepochs, model):
         nepochs = int(nepochs)
     
     # Pulling in the images that were exported
-    afile_names = [('./plotdata/%s/%i_actual.txt' % (model, x) ) for x in range(nepochs) ] 
-    pfile_names = [('./plotdata/%s/%i_preds.txt' % (model, x)) for x in range(nepochs) ] 
-
-    llow, lhigh = 0., 0.
-    for (afile, pfile, epoch) in zip(afile_names, pfile_names, range(nepochs)):
+    ofile_names = [('./plotdata/%s/%i_epoch.txt' % (model, x) ) for x in range(nepochs) ] 
+    llow, lhigh = -2., 2.
+    for (ofile, epoch) in zip(ofile_names, range(nepochs)):
+        if epoch  == 0:
+            llow, lhigh = 
         # Loading data sets and concatenating them
-        dfy = pd.read_csv(afile, header=None, names=['actual'])
-        dfp = pd.read_csv(pfile, header=None, names=['preds'])
-        llow  = min(llow, dfy['actual'].min(), dfp['preds'].min())
-        lhigh = max(lhigh, dfy['actual'].max(), dfp['preds'].max())
+        odf = pd.read_csv(ofile, sep=';')
+        llow  = min(llow, odf['actual'].min(), odf['predSelect'].min(), odf['predSkip'].min())
+        lhigh  = max(lhigh, odf['actual'].max(), odf['predSelect'].max(), odf['predSkip'].max())
 
-    for (afile, pfile, epoch) in zip(afile_names, pfile_names, range(nepochs)):
+    for (ofile, epoch) in zip(ofile_names, range(nepochs)):
         # Loading data sets and concatenating them
-        dfy = pd.read_csv(afile, header=None, names=['actual'])
-        dfp = pd.read_csv(pfile, header=None, names=['preds'])
-        dft = pd.concat([dfy, dfp], axis=1)
-        # Plotting density
-        ax = dft.plot(kind='density', 
-                        figsize=(16, 8), 
-                        title=('Training Epoch %i' % epoch),
-                        xlim=[llow, lhigh], 
-                        ylim = [0, 2] )
-        fig = ax.get_figure()
-        fig.savefig('./plotdata/plotfiles/denplot_%i.png' % epoch )
-
-        # Plotting cdf
-        cdfy = buildCDF(dfy, 'actual')
-        cdfp = buildCDF(dfp, 'preds')
-        plt.figure(figsize=(16,8))
-        plt.xlim([llow, lhigh])
-        plt.plot(cdfp['preds'], cdfp['cumpercent'], label='Predicted', c='blue')
-        plt.plot(cdfy['actual'], cdfy['cumpercent'], label='Actual', c='red')
-        plt.title(("Training Epoch %i" % epoch))
-        plt.legend(loc="lower right")
-        plt.savefig('./plotdata/plotfiles/cdfplot_%i.png' % epoch )
-        plt.close()
+        # Two subplots, the axes array is 1-d
+        odf = pd.read_csv(ofile, sep=';')
+        odf['predOptimal'] = odf[['predSelect','predSkip']].max(axis=1)
+        cdfp = buildCDF(odf, 'predOptimal')
+        cdfa = buildCDF(odf, 'actual')
+        f, axarr = plt.subplots(1, 2, figsize=(16,8))
+        axarr[0].imshow(odf[['Skip', 'Select']], cmap='autumn')
+        axarr[0].set_title('Actions')
+        axarr[0].set_xticks([])
+        axarr[1].plot(cdfp['predOptimal'], cdfp['cumpercent'], label='Predicted', c='blue')
+        axarr[1].plot(cdfa['actual'], cdfa['cumpercent'], label='Actual', c='red')
+        axarr[1].set_ylim([0,1])
+        axarr[1].set_xlim([llow, lhigh])
+        axarr[1].legend(loc ='upper left')
+        axarr[1].grid()
+        f.suptitle('%s model performance at epoch %i' % (model, epoch))
+        f.tight_layout()
+        f.savefig('./plotdata/%s/plotfiles/perfplot_%i.png' % (model, epoch) )
 
     # Exporting the images to a gif
-    file_names = [ ('./plotdata/denplot_%i.png' %x) for x in range(nepochs)]
+    file_names = [ ('./plotdata/%s/plotfiles/perfplot_%i.png' % (model, epoch)) for epoch in range(nepochs)]
     images = []
     for filename in file_names:
         images.append(imageio.imread(filename))
         # Actual v Predicted gif
-    imageio.mimsave('./avp_density.gif', images, duration=0.75)
-
-    file_names = [ ('./plotdata/cdfplot_%i.png' %x) for x in range(nepochs)]
-    images = []
-    for filename in file_names:
-        images.append(imageio.imread(filename))
-        # Actual v Predicted gif
-    imageio.mimsave('./avp_cdf.gif', images, duration=0.75)
+    imageio.mimsave('./perf.gif', images, duration=0.75)
 
 if __name__ == '__main__':
     main(sys.argv[1], sys.argv[2])

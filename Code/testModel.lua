@@ -23,6 +23,8 @@ cmd:option('--nnmod','bow','BOW/LSTM option')
 cmd:option('--edim', 64,'Embedding dimension')
 cmd:option('--usecuda', false, 'running on cuda')
 cmd:option('--metric', "f1", 'Metric to learn')
+cmd:option('--n_samples', 500, 'Number of samples to use')
+cmd:option('--max_summary', 300, 'Maximum summary size')
 cmd:text()
 --- this retrieves the commands and stores them in opt.variable (e.g., opt.model)
 local opt = cmd:parse(arg or {})
@@ -38,9 +40,13 @@ nnmod = opt.nnmod
 embeddingSize = opt.edim
 use_cuda = opt.usecuda
 metric = opt.metric
+maxSummarySize = opt.max_summary
+n = opt.n_samples
 SKIP = 1
 SELECT = 2
 bow = false
+export = true
+
 local optimParams = {
     learningRate = opt.learning_rate,
 }
@@ -61,8 +67,6 @@ inputs = {
 }
 query_id = 1
 K_tokens = 25
-local maxSummarySize = 300
-local n = 100
 qs = inputs['query']
 input_file = csvigo.load({path = data_path .. inputs['inputs'], mode = "large", verbose = false})
 nugget_file = csvigo.load({path = data_path .. inputs['nuggets'], mode = "large", verbose = false})
@@ -75,10 +79,10 @@ K_nuggs = getMaxseq(nugget_file)
 
 nuggets = buildTermDocumentTable(nugget_file, nil)
 xtdm  = buildTermDocumentTable(input_file, K_tokens)
-nuggsdm = {}
 
+ntdm = {}
 for i=1, #nuggets do
-    nuggsdm = tableConcat(table.unpack(nuggets), nuggsdm)
+    ntdm = tableConcat(table.unpack(nuggets), ntdm)
 end
 
 if nnmod=='bow' then
@@ -212,7 +216,8 @@ function buildMemory(newinput, memory_hist, memsize, use_cuda)
         nstart = 1
     else 
         nend = memsize
-        nstart = math.max(memsize - sentMemory:size(1), 1)
+        nstart = 1
+        -- nstart = math.max(memsize - sentMemory:size(1), 1)
     end
     --- Selecting n last data points
     sentMemory = sentMemory[{{nstart, nend}}]
@@ -264,14 +269,14 @@ local epsilon = 1.0
 local query = LongTensor{qs}
 local sentenceStream = LongTensor(padZeros(xtdm, K_tokens))
 
-local refSummary = Tensor{nuggsdm}
+local refSummary = Tensor{ntdm}
 local refCounts = buildTokenCounts(refSummary)
 local streamSize = sentenceStream:size(1)
 local buffer = Tensor(1, maxSummarySize):zero()
 
 local perf = io.open("perf.txt", 'w')
 memory = {}
-for epoch=1, nepochs do
+for epoch=0, nepochs do
     actions = ByteTensor(streamSize, 2):fill(0)
     local exploreDraws = Tensor(streamSize)
     local summaryBuffer = LongTensor(streamSize + 1, maxSummarySize):zero()
@@ -339,7 +344,7 @@ for epoch=1, nepochs do
     --- Storing the data
     memory = {input, reward, actions}
 
-    if epoch == 1 then
+    if epoch == 0 then
         fullmemory = memory 
     else
         local tmp = buildMemory(memory, fullmemory, mem_size, batch_size, use_cuda)
@@ -363,6 +368,15 @@ for epoch=1, nepochs do
         qValues:min(), qValues:max()
         )
         perf:write(out)
+
+    if export then 
+        local ofile = io.open(string.format("plotdata/%s/%i_epoch.txt", nnmod, epoch), 'w')
+        ofile:write("predSelect;predSkip;actual;Skip;Select\n")
+        for i=1, streamSize do
+            ofile:write(string.format("%.6f;%.6f;%6f;%i;%i\n", qValues[i][SKIP], qValues[i][SELECT], rouge[i], actions[i][SKIP], actions[i][SELECT]))
+        end
+        ofile:close()
+    end 
     if (epsilon - delta) <= base_explore_rate then
         epsilon = base_explore_rate
     else 
