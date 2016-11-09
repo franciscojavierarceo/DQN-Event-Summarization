@@ -357,7 +357,7 @@ for epoch=0, nepochs do
         loss = 0.
     end
 
-    if epoch==1 then
+    if epoch==0 then
         out = string.format("epoch;epsilon;loss;rougeF1;rougeRecall;rougePrecision;actual;pred\n")
         perf:write(out)
     end
@@ -384,4 +384,4 @@ for epoch=0, nepochs do
     end
 end
 
--- os.execute(string.format("python plotsim.py %i %s", nepochs, nn_model))
+os.execute(string.format("python plotsim.py %i %s", nepochs, nnmod))
