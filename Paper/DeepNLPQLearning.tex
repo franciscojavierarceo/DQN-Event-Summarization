@@ -122,7 +122,7 @@ Our extraction policy then takes as input an action $a_t$ in state $s_t$ at time
 \begin{equation}
 	\hat{Q}_{t+1}(s,a) = \textrm{E}[ r + \gamma \textrm{max}_{a'} \hat{Q}_t(s', a') | s, a]
 \end{equation}
-where $\gamma \in \mathbb{R}$ is the discount rate applied to future rewards and the expectation is taken over transitions in state $s$ and action $a$. By iterating over the Q-function, it converges asymptotically to the optimal policy, i.e.,  $\hat{Q}_t \rightarrow \hat{Q}^{*}$ as $t \rightarrow \infty$, but in finite iterations we can use a neural network as our function approximator, where our weights our $\theta$ can be optimized using the loss function
+where $\gamma \in \mathbb{R}$ is the discount rate applied to future rewards and the expectation is taken over transitions in state $s$ and action $a$. By iterating over the Q-function, it converges asymptotically to the optimal policy, i.e.,  $\hat{Q}_t \rightarrow \hat{Q}^{*}$ as $t \rightarrow \infty$, but in finite iterations we can use a neural network as our function approximator, where our weights our $\theta$ can be optimized using the following loss function
 
 \begin{equation}
 	\mathcal{L}_i(\theta_i) =  \textrm{E}_{\hat{s}, \hat{a}}[ \big (y_i - Q(\hat{s}, \hat{a}; \theta_i) \big )^2]
@@ -133,15 +133,14 @@ where
 	y_i = \textrm{E}_{\hat{s}, \hat{a}}[ r_i + \gamma \textrm{max}_{a'} Q(s', a' ; \theta_{i-1}) | s', a' ].
 \end{equation}
 
-We learn the parameters using stochastic gradient descent with RMSprop \cite{hinton2012lecture}. Simple differentiation yields the following gradient of $L_i(\theta_i)$
+Differentiation of the loss function yields the update equation,
 
 \begin{equation}
-	\nabla_{\theta_i} L_i(\theta_i) = \textrm{E}_{\hat{s}, \hat{a}}[ 2  \big (y_i - Q(\hat{s}, \hat{a}; \theta_i) \big ) \nabla_{\theta_{i}}  Q(\hat{s}, \hat{a}; \theta_i)].
+	\nabla_{\theta_i} L_i(\theta_i) = \textrm{E}_{\hat{s}, \hat{a}}[ 2  \big (y_i - Q(\hat{s}, \hat{a}; \theta_i) \big ) \nabla_{\theta_{i}}  Q(\hat{s}, \hat{a}; \theta_i)]
 \end{equation}
+that learns the parameters using stochastic gradient descent with RMSprop \cite{hinton2012lecture} on sampled batches of the stored transitions.
 
-%  TODO: Think about how to incorporate a time penalty into the reward.
-
-\center
+\begin{center}
 % Define the layers to draw the diagram
 \pgfdeclarelayer{background}
 \pgfdeclarelayer{foreground}
@@ -216,9 +215,11 @@ We learn the parameters using stochastic gradient descent with RMSprop \cite{hin
         \path (wa.west) + (9.30,  -3.2)  node (vote.east) {Output}; %{\textbf{Output State}};
         \path (wa.east) + (0.5, -4.2)  node (vote.east) {\textbf{Figure 1: DQN-LSTM Architecture}};
 \end{tikzpicture}
+\end{center}
 
 \section{Learning an Extraction Policy}
 The 
+
 \begin{algorithm}
     \bf{Input:} { \rm  \{$\mathcal{D}$: Event queries, $X_d$: Input sentences, $N$: Number of epochs\} } \\
     \underline{$\bf{Output: }$ \rm \{$\hat{\pi}$: extraction policy, $\tilde{Y}$: event summary for query $q$\} }
@@ -258,21 +259,23 @@ The
     \caption{DQN-LSTM for Event Summarization Training Procedure}
 \end{algorithm}
 
+\section{Results}
 
+\begin{center}
 \begin{tabular}{ l | c | c  }
 	\hline
 	Metric  & Model  & Performance\\ \hline \hline
-  	ROUGUE-1F1 & DQN-LSTM  & X \\
-  	ROUGUE-1F1 & DQN-BOW  & X \\
-  	ROUGUE-1F1 & DQN-BiBOW  & X \\
-  	ROUGUE-1F1 & Random  & X \\ \hline
-  	ROUGUE-2F1 & DQN-LSTM  & X \\
-  	ROUGUE-2F1 & DQN-BOW  & X \\
-  	ROUGUE-2F1 & DQN-BiBOW  & X \\
-  	ROUGUE-2F1 & Random  & X \\ \hline
+  	ROUGUE-1F1 & DQN-LSTM  & TBD \\
+  	ROUGUE-1F1 & DQN-BOW  & TBD \\
+  	ROUGUE-1F1 & DQN-BiBOW  & TBD \\
+  	ROUGUE-1F1 & Random  & TBD \\ \hline
+  	ROUGUE-2F1 & DQN-LSTM  & TBD \\
+  	ROUGUE-2F1 & DQN-BOW  & TBD \\
+  	ROUGUE-2F1 & DQN-BiBOW  & TBD \\
+  	ROUGUE-2F1 & Random  & TBD \\ \hline
 	\hline
 \end{tabular}
-
+\end{center}
 
 
 \newpage
