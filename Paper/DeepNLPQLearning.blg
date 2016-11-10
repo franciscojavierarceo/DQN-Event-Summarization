@@ -7,6 +7,8 @@ Repeated entry---line 113 of file DeepNLPQLearning.bib
  : @inproceedings{hausknecht2015deep
  :                                  ,
 I'm skipping whatever remains of this entry
+Warning--empty booktitle in garbacea2015university
+Warning--empty year in garbacea2015university
 Warning--empty journal in hinton2012lecture
 Warning--empty year in hinton2012lecture
 Warning--empty journal in kedzieextractive
@@ -14,45 +16,45 @@ Warning--empty year in kedzieextractive
 Warning--can't use both volume and number fields in sutton1998reinforcement
 Warning--empty publisher in sutton1998reinforcement
 Warning--empty year in sutton1998reinforcement
-You've used 12 entries,
+You've used 13 entries,
             2118 wiz_defined-function locations,
-            557 strings with 6301 characters,
-and the built_in function-call counts, 4367 in all, are:
-= -- 410
-> -- 245
+            560 strings with 6450 characters,
+and the built_in function-call counts, 4629 in all, are:
+= -- 430
+> -- 258
 < -- 4
-+ -- 97
-- -- 84
-* -- 305
-:= -- 724
-add.period$ -- 36
-call.type$ -- 12
-change.case$ -- 77
++ -- 103
+- -- 88
+* -- 320
+:= -- 766
+add.period$ -- 38
+call.type$ -- 13
+change.case$ -- 82
 chr.to.int$ -- 0
-cite$ -- 19
-duplicate$ -- 172
-empty$ -- 319
-format.name$ -- 84
-if$ -- 910
+cite$ -- 22
+duplicate$ -- 185
+empty$ -- 345
+format.name$ -- 88
+if$ -- 964
 int.to.chr$ -- 0
-int.to.str$ -- 12
-missing$ -- 13
-newline$ -- 60
-num.names$ -- 24
-pop$ -- 102
+int.to.str$ -- 13
+missing$ -- 14
+newline$ -- 64
+num.names$ -- 26
+pop$ -- 114
 preamble$ -- 1
-purify$ -- 66
+purify$ -- 70
 quote$ -- 0
-skip$ -- 120
+skip$ -- 127
 stack$ -- 0
-substring$ -- 196
-swap$ -- 46
+substring$ -- 202
+swap$ -- 47
 text.length$ -- 4
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 46
-warning$ -- 7
-while$ -- 35
-width$ -- 14
-write$ -- 123
+type$ -- 50
+warning$ -- 9
+while$ -- 37
+width$ -- 15
+write$ -- 130
 (There was 1 error message)

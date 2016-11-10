@@ -5,6 +5,11 @@ Yoshua Bengio, R{\'e}jean Ducharme, Pascal Vincent, and Christian Jauvin.
 \newblock A neural probabilistic language model.
 \newblock {\em Journal of Machine Learning Research}, 3(Feb):1137--1155, 2003.
 
+\bibitem{garbacea2015university}
+Cristina G{\^a}rbacea and Evangelos Kanoulas.
+\newblock The university of amsterdam (ilps. uva) at trec 2015 temporal
+  summarization track.
+
 \bibitem{guo2013updating}
 Qi~Guo, Fernando Diaz, and Elad Yom-Tov.
 \newblock Updating users about time critical events.

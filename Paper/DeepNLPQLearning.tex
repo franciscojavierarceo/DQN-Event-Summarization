@@ -29,16 +29,16 @@
 \maketitle
 
 \begin{abstract}
-We present a streaming extraction policy for massive document summarization learned using a deep reinforcement learning recurrent neural network architecture. The rewards of our network are evaluated through manually reviewed summaries, which allow us to specify an end-to-end framework to optimize our extractive policy.  By using raw text from our articles and mapping words into a higher embedding dimension through our recurrent neural network, we are able to learn a more robust representation than traditional n-gram models. We benchmark our model against random decisions, bag-of-words, and bag-of-bigrams models.\footnote{ \url{https://github.com/franciscojavierarceo/DQN-Event-Summarization} }
+We present a streaming extraction policy for multi-document summarization learned using a deep reinforcement learning recurrent neural network architecture. The rewards of our network are evaluated through manually reviewed summaries, which allow us to specify an end-to-end framework to optimize our extraction policy.  By using raw text from our articles and mapping words into a higher embedding dimension through our recurrent neural network, we are able to learn a more robust representation than traditional n-gram models. We benchmark our model against random decisions, bag-of-words, and bag-of-bigrams models.\footnote{ \url{https://github.com/franciscojavierarceo/DQN-Event-Summarization} }
 \end{abstract}
 
 \bibliographystyle{plain}
 
 \section{Introduction}
 
-Crisis informatics is becoming an increasingly popular area of study in machine learning with more recent research focusing on extractive summarization (e.g., \cite{kedzie2015predicting} and \cite{kedzieextractive}) of multi-document summarization. The approach by \cite{kedzie2015predicting}  has shown that it is possible to select relevant sentences from a massive number of documents on the web to create summaries with meaningful content by adapting classifiers to maximize search policies. These systems operate in a streaming fashion and are capable of evaluating each sentence within each article to decide whether or not to include or ignore the sentence. 
+Recent research has focused on extractive (e.g., \cite{kedzie2015predicting}, \cite{garbacea2015university}, and \cite{kedzieextractive}) multi-document summarization. The approach by \cite{kedzie2015predicting}  has shown that it is possible to select relevant sentences from a massive number of documents on the web to create summaries with meaningful content by adapting classifiers to maximize search policies. These systems operate in a streaming fashion and are capable of evaluating each sentence within each article to decide whether or not to include or ignore the sentence. 
 
-Unfortunately, these systems have still been shown to fall short of heuristic algorithms [citation needed], which may be due to inadequate capturing of the rich structure and often idiosyncratic information by traditional n-gram language models. \cite{bengio2003neural} have shown that natural language processing can be mapped to a higher order dimension to represent more powerful features for various language modeling tasks. These embeddings have proven incredibly powerful on a variety of different natural language processing tasks [citations needed].
+Unfortunately, these systems have still been shown to fall short of algorithms that employ simple heuristics \cite{garbacea2015university}, which may be due to inadequate capturing of the rich structure and often idiosyncratic information by traditional n-gram language models. In recent years, \cite{bengio2003neural} have shown that natural language processing can be mapped to a higher order dimension to represent more powerful features for various language modeling tasks. These embeddings have proven incredibly powerful on a variety of different natural language processing tasks [citations needed].
 
 In this paper we show that a deep recurrent neural network with a long short term memory (LSTM) is able to successfully learn an extractive summary policy by encoding the action, state, and reward into a Q-Learning model, similar to that of  \cite{hausknecht2015deep}. We show that on a variety of different metrics, our specification is able to reach state-of-the-art performance.
 
@@ -147,7 +147,8 @@ that learns the parameters using stochastic gradient descent with RMSprop \cite{
     \tikzstyle{sensor}=[draw, fill=blue!10, text width=5em,  text centered, minimum height=2.0em,drop shadow]
     \tikzstyle{term}=[draw, fill=gray!10, text width=5em,  text centered, minimum height=2.0em,drop shadow]
     \tikzstyle{wa} = [sensor, fill=gray!10, text width=5em,  minimum height=2em, rounded corners, drop shadow]
-    \tikzstyle{wa2} = [sensor, fill=gray!10, text width=6em,  minimum height=12em, rounded corners, drop shadow]
+    \tikzstyle{wa} = [sensor, fill=gray!10, text width=5em,  minimum height=2em, rounded corners, drop shadow]
+    \tikzstyle{wa2} = [sensor, fill=gray!10, text width=6em,  minimum height=12em, drop shadow]
     \tikzstyle{om} = [draw, fill=green!05, text width=5em,  text centered, minimum height=2.0em,drop shadow]
 
     \begin{tikzpicture}
@@ -207,17 +208,17 @@ that learns the parameters using stochastic gradient descent with RMSprop \cite{
             \path[fill=white!20,rounded corners, draw=green!100, dashed]         (a) rectangle (d);
         \end{pgfonlayer}
 
-        \path (wa.west) + (5.8,    2.25)  node (vote.east) {\scriptsize \textbf{Action} }; %{\textbf{Summary-Action Representation} };
-        \path (wa.west) + (5.8,    1.95)  node (vote.east) {\scriptsize $\{argmax(a_t)$\}}; %{\textbf{Summary-Action Representation} };
-        \path (wa.west) + (-2.90, -3.2)  node (vote.east) {Input}; %{\textbf{Input State}};
-        \path (wa.west) + (3.5,    -3.2)  node (vote.east) {State-Action Representation }; %{\textbf{Summary-Action Representation} };
-        \path (wa.west) + (9.30,  -3.2)  node (vote.east) {Output}; %{\textbf{Output State}};
+        \path (wa.west) + (5.8,    2.25)  node (vote.east) {\scriptsize \textbf{Action} }; 
+        \path (wa.west) + (5.8,    1.95)  node (vote.east) {\scriptsize $\{argmax(a_t)$\}}; 
+        \path (wa.west) + (-2.90, -3.2)  node (vote.east) {Input}; 
+        \path (wa.west) + (3.5,    -3.2)  node (vote.east) {State-Action Representation }; 
+        \path (wa.west) + (9.30,  -3.2)  node (vote.east) {Output};
         \path (wa.east) + (0.5, -4.2)  node (vote.east) {\textbf{Figure 1: DQN-LSTM Architecture}};
 \end{tikzpicture}
 \end{center}
 
 \section{Learning an Extraction Policy}
-We process our queries and extract the 
+Since the state of our current summary at time $t$ depends on the state at time $t - 1$, we execute our Q-function in the feedforward stage using single batches to allow for proper updating of the predicted summary, yet during the backpropagation phase, we sample random mini-batches from the stored transitions.  The weights of the Q-function and the action sequence are initialized at random and we randomly explore the state-space by employing an $\epsilon$-greedy search strategy during our action selection that linearly decays to a base exploration rate of 0.01. We describe in full detail the training of our DQN-LSTM in $\textbf{Algorithm 1}$. 
 
 \begin{algorithm}
     \bf{Input:} { \rm  \{$\mathcal{D}$: Event queries, $X_d$: Input sentences, $N$: Number of epochs\} } \\
@@ -260,7 +261,7 @@ We process our queries and extract the
 
 \section{Results}
 \subsection{Evaluation}
-We evaluate our learned extracted summaries on ROUGE-N F1, Recall, and Precision on the full set of nuggets. 
+We evaluate our learned extracted summaries on ROUGE-N F1, Recall, and Precision on the full set of nuggets averaged across all of the queries on the full predicted summary $\tilde{Y}_d$ $\forall d \in \mathcal{D}$. The results are presented in \textbf{Table 1}.
 
 \begin{center}
 \begin{tabular}{  c | c | c | c  }
@@ -269,14 +270,15 @@ We evaluate our learned extracted summaries on ROUGE-N F1, Recall, and Precision
 	DQN-LSTM  & TBD & TBD  & TBD\\
 	DQN-BOW  & TBD & TBD  & TBD\\
 	DQN-BiBOW  & TBD & TBD  & TBD\\
-	Random  & TBD & TBD \\ \hline
+	Random  & TBD & TBD  & TBD\\ \hline
 	\hline
-	\multicolumn{4}{c}{Figure 1. Extracted summary performance on manually reviewed nuggets} \\
+	\multicolumn{4}{c}{Table 1. Extracted summary performance on manually reviewed nuggets} \\
 	\hline
 \end{tabular}
 \end{center}
 
 \section{Conclusion}
+We have presented an end-to-end deep reinforcement learning architecture to learn an extraction policy for multi-document summarization. By treating the incoming sentence streams from different documents as inputs into a recurrent neural network, we are able to learn both a richer embedding representation of the three input components and a robust extraction policy.
 \newpage
 
 \bibliography{DeepNLPQLearning}
