@@ -218,7 +218,9 @@ that learns the parameters using stochastic gradient descent with RMSprop \cite{
 \end{center}
 
 \section{Learning an Extraction Policy}
-Since the state of our current summary at time $t$ depends on the state at time $t - 1$, we execute our Q-function in the feedforward stage using single batches to allow for proper updating of the predicted summary, yet during the backpropagation phase, we sample random mini-batches from the stored transitions.  The weights of the Q-function and the action sequence are initialized at random and we randomly explore the state-space by employing an $\epsilon$-greedy search strategy during our action selection that linearly decays to a base exploration rate of 0.01. We describe in full detail the training of our DQN-LSTM in $\textbf{Algorithm 1}$. 
+Since the state of our current summary at time $t$ depends on the state at time $t - 1$, we execute our Q-function in the feedforward stage using single batches to allow for proper updating of the predicted summary, yet during the backpropagation phase, we sample random mini-batches from the stored transitions.  We set our embedding dimension to 100, the future discount rate $\gamma$ to 0.50, and the maximum summary length to 25 tokens.
+
+The weights of the Q-function and the action sequence are initialized at random and we randomly explore the state-space for 200 of the 1000 epochs by employing an $\epsilon$-greedy search strategy during our action selection that linearly decays to a base exploration rate of 0.01. We describe in full detail the training of our DQN-LSTM in $\textbf{Algorithm 1}$. 
 
 \begin{algorithm}
     \bf{Input:} { \rm  \{$\mathcal{D}$: Event queries, $X_d$: Input sentences, $N$: Number of epochs\} } \\
@@ -260,8 +262,7 @@ Since the state of our current summary at time $t$ depends on the state at time 
 \end{algorithm}
 
 \section{Results}
-\subsection{Evaluation}
-We evaluate our learned extracted summaries on ROUGE-N F1, Recall, and Precision on the full set of nuggets averaged across all of the queries on the full predicted summary $\tilde{Y}_d$ $\forall d \in \mathcal{D}$. The results are presented in \textbf{Table 1}.
+We evaluate our learned extracted summaries on ROUGE-N F1, Recall, and Precision on the full set of nuggets averaged across all of the queries on the full predicted summary $\tilde{Y}_d$, $\forall d \in \mathcal{D}$. We compare our DQN-LSTM to bag-of-words and bag-of-bigrams neural networks, our results are presented in \textbf{Table 1}.
 
 \begin{center}
 \begin{tabular}{  c | c | c | c  }
