@@ -25,6 +25,7 @@ cmd:option('--usecuda', false, 'running on cuda')
 cmd:option('--metric', "f1", 'Metric to learn')
 cmd:option('--n_samples', 500, 'Number of samples to use')
 cmd:option('--max_summary', 300, 'Maximum summary size')
+cmd:option('--end_baserate', 5, 'Maximum summary size')
 cmd:text()
 --- this retrieves the commands and stores them in opt.variable (e.g., opt.model)
 local opt = cmd:parse(arg or {})
@@ -41,6 +42,7 @@ embeddingSize = opt.edim
 use_cuda = opt.usecuda
 metric = opt.metric
 maxSummarySize = opt.max_summary
+end_baserate = opt.end_baserate
 n = opt.n_samples
 SKIP = 1
 SELECT = 2
@@ -100,7 +102,8 @@ else
                 :add(nn.Sequencer(nn.LSTM(embeddingSize, embeddingSize)))
                 :add(nn.SelectTable(-1))            -- selects last state of the LSTM
                 :add(nn.Linear(embeddingSize, embeddingSize))
-                :add(nn.Tanh())
+                :add(nn.ReLU())
+                -- :add(nn.Tanh())
 end
 local queryLookup = sentenceLookup:clone("weight", "gradWeight") 
 local summaryLookup = sentenceLookup:clone("weight", "gradWeight")
@@ -383,8 +386,11 @@ for epoch=0, nepochs do
     end 
     if (epsilon - delta) <= base_explore_rate then
         epsilon = base_explore_rate
+        if epoch > end_baserate then 
+            base_explore_rate = 0.
+        end
     else 
         epsilon = epsilon - delta
     end
 end
-os.execute(string.format("python make_density_gif.py %i %s %s", nepochs, nnmod, metric))
+-- os.execute(string.format("python make_density_gif.py %i %s %s", nepochs, nnmod, metric))
