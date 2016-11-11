@@ -44,6 +44,8 @@ metric = opt.metric
 maxSummarySize = opt.max_summary
 end_baserate = opt.end_baserate
 n = opt.n_samples
+K_tokens = 25
+
 SKIP = 1
 SELECT = 2
 bow = false
@@ -68,7 +70,6 @@ inputs = {
         ['query'] = queries[3]
 }
 query_id = 1
-K_tokens = 25
 qs = inputs['query']
 input_file = csvigo.load({path = data_path .. inputs['inputs'], mode = "large", verbose = false})
 nugget_file = csvigo.load({path = data_path .. inputs['nuggets'], mode = "large", verbose = false})

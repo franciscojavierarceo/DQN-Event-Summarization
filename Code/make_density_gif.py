@@ -4,6 +4,25 @@ import imageio
 import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
+import matplotlib.colors as mcolors
+
+
+def make_colormap(seq):
+    """Return a LinearSegmentedColormap
+    seq: a sequence of floats and RGB-tuples. The floats should be increasing
+    and in the interval (0,1).
+    """
+    seq = [(None,) * 3, 0.0] + list(seq) + [1.0, (None,) * 3]
+    cdict = {'red': [], 'green': [], 'blue': []}
+    for i, item in enumerate(seq):
+        if isinstance(item, float):
+            r1, g1, b1 = seq[i - 1]
+            r2, g2, b2 = seq[i + 1]
+            cdict['red'].append([item, r1, r2])
+            cdict['green'].append([item, g1, g2])
+            cdict['blue'].append([item, b1, b2])
+    return mcolors.LinearSegmentedColormap('CustomMap', cdict)
+
 
 def buildCDF(df, var):
     cdf = pd.DataFrame(df[var].value_counts())
@@ -21,6 +40,9 @@ def main(nepochs, model, metric):
     pdf = pd.read_csv('./perf.txt', sep=';')
     md = {"f1": "rougeF1", "recall": "rougeRecall", "precision": "rougePrecision"}
     emetric = md[metric]
+    c = mcolors.ColorConverter().to_rgb
+    grn = 'limegreen'
+    rvb = make_colormap([c(grn), c('white'), 0.1, c(grn), c('white'), 0.9, c('white')])
     # Pulling in the images that were exported
     ofile_names = [('./plotdata/%s/%i_epoch.txt' % (model, x) ) for x in range(nepochs) ] 
     for (ofile, epoch) in zip(ofile_names, range(nepochs)):
@@ -41,17 +63,19 @@ def main(nepochs, model, metric):
         odf['predOptimal'] = odf[['predSelect','predSkip']].max(axis=1)
         nsel  = odf['Select'].sum()
         nskip = odf['Skip'].sum()
+        den =  float(nsel+nskip)
         cdfp = buildCDF(odf, 'predOptimal')
         cdfa = buildCDF(odf, 'actual')
         f, axarr = plt.subplots(1, 2, figsize=(16,8))
-        axarr[0].imshow(odf[['Skip', 'Select']], cmap='autumn')
-        axarr[0].set_title('Actions')
-        axarr[0].set_xlabel('Select = %i and Skip = %i' % (nsel, nskip))
+        axarr[0].imshow(odf[['Skip', 'Select']], cmap=rvb, interpolation='nearest', aspect='auto')
+        axarr[0].set_title('Select = {%i, %.3f} and Skip = {%i, %.3f}' % (nsel, nsel/den, nskip, nskip/den))
+        axarr[0].set_xlabel('Estimated Optimal Actions')
         axarr[0].set_xticks([])
         axarr[1].plot(cdfp['predOptimal'], cdfp['cumpercent'], label='Predicted', c='blue')
         axarr[1].plot(cdfa['actual'], cdfa['cumpercent'], label='Actual', c='red')
         axarr[1].set_ylim([0,1])
         axarr[1].set_xlim([llow, lhigh])
+        axarr[1].set_xlabel('CDF of Actual and Predicted Rouge')
         axarr[1].legend(loc ='upper left')
         axarr[1].grid()
         axarr[1].set_title('%s %s model performance at epoch %i = %.3f' % (metric, model, epoch, rouge))
