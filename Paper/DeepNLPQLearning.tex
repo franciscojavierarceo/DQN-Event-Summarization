@@ -5,6 +5,7 @@
 \usepackage{ bm }
 \usepackage{amsmath}
 \usepackage{hyperref}
+\usepackage{caption}
 
 \usepackage{tikz}
 \usetikzlibrary{shapes,arrows,shadows}
@@ -37,7 +38,7 @@
 \maketitle
 
 \begin{abstract}
-We present a streaming extraction policy for multi-document summarization learned using a deep reinforcement learning recurrent neural network architecture. The rewards of our network are evaluated through manually reviewed summaries, which allow us to specify an end-to-end framework to optimize our extraction policy.  By using raw text from our articles and mapping words into a higher embedding dimension through our recurrent neural network, we are able to learn a more robust representation than traditional n-gram models. We benchmark our model against random decisions, bag-of-words, and bag-of-bigrams models.\footnote{ \url{https://github.com/franciscojavierarceo/DQN-Event-Summarization} }
+We present a streaming extraction policy for multi-document summarization learned using a deep reinforcement learning recurrent neural network architecture. The rewards of our network are evaluated through manually reviewed summaries, which allow us to specify an end-to-end framework to optimize our extraction policy.  By using raw text from our articles and mapping words into a higher embedding dimension through our recurrent neural network, we are able to learn a more robust representation than traditional n-gram models. We benchmark our model against random actions, a bag-of-words model, and a bag-of-bigrams model.\footnote{ \url{https://github.com/franciscojavierarceo/DQN-Event-Summarization} }
 \end{abstract}
 
 \bibliographystyle{plain}
@@ -74,7 +75,7 @@ In the subsequent sections, we outline the architecture of our DQN and define th
 
 \subsection{States}  
 
-In our architecture a state $s(x_{t},\tilde{y}_{t}, d)$ is a function of the stream $X_d$, $\forall d \in D$, observed up to the current system time $t$, the state of the current summary $\tilde{y}_t$ at system time $t$, and the query $d$. For brevity we will use $s_t$ where the dependence on $x_{t},\tilde{y}_{t},$ and $d$ is assumed. $s_t$ itself is three recurrent neural networks, one for encoding  the summary, the stream, and the query. 
+In our architecture a state $s(x_{t},\tilde{y}_{t}, d)$ is a function of the stream $X_d$, $\forall d \in D$, the state of the current summary $\tilde{y}_t$ at system time $t$, and the query $d$. For brevity we will use $s_t$ where the dependence on $x_{t},\tilde{y}_{t},$ and $d$ is assumed. $s_t$ itself is three recurrent neural networks, one for encoding  the summary, the stream, and the query. 
 
 \subsection{Actions} 
 The set of possible actions $a_t$ at each time step is $\mathcal{A} = \{select, skip\}$ where $select$ corresponds to adding the current sentence $x_t$ to the summary and incrementing the current system time, or $skip$ where only $t$ is incremented without changing the current summary. Thus, our current predicted summary at time $t$ is defined as
@@ -129,7 +130,7 @@ Our extraction policy then takes as input an action $a_t$ in state $s_t$ at time
 \begin{equation}
 	\hat{Q}_{t+1}(s,a) = \textrm{E}[ r + \gamma \textrm{max}_{a'} \hat{Q}_t(s', a') | s, a]
 \end{equation}
-where $\gamma \in \mathbb{R}$ is the discount rate applied to future rewards and the expectation is taken over transitions in state $s$ and action $a$. By iterating over the Q-function, it converges asymptotically to the optimal policy, i.e.,  $\hat{Q}_t \rightarrow \hat{Q}^{*}$ as $t \rightarrow \infty$, but in finite iterations we can use a neural network as our function approximator, where our weights, $\theta$, can be optimized using the following loss function
+where $\gamma \in \mathbb{R}$ is the discount rate applied to future rewards and the expectation is taken over transitions in state $s$ and action $a$. By iterating over the Q-function, it converges asymptotically to the optimal policy, i.e.,  $\hat{Q}_t \rightarrow Q^{*}$ as $t \rightarrow \infty$, but in finite iterations we can use a neural network as our function approximator, where our weights, $\theta$, can be optimized using the following loss function
 
 \begin{equation}
 	\mathcal{L}_i(\theta_i) =  \textrm{E}_{\hat{s}, \hat{a}}[ \big (y_i - Q(\hat{s}, \hat{a}; \theta_i) \big )^2]
@@ -227,13 +228,20 @@ that learns the parameters using stochastic gradient descent with RMSprop \cite{
 
 \section{Learning an Extraction Policy}
 \subsection{Settings}
-Since the state of our current summary at time $t$ depends on the state at time $t - 1$, we execute our Q-function in the feedforward stage using single batches to allow for proper updating of the predicted summary. During the backpropagation phase we sample random mini-batches from the stored transitions.  We set our embedding dimension to 100, the future discount rate $\gamma$ to 0.50, and the maximum summary length to 300 tokens.
+Since the state of our current summary at time $t$ depends on the state at time $t - 1$, we have to execute our Q-function in the feedforward stage using a single batch to properly update the predicted summary with optimal expected action. During the backpropagation phase we sample random mini-batches from the stored transitions.  We set our embedding dimension to 100, the future discount rate $\gamma$ to 0.50, and the maximum summary length to 300 tokens.
 
-The weights of the Q-function and the action sequence are initialized at random and we randomly explore the state-space for 200 of the 1000 epochs by employing an $\epsilon$-greedy search strategy during our action selection that linearly decays to a base exploration rate of 0.01. We describe in full detail the training of our DQN-LSTM in $\textbf{Algorithm 1}$. 
+The weights of the Q-function and the action sequence are initialized at random and we randomly explore the state-space for 200 of the 1000 epochs by employing an $\epsilon$-greedy search strategy during our action selection that linearly decays to a base exploration rate of 0.01. We describe in full detail the training of our DQN-LSTM in $\textbf{Algorithm 1}$.
 
 \subsection{Experiments}
 
-Different experiments were done to study the effect of each hyperparameter on the model.  Specifically, we evalute (1) the settings of $K$ to assess the impact on the final predicted summary, (2) values of gamma to understand the effects on the parameter updates, (3) the memory size on the speed of convergence, and (4) the base exploration rate on the states explored. We present several figures visualizing the impact using of the different hyperparameters in our model in \textbf{Figure 2} using 5-fold cross-validation.
+Different experiments were done to study the effect of each hyperparameter on the model.  Specifically, we evalute (1) the settings of $K$ to assess the impact on the final predicted summary, (2) values of gamma to understand the effects on the parameter updates, (3) the memory size on the speed of convergence, and (4) the base exploration rate on the states explored. We present several figures visualizing the impact using different settings of the hyperparameters in our model in \textbf{Figure 2} using 5-fold cross-validation.
+
+\begin{figure}[h]
+    \centering
+    \fbox{\includegraphics[scale=0.35]{perf}}
+    \captionsetup{labelformat=empty}
+    \caption{\textbf{Figure 2: Experiments on DQN Architecture}}
+\end{figure}
 
 \begin{algorithm}
     \bf{Input:} { \rm  \{$\mathcal{D}$: Event queries, $X_d$: Input sentences, $N$: Number of epochs\} } \\
@@ -281,10 +289,10 @@ We evaluate our learned extracted summaries on ROUGE-N F1, Recall, and Precision
 \begin{tabular}{  c | c | c | c  }
 	\hline
 	Model  & ROUGE-1F1 & ROUGE-1Recall & ROUGE-1Precision  \\ \hline \hline
-	DQN-LSTM  & \color{ red} TBD & \color{ red} TBD  & \color{ red} TBD\\
+	Random  & \color{ red}TBD & \color{ red}TBD  & \color{ red}TBD\\ 
 	DQN-BOW  & \color{ red}TBD & \color{ red} TBD  & \color{ red} TBD\\
 	DQN-BiBOW  & \color{ red} TBD & \color{ red} TBD  & \color{ red}TBD\\
-	Random  & \color{ red}TBD & \color{ red}TBD  & \color{ red}TBD\\ \hline
+	DQN-LSTM  & \color{ red} TBD & \color{ red} TBD  & \color{ red} TBD\\ \hline
 	\hline
 	\multicolumn{4}{c}{Table 1. Extracted summary performance on manually reviewed nuggets} \\
 	\hline
