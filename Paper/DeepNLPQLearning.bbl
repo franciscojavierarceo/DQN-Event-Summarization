@@ -31,17 +31,20 @@ Matthew Hausknecht and Peter Stone.
 Geoffrey Hinton, N~Srivastava, and Kevin Swersky.
 \newblock Lecture 6a overview of mini--batch gradient descent.
 
-\bibitem{kedzieextractive}
-Chris Kedzie.
-\newblock Extractive and abstractive event summarization over streaming web
-  text.
-
 \bibitem{kedzie2016real}
 Chris Kedzie, Fernando Diaz, and Kathleen McKeown.
 \newblock Real-time web scale event summarization using sequential decision
   making.
 \newblock {\em Proceedings of the Joint Conference on Artificial Intelligence},
   2016.
+
+\bibitem{kedzieextractive}
+Chris Kedzie and Kathleen McKeown.
+\newblock Extractive and abstractive event summarization over streaming web
+  text.
+\newblock In {\em Proceedings of the Twenty-Fifth International Joint
+  Conference on Artificial Intelligence, {IJCAI} 2016, New York, NY, USA, 9-15
+  July 2016}, pages 4002--4003, 2016.
 
 \bibitem{kedzie2015predicting}
 Chris Kedzie, Kathleen McKeown, and Fernando Diaz.

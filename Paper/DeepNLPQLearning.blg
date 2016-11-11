@@ -3,59 +3,60 @@ Capacity: max_strings=35307, hash_size=35307, hash_prime=30011
 The top-level auxiliary file: DeepNLPQLearning.aux
 The style file: plain.bst
 Database file #1: DeepNLPQLearning.bib
-Repeated entry---line 113 of file DeepNLPQLearning.bib
+Repeated entry---line 125 of file DeepNLPQLearning.bib
  : @inproceedings{hausknecht2015deep
  :                                  ,
 I'm skipping whatever remains of this entry
+A bad cross reference---entry "kedzieextractive"
+refers to entry "DBLP:conf/ijcai/2016", which doesn't exist
+Warning--I didn't find a database entry for "DBLP:conf/ijcai/2016"
 Warning--empty year in diazquery
 Warning--empty booktitle in garbacea2015university
 Warning--empty year in garbacea2015university
 Warning--empty journal in hinton2012lecture
 Warning--empty year in hinton2012lecture
-Warning--empty journal in kedzieextractive
-Warning--empty year in kedzieextractive
 Warning--can't use both volume and number fields in sutton1998reinforcement
 Warning--empty publisher in sutton1998reinforcement
 Warning--empty year in sutton1998reinforcement
 You've used 16 entries,
             2118 wiz_defined-function locations,
-            574 strings with 7065 characters,
-and the built_in function-call counts, 5584 in all, are:
-= -- 511
-> -- 317
-< -- 4
-+ -- 126
-- -- 108
-* -- 381
-:= -- 927
-add.period$ -- 48
+            578 strings with 7273 characters,
+and the built_in function-call counts, 5874 in all, are:
+= -- 546
+> -- 323
+< -- 5
++ -- 128
+- -- 110
+* -- 396
+:= -- 955
+add.period$ -- 49
 call.type$ -- 16
-change.case$ -- 101
+change.case$ -- 102
 chr.to.int$ -- 0
-cite$ -- 26
-duplicate$ -- 227
-empty$ -- 429
-format.name$ -- 108
-if$ -- 1165
+cite$ -- 24
+duplicate$ -- 242
+empty$ -- 456
+format.name$ -- 110
+if$ -- 1243
 int.to.chr$ -- 0
 int.to.str$ -- 16
 missing$ -- 17
-newline$ -- 79
+newline$ -- 80
 num.names$ -- 32
 pop$ -- 147
 preamble$ -- 1
-purify$ -- 86
+purify$ -- 87
 quote$ -- 0
-skip$ -- 145
+skip$ -- 163
 stack$ -- 0
-substring$ -- 217
-swap$ -- 53
-text.length$ -- 4
+substring$ -- 257
+swap$ -- 66
+text.length$ -- 5
 text.prefix$ -- 0
 top$ -- 0
 type$ -- 62
-warning$ -- 10
-while$ -- 43
+warning$ -- 8
+while$ -- 46
 width$ -- 18
-write$ -- 160
-(There was 1 error message)
+write$ -- 164
+(There were 2 error messages)
