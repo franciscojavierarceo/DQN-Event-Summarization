@@ -9,6 +9,7 @@ Repeated entry---line 125 of file DeepNLPQLearning.bib
 I'm skipping whatever remains of this entry
 A bad cross reference---entry "kedzieextractive"
 refers to entry "DBLP:conf/ijcai/2016", which doesn't exist
+Warning--I didn't find a database entry for "kedzie2015xpredicting"
 Warning--I didn't find a database entry for "DBLP:conf/ijcai/2016"
 Warning--empty year in diazquery
 Warning--empty booktitle in garbacea2015university
@@ -18,45 +19,45 @@ Warning--empty year in hinton2012lecture
 Warning--can't use both volume and number fields in sutton1998reinforcement
 Warning--empty publisher in sutton1998reinforcement
 Warning--empty year in sutton1998reinforcement
-You've used 16 entries,
+You've used 18 entries,
             2118 wiz_defined-function locations,
-            578 strings with 7273 characters,
-and the built_in function-call counts, 5874 in all, are:
-= -- 546
-> -- 323
+            593 strings with 7698 characters,
+and the built_in function-call counts, 6590 in all, are:
+= -- 612
+> -- 364
 < -- 5
-+ -- 128
-- -- 110
-* -- 396
-:= -- 955
-add.period$ -- 49
-call.type$ -- 16
-change.case$ -- 102
++ -- 144
+- -- 124
+* -- 450
+:= -- 1075
+add.period$ -- 55
+call.type$ -- 18
+change.case$ -- 115
 chr.to.int$ -- 0
-cite$ -- 24
-duplicate$ -- 242
-empty$ -- 456
-format.name$ -- 110
-if$ -- 1243
+cite$ -- 26
+duplicate$ -- 267
+empty$ -- 513
+format.name$ -- 124
+if$ -- 1389
 int.to.chr$ -- 0
-int.to.str$ -- 16
-missing$ -- 17
-newline$ -- 80
-num.names$ -- 32
-pop$ -- 147
+int.to.str$ -- 18
+missing$ -- 19
+newline$ -- 90
+num.names$ -- 36
+pop$ -- 162
 preamble$ -- 1
-purify$ -- 87
+purify$ -- 98
 quote$ -- 0
-skip$ -- 163
+skip$ -- 178
 stack$ -- 0
-substring$ -- 257
-swap$ -- 66
+substring$ -- 298
+swap$ -- 69
 text.length$ -- 5
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 62
+type$ -- 70
 warning$ -- 8
-while$ -- 46
-width$ -- 18
-write$ -- 164
+while$ -- 52
+width$ -- 20
+write$ -- 185
 (There were 2 error messages)

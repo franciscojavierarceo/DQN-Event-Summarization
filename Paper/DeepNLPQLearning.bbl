@@ -31,6 +31,11 @@ Matthew Hausknecht and Peter Stone.
 Geoffrey Hinton, N~Srivastava, and Kevin Swersky.
 \newblock Lecture 6a overview of mini--batch gradient descent.
 
+\bibitem{hochreiter1997long}
+Sepp Hochreiter and J{\"u}rgen Schmidhuber.
+\newblock Long short-term memory.
+\newblock {\em Neural computation}, 9(8):1735--1780, 1997.
+
 \bibitem{kedzie2016real}
 Chris Kedzie, Fernando Diaz, and Kathleen McKeown.
 \newblock Real-time web scale event summarization using sequential decision
@@ -65,6 +70,13 @@ Richard McCreadie, Craig Macdonald, and Iadh Ounis.
 \newblock In {\em Proceedings of the 23rd ACM International Conference on
   Conference on Information and Knowledge Management}, pages 301--310. ACM,
   2014.
+
+\bibitem{mikolov2010recurrent}
+Tom{\'a}{\v{s}} Mikolov, Martin Karafi{\'a}t, Luk{\'a}{\v{s}} Burget, Jan
+  {\v{C}}ernock{\`y}, and Sanjeev Khudanpur.
+\newblock Recurrent neural network based language model.
+\newblock In {\em Eleventh Annual Conference of the International Speech
+  Communication Association}, 2010.
 
 \bibitem{MnihBMGLHSK16}
 Volodymyr Mnih, Adri{\`{a}}~Puigdom{\`{e}}nech Badia, Mehdi Mirza, Alex Graves,

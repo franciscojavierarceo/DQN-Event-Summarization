@@ -6,6 +6,9 @@
 \usepackage{amsmath}
 \usepackage{hyperref}
 \usepackage{caption}
+\usepackage{algorithm}
+\usepackage[noend]{algorithmic}
+%\usepackage[noend]{algcompatible}
 
 \usepackage{tikz}
 \usetikzlibrary{shapes,arrows,shadows}
@@ -22,7 +25,6 @@
 }
 
 
-\usepackage{algorithm,algorithmic,amsmath}
 %\usepackage[linesnumbered,ruled]{algorithm2e}
 
 
@@ -49,9 +51,9 @@ Recent research in text retrieval  has focused on extractive algorithms to ident
 
 Unfortunately, many of these systems have still been shown to fall short of algorithms that employ simple heuristics \cite{garbacea2015university}, which may be due to inadequate capturing of the rich structure and often idiosyncratic information by traditional n-gram language models.  
 
-In recent years, recurrent neural networks have been used to map textual language to a higher order dimension to represent more powerful features for various language modeling tasks. These vector representations, also known as embeddings, have proven incredibly powerful on a variety of different natural language processing tasks (e.g., \cite{bengio2003neural}, \cite{sundermeyer2012lstm}, \cite{kim2016character}). For query based retrievals, \cite{diazquery} has shown success in using these embeddings for \emph{ad hoc} information retrieval.
+In recent years, recurrent neural networks have been used to map textual language to a higher order dimension to represent more powerful features for a variety of different language modeling tasks \cite{mikolov2010recurrent}. These vector representations, also known as embeddings, have proven incredibly powerful on a variety of different natural language processing tasks (e.g., \cite{bengio2003neural}, \cite{sundermeyer2012lstm}, \cite{kim2016character}). For query based retrievals, \cite{diazquery} has shown success in using these embeddings for \emph{ad hoc} information retrieval.
 
-In this paper we show that a deep recurrent neural network with a long short term memory (LSTM) is able to successfully learn an extractive summary policy by encoding the action, state, and reward into a Q-Learning model, similar to that of  \cite{hausknecht2015deep}. We show the performance of our model on a variety of different metrics and benchmark them against random actions, a bag-of-words multilayered perceptron, and bag-of-bigrams multilayered perceptron.
+In this paper we show that a deep recurrent neural network with a long short term memory (LSTM) \cite{hochreiter1997long} is able to successfully learn an extractive summary policy by encoding the action, state, and reward into a Q-Learning model, similar to that of  \cite{hausknecht2015deep}. We show the performance of our model on a variety of different metrics and benchmark them against random actions, a bag-of-words multilayered perceptron, and bag-of-bigrams multilayered perceptron.
 
 % Section 3
 \section{Extractive Streaming Summarization}
@@ -60,7 +62,7 @@ In the extractive streaming summarization task, we are given as input a query (i
 
 Implicit to this problem is the notion of system time -- the summarization algorithm can only examine sentences that occur in the stream before the current system time. Advancing the system time gives the algorithm access to more sentences, although in practice the stream is sufficiently large enough that choices have to be made about how much history can be kept in memory. For many domains, e.g., crisis informatics, it is preferable for a summarization algorithm to identify important information as early as possible, and so the objective function should penalize a large disparity between the time a piece of information is first available to the algorithm and the system time at which that information is actually added to the summary.
 
-Previous work in this area has either incremented the system time in fixed increments (e.g., an hour)  \cite{mccreadie2014incremental,kedzie2015predicting} or operated in a fully online setting \cite{guo2013updating,kedzie2016real}. In both cases explicitly modeling the current state of the summary, the stream, and their relationship with the query is quite complicated and exhibits non-linear dynamics that are difficult characterize in traditional feature based models.
+Previous work in this area has either incremented the system time in fixed increments (e.g., an hour)  \cite{mccreadie2014incremental,kedzie2015xpredicting} or operated in a fully online setting \cite{guo2013updating,kedzie2016real}. In both cases explicitly modeling the current state of the summary, the stream, and their relationship with the query is quite complicated and exhibits non-linear dynamics that are difficult characterize in traditional feature based models.
 
 Additionally, the structured nature of the sentence selection task (sentence selection is highly dependent on the current summary state) suggests that imitation or reinforcement learning are necessary to obtain parity between training and testing feature distributions. 
 
@@ -90,37 +92,41 @@ The set of possible actions $a_t$ at each time step is $\mathcal{A} = \{select, 
 Since $\tilde{y}_t$ grows linearly with the number of selected sentences, we mitigate potential capacity constraints by using a queue to hold the last $K$ elements of the current predicted summary. 
 
 \subsection{Reward} 
-The reward for a given action is measured by relative gain in ROUGE-2 F1 score of the predicted summary $\tilde{y}_{t}$ measured against a gold standard summary $Y$. When only one gold summary reference is used, ROUGE-N Recall is calculated as 
+The reward for a given action is measured by the change in ROUGE-N F1 score of the predicted summary $\tilde{y}_{t}$ measured against a gold standard summary $Y$. When only one gold summary reference is used, ROUGE-N Recall is calculated as 
 
-\[ \textrm{ROUGE-NR}(\tilde{y}, Y) = 
+\begin{equation}
+ \textrm{ROUGE-NR}(\tilde{y}, Y) = 
     \frac{\sum_{g \in \textrm{ngrams}(Y,N)} 
     \min \left(\textrm{count}(g, \tilde{y}), \textrm{count}(g, Y)\right)}{
     \sum_{g \in \textrm{ngrams}(Y,N)} 
     \textrm{count}(g, Y)
     }
-\]
+\end{equation}
 
 where $\textrm{ngrams}(Y, N)$ returns the set of ngrams of order $N$ in the summary $Y$ and $\textrm{count}(g, Y)$ is the count of occurrences of ngram $g$ in $Y.$
 
 Similarly, ROUGE-N Precision is calculated as 
-\[ \textrm{ROUGE-NP}(\tilde{Y}, Y) = 
+
+\begin{equation}
+\textrm{ROUGE-NP}(\tilde{Y}, Y) = 
     \frac{\sum_{g \in \textrm{ngrams}(Y,N)} 
     \min \left(\textrm{count}(g, \tilde{Y}), \textrm{count}(g, Y)\right)}{
         \sum_{g \in \textrm{ngrams}(\tilde{Y},N)} 
         \textrm{count}(g, \tilde{Y})
     }
-\]
+\end{equation}
 
 and the $F_1$ is simply the harmonic mean of the two:
-\[ \textrm{ROUGE-NF1}(\tilde{Y}, Y) = \frac{ 2 \times 
+\begin{equation}
+\textrm{ROUGE-NF1}(\tilde{Y}, Y) = \frac{ 2 \times 
 \textrm{ROUGE-NP}(\tilde{Y}, Y) \times \textrm{ROUGE-NR}(\tilde{Y}, Y)
-}{ \textrm{ROUGE-NP}(\tilde{Y}, Y) + \textrm{ROUGE-NR}(\tilde{Y}, Y) } \]
+}{ \textrm{ROUGE-NP}(\tilde{Y}, Y) + \textrm{ROUGE-NR}(\tilde{Y}, Y) }
+\end{equation}
 
-
-The reward $r$ at time $t$ is then:
-\[ r_t = \textrm{ROUGE-NF1}(\tilde{y}_{t}, Y) - 
-\textrm{ROUGE-NF1}(\tilde{y}_{t-1}, Y) \]
-
+The reward $r$ at time $t$ is 
+\begin{equation}
+r_t = \textrm{ROUGE-NF1}(\tilde{y}_{t}, Y) -  \textrm{ROUGE-NF1}(\tilde{y}_{t-1}, Y).
+\end{equation}
 \subsection{Deep Q-Learning}
 
 We define an architecture similar to that of \cite{narasimhan2015language} and map our three inputs (query, sentence, and current predicted summary) into LSTM embeddings according to $\textbf{Figure 1}$. By formulating our extraction task as a Markov Decision Process (MDP) we can express the state-action tuples as transitions states. 
@@ -153,7 +159,7 @@ that learns the parameters using stochastic gradient descent with RMSprop \cite{
 \pgfdeclarelayer{background}
 \pgfdeclarelayer{foreground}
 \pgfsetlayers{background,main,foreground}
-	% Define the layers to draw the diagram
+    % Define the layers to draw the diagram
     \tikzstyle{sensor}=[draw, fill=blue!10, text width=5em,  text centered, minimum height=2.0em,drop shadow]
     \tikzstyle{term}=[draw, fill=gray!10, text width=5em,  text centered, minimum height=2.0em,drop shadow]
     \tikzstyle{wa} = [sensor, fill=gray!10, text width=5em,  minimum height=2em, rounded corners, drop shadow]
@@ -161,14 +167,14 @@ that learns the parameters using stochastic gradient descent with RMSprop \cite{
     \tikzstyle{wa2} = [sensor, fill=gray!10, text width=6em,  minimum height=12em, drop shadow]
     \tikzstyle{om} = [draw, fill=green!05, text width=5em,  text centered, minimum height=2.0em,drop shadow]
 
-    \begin{tikzpicture}[scale=0.75, transform shape]
-        \node (wa) [wa2] {Joined \textbf{Linear Layer}  \\ \scriptsize (3 x Embedding) };
+\begin{tikzpicture}[scale=0.75, transform shape]
+        \node (wa) [wa2] {Joined \textbf{ReLU Layer}  \\ \scriptsize (3 x Embedding) };
         \path (wa.west)+(-3.0 ,  2.0) node (asr1)[sensor] {$Query$ \textbf{LSTM}};
         \path (wa.west)+(-3.0 ,  0.0) node (asr2)[sensor] {$Sentence_t$  \textbf{LSTM}};
         \path (wa.west)+(-3.0 , -2.0) node (asr3)[sensor] {$Summary_t$  \textbf{LSTM}};
-        \path (wa.east)+(3.0,  1) node (vote) [term] {\textbf{Linear} \\ \scriptsize $\{Select\}$ };
-        \path (wa.east)+(3.0, -1) node (vote2) [term] {\textbf{Linear} \\ \scriptsize $\{Skip\}$ } ;
-        \path (wa.east)+(6.5,  0) node (output) [om] {\textbf{Linear} \\ \scriptsize E[Rouge]} ;
+        \path (wa.east)+(3.0,  1) node (vote) [term] {\textbf{ReLU} \\ \scriptsize $\{Select\}$ };
+        \path (wa.east)+(3.0, -1) node (vote2) [term] {\textbf{ReLU} \\ \scriptsize $\{Skip\}$ } ;
+        \path (wa.east)+(6.5,  0) node (output) [om] {\textbf{ReLU} \\ \scriptsize E[Rouge]} ;
 
         \path [draw, ->] (asr1.east) -- node [above] {}     (wa.125) ;
         \path [draw, ->] (asr2.east) -- node [above] {}     (wa.180);
@@ -267,15 +273,26 @@ The weights of the Q-function and the action sequence are initialized at random 
 \end{algorithm}
 
 
-\subsection{Experiments}
+\subsection{Simulations}
+To understand the behavior of our architecture, we produce a number of experiments on the first sentence of the first 100 articles for a single query. By restricting our study to such small data we are able to better monitor the system and influence of hyperparameters. We study the performance of hyperparemters on a small set of test data in the next section.
 
-Different experiments were done to study the effect of each hyperparameter on the model.  Specifically, we evalute (1) the settings of $K$ to assess the impact on the final predicted summary, (2) values of $\gamma$ to understand the effects on the parameter updates, (3) the memory size, $ | D |$ on the speed of convergence, and (4) the base exploration rate on the states explored. We present several figures visualizing the impact using different settings of the hyperparameters in our model in \textbf{Figure 2} on a smaller subset of our data using 5-fold cross-validation.
+In \textbf{Figure 2a} we see the convergence of our model when trained on F1, which suggests that our Q-function learns a policy that tries to vary the Precision while maintaining a fixed Recall. When we specify the model to learn Recall or Precision obvious pathological policies are learned, i.e., our model decides to select all sentences or select only the fewest that maximize the intersection with the n-grams in our nuggets. In  \textbf{Figure 2b} we present the model without a base exploration rate, which suggests that adding a small amount of randomness helps the model from converging to poor local optimums.  
+
+\begin{figure}[h]
+    \centering
+    \fbox{\includegraphics[scale=0.30]{sim1}}
+    \captionsetup{labelformat=empty}
+    \caption{\textbf{Figure 2a: DQN-LSTM Hyperparameter Experiments}}
+\end{figure}
+
+\subsection{Hyperparameters}
+Different experiments were done to study the effect of each hyperparameter on the model.  Specifically, we evaluate (1) the settings of $K$ to assess the impact on the final predicted summary, (2) values of $\gamma$ to understand the effects on the parameter updates, (3) the memory size, $ | D |$ on the speed of convergence, and (4) the base exploration rate on the states explored. We present several figures visualizing the impact using different settings of the hyperparameters in our model in \textbf{Figure 3} on a smaller subset of the data; specifically, we use the first sentence from the first 100 articles for all but three of the queries. 
 
 \begin{figure}[h]
     \centering
     \fbox{\includegraphics[scale=0.35]{perf}}
     \captionsetup{labelformat=empty}
-    \caption{\textbf{Figure 2: DQN-LSTM Hyperparameter Experiments}}
+    \caption{\textbf{Figure 3: DQN-LSTM Hyperparameter Experiments}}
 \end{figure}
 \section{Results}
 We evaluate our learned extracted summaries on ROUGE-N F1, Recall, and Precision on the full set of nuggets averaged across all of the queries on the full predicted summary $\tilde{Y}_d$, $\forall d \in \mathcal{D}$. We compare our DQN-LSTM to bag-of-words and bag-of-bigrams neural networks, our results are presented in \textbf{Table 1}.
@@ -289,13 +306,13 @@ We evaluate our learned extracted summaries on ROUGE-N F1, Recall, and Precision
 	DQN-BiBOW  & \color{ red} TBD & \color{ red} TBD  & \color{ red}TBD\\
 	DQN-LSTM  & \color{ red} TBD & \color{ red} TBD  & \color{ red} TBD\\ \hline
 	\hline
-	\multicolumn{4}{c}{Table 1. Extracted summary performance on manually reviewed nuggets} \\
+	\multicolumn{4}{c}{Table 1. \footnotesize Extracted summary performance on manually reviewed nuggets} \\
 	\hline
 \end{tabular}
 \end{center}
 
 \section{Conclusion}
-We have presented an end-to-end deep reinforcement learning architecture to learn an extraction policy for multi-document summarization. By treating the incoming sentence streams from different documents as inputs into a recurrent neural network, we are able to learn both a richer embedding representation of the three input components and a robust extraction policy.
+We have presented an end-to-end deep reinforcement learning architecture to learn an extraction policy for multi-document summarization. By treating the incoming sentence streams from different documents as inputs into a recurrent neural network and by backpropagating the action selected, we are able to learn both a richer embedding representation of the three input components and a robust extraction policy.
 
 \bibliography{DeepNLPQLearning}
 
