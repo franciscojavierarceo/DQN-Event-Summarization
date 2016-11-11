@@ -5,6 +5,12 @@ Yoshua Bengio, R{\'e}jean Ducharme, Pascal Vincent, and Christian Jauvin.
 \newblock A neural probabilistic language model.
 \newblock {\em Journal of Machine Learning Research}, 3(Feb):1137--1155, 2003.
 
+\bibitem{diazquery}
+Fernando Diaz, Bhaskar Mitra, and Nick Craswell.
+\newblock Query expansion with locally-trained word embeddings.
+\newblock In {\em Proceedings of the 54th Annual Meeting of the Association for
+  Computational}. ACL--Association for Computational Linguistics.
+
 \bibitem{garbacea2015university}
 Cristina G{\^a}rbacea and Evangelos Kanoulas.
 \newblock The university of amsterdam (ilps. uva) at trec 2015 temporal
@@ -44,6 +50,11 @@ Chris Kedzie, Kathleen McKeown, and Fernando Diaz.
   International Conference on Natural Language Processing}, pages 1608--1617,
   2015.
 
+\bibitem{kim2016character}
+Yoon Kim, Yacine Jernite, David Sontag, and Alexander~M Rush.
+\newblock Character-aware neural language models.
+\newblock In {\em Thirtieth AAAI Conference on Artificial Intelligence}, 2016.
+
 \bibitem{mccreadie2014incremental}
 Richard McCreadie, Craig Macdonald, and Iadh Ounis.
 \newblock Incremental update summarization: Adaptive sentence selection based
@@ -70,6 +81,12 @@ Karthik Narasimhan, Tejas~D Kulkarni, and Regina Barzilay.
   learning.
 \newblock In {\em Proceedings of the Conference on Empirical Methods in Natural
   Language Processing}. Citeseer, 2015.
+
+\bibitem{sundermeyer2012lstm}
+Martin Sundermeyer, Ralf Schl{\"u}ter, and Hermann Ney.
+\newblock Lstm neural networks for language modeling.
+\newblock In {\em Thirteenth Annual Conference of the International Speech
+  Communication Association}, 2012.
 
 \bibitem{sutton1998reinforcement}
 Richard~S Sutton and Andrew~G Barto.

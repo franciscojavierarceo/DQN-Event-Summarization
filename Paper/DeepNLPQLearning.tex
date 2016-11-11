@@ -12,6 +12,14 @@
 \newcommand{\mx}[1]{\mathbf{\bm{#1}}} % Matrix command
 \newcommand{\vc}[1]{\mathbf{\bm{#1}}} % Vector command
 
+\hypersetup{ 
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=blue,
+    citecolor=blue
+}
+
 
 \usepackage{algorithm,algorithmic,amsmath}
 %\usepackage[linesnumbered,ruled]{algorithm2e}
@@ -36,27 +44,28 @@ We present a streaming extraction policy for multi-document summarization learne
 
 \section{Introduction}
 
-Recent research has focused on extractive (e.g., \cite{kedzie2015predicting}, \cite{garbacea2015university}, and \cite{kedzieextractive}) multi-document summarization. The approach by \cite{kedzie2015predicting}  has shown that it is possible to select relevant sentences from a massive number of documents on the web to create summaries with meaningful content by adapting classifiers to maximize search policies. These systems operate in a streaming fashion and are capable of evaluating each sentence within each article to decide whether or not to include or ignore the sentence. 
+Recent research in text retrieval  has focused on extractive algorithms to identify important sentences from a large set of documents (e.g., \cite{diazquery}, \cite{kedzie2015predicting}, \cite{garbacea2015university}, and \cite{kedzieextractive}). The approach by \cite{kedzie2015predicting}  has shown that it is possible to select relevant sentences from a massive number of documents on the web to create summaries with meaningful content by adapting classifiers to maximize search policies. These systems operate in a streaming fashion and are capable of evaluating each sentence within each article to decide whether or not to include or ignore the sentence. 
 
-Unfortunately, these systems have still been shown to fall short of algorithms that employ simple heuristics \cite{garbacea2015university}, which may be due to inadequate capturing of the rich structure and often idiosyncratic information by traditional n-gram language models. In recent years, \cite{bengio2003neural} have shown that natural language processing can be mapped to a higher order dimension to represent more powerful features for various language modeling tasks. These embeddings have proven incredibly powerful on a variety of different natural language processing tasks [citations needed].
+Unfortunately, many of these systems have still been shown to fall short of algorithms that employ simple heuristics \cite{garbacea2015university}, which may be due to inadequate capturing of the rich structure and often idiosyncratic information by traditional n-gram language models.  
 
-In this paper we show that a deep recurrent neural network with a long short term memory (LSTM) is able to successfully learn an extractive summary policy by encoding the action, state, and reward into a Q-Learning model, similar to that of  \cite{hausknecht2015deep}. We show that on a variety of different metrics, our specification is able to reach state-of-the-art performance.
+In recent years, recurrent neural networks have been used to map textual language to a higher order dimension to represent more powerful features for various language modeling tasks. These vector representations, also known as embeddings, have proven incredibly powerful on a variety of different natural language processing tasks (e.g., \cite{bengio2003neural}, \cite{sundermeyer2012lstm}, \cite{kim2016character}). For query based retrievals, \cite{diazquery} has shown success in using these embeddings for \emph{ad hoc} information retrieval.
+
+In this paper we show that a deep recurrent neural network with a long short term memory (LSTM) is able to successfully learn an extractive summary policy by encoding the action, state, and reward into a Q-Learning model, similar to that of  \cite{hausknecht2015deep}. We show the performance of our model on a variety of different metrics and benchmark them against random actions, a bag-of-words multilayered perceptron, and bag-of-bigrams multilayered perceptron.
 
 % Section 3
 \section{Extractive Streaming Summarization}
 
-In the extractive streaming summarization task, we are given as input a query (i.e., a short text description of a topic or an event), a document stream, and a time ordered set of sentences relevant to the query. Starting with an initially empty summary,  an extractive, streaming summarization algorithm is intended to examine each sentence in order and when new and important (relative to the query) information is identified, add that sentence to the summary. 
+In the extractive streaming summarization task, we are given as input a query (i.e., a short text description of a topic or an event), a document stream, and a time ordered set of sentences relevant to the query. Starting with an initially empty summary,  an extractive, streaming summarization algorithm is intended to examine each sentence in order and, when new and important (relative to the query) information is identified, add that sentence to the summary. 
 
-Implicit to this problem is the notion of system time -- the summarization algorithm can only examine sentences that occur in the stream before the current system time. Advancing the system time gives the algorithm access to more sentences, although in practice the stream is sufficiently large enough that choices have to be made about how much history can be kept in memory. For many domains, e.g. crisis informatics, it is preferable for a summarization algorithm to identify important information as early as possible, and so the objective function should penalize a large disparity between the time a piece of information is first available to the algorithm and the system time at which that information is actually added to the summary.
+Implicit to this problem is the notion of system time -- the summarization algorithm can only examine sentences that occur in the stream before the current system time. Advancing the system time gives the algorithm access to more sentences, although in practice the stream is sufficiently large enough that choices have to be made about how much history can be kept in memory. For many domains, e.g., crisis informatics, it is preferable for a summarization algorithm to identify important information as early as possible, and so the objective function should penalize a large disparity between the time a piece of information is first available to the algorithm and the system time at which that information is actually added to the summary.
 
-Previous work in this area has either incremented the system time in fixed increments (e.g. an hour)  \cite{mccreadie2014incremental,kedzie2015predicting} or operated in
-a fully online setting \cite{guo2013updating,kedzie2016real}. In both cases explicitly modeling the current state of the summary, the stream, and their relationship with the query is quite complicated and exhibits non-linear dynamics that are difficult characterize in traditional feature based models.
+Previous work in this area has either incremented the system time in fixed increments (e.g., an hour)  \cite{mccreadie2014incremental,kedzie2015predicting} or operated in a fully online setting \cite{guo2013updating,kedzie2016real}. In both cases explicitly modeling the current state of the summary, the stream, and their relationship with the query is quite complicated and exhibits non-linear dynamics that are difficult characterize in traditional feature based models.
 
 Additionally, the structured nature of the sentence selection task (sentence selection is highly dependent on the current summary state) suggests that imitation or reinforcement learning are necessary to obtain parity between training and testing feature distributions. 
 
-Early successes of deep reinforcement learning have used convolutional neural networks for video games (e.g., \cite{MnihBMGLHSK16} and \cite{MnihKSGAWR13}) but recent work has leveraged recurrent neural networks for both video-based and text-based gaming environments (e.g. \cite{hausknecht2015deep} and \cite{narasimhan2015language}). 
+Early successes of deep reinforcement learning have used convolutional neural networks for video games (e.g., \cite{MnihBMGLHSK16} and \cite{MnihKSGAWR13}) but recent work has leveraged recurrent neural networks for both video-based and text-based gaming environments (e.g., \cite{hausknecht2015deep} and \cite{narasimhan2015language}). 
 
-This leads us to explore Deep Q-Networks (DQN) for three reasons: (1) both the representation and mode of interaction between the stream, summary, and 
+This leads us to explore Deep Q-Networks (DQN) for three reasons: (1) both the representation and interaction between the stream, summary, and 
 query can be learned; (2) the embeddings can learn a more robust semantic representations than classic n-gram models; and (3) by randomly exploring the state space, the $\epsilon$-greedy strategy used in DQN learns a policy that yields more consistency between train and test distributions.
 
 \section{Background}
@@ -65,7 +74,7 @@ In the subsequent sections, we outline the architecture of our DQN and define th
 
 \subsection{States}  
 
-In our architecture a state $s(x_{t},\tilde{y}_{t}, q)$ is a function of the stream $X$ observed up to the current system time $t$, the state of the current summary $\tilde{Y}$ at system time $t$, and the query $q$. For brevity we will use $s(t,q)$ where the dependence on $x_{t},\tilde{Y}_{t}$ is assumed. $s(t,q)$ is itself three recurrent neural networks, one for encoding  the summary, the stream, and the query respectively. 
+In our architecture a state $s(x_{t},\tilde{y}_{t}, d)$ is a function of the stream $X_d$, $\forall d \in D$, observed up to the current system time $t$, the state of the current summary $\tilde{y}_t$ at system time $t$, and the query $d$. For brevity we will use $s_t$ where the dependence on $x_{t},\tilde{y}_{t},$ and $d$ is assumed. $s_t$ itself is three recurrent neural networks, one for encoding  the summary, the stream, and the query. 
 
 \subsection{Actions} 
 The set of possible actions $a_t$ at each time step is $\mathcal{A} = \{select, skip\}$ where $select$ corresponds to adding the current sentence $x_t$ to the summary and incrementing the current system time, or $skip$ where only $t$ is incremented without changing the current summary. Thus, our current predicted summary at time $t$ is defined as
@@ -120,7 +129,7 @@ Our extraction policy then takes as input an action $a_t$ in state $s_t$ at time
 \begin{equation}
 	\hat{Q}_{t+1}(s,a) = \textrm{E}[ r + \gamma \textrm{max}_{a'} \hat{Q}_t(s', a') | s, a]
 \end{equation}
-where $\gamma \in \mathbb{R}$ is the discount rate applied to future rewards and the expectation is taken over transitions in state $s$ and action $a$. By iterating over the Q-function, it converges asymptotically to the optimal policy, i.e.,  $\hat{Q}_t \rightarrow \hat{Q}^{*}$ as $t \rightarrow \infty$, but in finite iterations we can use a neural network as our function approximator, where our weights our $\theta$ can be optimized using the following loss function
+where $\gamma \in \mathbb{R}$ is the discount rate applied to future rewards and the expectation is taken over transitions in state $s$ and action $a$. By iterating over the Q-function, it converges asymptotically to the optimal policy, i.e.,  $\hat{Q}_t \rightarrow \hat{Q}^{*}$ as $t \rightarrow \infty$, but in finite iterations we can use a neural network as our function approximator, where our weights, $\theta$, can be optimized using the following loss function
 
 \begin{equation}
 	\mathcal{L}_i(\theta_i) =  \textrm{E}_{\hat{s}, \hat{a}}[ \big (y_i - Q(\hat{s}, \hat{a}; \theta_i) \big )^2]
@@ -218,17 +227,17 @@ that learns the parameters using stochastic gradient descent with RMSprop \cite{
 
 \section{Learning an Extraction Policy}
 \subsection{Settings}
-Since the state of our current summary at time $t$ depends on the state at time $t - 1$, we execute our Q-function in the feedforward stage using single batches to allow for proper updating of the predicted summary, yet during the backpropagation phase, we sample random mini-batches from the stored transitions.  We set our embedding dimension to 100, the future discount rate $\gamma$ to 0.50, and the maximum summary length to 300 tokens.
+Since the state of our current summary at time $t$ depends on the state at time $t - 1$, we execute our Q-function in the feedforward stage using single batches to allow for proper updating of the predicted summary. During the backpropagation phase we sample random mini-batches from the stored transitions.  We set our embedding dimension to 100, the future discount rate $\gamma$ to 0.50, and the maximum summary length to 300 tokens.
 
 The weights of the Q-function and the action sequence are initialized at random and we randomly explore the state-space for 200 of the 1000 epochs by employing an $\epsilon$-greedy search strategy during our action selection that linearly decays to a base exploration rate of 0.01. We describe in full detail the training of our DQN-LSTM in $\textbf{Algorithm 1}$. 
 
 \subsection{Experiments}
 
-Different experiments were done to study the effect of each hyperparameter on the model.  Specifically, we evalute (1) the settings of $K$ to assess the impact on the final predicted summary, (2) values of gamma to understand the effects on the parameter updates, (3) the memory size on the speed of convergence, and (4) the base exploration rate on the states explored. We provide visualization of the impact using 5-fold cross-validation on the different hyperparameters of our model in \textbf{Figure 2}.
+Different experiments were done to study the effect of each hyperparameter on the model.  Specifically, we evalute (1) the settings of $K$ to assess the impact on the final predicted summary, (2) values of gamma to understand the effects on the parameter updates, (3) the memory size on the speed of convergence, and (4) the base exploration rate on the states explored. We present several figures visualizing the impact using of the different hyperparameters in our model in \textbf{Figure 2} using 5-fold cross-validation.
 
 \begin{algorithm}
     \bf{Input:} { \rm  \{$\mathcal{D}$: Event queries, $X_d$: Input sentences, $N$: Number of epochs\} } \\
-    \underline{$\bf{Output: }$ \rm \{$\hat{Q}$: extraction policy, $\tilde{Y}$: event summary for query $d$\} }
+    \underline{$\bf{Output: }$ \rm \{$\hat{Q}$: extraction policy, $\tilde{Y}_d$: event summary for query $d$\} }
 \begin{algorithmic}[1]
 \STATE \rm Initialize memory $\Gamma =  \{\emptyset \}^{\mathcal{|D|}}_{d=1}$
 \STATE \rm Initialize summaries $\tilde{Y} = \{\emptyset \}^{\mathcal{|D|}}_{d=1} $
@@ -272,10 +281,10 @@ We evaluate our learned extracted summaries on ROUGE-N F1, Recall, and Precision
 \begin{tabular}{  c | c | c | c  }
 	\hline
 	Model  & ROUGE-1F1 & ROUGE-1Recall & ROUGE-1Precision  \\ \hline \hline
-	DQN-LSTM  & TBD & TBD  & TBD\\
-	DQN-BOW  & TBD & TBD  & TBD\\
-	DQN-BiBOW  & TBD & TBD  & TBD\\
-	Random  & TBD & TBD  & TBD\\ \hline
+	DQN-LSTM  & \color{ red} TBD & \color{ red} TBD  & \color{ red} TBD\\
+	DQN-BOW  & \color{ red}TBD & \color{ red} TBD  & \color{ red} TBD\\
+	DQN-BiBOW  & \color{ red} TBD & \color{ red} TBD  & \color{ red}TBD\\
+	Random  & \color{ red}TBD & \color{ red}TBD  & \color{ red}TBD\\ \hline
 	\hline
 	\multicolumn{4}{c}{Table 1. Extracted summary performance on manually reviewed nuggets} \\
 	\hline
@@ -284,7 +293,6 @@ We evaluate our learned extracted summaries on ROUGE-N F1, Recall, and Precision
 
 \section{Conclusion}
 We have presented an end-to-end deep reinforcement learning architecture to learn an extraction policy for multi-document summarization. By treating the incoming sentence streams from different documents as inputs into a recurrent neural network, we are able to learn both a richer embedding representation of the three input components and a robust extraction policy.
-\newpage
 
 \bibliography{DeepNLPQLearning}
 
