@@ -3,8 +3,11 @@
 \BOOKMARK [1][-]{section.3}{Background}{}% 3
 \BOOKMARK [2][-]{subsection.3.1}{States}{section.3}% 4
 \BOOKMARK [2][-]{subsection.3.2}{Actions}{section.3}% 5
-\BOOKMARK [2][-]{subsection.3.3}{Reward}{section.3}% 6
+\BOOKMARK [2][-]{subsection.3.3}{Rewards}{section.3}% 6
 \BOOKMARK [2][-]{subsection.3.4}{Deep Q-Learning}{section.3}% 7
 \BOOKMARK [1][-]{section.4}{Learning an Extraction Policy}{}% 8
 \BOOKMARK [2][-]{subsection.4.1}{Settings}{section.4}% 9
 \BOOKMARK [2][-]{subsection.4.2}{Simulations}{section.4}% 10
+\BOOKMARK [2][-]{subsection.4.3}{Hyperparameters}{section.4}% 11
+\BOOKMARK [1][-]{section.5}{Results}{}% 12
+\BOOKMARK [1][-]{section.6}{Conclusion}{}% 13

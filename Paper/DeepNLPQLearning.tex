@@ -62,7 +62,7 @@ In the extractive streaming summarization task, we are given as input a query (i
 
 Implicit to this problem is the notion of system time -- the summarization algorithm can only examine sentences that occur in the stream before the current system time. Advancing the system time gives the algorithm access to more sentences, although in practice the stream is sufficiently large enough that choices have to be made about how much history can be kept in memory. For many domains, e.g., crisis informatics, it is preferable for a summarization algorithm to identify important information as early as possible, and so the objective function should penalize a large disparity between the time a piece of information is first available to the algorithm and the system time at which that information is actually added to the summary.
 
-Previous work in this area has either incremented the system time in fixed increments (e.g., an hour)  \cite{mccreadie2014incremental,kedzie2015xpredicting} or operated in a fully online setting \cite{guo2013updating,kedzie2016real}. In both cases explicitly modeling the current state of the summary, the stream, and their relationship with the query is quite complicated and exhibits non-linear dynamics that are difficult characterize in traditional feature based models.
+Previous work in this area has either incremented the system time in fixed increments (e.g., an hour)  \cite{mccreadie2014incremental, kedzie2015predicting} or operated in a fully online setting \cite{guo2013updating,kedzie2016real}. In both cases explicitly modeling the current state of the summary, the stream, and their relationship with the query is quite complicated and exhibits non-linear dynamics that are difficult to characterize in traditional models with manually crafted features.
 
 Additionally, the structured nature of the sentence selection task (sentence selection is highly dependent on the current summary state) suggests that imitation or reinforcement learning are necessary to obtain parity between training and testing feature distributions. 
 
@@ -91,7 +91,7 @@ The set of possible actions $a_t$ at each time step is $\mathcal{A} = \{select, 
 \end{equation}
 Since $\tilde{y}_t$ grows linearly with the number of selected sentences, we mitigate potential capacity constraints by using a queue to hold the last $K$ elements of the current predicted summary. 
 
-\subsection{Reward} 
+\subsection{Rewards} 
 The reward for a given action is measured by the change in ROUGE-N F1 score of the predicted summary $\tilde{y}_{t}$ measured against a gold standard summary $Y$. When only one gold summary reference is used, ROUGE-N Recall is calculated as 
 
 \begin{equation}
@@ -136,7 +136,7 @@ Our extraction policy then takes as input an action $a_t$ in state $s_t$ at time
 \begin{equation}
 	\hat{Q}_{t+1}(s,a) = \textrm{E}[ r + \gamma \textrm{max}_{a'} \hat{Q}_t(s', a') | s, a]
 \end{equation}
-where $\gamma \in \mathbb{R}$ is the discount rate applied to future rewards and the expectation is taken over transitions in state $s$ and action $a$. By iterating over the Q-function, it converges asymptotically to the optimal policy, i.e.,  $\hat{Q}_t \rightarrow Q^{*}$ as $t \rightarrow \infty$, but in finite iterations we can use a neural network as our function approximator, where our weights, $\theta$, can be optimized using the following loss function
+where $\gamma \in \mathbb{R}$ is the discount rate applied to future rewards and the expectation is taken over transitions in state $s$ and action $a$. By iterating over the Q-function, it converges asymptotically to the optimal policy, i.e.,  $\hat{Q}_t \rightarrow Q^{*}$ as $t \rightarrow \infty$. In finite iterations we can use a neural network as our function approximator, where our weights, $\theta$, can be optimized using the following loss function
 
 \begin{equation}
 	\mathcal{L}_i(\theta_i) =  \textrm{E}_{\hat{s}, \hat{a}}[ \big (y_i - Q(\hat{s}, \hat{a}; \theta_i) \big )^2]
@@ -174,9 +174,9 @@ that learns the parameters using stochastic gradient descent with RMSprop \cite{
         \path (wa.west)+(-3.0 , -2.0) node (asr3)[sensor] {$Summary_t$  \textbf{LSTM}};
         \path (wa.east)+(3.0,  1) node (vote) [term] {\textbf{ReLU} \\ \scriptsize $\{Select\}$ };
         \path (wa.east)+(3.0, -1) node (vote2) [term] {\textbf{ReLU} \\ \scriptsize $\{Skip\}$ } ;
-        \path (wa.east)+(6.5,  0) node (output) [om] {\textbf{ReLU} \\ \scriptsize E[Rouge]} ;
+        \path (wa.east)+(6.5,  0) node (output) [om] {\textbf{Select} \\ \scriptsize E[Rouge]} ;
 
-        \path [draw, ->] (asr1.east) -- node [above] {}     (wa.125) ;
+        \path [draw, ->] (asr1.east) -- node [above] {}     (wa.125);
         \path [draw, ->] (asr2.east) -- node [above] {}     (wa.180);
         \path [draw, ->] (asr3.east) -- node [above] {}     (wa.235);
         \path [draw, ->] (wa.east) -- node [above] {}       (vote.west);
@@ -237,7 +237,7 @@ that learns the parameters using stochastic gradient descent with RMSprop \cite{
 \subsection{Settings}
 Since the state of our current summary at time $t$ depends on the state at time $t - 1$, we have to execute our Q-function in the feedforward stage using a single batch to properly update the predicted summary with optimal expected action. During the backpropagation phase we sample random mini-batches from the stored transitions.  We set our embedding dimension to 100, the future discount rate $\gamma$ to 0.50, and the maximum summary length to 300 tokens.
 
-The weights of the Q-function and the action sequence are initialized at random and we randomly explore the state-space for 200 of the 1000 epochs by employing an $\epsilon$-greedy search strategy during our action selection that linearly decays to a base exploration rate of 0.01. We describe in full detail the training of our DQN-LSTM in $\textbf{Algorithm 1}$.
+The weights of the Q-function and the action sequence are initialized at random and we randomly explore the state-space for 200 of the 1000 epochs by employing an $\epsilon$-greedy search strategy that decays linearly to a base exploration rate of 0.01 during our action selection. We describe in full detail the training of our DQN-LSTM in $\textbf{Algorithm 1}$.
 
 
 \begin{algorithm}
@@ -274,30 +274,29 @@ The weights of the Q-function and the action sequence are initialized at random 
 
 
 \subsection{Simulations}
-To understand the behavior of our architecture, we produce a number of experiments on the first sentence of the first 100 articles for a single query. By restricting our study to such small data we are able to better monitor the system and influence of hyperparameters. We study the performance of hyperparemters on a small set of test data in the next section.
+To understand the behavior of our architecture, we produce a number of experiments on the first sentence of the first 100 articles for a single query. By restricting our study to such small in-sample data we are able to better monitor the system and influence of hyperparameters. We study the choice of hyperparemters on a small set of test data in the next section.
 
-In \textbf{Figure 2a} we see the convergence of our model when trained on F1, which suggests that our Q-function learns a policy that tries to vary the Precision while maintaining a fixed Recall. When we specify the model to learn Recall or Precision obvious pathological policies are learned, i.e., our model decides to select all sentences or select only the fewest that maximize the intersection with the n-grams in our nuggets. In  \textbf{Figure 2b} we present the model without a base exploration rate, which suggests that adding a small amount of randomness helps the model from converging to poor local optimums.  
-
+In \textbf{Figure 2a} we see the convergence of our model when trained on F1, which suggests that our Q-function learns a policy that tries to vary the Precision while maintaining a fixed Recall. When we specify the model to learn Recall or Precision obvious pathological policies are learned, i.e., our model decides to select all of the sentences or select the fewest sentences with the greatest intersection with golden summaries. In  \textbf{Figure 2b} we present the model without a base exploration rate, which suggests that adding a small amount of randomness helps the model from converging to poor local optimums.  
 
 \begin{figure}[!tbp]
   \centering
   \begin{minipage}[b]{0.4\textwidth}
-    \includegraphics[width=\textwidth]{sim1}
-    \caption{Image 1}
+    \captionsetup{labelformat=empty}
+    \includegraphics[width=\textwidth]{dqn_with_base}
+    \caption{ \scriptsize (a): DQN with base exploration rate}
   \end{minipage}
   \hfill
   \begin{minipage}[b]{0.4\textwidth}
-    \includegraphics[width=\textwidth]{sim2}
-    \caption{Image 2}
+    \captionsetup{labelformat=empty}
+    \includegraphics[width=\textwidth]{dqn_no_base}
+    \caption{\scriptsize (b): DQN without base exploration rate}
   \end{minipage}
     \captionsetup{labelformat=empty}
-    \caption{\textbf{Figure 2a: DQN-LSTM Hyperparameter Experiments}}
+    \caption{\textbf{Figure 2: DQN-LSTM Hyperparameter Experiments}}
 \end{figure}
 
-\end{document}
-
 \subsection{Hyperparameters}
-Different experiments were done to study the effect of each hyperparameter on the model.  Specifically, we evaluate (1) the settings of $K$ to assess the impact on the final predicted summary, (2) values of $\gamma$ to understand the effects on the parameter updates, (3) the memory size, $ | D |$ on the speed of convergence, and (4) the base exploration rate on the states explored. We present several figures visualizing the impact using different settings of the hyperparameters in our model in \textbf{Figure 3} on a smaller subset of the data; specifically, we use the first sentence from the first 100 articles for all but three of the queries. 
+Different experiments were done to study the effect of each hyperparameter on the model.  Specifically, we evaluate (1) the settings of $K$ to assess the impact on the final predicted summary, (2) values of $\gamma$ to understand the effects on the parameter updates, (3) the memory size, $ | D |$ on the speed of convergence, and (4) the base exploration rate on the states explored. We present several figures visualizing the impact using different settings of the hyperparameters in our model in \textbf{Figure 3} on a smaller subset of the data; specifically, we use the first sentence from the first 100 articles for all but three of the queries, which are left as test data. 
 
 \begin{figure}[h]
     \centering
@@ -305,19 +304,23 @@ Different experiments were done to study the effect of each hyperparameter on th
     \captionsetup{labelformat=empty}
     \caption{\textbf{Figure 3: DQN-LSTM Hyperparameter Experiments}}
 \end{figure}
+
 \section{Results}
-We evaluate our learned extracted summaries on ROUGE-N F1, Recall, and Precision on the full set of nuggets averaged across all of the queries on the full predicted summary $\tilde{Y}_d$, $\forall d \in \mathcal{D}$. We compare our DQN-LSTM to bag-of-words and bag-of-bigrams neural networks, our results are presented in \textbf{Table 1}.
+We evaluate our learned extracted summaries on ROUGE-N F1, Recall, and Precision on the full set of nuggets averaged across all of the queries on the full predicted summary $\tilde{Y}_d$, $\forall d \in \mathcal{D}$. We compare our DQN-LSTM to bag-of-words and bag-of-bigrams multi-layered perceptrons, our results are presented in \textbf{Table 1}.
 
 \begin{center}
 \begin{tabular}{  c | c | c | c  }
+	\multicolumn{4}{c}{\textbf{Table 1}: Rouge Evaluation} \\
 	\hline
-	Model  & ROUGE-1F1 & ROUGE-1Recall & ROUGE-1Precision  \\ \hline \hline
-	Random  & \color{ red}TBD & \color{ red}TBD  & \color{ red}TBD\\ 
-	DQN-BOW  & \color{ red}TBD & \color{ red} TBD  & \color{ red} TBD\\
-	DQN-BiBOW  & \color{ red} TBD & \color{ red} TBD  & \color{ red}TBD\\
-	DQN-LSTM  & \color{ red} TBD & \color{ red} TBD  & \color{ red} TBD\\ \hline
+	Model  & F1 & Recall & Precision  \\ \hline \hline
+	Random  & \color{ red} - - & \color{ red} - -  & \color{ red} - -\\ 
+	DQN-BOW  & \color{ red} - - & \color{ red} - -  & \color{ red} - -\\
+	DQN-BiBOW  & \color{ red} - - & \color{ red} - -  & \color{ red} - -\\
+	DQN-LSTM  & \color{ red}  - - & \color{ red} - -  & \color{ red} - -\\ \hline
 	\hline
-	\multicolumn{4}{c}{Table 1. \footnotesize Extracted summary performance on manually reviewed nuggets} \\
+	\multicolumn{4}{l}{\footnotesize Average Rouge of the extracted summaries against} \\
+	\multicolumn{4}{l}{\footnotesize the gold standard summaries for 3 of the 25 queries} \\
+	\multicolumn{4}{l}{\footnotesize  on the first 10,000 articles of each query.} \\
 	\hline
 \end{tabular}
 \end{center}
