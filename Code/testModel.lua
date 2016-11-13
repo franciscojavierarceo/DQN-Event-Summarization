@@ -8,7 +8,7 @@ require 'cutorch'
 require 'cunn'
 require 'cunnx'
 
-local dl = require 'dataload'
+dl = require 'dataload'
 cmd = torch.CmdLine()
 
 cmd:option('--nepochs', 5, 'running for 50 epochs')
@@ -19,7 +19,7 @@ cmd:option('--base_explore_rate', 0.0, 'Base rate')
 cmd:option('--n_rand', 0, 'Base rate')
 cmd:option('--mem_size', 100, 'Memory size')
 cmd:option('--batch_size', 200,'Batch Size')
-cmd:option('--nnmod','bow','BOW/LSTM option')
+cmd:option('--model','bow','BOW/LSTM option')
 cmd:option('--edim', 64,'Embedding dimension')
 cmd:option('--usecuda', false, 'running on cuda')
 cmd:option('--metric', "f1", 'Metric to learn')
@@ -37,7 +37,7 @@ base_explore_rate = opt.base_explore_rate
 n_rand = opt.n_rand
 mem_size = opt.mem_size
 batch_size = opt.batch_size
-nnmod = opt.nnmod
+nnmod = opt.model
 embeddingSize = opt.edim
 use_cuda = opt.usecuda
 metric = opt.metric
@@ -48,8 +48,8 @@ K_tokens = 25
 
 SKIP = 1
 SELECT = 2
-bow = false
 export = true
+local epsilon = 1.0
 
 local optimParams = {
     learningRate = opt.learning_rate,
@@ -58,6 +58,7 @@ local optimParams = {
 dofile("utils.lua")
 dofile("model_utils.lua")
 dofile("model_utils2.lua")
+
 data_path = '~/GitHub/DeepNLPQLearning/DO_NOT_UPLOAD_THIS_DATA/0-output/'
 query_fn = data_path .. 'queries_numtext.csv'
 query_file =  csvigo.load({path = query_fn, mode = "large", verbose = false})
@@ -90,8 +91,8 @@ end
 
 local model = buildModel(nnmod, vocabSize, embeddingSize)
 
-local criterion = nn.MSECriterion()
-local params, gradParams = model:getParameters()
+criterion = nn.MSECriterion()
+params, gradParams = model:getParameters()
 
 if use_cuda then
     Tensor = torch.CudaTensor
@@ -109,7 +110,6 @@ else
 end
 
 -- Initializing stuff
-local epsilon = 1.0
 local query = LongTensor{qs}
 local sentenceStream = LongTensor(padZeros(xtdm, K_tokens))
 local refSummary = Tensor{ntdm}

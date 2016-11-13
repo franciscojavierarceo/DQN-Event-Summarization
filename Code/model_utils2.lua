@@ -31,7 +31,7 @@ function buildModel(model, vocabSize, embeddingSize)
     return nnmodel
 end
 
-local function buildSummary(actions, sentences, buffer, use_cuda)
+function buildSummary(actions, sentences, buffer, use_cuda)
     buffer:zero()
 
     if use_cuda then 
@@ -123,7 +123,6 @@ function buildMemory(newinput, memory_hist, memsize, use_cuda)
     sumryMemory= sumryMemory[{{nstart, nend}}]
     rewardMemory = rewardMemory[{{nstart, nend}}]
     actionMemory = actionMemory[{{nstart, nend}}]
-
     local inputMemory = {sentMemory, queryMemory, sumryMemory}
 
     if use_cuda then
@@ -138,7 +137,6 @@ function backProp(input_memory, params, model, criterion, batch_size, memsize, u
     local dataloader = dl.TensorLoader(inputs, rewards)
     local err = 0.    
 
-    den = 1
     for k, xin, reward in dataloader:sampleiter(batch_size, memsize) do
         xinput = xin[1]
         actions_in = xin[2]
