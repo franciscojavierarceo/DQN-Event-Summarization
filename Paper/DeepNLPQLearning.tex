@@ -147,7 +147,7 @@ where
 	y_i = \textrm{E}_{\hat{s}, \hat{a}}[ r_i + \gamma \textrm{max}_{a'} Q(s', a' ; \theta_{i-1}) | s', a' ].
 \end{equation}
 
-Differentiation of the loss function yields the update equation,
+Differentiation of the loss function yields the gradient
 
 \begin{equation}
 	\nabla_{\theta_i} L_i(\theta_i) = \textrm{E}_{\hat{s}, \hat{a}}[ 2  \big (y_i - Q(\hat{s}, \hat{a}; \theta_i) \big ) \nabla_{\theta_{i}}  Q(\hat{s}, \hat{a}; \theta_i)]
@@ -239,11 +239,11 @@ Since the state of our current summary at time $t$ depends on the state at time 
 
 The weights of the Q-function and the action sequence are initialized at random and we randomly explore the state-space for 200 of the 1000 epochs by employing an $\epsilon$-greedy search strategy that decays linearly to a base exploration rate of 0.01 during our action selection. We describe in full detail the training of our DQN-LSTM in $\textbf{Algorithm 1}$.
 
-
 \begin{algorithm}
-    \bf{Input:} { \rm  \{$\mathcal{D}$: Event queries, $X_d$: Input sentences, $N$: Number of epochs\} } \\
-    \underline{$\bf{Output: }$ \rm \{$\hat{Q}$: extraction policy, $\tilde{Y}_d$: event summary for query $d$\} }
+    \textbf{Input:} { \rm  \{$\mathcal{D}$: Event queries, $X_d$: Input sentences, $N$: Number of epochs\} } \\
+    \underline{\textbf{Output:} \rm \{$\hat{Q}$: extraction policy, $\tilde{Y}_d$: event summary for query $d$\} }
 \begin{algorithmic}[1]
+\vspace{-0.5cm}
 \STATE \rm Initialize action-value function $\hat{Q}$ with random weights
 \STATE \rm Initialize memory and summary: $\Gamma, \tilde{Y} =  \{\emptyset \}^{\mathcal{|D|}}_{d=1},  \{\emptyset \}^{\mathcal{|D|}}_{d=1} $
 \FOR{$epoch=1,..,N\ $}
