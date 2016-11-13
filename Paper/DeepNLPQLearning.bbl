@@ -103,6 +103,12 @@ Martin Sundermeyer, Ralf Schl{\"u}ter, and Hermann Ney.
 \newblock In {\em Thirteenth Annual Conference of the International Speech
   Communication Association}, 2012.
 
+\bibitem{sutskever2014sequence}
+Ilya Sutskever, Oriol Vinyals, and Quoc~V Le.
+\newblock Sequence to sequence learning with neural networks.
+\newblock In {\em Advances in neural information processing systems}, pages
+  3104--3112, 2014.
+
 \bibitem{sutton1998reinforcement}
 Richard~S Sutton and Andrew~G Barto.
 \newblock {\em Reinforcement learning: An introduction}, volume~1.

@@ -306,10 +306,10 @@ Different experiments were done to study the effect of each hyperparameter on th
 \end{figure}
 
 \section{Results}
-We evaluate our learned extracted summaries on ROUGE-N F1, Recall, and Precision on the full set of nuggets averaged across all of the queries on the full predicted summary $\tilde{Y}_d$, $\forall d \in \mathcal{D}$. We compare our DQN-LSTM to bag-of-words and bag-of-bigrams multi-layered perceptrons, our results are presented in \textbf{Table 1}.
+We evaluate our learned extracted summaries on ROUGE-N F1, Recall, and Precision on the full set of nuggets averaged across all of the queries on the full predicted summary $\tilde{Y}_d$, $\forall d \in \mathcal{D}$. We present the performance of our DQN-LSTM against random action, bag-of-words and bag-of-bigrams multi-layered perceptrons in \textbf{Table 1}. 
 
 \begin{center}
-\begin{tabular}{  c | c | c | c  }
+\begin{tabular}{  l | c | c | c  }
 	\multicolumn{4}{c}{\textbf{Table 1}: Rouge Evaluation} \\
 	\hline
 	Model  & F1 & Recall & Precision  \\ \hline \hline
@@ -326,7 +326,9 @@ We evaluate our learned extracted summaries on ROUGE-N F1, Recall, and Precision
 \end{center}
 
 \section{Conclusion}
-We have presented an end-to-end deep reinforcement learning architecture to learn an extraction policy for multi-document summarization. By treating the incoming sentence streams from different documents as inputs into a recurrent neural network and by backpropagating the action selected, we are able to learn both a richer embedding representation of the three input components and a robust extraction policy.
+We have presented an end-to-end deep reinforcement learning architecture to learn an extraction policy for multi-document summarization. By treating the incoming sentence streams from different documents as inputs into a recurrent neural network and by backpropagating the action selected, we are able to learn both a richer embedding representation of the three input components and a robust extraction policy. 
+
+Future research could consider treating the policy as a generative sequence. Sequence-to-sequence models \cite{sutskever2014sequence} have shown wide success in language translation and could be a useful model for the summarization of multiple documents. 
 
 \bibliography{DeepNLPQLearning}
 
