@@ -192,11 +192,7 @@ for epoch=0, nepochs do
         fullmemory = tmp
     end
     --- Running backprop
-    if(epoch > n_rand) then 
-        loss = backProp(memory, params, model, criterion, batch_size, mem_size, use_cuda)
-    else 
-        loss = 0.
-    end
+    loss = backProp(memory, params, model, criterion, batch_size, mem_size, use_cuda)
 
     if epoch==0 then
         out = string.format("epoch;epsilon;loss;rougeF1;rougeRecall;rougePrecision;actual;pred;nselect;nskip\n")
