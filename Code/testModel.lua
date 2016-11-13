@@ -73,11 +73,10 @@ query_id = 1
 qs = inputs['query']
 input_file = csvigo.load({path = data_path .. inputs['inputs'], mode = "large", verbose = false})
 nugget_file = csvigo.load({path = data_path .. inputs['nuggets'], mode = "large", verbose = false})
+nugget_file = geti_n(nugget_file, 2, #nugget_file) 
 input_file = geti_n(input_file, 2, n) 
 -- input_file = geti_n(input_file, 2, #input_file) 
 local vocabSize = getVocabSize(input_file)
-nugget_file = geti_n(nugget_file, 2, n)
--- nugget_file = geti_n(nugget_file, 2, #nugget_file) 
 K_nuggs = getMaxseq(nugget_file)
 
 nuggets = buildTermDocumentTable(nugget_file, nil)
@@ -88,38 +87,46 @@ for i=1, #nuggets do
     ntdm = tableConcat(table.unpack(nuggets), ntdm)
 end
 
-if nnmod=='bow' then
-    print(string.format("Running bag-of-words model to learn %s", metric))
-    sentenceLookup = nn.Sequential()
-                :add(nn.LookupTableMaskZero(vocabSize, embeddingSize))
-                :add(nn.Sum(2, 3, false))
-                :add(nn.ReLU())
-                -- :add(nn.Tanh())
-else
-    print(string.format("Running LSTM model to learn %s", metric))
-    sentenceLookup = nn.Sequential()
-                :add(nn.LookupTableMaskZero(vocabSize, embeddingSize))
-                :add(nn.SplitTable(2))
-                :add(nn.Sequencer(nn.LSTM(embeddingSize, embeddingSize)))
-                :add(nn.SelectTable(-1))            -- selects last state of the LSTM
-                :add(nn.Linear(embeddingSize, embeddingSize))
-                :add(nn.ReLU())
-                -- :add(nn.Tanh())
+function buildEmbeddings(model, vocabSize, embeddingSize)
+    if model == 'bow' then
+        print(string.format("Running bag-of-words model to learn %s", metric))
+        local sentenceLookup = nn.Sequential()
+                    :add(nn.LookupTableMaskZero(vocabSize, embeddingSize))
+                    :add(nn.Sum(2, 3, false))
+                    :add(nn.ReLU())
+                    -- :add(nn.Tanh())
+    else
+        print(string.format("Running LSTM model to learn %s", metric))
+        local sentenceLookup = nn.Sequential()
+                    :add(nn.LookupTableMaskZero(vocabSize, embeddingSize))
+                    :add(nn.SplitTable(2))
+                    :add(nn.Sequencer(nn.LSTM(embeddingSize, embeddingSize)))
+                    :add(nn.SelectTable(-1))            -- selects last state of the LSTM
+                    :add(nn.Linear(embeddingSize, embeddingSize))
+                    :add(nn.ReLU())
+    end
+    return sentenceLookup
 end
-local queryLookup = sentenceLookup:clone("weight", "gradWeight") 
-local summaryLookup = sentenceLookup:clone("weight", "gradWeight")
 
-local pmodule = nn.ParallelTable()
-            :add(sentenceLookup)
-            :add(queryLookup)
-            :add(summaryLookup)
+function buildModel(model, vocabSize, embeddingSize)
+    local sentenceLookup = buildEmbeddings(model, vocabSize, embeddingSize)
+    local queryLookup = sentenceLookup:clone("weight", "gradWeight") 
+    local summaryLookup = sentenceLookup:clone("weight", "gradWeight")
 
-local model = nn.Sequential()
-        :add(pmodule)
-        :add(nn.JoinTable(2))
-        :add(nn.ReLU())
-        -- :add(nn.Tanh())
-        :add(nn.Linear(embeddingSize * 3, 2))
+    local pmodule = nn.ParallelTable()
+                :add(sentenceLookup)
+                :add(queryLookup)
+                :add(summaryLookup)
+
+    local nnmodel = nn.Sequential()
+            :add(pmodule)
+            :add(nn.JoinTable(2))
+            :add(nn.ReLU())
+            :add(nn.Linear(embeddingSize * 3, 2))
+    return nnmodel
+end
+
+local model = buildModel(nnmod, vocabSize, embeddingSize)
 
 local criterion = nn.MSECriterion()
 local params, gradParams = model:getParameters()
@@ -129,6 +136,7 @@ if use_cuda then
     LongTensor = torch.CudaLongTensor
     ByteTensor = torch.CudaByteTensor
     criterion = criterion:cuda()
+    model = model:cuda()
     print("...running on GPU")
 else
     torch.setnumthreads(8)
@@ -270,17 +278,17 @@ function backProp(input_memory, params, model, criterion, batch_size, memsize, u
     return lossv[1]
 end
 
+-- Initializing stuff
 local epsilon = 1.0
 local query = LongTensor{qs}
 local sentenceStream = LongTensor(padZeros(xtdm, K_tokens))
-
+local memory = {}
 local refSummary = Tensor{ntdm}
 local refCounts = buildTokenCounts(refSummary)
 local streamSize = sentenceStream:size(1)
 local buffer = Tensor(1, maxSummarySize):zero()
 
 local perf = io.open("perf.txt", 'w')
-memory = {}
 for epoch=0, nepochs do
     actions = ByteTensor(streamSize, 2):fill(0)
     local exploreDraws = Tensor(streamSize)
