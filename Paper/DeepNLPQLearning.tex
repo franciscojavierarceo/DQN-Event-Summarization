@@ -306,7 +306,7 @@ Different experiments were done to study the effect of each hyperparameter on th
 \end{figure}
 
 \section{Results}
-We evaluate our learned extracted summaries on ROUGE-N F1, Recall, and Precision on the full set of nuggets averaged across all of the queries on the full predicted summary $\tilde{Y}_d$, $\forall d \in \mathcal{D}$. We present the performance of our DQN-LSTM against random action, bag-of-words and bag-of-bigrams multi-layered perceptrons in \textbf{Table 1}. 
+We evaluate our learned extracted summaries on ROUGE-N F1, Recall, and Precision on the full set of nuggets averaged across all of the queries on the full predicted summary $\tilde{Y}_d$, $\forall d \in \mathcal{D}$. The hyperparameters for the three neural networks were set using cross-validation as described in the previous section. We present the performance of our DQN-LSTM against random action, bag-of-words and bag-of-bigrams multi-layered perceptrons in \textbf{Table 1}. 
 
 \begin{center}
 \begin{tabular}{  l | c | c | c  }
@@ -328,7 +328,7 @@ We evaluate our learned extracted summaries on ROUGE-N F1, Recall, and Precision
 \section{Conclusion}
 We have presented an end-to-end deep reinforcement learning architecture to learn an extraction policy for multi-document summarization. By treating the incoming sentence streams from different documents as inputs into a recurrent neural network and by backpropagating the action selected, we are able to learn both a richer embedding representation of the three input components and a robust extraction policy. 
 
-Future research could consider treating the policy as a generative sequence. Sequence-to-sequence models \cite{sutskever2014sequence} have shown wide success in language translation and could be a useful model for the summarization of multiple documents. 
+Future research could consider modifying the extractive policy into one that generates a sequence. Sequence-to-sequence models \cite{sutskever2014sequence} have shown wide success in language translation and could be a useful model for the summarization of multiple documents.
 
 \bibliography{DeepNLPQLearning}
 
