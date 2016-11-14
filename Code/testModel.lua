@@ -26,6 +26,7 @@ cmd:option('--metric', "f1", 'Metric to learn')
 cmd:option('--n_samples', 500, 'Number of samples to use')
 cmd:option('--max_summary', 300, 'Maximum summary size')
 cmd:option('--end_baserate', 5, 'Maximum summary size')
+cmd:option('--thresh', 0, 'Threshold operator')
 cmd:text()
 --- this retrieves the commands and stores them in opt.variable (e.g., opt.model)
 local opt = cmd:parse(arg or {})
@@ -45,6 +46,7 @@ maxSummarySize = opt.max_summary
 end_baserate = opt.end_baserate
 n = opt.n_samples
 K_tokens = 25
+thresh = opt.thresh
 
 SKIP = 1
 SELECT = 2
@@ -77,13 +79,12 @@ input_file = csvigo.load({path = data_path .. inputs['inputs'], mode = "large", 
 nugget_file = csvigo.load({path = data_path .. inputs['nuggets'], mode = "large", verbose = false})
 nugget_file = geti_n(nugget_file, 2, #nugget_file) 
 input_file = geti_n(input_file, 2, n) 
--- input_file = geti_n(input_file, 2, #input_file) 
+-- input_file = geti_n(input_file, 2, #input_file)
 local vocabSize = getVocabSize(input_file)
 K_nuggs = getMaxseq(nugget_file)
 
 nuggets = buildTermDocumentTable(nugget_file, nil)
 xtdm  = buildTermDocumentTable(input_file, K_tokens)
-
 ntdm = {}
 for i=1, #nuggets do
     ntdm = tableConcat(table.unpack(nuggets), ntdm)
@@ -154,11 +155,11 @@ for epoch=0, nepochs do
         local recall, prec, f1 = rougeScores(generatedCounts, refCounts)
 
         if metric == "f1" then
-            rouge[i + 1]  = f1
+            rouge[i + 1]  = threshold(f1, thresh)
         elseif metric == "recall" then
-            rouge[i + 1]  = recall
+            rouge[i + 1]  = threshold(recall, thresh)
         elseif metric == "precision" then
-            rouge[i + 1] = prec
+            rouge[i + 1] = threshold(prec, thresh)
         end
 
         if i==streamSize then
@@ -171,16 +172,11 @@ for epoch=0, nepochs do
     local max, argmax = torch.max(qValues, 2)
     local reward0 = rouge:narrow(1,2, streamSize) - rouge:narrow(1,1, streamSize)
     local reward_tp1 = gamma * reward0:narrow(1, 2, streamSize - 1):resize(streamSize)
-    --- occasionally the zeros result in a nan, which is strange
-    reward_tp1[reward_tp1:ne(reward_tp1)] = 0
-    reward_tp1 = torch.clamp(reward_tp1, -1, 1)
-    -- local reward = rouge:narrow(1,2, streamSize)
     local reward = reward0 + reward_tp1
     
     local querySize = query:size(2)
     local summaryBatch = summaryBuffer:narrow(1, 1, streamSize)
     local queryBatch = query:view(1, querySize):expand(streamSize, querySize) 
-
     local input = {sentenceStream, queryBatch, summaryBatch}
     --- Storing the data
     memory = {input, reward, actions}
@@ -188,8 +184,7 @@ for epoch=0, nepochs do
     if epoch == 0 then
         fullmemory = memory 
     else
-        local tmp = buildMemory(memory, fullmemory, mem_size, batch_size, use_cuda)
-        fullmemory = tmp
+        fullmemory = buildMemory(memory, fullmemory, mem_size, batch_size, use_cuda)
     end
     --- Running backprop
     loss = backProp(memory, params, model, criterion, batch_size, mem_size, use_cuda)
@@ -204,8 +199,8 @@ for epoch=0, nepochs do
         reward:min(), reward:max(),
         qValues:min(), qValues:max(),
         nactions[1], nactions[2]
-        )
-        perf:write(out)
+    )
+    perf:write(out)
 
     if export then 
         local ofile = io.open(string.format("plotdata/%s/%i_epoch.txt", nnmod, epoch), 'w')

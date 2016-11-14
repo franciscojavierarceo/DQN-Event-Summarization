@@ -102,6 +102,15 @@ function rougeScores(genSummary, refSummary)
     end
     return recall, prec, f1
 end
+function sampleData(input, n)
+    local output = torch.Tensor(n, input:size(2))
+    -- local output = torch.Tensor(input:size())
+    for i=1, n do
+        local indx = math.random(1, input:size(1))
+        output:narrow(1, i, 1):copy(input[indx])
+    end
+    return output
+end
 
 function buildMemory(newinput, memory_hist, memsize, use_cuda)
     local sentMemory = torch.cat(newinput[1][1]:double(), memory_hist[1][1]:double(), 1)
@@ -110,19 +119,19 @@ function buildMemory(newinput, memory_hist, memsize, use_cuda)
     local rewardMemory = torch.cat(newinput[2]:double(), memory_hist[2]:double(), 1)
     local actionMemory = torch.cat(newinput[3]:double(), memory_hist[3]:double(), 1)
     --- specifying rows to index 
-    if sentMemory:size(1) < memsize then
-        nend = sentMemory:size(1)
-        nstart = 1
-    else 
-        nstart = math.max(memsize - sentMemory:size(1), 1)
-        nend = memsize + nstart
+    if sentMemory:size(1) >= memsize then
+        -- My hack for sampling from a unifrom distribution
+        p = torch.ones(memsize)
+        p = p/p:sum()
+        indxs = torch.multinomial(p, batch_size, true)
+
+        sentMemory = sentMemory:index(1, indxs)
+        queryMemory = queryMemory:index(1, indxs)
+        sumryMemory = sumryMemory:index(1, indxs)
+        rewardMemory = rewardMemory:index(1, indxs)
+        actionMemory = actionMemory:index(1, indxs)
     end
-    --- Selecting n last data points
-    sentMemory = sentMemory[{{nstart, nend}}]
-    queryMemory= queryMemory[{{nstart, nend}}]
-    sumryMemory= sumryMemory[{{nstart, nend}}]
-    rewardMemory = rewardMemory[{{nstart, nend}}]
-    actionMemory = actionMemory[{{nstart, nend}}]
+    --- Selecting random samples of the data
     local inputMemory = {sentMemory, queryMemory, sumryMemory}
 
     if use_cuda then
