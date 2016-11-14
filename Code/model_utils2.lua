@@ -1,4 +1,4 @@
-function buildModel(model, vocabSize, embeddingSize)
+function buildModel(model, vocabSize, embeddingSize, use_cuda)
     if model == 'bow' then
         print(string.format("Running bag-of-words model to learn %s", metric))
         sentenceLookup = nn.Sequential()
@@ -28,6 +28,9 @@ function buildModel(model, vocabSize, embeddingSize)
             :add(nn.JoinTable(2))
             :add(nn.ReLU())
             :add(nn.Linear(embeddingSize * 3, 2))
+    if use_cuda then
+        return nnmodel:cuda()
+    end
     return nnmodel
 end
 
@@ -101,15 +104,6 @@ function rougeScores(genSummary, refSummary)
         f1 = 0
     end
     return recall, prec, f1
-end
-function sampleData(input, n)
-    local output = torch.Tensor(n, input:size(2))
-    -- local output = torch.Tensor(input:size())
-    for i=1, n do
-        local indx = math.random(1, input:size(1))
-        output:narrow(1, i, 1):copy(input[indx])
-    end
-    return output
 end
 
 function buildMemory(newinput, memory_hist, memsize, use_cuda)
