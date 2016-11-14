@@ -244,7 +244,7 @@ The weights of the Q-function and the action sequence are initialized at random 
     \underline{\textbf{Output:} \rm \{$\hat{Q}$: extraction policy, $\tilde{Y}_d$: event summary for query $d$\} }
 \begin{algorithmic}[1]
 \vspace{-0.5cm}
-\STATE \rm Initialize action-value function $\hat{Q}$ with random weights
+\STATE \rm Initialize extraction policy $\hat{Q}$ with random weights
 \STATE \rm Initialize memory and summary: $\Gamma, \tilde{Y} =  \{\emptyset \}^{\mathcal{|D|}}_{d=1},  \{\emptyset \}^{\mathcal{|D|}}_{d=1} $
 \FOR{$epoch=1,..,N\ $}
 	\FOR{query $d \in \mathcal{D}$}
@@ -296,7 +296,7 @@ In \textbf{Figure 2a} we see the convergence of our model when trained on F1, wh
 \end{figure}
 
 \subsection{Hyperparameters}
-Different experiments were done to study the effect of each hyperparameter on the model.  Specifically, we evaluate (1) the settings of $K$ to assess the impact on the final predicted summary, (2) values of $\gamma$ to understand the effects on the parameter updates, (3) the memory size, $ | D |$ on the speed of convergence, and (4) the base exploration rate on the states explored. We present several figures visualizing the impact using different settings of the hyperparameters in our model in \textbf{Figure 3} on a smaller subset of the data; specifically, we use the first sentence from the first 100 articles for all but three of the queries, which are left as test data. 
+Different experiments were done to study the effect of each hyperparameter on the model.  Specifically, we evaluate (1) the settings of $K$ to assess the impact on the final predicted summary, (2) values of $\gamma$ to understand the effects on the parameter updates, (3) the memory size, $ | \Gamma |$ on the speed of convergence, and (4) the base exploration rate on the states explored. We present several figures visualizing the impact using different settings of the hyperparameters in our model in \textbf{Figure 3} on a smaller subset of the data; specifically, we use the first sentence from the first 100 articles for all but three of the queries, which are left as test data. 
 
 \begin{figure}[h]
     \centering
