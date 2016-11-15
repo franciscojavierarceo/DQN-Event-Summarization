@@ -68,11 +68,74 @@ queries = buildTermDocumentTable(query_file, nil)
 
 torch.manualSeed(420)
 math.randomseed(420)
+
+
+pakistan = {
+        ['inputs'] = '2012_pakistan_garment_factory_fires_first_sentence_numtext2.csv',
+        ['nuggets'] ='pakistan_nuggets_numtext.csv',
+        ['query'] = queries[2],
+        ['query_name'] = 'pakistan'
+}
+aurora = {
+        ['inputs'] = '2012_aurora_shooting_first_sentence_numtext2.csv', 
+        ['nuggets'] = 'aurora_nuggets_numtext.csv',
+        ['query'] = queries[3],
+        ['query_name'] = 'aurora'
+}
+sandy = {
+        ['inputs'] = 'hurricane_sandy_first_sentence_numtext2.csv',
+        ['nuggets'] ='sandy_nuggets_numtext.csv',
+        ['query'] = queries[7],
+        ['query_name'] = 'sandy'
+}
+
+
 inputs = {
         ['inputs'] = '2012_aurora_shooting_first_sentence_numtext2.csv', 
         ['nuggets'] = 'aurora_nuggets_numtext.csv',
         ['query'] = queries[3]
 }
+
+
+
+if use_cuda then
+    Tensor = torch.CudaTensor
+    LongTensor = torch.CudaLongTensor
+    ByteTensor = torch.CudaByteTensor
+    criterion = criterion:cuda()
+    model = model:cuda()
+    print("...running on GPU")
+else
+    torch.setnumthreads(8)
+    Tensor = torch.Tensor
+    LongTensor = torch.LongTensor
+    ByteTensor = torch.ByteTensor
+    print("...running on CPU")
+end
+
+for query_id = 1, #inputs do
+    input_fn = inputs[query_id]['inputs']
+    nugget_fn = inputs[query_id]['nuggets']
+
+    input_file = csvigo.load({path = input_path .. input_fn, mode = "large", verbose = false})
+    nugget_file = csvigo.load({path = input_path .. nugget_fn, mode = "large", verbose = false})
+    input_file = geti_n(input_file, 2, #input_file) 
+    nugget_file = geti_n(nugget_file, 2, #nugget_file) 
+
+    vocab_sized = getVocabSize(input_file)
+    vocab_sizeq = getVocabSize(query_file)
+    vocab_size = math.max(vocab_size, vocab_sized, vocab_sizeq)
+
+    maxseqlend = getMaxseq(input_file)
+    maxseqlen = math.max(maxseqlen, maxseqlenq, maxseqlend)
+    action_list = torch.totable(torch.round(torch.rand(#input_file)))
+
+    --- initialize the query specific lists
+    action_query_list[query_id] = action_list
+    yrouge_query_list[query_id] = torch.totable(torch.rand(#input_file))     --- Actual
+    pred_query_list[query_id] = torch.totable(torch.zeros(#input_file))     --- Predicted
+end
+
 query_id = 1
 qs = inputs['query']
 input_file = csvigo.load({path = data_path .. inputs['inputs'], mode = "large", verbose = false})
@@ -90,25 +153,12 @@ for i=1, #nuggets do
     ntdm = tableConcat(table.unpack(nuggets), ntdm)
 end
 
-local model = buildModel(nnmod, vocabSize, embeddingSize)
+
+local model = buildModel(nnmod, vocabSize, embeddingSize, use_cuda)
 
 criterion = nn.MSECriterion()
 params, gradParams = model:getParameters()
 
-if use_cuda then
-    Tensor = torch.CudaTensor
-    LongTensor = torch.CudaLongTensor
-    ByteTensor = torch.CudaByteTensor
-    criterion = criterion:cuda()
-    model = model:cuda()
-    print("...running on GPU")
-else
-    torch.setnumthreads(8)
-    Tensor = torch.Tensor
-    LongTensor = torch.LongTensor
-    ByteTensor = torch.ByteTensor
-    print("...running on CPU")
-end
 
 -- Initializing stuff
 local query = LongTensor{qs}
