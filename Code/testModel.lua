@@ -61,10 +61,10 @@ dofile("utils.lua")
 dofile("model_utils.lua")
 dofile("model_utils2.lua")
 
-data_path = '~/GitHub/DeepNLPQLearning/DO_NOT_UPLOAD_THIS_DATA/0-output/'
-query_fn = data_path .. 'queries_numtext.csv'
+input_path = '~/GitHub/DeepNLPQLearning/DO_NOT_UPLOAD_THIS_DATA/0-output/'
+query_fn = input_path .. 'queries_numtext.csv'
 query_file =  csvigo.load({path = query_fn, mode = "large", verbose = false})
-queries = buildTermDocumentTable(query_file, nil)
+queries = padZeros(buildTermDocumentTable(query_file, nil), 5)
 
 torch.manualSeed(420)
 math.randomseed(420)
@@ -90,11 +90,16 @@ sandy = {
 }
 
 
+-- inputs = {
+--         ['inputs'] = '2012_aurora_shooting_first_sentence_numtext2.csv', 
+--         ['nuggets'] = 'aurora_nuggets_numtext.csv',
+--         ['query'] = queries[3]
+-- }
 inputs = {
-        ['inputs'] = '2012_aurora_shooting_first_sentence_numtext2.csv', 
-        ['nuggets'] = 'aurora_nuggets_numtext.csv',
-        ['query'] = queries[3]
-}
+        aurora, 
+        -- pakistan,
+        -- sandy
+    }
 
 
 
@@ -113,6 +118,11 @@ else
     print("...running on CPU")
 end
 
+vocab_size = 0
+maxseqlen = 0
+maxseqlenq = getMaxseq(query_file)
+
+query_data = {}
 for query_id = 1, #inputs do
     input_fn = inputs[query_id]['inputs']
     nugget_fn = inputs[query_id]['nuggets']
@@ -130,30 +140,60 @@ for query_id = 1, #inputs do
     maxseqlen = math.max(maxseqlen, maxseqlenq, maxseqlend)
     action_list = torch.totable(torch.round(torch.rand(#input_file)))
 
-    --- initialize the query specific lists
-    action_query_list[query_id] = action_list
-    yrouge_query_list[query_id] = torch.totable(torch.rand(#input_file))     --- Actual
-    pred_query_list[query_id] = torch.totable(torch.zeros(#input_file))     --- Predicted
+    xtdm  = buildTermDocumentTable(input_file, K_tokens)
+    nuggets = buildTermDocumentTable(nugget_file, nil)
+    ntdm = {}
+    for i=1, #nuggets do
+        ntdm = tableConcat(table.unpack(nuggets), ntdm)
+    end
+
+    query = LongTensor{inputs[query_id]['query'] }
+    sentenceStream = LongTensor(padZeros(xtdm, K_tokens))
+    streamSize = sentenceStream:size(1)
+    refSummary = Tensor{ntdm}
+    refCounts = buildTokenCounts(refSummary)
+    buffer = Tensor(1, maxSummarySize):zero()
+    actions = ByteTensor(streamSize, 2):fill(0)
+    exploreDraws = Tensor(streamSize)
+    summaryBuffer = LongTensor(streamSize + 1, maxSummarySize):zero()
+    qValues = Tensor(streamSize, 2):zero()
+    rouge = Tensor(streamSize + 1):zero()
+    rouge[1] = 0
+    summary = summaryBuffer:zero():narrow(1,1,1)
+    
+    query_data[query_id] = {
+        query,
+        sentenceStream,
+        streamSize,
+        refSummary,
+        refCounts,
+        buffer,
+        actions,
+        exploreDraws,
+        summaryBuffer,
+        qValues,
+        rouge,
+        summary
+    }
 end
 
-query_id = 1
-qs = inputs['query']
-input_file = csvigo.load({path = data_path .. inputs['inputs'], mode = "large", verbose = false})
-nugget_file = csvigo.load({path = data_path .. inputs['nuggets'], mode = "large", verbose = false})
-nugget_file = geti_n(nugget_file, 2, #nugget_file) 
-input_file = geti_n(input_file, 2, n) 
--- input_file = geti_n(input_file, 2, #input_file)
-local vocabSize = getVocabSize(input_file)
-K_nuggs = getMaxseq(nugget_file)
+-- query_id = 1
+-- qs = inputs['query']
+-- input_file = csvigo.load({path = data_path .. inputs['inputs'], mode = "large", verbose = false})
+-- nugget_file = csvigo.load({path = data_path .. inputs['nuggets'], mode = "large", verbose = false})
+-- nugget_file = geti_n(nugget_file, 2, #nugget_file) 
+-- input_file = geti_n(input_file, 2, n) 
+-- -- input_file = geti_n(input_file, 2, #input_file)
+-- local vocabSize = getVocabSize(input_file)
 
-nuggets = buildTermDocumentTable(nugget_file, nil)
-xtdm  = buildTermDocumentTable(input_file, K_tokens)
-ntdm = {}
-for i=1, #nuggets do
-    ntdm = tableConcat(table.unpack(nuggets), ntdm)
-end
+-- nuggets = buildTermDocumentTable(nugget_file, nil)
+-- xtdm  = buildTermDocumentTable(input_file, K_tokens)
+-- ntdm = {}
+-- for i=1, #nuggets do
+--     ntdm = tableConcat(table.unpack(nuggets), ntdm)
+-- end
 
-
+vocabSize = vocab_size
 local model = buildModel(nnmod, vocabSize, embeddingSize, use_cuda)
 
 criterion = nn.MSECriterion()
@@ -161,107 +201,138 @@ params, gradParams = model:getParameters()
 
 
 -- Initializing stuff
-local query = LongTensor{qs}
-local sentenceStream = LongTensor(padZeros(xtdm, K_tokens))
-local refSummary = Tensor{ntdm}
-local refCounts = buildTokenCounts(refSummary)
-local streamSize = sentenceStream:size(1)
-local buffer = Tensor(1, maxSummarySize):zero()
+-- local query = LongTensor{qs}
+-- local sentenceStream = LongTensor(padZeros(xtdm, K_tokens))
+-- local refSummary = Tensor{ntdm}
+-- local refCounts = buildTokenCounts(refSummary)
+-- local streamSize = sentenceStream:size(1)
+-- local buffer = Tensor(1, maxSummarySize):zero()
 
 local perf = io.open("perf.txt", 'w')
 for epoch=0, nepochs do
-    actions = ByteTensor(streamSize, 2):fill(0)
-    local exploreDraws = Tensor(streamSize)
-    local summaryBuffer = LongTensor(streamSize + 1, maxSummarySize):zero()
-    local qValues = Tensor(streamSize, 2):zero()
-    rouge = Tensor(streamSize + 1):zero()
-    rouge[1] = 0
-    exploreDraws:uniform(0, 1)
+    -- actions = ByteTensor(streamSize, 2):fill(0)
+    -- local exploreDraws = Tensor(streamSize)
+    -- local summaryBuffer = LongTensor(streamSize + 1, maxSummarySize):zero()
+    -- local qValues = Tensor(streamSize, 2):zero()
+    -- rouge = Tensor(streamSize + 1):zero()
+    -- rouge[1] = 0
+    -- exploreDraws:uniform(0, 1)
+    -- local summary = summaryBuffer:zero():narrow(1,1,1)
+    for query_id=1, #inputs do
+        query = query_data[query_id][1]
+        sentenceStream = query_data[query_id][2]
+        streamSize = query_data[query_id][3]
+        refSummary = query_data[query_id][4]
+        refCounts = query_data[query_id][5]
+        buffer = query_data[query_id][6]
+        actions = query_data[query_id][7]
+        exploreDraws = query_data[query_id][8]
+        summaryBuffer = query_data[query_id][9]
+        qValues = query_data[query_id][10]
+        rouge = query_data[query_id][11]
+        summary = query_data[query_id][12]
 
-    local summary = summaryBuffer:zero():narrow(1,1,1)
-    for i=1, streamSize do
-        --- the i extracts individual sentences from the stream
-        local sentence = sentenceStream:narrow(1, i, 1)
-        qValues[i]:copy(model:forward({sentence, query, summary}))
+        for i=1, streamSize do
+            --- the i extracts individual sentences from the stream
+            local sentence = sentenceStream:narrow(1, i, 1)
+            qValues[i]:copy(model:forward({sentence, query, summary}))
 
-        if exploreDraws[i] <= epsilon then
-            actions[i][torch.random(SKIP, SELECT)] = 1
-        else
-            if qValues[i][SKIP] > qValues[i][SELECT] then
-                actions[i][SKIP] = 1
+            if exploreDraws[i] <= epsilon then
+                actions[i][torch.random(SKIP, SELECT)] = 1
             else
-                actions[i][SELECT] = 1
+                if qValues[i][SKIP] > qValues[i][SELECT] then
+                    actions[i][SKIP] = 1
+                else
+                    actions[i][SELECT] = 1
+                end
+            end
+
+            summary = buildSummary(
+                actions:narrow(1, 1, i), 
+                sentenceStream:narrow(1, 1, i),
+                summaryBuffer:narrow(1, i + 1, 1),
+                use_cuda
+                )
+
+            local generatedCounts = buildTokenCounts(summary) 
+            local recall, prec, f1 = rougeScores(generatedCounts, refCounts)
+
+            if metric == "f1" then
+                rouge[i + 1]  = threshold(f1, thresh)
+            elseif metric == "recall" then
+                rouge[i + 1]  = threshold(recall, thresh)
+            elseif metric == "precision" then
+                rouge[i + 1] = threshold(prec, thresh)
+            end
+
+            if i==streamSize then
+                rougeRecall = recall
+                rougePrecision = prec
+                rougeF1 = f1
             end
         end
 
-        summary = buildSummary(
-            actions:narrow(1, 1, i), 
-            sentenceStream:narrow(1, 1, i),
-            summaryBuffer:narrow(1, i + 1, 1),
-            use_cuda
-            )
+        local max, argmax = torch.max(qValues, 2)
+        local reward0 = rouge:narrow(1,2, streamSize) - rouge:narrow(1,1, streamSize)
+        local reward_tp1 = gamma * reward0:narrow(1, 2, streamSize - 1):resize(streamSize)
+        local reward = reward0 + reward_tp1
+        
+        local querySize = query:size(2)
+        local summaryBatch = summaryBuffer:narrow(1, 1, streamSize)
+        local queryBatch = query:view(1, querySize):expand(streamSize, querySize) 
+        local input = {sentenceStream, queryBatch, summaryBatch}
+        --- Storing the data
+        memory = {input, reward, actions}
 
-        local generatedCounts = buildTokenCounts(summary) 
-        local recall, prec, f1 = rougeScores(generatedCounts, refCounts)
-
-        if metric == "f1" then
-            rouge[i + 1]  = threshold(f1, thresh)
-        elseif metric == "recall" then
-            rouge[i + 1]  = threshold(recall, thresh)
-        elseif metric == "precision" then
-            rouge[i + 1] = threshold(prec, thresh)
+        if epoch == 0 then
+            fullmemory = memory 
+        else
+            fullmemory = buildMemory(memory, fullmemory, mem_size, batch_size, use_cuda)
         end
+        --- Running backprop
+        loss = backProp(memory, params, model, criterion, batch_size, use_cuda)
 
-        if i==streamSize then
-            rougeRecall = recall
-            rougePrecision = prec
-            rougeF1 = f1
+        if epoch==0 then
+            out = string.format("epoch;epsilon;loss;rougeF1;rougeRecall;rougePrecision;actual;pred;nselect;nskip;query\n")
+            perf:write(out)
         end
-    end
-
-    local max, argmax = torch.max(qValues, 2)
-    local reward0 = rouge:narrow(1,2, streamSize) - rouge:narrow(1,1, streamSize)
-    local reward_tp1 = gamma * reward0:narrow(1, 2, streamSize - 1):resize(streamSize)
-    local reward = reward0 + reward_tp1
-    
-    local querySize = query:size(2)
-    local summaryBatch = summaryBuffer:narrow(1, 1, streamSize)
-    local queryBatch = query:view(1, querySize):expand(streamSize, querySize) 
-    local input = {sentenceStream, queryBatch, summaryBatch}
-    --- Storing the data
-    memory = {input, reward, actions}
-
-    if epoch == 0 then
-        fullmemory = memory 
-    else
-        fullmemory = buildMemory(memory, fullmemory, mem_size, batch_size, use_cuda)
-    end
-    --- Running backprop
-    loss = backProp(memory, params, model, criterion, batch_size, use_cuda)
-
-    if epoch==0 then
-        out = string.format("epoch;epsilon;loss;rougeF1;rougeRecall;rougePrecision;actual;pred;nselect;nskip\n")
+        nactions = torch.totable(actions:sum(1))[1]
+        out = string.format("%i; %.3f; %.6f; %.6f; %.6f; %.6f; {min=%.3f, max=%.3f}; {min=%.3f, max=%.3f}; %i; %i; %s\n", 
+            epoch, epsilon, loss, rougeF1, rougeRecall, rougePrecision,
+            reward:min(), reward:max(),
+            qValues:min(), qValues:max(),
+            nactions[1], nactions[2],
+            inputs[query_id]['query']
+        )
         perf:write(out)
-    end
-    nactions = torch.totable(actions:sum(1))[1]
-    out = string.format("%i; %.3f; %.6f; %.6f; %.6f; %.6f; {min=%.3f, max=%.3f}; {min=%.3f, max=%.3f}; %i; %i\n", 
-        epoch, epsilon, loss, rougeF1, rougeRecall, rougePrecision,
-        reward:min(), reward:max(),
-        qValues:min(), qValues:max(),
-        nactions[1], nactions[2]
-    )
-    perf:write(out)
 
-    if export then 
-        local ofile = io.open(string.format("plotdata/%s/%i_epoch.txt", nnmod, epoch), 'w')
-        ofile:write("predSkip;predSelect;actual;Skip;Select\n")
-        for i=1, streamSize do
-            ofile:write(string.format("%.6f;%.6f;%6f;%i;%i\n", 
-                    qValues[i][SKIP], qValues[i][SELECT], rouge[i], 
-                    actions[i][SKIP], actions[i][SELECT]))
-        end
-        ofile:close()
-    end 
+        if export then 
+            local ofile = io.open(string.format("plotdata/%s/%i_epoch.txt", nnmod, epoch), 'w')
+            ofile:write("predSkip;predSelect;actual;Skip;Select\n")
+            for i=1, streamSize do
+                ofile:write(string.format("%.6f;%.6f;%6f;%i;%i\n", 
+                        qValues[i][SKIP], qValues[i][SELECT], rouge[i], 
+                        actions[i][SKIP], actions[i][SELECT]))
+            end
+            ofile:close()
+        end 
+
+        query_data[query_id] = {
+            query,
+            sentenceStream,
+            streamSize,
+            refSummary,
+            refCounts,
+            buffer,
+            actions,
+            exploreDraws,
+            summaryBuffer,
+            qValues,
+            rouge,
+            summary
+        }
+    end
+
     if (epsilon - delta) <= base_explore_rate then
         epsilon = base_explore_rate
         if epoch > end_baserate then 

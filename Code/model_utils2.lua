@@ -125,7 +125,6 @@ function buildMemory(newinput, memory_hist, memsize, use_cuda)
     end
     --- Selecting random samples of the data
     local inputMemory = {sentMemory, queryMemory, sumryMemory}
-
     if use_cuda then
         inputMemory = {sentMemory:cuda(), queryMemory:cuda(), sumryMemory:cuda()}
     end
@@ -133,19 +132,15 @@ function buildMemory(newinput, memory_hist, memsize, use_cuda)
 end
 
 function backProp(input_memory, params, model, criterion, batch_size, use_cuda)
-    if batch_size > input_memory[2]:size(1) then
-        batch_size = input_memory[2]:size(1)
-    end
     p = torch.ones(batch_size) / batch_size
     indxs = torch.multinomial(p, batch_size, true)
-    reward = input_memory[2]:index(1, indxs)
-    actions_in = input_memory[3]:index(1, indxs)
     xinput = {  
                 input_memory[1][1]:index(1, indxs), 
                 input_memory[1][2]:index(1, indxs), 
                 input_memory[1][3]:index(1, indxs)
             }
-
+    reward = input_memory[2]:index(1, indxs)
+    actions_in = input_memory[3]:index(1, indxs)
     local function feval(params)
         gradParams:zero()
         local predQ = model:forward(xinput)
@@ -154,11 +149,18 @@ function backProp(input_memory, params, model, criterion, batch_size, use_cuda)
             maskLayer = maskLayer:cuda()
         end
         local predQOnActions = maskLayer:forward({predQ, actions_in})
-
+        print("forward action pass")
+        print(predQ:size())
+        print(predQOnActions:size())
+        print(actions_in:size())
+        print(reward:size())
         local lossf = criterion:forward(predQOnActions, reward)
+        print("forward loss pass")
         local gradOutput = criterion:backward(predQOnActions, reward)
+        print("backward grad action pass")
         local gradMaskLayer = maskLayer:backward({predQ, actions_in}, gradOutput)
         model:backward(xinput, gradMaskLayer[1])
+        print("backward grad input pass")
         return lossf, gradParams
     end
     --- optim.rmsprop returns \theta, f(\theta):= loss function
