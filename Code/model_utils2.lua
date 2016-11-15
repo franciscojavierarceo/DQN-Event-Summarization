@@ -132,7 +132,8 @@ function buildMemory(newinput, memory_hist, memsize, use_cuda)
 end
 
 function backProp(input_memory, params, gradParams, optimParams, model, criterion, batch_size, use_cuda)
-    local p = torch.ones(batch_size) / batch_size
+    local n = input_memory[1][1]:size(2)
+    local p = torch.ones(n) / n
     local indxs = torch.multinomial(p, batch_size, true)
     local xinput = {  
                 input_memory[1][1]:index(1, indxs), 

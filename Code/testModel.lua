@@ -177,47 +177,14 @@ for query_id = 1, #inputs do
     }
 end
 
--- query_id = 1
--- qs = inputs['query']
--- input_file = csvigo.load({path = data_path .. inputs['inputs'], mode = "large", verbose = false})
--- nugget_file = csvigo.load({path = data_path .. inputs['nuggets'], mode = "large", verbose = false})
--- nugget_file = geti_n(nugget_file, 2, #nugget_file) 
--- input_file = geti_n(input_file, 2, n) 
--- -- input_file = geti_n(input_file, 2, #input_file)
--- local vocabSize = getVocabSize(input_file)
-
--- nuggets = buildTermDocumentTable(nugget_file, nil)
--- xtdm  = buildTermDocumentTable(input_file, K_tokens)
--- ntdm = {}
--- for i=1, #nuggets do
---     ntdm = tableConcat(table.unpack(nuggets), ntdm)
--- end
-
 vocabSize = vocab_size
 local model = buildModel(nnmod, vocabSize, embeddingSize, use_cuda)
 
 criterion = nn.MSECriterion()
 params, gradParams = model:getParameters()
 
-
--- Initializing stuff
--- local query = LongTensor{qs}
--- local sentenceStream = LongTensor(padZeros(xtdm, K_tokens))
--- local refSummary = Tensor{ntdm}
--- local refCounts = buildTokenCounts(refSummary)
--- local streamSize = sentenceStream:size(1)
--- local buffer = Tensor(1, maxSummarySize):zero()
-
 local perf = io.open("perf.txt", 'w')
 for epoch=0, nepochs do
-    -- actions = ByteTensor(streamSize, 2):fill(0)
-    -- local exploreDraws = Tensor(streamSize)
-    -- local summaryBuffer = LongTensor(streamSize + 1, maxSummarySize):zero()
-    -- local qValues = Tensor(streamSize, 2):zero()
-    -- rouge = Tensor(streamSize + 1):zero()
-    -- rouge[1] = 0
-    -- exploreDraws:uniform(0, 1)
-    -- local summary = summaryBuffer:zero():narrow(1,1,1)
     for query_id=1, #inputs do
         query = query_data[query_id][1]
         sentenceStream = query_data[query_id][2]
@@ -283,7 +250,7 @@ for epoch=0, nepochs do
         local input = {sentenceStream, queryBatch, summaryBatch}
         --- Storing the data
         print(string.format('action size %i x %i', actions:size(1), actions:size(2)))
-        memory = {input, reward, actions}
+        local memory = {input, reward, actions}
 
         if epoch == 0 then
             fullmemory = memory 
@@ -325,7 +292,7 @@ for epoch=0, nepochs do
             refSummary,
             refCounts,
             buffer,
-            actions,
+            actions:fill(0),
             exploreDraws,
             summaryBuffer,
             qValues,
