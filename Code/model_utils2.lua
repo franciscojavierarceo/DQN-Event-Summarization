@@ -115,13 +115,13 @@ function buildMemory(newinput, memory_hist, memsize, use_cuda)
     --- specifying rows to index 
     if sentMemory:size(1) >= memsize then
         -- My hack for sampling from a uniform distribution
-        p = torch.ones(memsize) / memsize
-        indxs = torch.multinomial(p, memsize, true)
-        sentMemory = sentMemory:index(1, indxs)
-        queryMemory = queryMemory:index(1, indxs)
-        sumryMemory = sumryMemory:index(1, indxs)
-        rewardMemory = rewardMemory:index(1, indxs)
-        actionMemory = actionMemory:index(1, indxs)
+        local p = torch.ones(memsize) / memsize
+        local indxs = torch.multinomial(p, memsize, true)
+        local sentMemory = sentMemory:index(1, indxs)
+        local queryMemory = queryMemory:index(1, indxs)
+        local sumryMemory = sumryMemory:index(1, indxs)
+        local rewardMemory = rewardMemory:index(1, indxs)
+        local actionMemory = actionMemory:index(1, indxs)
     end
     --- Selecting random samples of the data
     local inputMemory = {sentMemory, queryMemory, sumryMemory}
@@ -131,36 +131,36 @@ function buildMemory(newinput, memory_hist, memsize, use_cuda)
     return {inputMemory, rewardMemory, actionMemory}
 end
 
-function backProp(input_memory, params, model, criterion, batch_size, use_cuda)
-    p = torch.ones(batch_size) / batch_size
-    indxs = torch.multinomial(p, batch_size, true)
-    xinput = {  
+function backProp(input_memory, params, optimParams, model, criterion, batch_size, use_cuda)
+    local p = torch.ones(batch_size) / batch_size
+    local indxs = torch.multinomial(p, batch_size, true)
+    local xinput = {  
                 input_memory[1][1]:index(1, indxs), 
                 input_memory[1][2]:index(1, indxs), 
                 input_memory[1][3]:index(1, indxs)
             }
-    reward = input_memory[2]:index(1, indxs)
-    actions_in = input_memory[3]:index(1, indxs)
+    local reward = input_memory[2]:index(1, indxs)
+    local actions_in = input_memory[3]:index(1, indxs)
     local function feval(params)
         gradParams:zero()
-        local predQ = model:forward(xinput)
         local maskLayer = nn.MaskedSelect()
         if use_cuda then 
             maskLayer = maskLayer:cuda()
         end
+        local predQ = model:forward(xinput)
         local predQOnActions = maskLayer:forward({predQ, actions_in})
-        print("forward action pass")
-        print(predQ:size())
-        print(predQOnActions:size())
-        print(actions_in:size())
-        print(reward:size())
+        print(string.format("input1 = %i x %i", xinput[1]:size(1), xinput[1]:size(2)))
+        print(string.format("input2 = %i x %i", xinput[2]:size(1), xinput[2]:size(2)))
+        print(string.format("input3 = %i x %i", xinput[3]:size(1), xinput[3]:size(2)))
+        print(string.format("actions= %i x %i", actions_in:size(1), actions_in:size(2)))
+        print(string.format("rewards= %i x 1", reward:size(1)))
+        print(string.format("predQ  = %i x %i", predQ:size(1), predQ:size(2)))
+        print(string.format("predQOnActions = %i x 1", predQOnActions:size(1) ))
+        print("****************************************")
         local lossf = criterion:forward(predQOnActions, reward)
-        print("forward loss pass")
         local gradOutput = criterion:backward(predQOnActions, reward)
-        print("backward grad action pass")
         local gradMaskLayer = maskLayer:backward({predQ, actions_in}, gradOutput)
         model:backward(xinput, gradMaskLayer[1])
-        print("backward grad input pass")
         return lossf, gradParams
     end
     --- optim.rmsprop returns \theta, f(\theta):= loss function
