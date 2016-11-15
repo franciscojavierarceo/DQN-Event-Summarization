@@ -282,6 +282,7 @@ for epoch=0, nepochs do
         local queryBatch = query:view(1, querySize):expand(streamSize, querySize) 
         local input = {sentenceStream, queryBatch, summaryBatch}
         --- Storing the data
+        print(string.format('action size %i x %i', actions:size(1), actions:size(2)))
         memory = {input, reward, actions}
 
         if epoch == 0 then
@@ -290,7 +291,7 @@ for epoch=0, nepochs do
             fullmemory = buildMemory(memory, fullmemory, mem_size, batch_size, use_cuda)
         end
         --- Running backprop
-        loss = backProp(memory, params, optimParams, model, criterion, batch_size, use_cuda)
+        loss = backProp(memory, params, gradParams, optimParams, model, criterion, batch_size, use_cuda)
 
         if epoch==0 then
             out = string.format("epoch;epsilon;loss;rougeF1;rougeRecall;rougePrecision;actual;pred;nselect;nskip;query\n")

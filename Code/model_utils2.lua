@@ -114,7 +114,7 @@ function buildMemory(newinput, memory_hist, memsize, use_cuda)
     local actionMemory = torch.cat(newinput[3]:double(), memory_hist[3]:double(), 1)
     --- specifying rows to index 
     if sentMemory:size(1) >= memsize then
-        -- My hack for sampling from a uniform distribution
+        -- My hack for sampling uniformly distribution
         local p = torch.ones(memsize) / memsize
         local indxs = torch.multinomial(p, memsize, true)
         local sentMemory = sentMemory:index(1, indxs)
@@ -131,7 +131,7 @@ function buildMemory(newinput, memory_hist, memsize, use_cuda)
     return {inputMemory, rewardMemory, actionMemory}
 end
 
-function backProp(input_memory, params, optimParams, model, criterion, batch_size, use_cuda)
+function backProp(input_memory, params, gradParams, optimParams, model, criterion, batch_size, use_cuda)
     local p = torch.ones(batch_size) / batch_size
     local indxs = torch.multinomial(p, batch_size, true)
     local xinput = {  

@@ -1,2 +1,2 @@
 epoch;epsilon;loss;rougeF1;rougeRecall;rougePrecision;actual;pred;nselect;nskip;query
-0; 1.000; 679.234562; 0.117542; 0.067831; 0.440000; {min=-0.009, max=0.006}; {min=-42.439, max=5.228}; 252; 235; table: 0x0705bd80
+0; 1.000; 723.093988; 0.124666; 0.071942; 0.466667; {min=-0.006, max=0.007}; {min=-42.770, max=5.228}; 37; 194; table: 0x09a30ae0
