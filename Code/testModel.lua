@@ -89,12 +89,6 @@ sandy = {
         ['query_name'] = 'sandy'
 }
 
-
--- inputs = {
---         ['inputs'] = '2012_aurora_shooting_first_sentence_numtext2.csv', 
---         ['nuggets'] = 'aurora_nuggets_numtext.csv',
---         ['query'] = queries[3]
--- }
 inputs = {
         aurora, 
         -- pakistan,
@@ -249,7 +243,6 @@ for epoch=0, nepochs do
         local queryBatch = query:view(1, querySize):expand(streamSize, querySize) 
         local input = {sentenceStream, queryBatch, summaryBatch}
         --- Storing the data
-        print(string.format('action size %i x %i', actions:size(1), actions:size(2)))
         local memory = {input, reward, actions}
 
         if epoch == 0 then
