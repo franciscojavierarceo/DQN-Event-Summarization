@@ -25,7 +25,7 @@ cmd:option('--usecuda', false, 'running on cuda')
 cmd:option('--metric', "f1", 'Metric to learn')
 cmd:option('--n_samples', 500, 'Number of samples to use')
 cmd:option('--max_summary', 300, 'Maximum summary size')
-cmd:option('--end_baserate', 5, 'Maximum summary size')
+cmd:option('--end_baserate', 5, 'Epoch number at which the base_rate ends')
 cmd:option('--thresh', 0, 'Threshold operator')
 cmd:text()
 --- this retrieves the commands and stores them in opt.variable (e.g., opt.model)
@@ -100,8 +100,6 @@ if use_cuda then
     Tensor = torch.CudaTensor
     LongTensor = torch.CudaLongTensor
     ByteTensor = torch.CudaByteTensor
-    criterion = criterion:cuda()
-    model = model:cuda()
     print("...running on GPU")
 else
     torch.setnumthreads(8)
@@ -173,8 +171,13 @@ end
 vocabSize = vocab_size
 local model = buildModel(nnmod, vocabSize, embeddingSize, use_cuda)
 
-criterion = nn.MSECriterion()
 params, gradParams = model:getParameters()
+criterion = nn.MSECriterion()
+
+if use_cuda then
+    criterion = criterion:cuda()
+    model = model:cuda()
+end
 
 local perf = io.open("perf.txt", 'w')
 for epoch=0, nepochs do
