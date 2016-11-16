@@ -174,7 +174,7 @@ that learns the parameters using stochastic gradient descent with RMSprop \cite{
         \path (wa.west)+(-3.0 , -2.0) node (asr3)[sensor] {$Summary_t$  \textbf{LSTM}};
         \path (wa.east)+(3.0,  1) node (vote) [term] {\textbf{ReLU} \\ \scriptsize $\{Select\}$ };
         \path (wa.east)+(3.0, -1) node (vote2) [term] {\textbf{ReLU} \\ \scriptsize $\{Skip\}$ } ;
-        \path (wa.east)+(6.5,  0) node (output) [om] {\textbf{Select} \\ \scriptsize E[Rouge]} ;
+        \path (wa.east)+(6.5,  0) node (output) [om] {\textbf{Linear} \\ \scriptsize E[Rouge]} ;
 
         \path [draw, ->] (asr1.east) -- node [above] {}     (wa.125);
         \path [draw, ->] (asr2.east) -- node [above] {}     (wa.180);
