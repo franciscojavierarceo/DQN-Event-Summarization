@@ -16,7 +16,6 @@ cmd:option('--learning_rate', 1e-5, 'using a learning rate of 1e-5')
 cmd:option('--gamma', 0.4, 'Discount rate parameter in backprop step')
 cmd:option('--cuts', 4, 'Discount rate parameter in backprop step')
 cmd:option('--base_explore_rate', 0.0, 'Base rate')
-cmd:option('--n_rand', 0, 'Base rate')
 cmd:option('--mem_size', 100, 'Memory size')
 cmd:option('--batch_size', 200,'Batch Size')
 cmd:option('--model','bow','BOW/LSTM option')
@@ -26,6 +25,7 @@ cmd:option('--metric', "f1", 'Metric to learn')
 cmd:option('--n_samples', 500, 'Number of samples to use')
 cmd:option('--max_summary', 300, 'Maximum summary size')
 cmd:option('--end_baserate', 5, 'Epoch number at which the base_rate ends')
+cmd:option('--K_tokens', 25, 'Maximum number of tokens for each sentence')
 cmd:option('--thresh', 0, 'Threshold operator')
 cmd:text()
 --- this retrieves the commands and stores them in opt.variable (e.g., opt.model)
@@ -45,7 +45,7 @@ metric = opt.metric
 maxSummarySize = opt.max_summary
 end_baserate = opt.end_baserate
 n = opt.n_samples
-K_tokens = 25
+K_tokens = opt.K_tokens
 thresh = opt.thresh
 
 SKIP = 1
@@ -94,8 +94,6 @@ inputs = {
         -- sandy
     }
 
-
-
 if use_cuda then
     Tensor = torch.CudaTensor
     LongTensor = torch.CudaLongTensor
@@ -109,10 +107,10 @@ else
     print("...running on CPU")
 end
 
-vocab_size = 0
+vocabSize = 0
 maxseqlen = 0
 maxseqlenq = getMaxseq(query_file)
-
+vocabSizeq = getVocabSize(query_file)
 query_data = {}
 for query_id = 1, #inputs do
     input_fn = inputs[query_id]['inputs']
@@ -120,15 +118,13 @@ for query_id = 1, #inputs do
 
     input_file = csvigo.load({path = input_path .. input_fn, mode = "large", verbose = false})
     nugget_file = csvigo.load({path = input_path .. nugget_fn, mode = "large", verbose = false})
-    input_file = geti_n(input_file, 2, #input_file) 
+    -- input_file = geti_n(input_file, 2, #input_file) 
+    input_file = geti_n(input_file, 2, n) 
     nugget_file = geti_n(nugget_file, 2, #nugget_file) 
 
-    vocab_sized = getVocabSize(input_file)
-    vocab_sizeq = getVocabSize(query_file)
-    vocab_size = math.max(vocab_size, vocab_sized, vocab_sizeq)
+    vocabSize = math.max(vocabSize, vocabSizeq, getVocabSize(input_file))
+    maxseqlen = math.max(maxseqlen, maxseqlenq, getMaxseq(input_file))
 
-    maxseqlend = getMaxseq(input_file)
-    maxseqlen = math.max(maxseqlen, maxseqlenq, maxseqlend)
     action_list = torch.totable(torch.round(torch.rand(#input_file)))
 
     xtdm  = buildTermDocumentTable(input_file, K_tokens)
@@ -137,7 +133,7 @@ for query_id = 1, #inputs do
     for i=1, #nuggets do
         ntdm = tableConcat(table.unpack(nuggets), ntdm)
     end
-
+    -- Initializing the bookkeeping variables and storing them
     query = LongTensor{inputs[query_id]['query'] }
     sentenceStream = LongTensor(padZeros(xtdm, K_tokens))
     streamSize = sentenceStream:size(1)
@@ -168,9 +164,7 @@ for query_id = 1, #inputs do
     }
 end
 
-vocabSize = vocab_size
-local model = buildModel(nnmod, vocabSize, embeddingSize, use_cuda)
-
+model = buildModel(nnmod, vocabSize, embeddingSize, use_cuda)
 params, gradParams = model:getParameters()
 criterion = nn.MSECriterion()
 
@@ -179,7 +173,7 @@ if use_cuda then
     model = model:cuda()
 end
 
-local perf = io.open("perf.txt", 'w')
+local perf = io.open(string.format("%s_perf.txt", nnmod), 'w')
 for epoch=0, nepochs do
     for query_id=1, #inputs do
         query = query_data[query_id][1]
@@ -265,7 +259,7 @@ for epoch=0, nepochs do
             reward:min(), reward:max(),
             qValues:min(), qValues:max(),
             nactions[1], nactions[2],
-            inputs[query_id]['query']
+            inputs[query_id]['query_name']
         )
         perf:write(out)
 

@@ -3,7 +3,7 @@ function buildModel(model, vocabSize, embeddingSize, use_cuda)
         print(string.format("Running bag-of-words model to learn %s", metric))
         sentenceLookup = nn.Sequential()
                     :add(nn.LookupTableMaskZero(vocabSize, embeddingSize))
-                    :add(nn.Sum(2, 3, false))
+                    :add(nn.Sum(2, 3, true))
                     :add(nn.ReLU())
                     -- :add(nn.Tanh())
     else
