@@ -131,32 +131,36 @@ function buildMemory(newinput, memory_hist, memsize, use_cuda)
     return {inputMemory, rewardMemory, actionMemory}
 end
 
-function backProp(input_memory, params, gradParams, optimParams, model, criterion, batch_size, use_cuda)
+function backProp(input_memory, params, gradParams, optimParams, model, criterion, batch_size, n_backprops, use_cuda)
     local n = input_memory[1][1]:size(2)
     local p = torch.ones(n) / n
-    local indxs = torch.multinomial(p, batch_size, true)
-    local xinput = {  
-                input_memory[1][1]:index(1, indxs), 
-                input_memory[1][2]:index(1, indxs), 
-                input_memory[1][3]:index(1, indxs)
-            }
-    local reward = input_memory[2]:index(1, indxs)
-    local actions_in = input_memory[3]:index(1, indxs)
-    local function feval(params)
-        gradParams:zero()
-        local maskLayer = nn.MaskedSelect()
-        if use_cuda then 
-            maskLayer = maskLayer:cuda()
+    local loss = 0
+    for i=1, n_backprops do
+        local indxs = torch.multinomial(p, batch_size, true)
+        local xinput = {  
+                    input_memory[1][1]:index(1, indxs), 
+                    input_memory[1][2]:index(1, indxs), 
+                    input_memory[1][3]:index(1, indxs)
+                }
+        local reward = input_memory[2]:index(1, indxs)
+        local actions_in = input_memory[3]:index(1, indxs)
+        local function feval(params)
+            gradParams:zero()
+            local maskLayer = nn.MaskedSelect()
+            if use_cuda then 
+                maskLayer = maskLayer:cuda()
+            end
+            local predQ = model:forward(xinput)
+            local predQOnActions = maskLayer:forward({predQ, actions_in})
+            local lossf = criterion:forward(predQOnActions, reward)
+            local gradOutput = criterion:backward(predQOnActions, reward)
+            local gradMaskLayer = maskLayer:backward({predQ, actions_in}, gradOutput)
+            model:backward(xinput, gradMaskLayer[1])
+            return lossf, gradParams
         end
-        local predQ = model:forward(xinput)
-        local predQOnActions = maskLayer:forward({predQ, actions_in})
-        local lossf = criterion:forward(predQOnActions, reward)
-        local gradOutput = criterion:backward(predQOnActions, reward)
-        local gradMaskLayer = maskLayer:backward({predQ, actions_in}, gradOutput)
-        model:backward(xinput, gradMaskLayer[1])
-        return lossf, gradParams
+        --- optim.rmsprop returns \theta, f(\theta):= loss function
+        _, lossv  = optim.rmsprop(feval, params, optimParams)   
+        loss = lossv/n_backprops
     end
-    --- optim.rmsprop returns \theta, f(\theta):= loss function
-    _, lossv  = optim.rmsprop(feval, params, optimParams)   
-    return lossv[1]
+    return loss
 end

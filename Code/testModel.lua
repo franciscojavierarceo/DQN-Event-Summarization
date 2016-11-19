@@ -27,6 +27,7 @@ cmd:option('--max_summary', 300, 'Maximum summary size')
 cmd:option('--end_baserate', 5, 'Epoch number at which the base_rate ends')
 cmd:option('--K_tokens', 25, 'Maximum number of tokens for each sentence')
 cmd:option('--thresh', 0, 'Threshold operator')
+cmd:option('--n_backprops', 1, 'Number of times to backprop through the data')
 cmd:text()
 --- this retrieves the commands and stores them in opt.variable (e.g., opt.model)
 local opt = cmd:parse(arg or {})
@@ -247,7 +248,7 @@ for epoch=0, nepochs do
             fullmemory = buildMemory(memory, fullmemory, mem_size, batch_size, use_cuda)
         end
         --- Running backprop
-        loss = backProp(memory, params, gradParams, optimParams, model, criterion, batch_size, use_cuda)
+        loss = backProp(memory, params, gradParams, optimParams, model, criterion, batch_size, n_backprops, use_cuda)
 
         if epoch==0 then
             out = string.format("epoch;epsilon;loss;rougeF1;rougeRecall;rougePrecision;actual;pred;nselect;nskip;query\n")
@@ -299,4 +300,6 @@ for epoch=0, nepochs do
         epsilon = epsilon - delta
     end
 end
+print(string.format("Model complete {Selected = %i; Skipped  = %i}; Final Rouge-F1 = {%.6f}", nactions[1], nactions[2], rougeF1))
+
 -- os.execute(string.format("python make_density_gif.py %i %s %s", nepochs, nnmod, metric))
