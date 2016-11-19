@@ -166,23 +166,22 @@ function backProp(input_memory, params, gradParams, optimParams, model, criterio
 end
 
  function backPropOld(input_memory, params, gradParams, optimParams, model, criterion, batch_size, memsize, use_cuda)
+
      local inputs = {input_memory[1], input_memory[3]}
      local rewards = input_memory[2]
      local dataloader = dl.TensorLoader(inputs, rewards)
-     local err = 0.    
- 
+
      for k, xin, reward in dataloader:sampleiter(batch_size, memsize) do
          xinput = xin[1]
          actions_in = xin[2]
          local function feval(params)
              gradParams:zero()
-             local predQ = model:forward(xinput)
              local maskLayer = nn.MaskedSelect()
              if use_cuda then 
                  maskLayer = maskLayer:cuda()
              end
-             local predQOnActions = maskLayer:forward({predQ, actions_in})
- 
+             local predQ = model:forward(xinput)
+             local predQOnActions = maskLayer:forward({predQ, actions_in}) 
              local lossf = criterion:forward(predQOnActions, reward)
              local gradOutput = criterion:backward(predQOnActions, reward)
              local gradMaskLayer = maskLayer:backward({predQ, actions_in}, gradOutput)

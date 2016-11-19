@@ -13,7 +13,7 @@ cmd = torch.CmdLine()
 
 cmd:option('--nepochs', 5, 'running for 50 epochs')
 cmd:option('--learning_rate', 1e-5, 'using a learning rate of 1e-5')
-cmd:option('--gamma', 0.4, 'Discount rate parameter in backprop step')
+cmd:option('--gamma', 0., 'Discount rate parameter in backprop step')
 cmd:option('--cuts', 4, 'Discount rate parameter in backprop step')
 cmd:option('--base_explore_rate', 0.0, 'Base rate')
 cmd:option('--mem_size', 100, 'Memory size')
@@ -190,19 +190,24 @@ for epoch=0, nepochs do
         qValues = query_data[query_id][10]
         rouge = query_data[query_id][11]
         summary = query_data[query_id][12]
-
+        --- This is an intermediate set of actions for choosing the optimal
+        optactions = ByteTensor(streamSize, 2):fill(0)
+        rougeOpt = Tensor(streamSize + 1):zero()
         for i=1, streamSize do
             --- the i extracts individual sentences from the stream
             local sentence = sentenceStream:narrow(1, i, 1)
             qValues[i]:copy(model:forward({sentence, query, summary}))
 
+            -- Replacing selection action with random one
             if exploreDraws[i] <= epsilon then
                 actions[i][torch.random(SKIP, SELECT)] = 1
-            else
+            else 
                 if qValues[i][SKIP] > qValues[i][SELECT] then
                     actions[i][SKIP] = 1
+                    optactions[i][SKIP] = 1
                 else
                     actions[i][SELECT] = 1
+                    optactions[i][SELECT] = 1
                 end
             end
 
@@ -215,6 +220,15 @@ for epoch=0, nepochs do
 
             local generatedCounts = buildTokenCounts(summary) 
             local recall, prec, f1 = rougeScores(generatedCounts, refCounts)
+
+            -- summaryOpt = buildSummary(
+            --     optactions:narrow(1, 1, i), 
+            --     sentenceStream:narrow(1, 1, i),
+            --     summaryBuffer:narrow(1, i + 1, 1),
+            --     use_cuda
+            --     )
+            -- local generatedOptCounts = buildTokenCounts(summaryOpt) 
+            -- local recallOpt, precOpt, f1Opt = rougeScores(generatedOptCounts, refCounts)
 
             if metric == "f1" then
                 rouge[i + 1]  = threshold(f1, thresh)
@@ -302,6 +316,6 @@ for epoch=0, nepochs do
         epsilon = epsilon - delta
     end
 end
-print(string.format("Model complete {Selected = %i; Skipped  = %i}; Final Rouge-F1 = {%.6f}", nactions[1], nactions[2], rougeF1))
+print(string.format("Model complete {Selected = %i; Skipped  = %i}; Final Rouge Recall, Precision, F1 = {%.6f;%.6f;%.6f}", nactions[1], nactions[2], rougeRecall, rougePrecision,rougeF1))
 
 -- os.execute(string.format("python make_density_gif.py %i %s %s", nepochs, nnmod, metric))
