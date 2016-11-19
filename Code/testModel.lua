@@ -48,6 +48,7 @@ end_baserate = opt.end_baserate
 n = opt.n_samples
 K_tokens = opt.K_tokens
 thresh = opt.thresh
+n_backprops = opt.n_backprops
 
 SKIP = 1
 SELECT = 2
@@ -248,7 +249,8 @@ for epoch=0, nepochs do
             fullmemory = buildMemory(memory, fullmemory, mem_size, batch_size, use_cuda)
         end
         --- Running backprop
-        loss = backProp(memory, params, gradParams, optimParams, model, criterion, batch_size, n_backprops, use_cuda)
+        loss = backPropOld(memory, params, gradParams, optimParams, model, criterion, batch_size, mem_size, use_cuda)
+        -- loss = backProp(memory, params, gradParams, optimParams, model, criterion, batch_size, n_backprops, use_cuda)
 
         if epoch==0 then
             out = string.format("epoch;epsilon;loss;rougeF1;rougeRecall;rougePrecision;actual;pred;nselect;nskip;query\n")
