@@ -131,6 +131,35 @@ function buildMemory(newinput, memory_hist, memsize, use_cuda)
     return {inputMemory, rewardMemory, actionMemory}
 end
 
+function buildMemoryOld(newinput, memory_hist, memsize, use_cuda)
+    local sentMemory = torch.cat(newinput[1][1]:double(), memory_hist[1][1]:double(), 1)
+    local queryMemory = torch.cat(newinput[1][2]:double(), memory_hist[1][2]:double(), 1)
+    local sumryMemory = torch.cat(newinput[1][3]:double(), memory_hist[1][3]:double(), 1)
+    local rewardMemory = torch.cat(newinput[2]:double(), memory_hist[2]:double(), 1)
+    local actionMemory = torch.cat(newinput[3]:double(), memory_hist[3]:double(), 1)
+    --- specifying rows to index 
+    if sentMemory:size(1) < memsize then
+        nend = sentMemory:size(1)
+        nstart = 1
+    else 
+        nstart = math.max(memsize - sentMemory:size(1), 1)
+        nend = memsize + nstart
+    end
+    --- Selecting n last data points
+    sentMemory = sentMemory[{{nstart, nend}}]
+    queryMemory= queryMemory[{{nstart, nend}}]
+    sumryMemory= sumryMemory[{{nstart, nend}}]
+    rewardMemory = rewardMemory[{{nstart, nend}}]
+    actionMemory = actionMemory[{{nstart, nend}}]
+
+    local inputMemory = {sentMemory, queryMemory, sumryMemory}
+
+    if use_cuda then
+        inputMemory = {sentMemory:cuda(), queryMemory:cuda(), sumryMemory:cuda()}
+    end
+    return {inputMemory, rewardMemory, actionMemory}
+end
+
 function backProp(input_memory, params, gradParams, optimParams, model, criterion, batch_size, n_backprops, use_cuda)
     local n = input_memory[1][1]:size(2)
     local p = torch.ones(n) / n
