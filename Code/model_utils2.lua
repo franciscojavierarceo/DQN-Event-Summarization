@@ -28,6 +28,7 @@ function buildModel(model, vocabSize, embeddingSize, use_cuda)
             :add(nn.JoinTable(2))
             :add(nn.ReLU())
             :add(nn.Linear(embeddingSize * 3, 2))
+            -- :add(nn.Tanh())
     if use_cuda then
         return nnmodel:cuda()
     end
@@ -194,7 +195,7 @@ function backProp(input_memory, params, gradParams, optimParams, model, criterio
     return loss/n_backprops
 end
 
- function backPropOld(input_memory, params, gradParams, optimParams, model, criterion, batch_size, memsize, use_cuda)
+ function backPropOld(input_memory, optimParams, model, criterion, batch_size, memsize, use_cuda)
 
      local inputs = {input_memory[1], input_memory[3]}
      local rewards = input_memory[2]

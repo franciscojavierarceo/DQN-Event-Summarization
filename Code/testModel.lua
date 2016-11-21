@@ -176,7 +176,7 @@ if use_cuda then
 end
 
 local perf = io.open(string.format("%s_perf.txt", nnmod), 'w')
-for epoch=0, nepochs do
+for epoch=0, nepochs-1 do
     for query_id=1, #inputs do
         query = query_data[query_id][1]
         sentenceStream = query_data[query_id][2]
@@ -191,44 +191,29 @@ for epoch=0, nepochs do
         rouge = query_data[query_id][11]
         summary = query_data[query_id][12]
         --- This is an intermediate set of actions for choosing the optimal
-        optactions = ByteTensor(streamSize, 2):fill(0)
+        -- optactions = ByteTensor(streamSize, 2):fill(0)
         rougeOpt = Tensor(streamSize + 1):zero()
-        for i=1, streamSize do
-            --- the i extracts individual sentences from the stream
+        for i=1, streamSize do      -- Iterating through individual sentences
             local sentence = sentenceStream:narrow(1, i, 1)
             qValues[i]:copy(model:forward({sentence, query, summary}))
-
-            -- Replacing selection action with random one
-            if exploreDraws[i] <= epsilon then
+            if exploreDraws[i]  <=  epsilon then        -- epsilon greedy strategy
                 actions[i][torch.random(SKIP, SELECT)] = 1
             else 
                 if qValues[i][SKIP] > qValues[i][SELECT] then
                     actions[i][SKIP] = 1
-                    optactions[i][SKIP] = 1
                 else
                     actions[i][SELECT] = 1
-                    optactions[i][SELECT] = 1
                 end
             end
-
+            
             summary = buildSummary(
                 actions:narrow(1, 1, i), 
                 sentenceStream:narrow(1, 1, i),
                 summaryBuffer:narrow(1, i + 1, 1),
                 use_cuda
                 )
-
             local generatedCounts = buildTokenCounts(summary) 
             local recall, prec, f1 = rougeScores(generatedCounts, refCounts)
-
-            -- summaryOpt = buildSummary(
-            --     optactions:narrow(1, 1, i), 
-            --     sentenceStream:narrow(1, 1, i),
-            --     summaryBuffer:narrow(1, i + 1, 1),
-            --     use_cuda
-            --     )
-            -- local generatedOptCounts = buildTokenCounts(summaryOpt) 
-            -- local recallOpt, precOpt, f1Opt = rougeScores(generatedOptCounts, refCounts)
 
             if metric == "f1" then
                 rouge[i + 1]  = threshold(f1, thresh)
@@ -261,11 +246,10 @@ for epoch=0, nepochs do
             fullmemory = memory 
         else
             -- fullmemory = buildMemory(memory, fullmemory, mem_size, batch_size, use_cuda)
-            fullmemory = buildMemoryOld(memory, fullmemory, mem_size, batch_size, use_cuda)
-            
+            fullmemory = buildMemoryOld(memory, fullmemory, mem_size, batch_size, use_cuda)            
         end
         --- Running backprop
-        loss = backPropOld(memory, params, gradParams, optimParams, model, criterion, batch_size, mem_size, use_cuda)
+        loss = backPropOld(memory, optimParams, model, criterion, batch_size, mem_size, use_cuda)
         -- loss = backProp(memory, params, gradParams, optimParams, model, criterion, batch_size, n_backprops, use_cuda)
 
         if epoch==0 then
