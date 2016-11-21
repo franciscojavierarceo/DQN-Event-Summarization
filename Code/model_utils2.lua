@@ -94,11 +94,16 @@ function rougeScores(genSummary, refSummary)
         genTotal = genTotal + genCount
     end
 
+    if refTotal == 0 then 
+        refTotal = 1 
+    end
     if genTotal == 0 then 
         genTotal = 1 
     end
     local recall = intersection / refTotal
+
     local prec = intersection / genTotal
+
     if recall > 0 and prec > 0 then
         f1 = 2 * recall * prec / (recall + prec)
     else 
@@ -162,7 +167,7 @@ function buildMemoryOld(newinput, memory_hist, memsize, use_cuda)
 end
 
 function backProp(input_memory, params, gradParams, optimParams, model, criterion, batch_size, n_backprops, use_cuda)
-    local n = input_memory[1][1]:size(2)
+    local n = input_memory[1][1]:size(1)
     local p = torch.ones(n) / n
     local loss = 0
     for i=1, n_backprops do
@@ -195,7 +200,7 @@ function backProp(input_memory, params, gradParams, optimParams, model, criterio
     return loss/n_backprops
 end
 
- function backPropOld(input_memory, params, model, criterion, batch_size, memsize, use_cuda)
+function backPropOld(input_memory, params, model, criterion, batch_size, memsize, use_cuda)
 
      local inputs = {input_memory[1], input_memory[3]}
      local rewards = input_memory[2]

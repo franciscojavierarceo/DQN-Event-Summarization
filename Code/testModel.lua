@@ -173,7 +173,7 @@ if use_cuda then
 end
 
 local perf = io.open(string.format("%s_perf.txt", nnmod), 'w')
-for epoch=0, nepochs-1 do
+for epoch=0, nepochs do
     for query_id=1, #inputs do
         query = query_data[query_id][1]
         sentenceStream = query_data[query_id][2]
