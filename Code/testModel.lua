@@ -126,9 +126,6 @@ for query_id = 1, #inputs do
 
     vocabSize = math.max(vocabSize, vocabSizeq, getVocabSize(input_file))
     maxseqlen = math.max(maxseqlen, maxseqlenq, getMaxseq(input_file))
-
-    action_list = torch.totable(torch.round(torch.rand(#input_file)))
-
     xtdm  = buildTermDocumentTable(input_file, K_tokens)
     nuggets = buildTermDocumentTable(nugget_file, nil)
     ntdm = {}
@@ -166,7 +163,7 @@ for query_id = 1, #inputs do
     }
 end
 
-model = buildModel(nnmod, vocabSize, embeddingSize, use_cuda)
+local model = buildModel(nnmod, vocabSize, embeddingSize, use_cuda)
 params, gradParams = model:getParameters()
 criterion = nn.MSECriterion()
 
@@ -193,6 +190,7 @@ for epoch=0, nepochs-1 do
         --- This is an intermediate set of actions for choosing the optimal
         -- optactions = ByteTensor(streamSize, 2):fill(0)
         rougeOpt = Tensor(streamSize + 1):zero()
+        exploreDraws:uniform(0, 1)
         for i=1, streamSize do      -- Iterating through individual sentences
             local sentence = sentenceStream:narrow(1, i, 1)
             qValues[i]:copy(model:forward({sentence, query, summary}))
@@ -211,7 +209,7 @@ for epoch=0, nepochs-1 do
                 sentenceStream:narrow(1, 1, i),
                 summaryBuffer:narrow(1, i + 1, 1),
                 use_cuda
-                )
+            )
             local generatedCounts = buildTokenCounts(summary) 
             local recall, prec, f1 = rougeScores(generatedCounts, refCounts)
 
@@ -246,11 +244,11 @@ for epoch=0, nepochs-1 do
             fullmemory = memory 
         else
             -- fullmemory = buildMemory(memory, fullmemory, mem_size, batch_size, use_cuda)
-            fullmemory = buildMemoryOld(memory, fullmemory, mem_size, batch_size, use_cuda)            
+            fullmemory = buildMemoryOld(memory, fullmemory, mem_size, batch_size, use_cuda)
         end
         --- Running backprop
-        loss = backPropOld(memory, optimParams, model, criterion, batch_size, mem_size, use_cuda)
-        -- loss = backProp(memory, params, gradParams, optimParams, model, criterion, batch_size, n_backprops, use_cuda)
+        -- loss = backPropOld(memory, params, model, criterion, batch_size, mem_size, use_cuda)
+        loss = backProp(memory, params, gradParams, optimParams, model, criterion, batch_size, n_backprops, use_cuda)
 
         if epoch==0 then
             out = string.format("epoch;epsilon;loss;rougeF1;rougeRecall;rougePrecision;actual;pred;nselect;nskip;query\n")
@@ -261,7 +259,7 @@ for epoch=0, nepochs-1 do
             epoch, epsilon, loss, rougeF1, rougeRecall, rougePrecision,
             reward:min(), reward:max(),
             qValues:min(), qValues:max(),
-            nactions[1], nactions[2],
+            nactions[SELECT], nactions[SKIP],
             inputs[query_id]['query_name']
         )
         perf:write(out)
@@ -301,7 +299,8 @@ for epoch=0, nepochs-1 do
     else 
         epsilon = epsilon - delta
     end
+
 end
-print(string.format("Model complete {Selected = %i; Skipped  = %i}; Final Rouge Recall, Precision, F1 = {%.6f;%.6f;%.6f}", nactions[1], nactions[2], rougeRecall, rougePrecision,rougeF1))
+print(string.format("Model complete {Selected = %i; Skipped  = %i}; Final Rouge Recall, Precision, F1 = {%.6f;%.6f;%.6f}", nactions[SELECT], nactions[SKIP], rougeRecall, rougePrecision,rougeF1))
 
 -- os.execute(string.format("python make_density_gif.py %i %s %s", nepochs, nnmod, metric))

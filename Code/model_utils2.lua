@@ -195,12 +195,11 @@ function backProp(input_memory, params, gradParams, optimParams, model, criterio
     return loss/n_backprops
 end
 
- function backPropOld(input_memory, optimParams, model, criterion, batch_size, memsize, use_cuda)
+ function backPropOld(input_memory, params, model, criterion, batch_size, memsize, use_cuda)
 
      local inputs = {input_memory[1], input_memory[3]}
      local rewards = input_memory[2]
      local dataloader = dl.TensorLoader(inputs, rewards)
-
      for k, xin, reward in dataloader:sampleiter(batch_size, memsize) do
          xinput = xin[1]
          actions_in = xin[2]
