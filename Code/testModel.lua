@@ -243,12 +243,12 @@ for epoch=0, nepochs do
         if epoch == 0 then
             fullmemory = memory 
         else
-            -- fullmemory = buildMemory(memory, fullmemory, mem_size, batch_size, use_cuda)
-            fullmemory = buildMemoryOld(memory, fullmemory, mem_size, batch_size, use_cuda)
+            fullmemory = buildMemory(memory, fullmemory, mem_size, batch_size, use_cuda)
+            -- fullmemory = buildMemoryOld(memory, fullmemory, mem_size, batch_size, use_cuda)
         end
         --- Running backprop
-        -- loss = backPropOld(memory, params, model, criterion, batch_size, mem_size, use_cuda)
-        loss = backProp(memory, params, gradParams, optimParams, model, criterion, batch_size, n_backprops, use_cuda)
+        loss = backPropOld(memory, params, model, criterion, batch_size, mem_size, use_cuda)
+        -- loss = backProp(memory, params, gradParams, optimParams, model, criterion, batch_size, n_backprops, use_cuda)
 
         if epoch==0 then
             out = string.format("epoch;epsilon;loss;rougeF1;rougeRecall;rougePrecision;actual;pred;nselect;nskip;query\n")
