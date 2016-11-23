@@ -1,0 +1,88 @@
+
+query_agg <- "SELECT  PATY_I,
+                      PATY_OPEN_D, 
+                      COALESCE(napps, 0) as ttl_apps,
+                      COALESCE(ncomplete ,0) as ttl_apps_cmpltd,
+                      last_appt_date as lastApplicationDate,
+                      COUNT(DISTINCT ACCT_I) as naccts,
+                      MAX(EXPY_D) as max_acct_expy_d,
+                      SUM(case when ACCT_CLSE_D is not null then 1 else 0 end) as nclosedaccts,
+                      SUM(case when ACCT_CLSE_D is null then 1 else 0 end) as nactiveaccts,
+                      SUM(COALESCE(POSAccount, 0)) as NMerchants,
+                      SUM(COALESCE(TransactionAccount, 0)) as NTransAccounts,
+                      MAX(COALESCE(POSAccount, 0)) as POSAcct_Flag,
+                      MAX(COALESCE(TransactionAccount, 0)) as TranAcct_Flag,
+                      COUNT(distinct CARD_ACPT_TRML_I||CARD_ACPT_LOCN_I) as nterminals,
+                      COUNT(distinct PDCT_N) as nproducts,
+                      SUM(LIMT_A) as total_exposure,
+                      MAX(  CASE WHEN TransactionAccount > 0 then 
+                            COALESCE(ACCT_CLSE_D, DATE '2016-11-21') - ACCT_OPEN_D 
+                            ELSE 0 END ) AS MAX_TRANS_ACCT_DURATION
+                      FROM (
+                          SELECT  DISTINCT  
+                                            a.PATY_I, a.EFFT_D as PATY_OPEN_D, 
+                                            b.ACCT_I, b.EFFT_D, b.EXPY_D,
+                                            c.OPEN_D as ACCT_OPEN_D, c.CLSE_D as ACCT_CLSE_D, 
+                                            d.PDCT_N,
+                                            f.LIMT_C, COALESCE(f.LIMT_A, 0) as LIMT_A,
+                                            COALESCE(g.REL_I, a.PATY_I) as CRIS_C, g.REL_I, g.CRIS_PDCT_C,
+                                            h.MERC_ACCT_I,
+                                            j.CARD_ACPT_TRML_I, j.CARD_ACPT_LOCN_I, e.TransactionAccount,
+                                            CASE WHEN j.CARD_ACPT_TRML_I IS NOT NULL THEN 1 ELSE 0 END as POSAccount,
+                                            k.OPEN_D as MERC_ACCT_OPEN_D, k.CLSE_D as MERC_CLSE_D, k.MERC_TRAD_M, 
+                                            m.napps, m.ncomplete, m.last_appt_date
+                                  
+                                        FROM pvdata.paty a
+                                          LEFT JOIN pvdata.acct_paty_hist  b 
+                                            on a.PATY_I = b.PATY_I
+                                          LEFT JOIN pvdata.acct_base c
+                                            on b.ACCT_I = c.ACCT_I
+                                          LEFT JOIN pvdata.acct_pdct_hist d
+                                            on  b.ACCT_I = d.ACCT_I 
+                                            and b.EFFT_D between d.EFFT_D and d.EXPY_D
+                                          LEFT JOIN (
+                                                    SELECT PDCT_N, 
+                                                        MAX(
+                                                            CASE 
+                                                              WHEN upper(PDCT_DESN_X) LIKE '%TRANSACTION%' then 1 
+                                                              WHEN upper(PDCT_DESN_X) LIKE '%CHEQUE%' then 1 
+                                                              ELSE 0 
+                                                            END) as TransactionAccount 
+                                                      FROM pvdata.pdct_idnn_hist group by PDCT_N
+                                          ) e
+                                            on  d.PDCT_N = e.PDCT_N
+                                          LEFT JOIN pvdata.ACCT_LIMT_HIST f
+                                            on  b.ACCT_I = f.ACCT_I
+                                          LEFT JOIN pvdata.CRIS_ACCT_REFN g
+                                            on b.PATY_I = g.PATY_I
+                                            and b.ACCT_I = g.ACCT_I
+                                          LEFT JOIN pvdata.DAR_ACCT_HIST h
+                                            on  b.ACCT_I = h.ACCT_I
+                                          LEFT JOIN pvdata.DAR_ACCT_TRML_hist j
+                                            on  h.MERC_ACCT_I = j.MERC_ACCT_I
+                                          LEFT JOIN pvdata.MAS_ACCT_HIST k
+                                            on b.ACCT_I = k.MAS_MERC_ACCT_I
+
+                                          INNER JOIN (
+                                              SELECT fin.PATY_I,  COUNT(*) as napps, MAX(fin.APPT_CRAT_D) as last_appt_date, SUM(fin.complete) as ncomplete
+                                                from (
+                                                      SELECT a1.PATY_I, a1.APPT_PDCT_I, a3.APPT_CRAT_D,
+                                                              MAX(case when a4.APPT_I is not null then 1 else 0 end) as complete
+                                                      FROM pvdata.appt_pdct_paty_hist a1
+                                                      INNER JOIN pvdata.appt_pdct_hist a2
+                                                          on a1.appt_pdct_i = a2.appt_pdct_i
+                                                      INNER JOIN pvdata.appt a3
+                                                          on a2.appt_i = a3.appt_i
+                                                      left join (SELECT DISTINCT APPT_I FROM pvdata.appt_stus_hist where STUS_C='COMP') a4
+                                                          on a3.APPT_I = a4.APPT_I
+                                                      WHERE a3.APPT_CRAT_D >= '2014-01-01' and a3.APPT_C = 'APPL'
+                                                        GROUP BY a1.PATY_I, a1.APPT_PDCT_I, a3.APPT_CRAT_D
+                                                ) fin 
+                                                group by fin.PATY_I
+                                            ) m
+                                            on a.PATY_I = m.PATY_I
+                                    WHERE a.PATY_TYPE_C='O'
+                      ) df 
+                      GROUP BY PATY_I, PATY_OPEN_D, lastApplicationDate, ttl_apps, ttl_apps_cmpltd;"
+# This gives us the data at the CIF level
+cdf <- sqlQuery(conn, query_agg)

@@ -187,6 +187,8 @@ for epoch=0, nepochs do
         qValues = query_data[query_id][10]
         rouge = query_data[query_id][11]
         summary = query_data[query_id][12]
+
+        rouge = Tensor(streamSize + 1):zero()
         --- This is an intermediate set of actions for choosing the optimal
         -- optactions = ByteTensor(streamSize, 2):fill(0)
         rougeOpt = Tensor(streamSize + 1):zero()
@@ -230,8 +232,8 @@ for epoch=0, nepochs do
 
         local max, argmax = torch.max(qValues, 2)
         local reward0 = rouge:narrow(1,2, streamSize) - rouge:narrow(1,1, streamSize)
-        local reward_tp1 = gamma * reward0:narrow(1, 2, streamSize - 1):resize(streamSize)
-        local reward = reward0 + reward_tp1
+        -- local reward_tp1 = gamma * reward0:narrow(1, 2, streamSize - 1):resize(streamSize)
+        local reward = reward0 --- + reward_tp1
         
         local querySize = query:size(2)
         local summaryBatch = summaryBuffer:narrow(1, 1, streamSize)
@@ -247,8 +249,8 @@ for epoch=0, nepochs do
             -- fullmemory = buildMemoryOld(memory, fullmemory, mem_size, batch_size, use_cuda)
         end
         --- Running backprop
-        -- loss = backPropOld(memory, params, model, criterion, batch_size, mem_size, use_cuda)
-        loss = backProp(memory, params, gradParams, optimParams, model, criterion, batch_size, n_backprops, use_cuda)
+        loss = backPropOld(memory, params, model, criterion, batch_size, mem_size, use_cuda)
+        -- loss = backProp(memory, params, gradParams, optimParams, model, criterion, batch_size, n_backprops, use_cuda)
 
         if epoch==0 then
             out = string.format("epoch;epsilon;loss;rougeF1;rougeRecall;rougePrecision;actual;pred;nselect;nskip;query\n")
