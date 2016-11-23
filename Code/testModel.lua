@@ -109,6 +109,33 @@ else
     print("...running on CPU")
 end
 
+function backPropOld(input_memory, params, model, criterion, batch_size, memsize, use_cuda)
+    local inputs = {input_memory[1], input_memory[3]}
+    local rewards = input_memory[2]
+    local dataloader = dl.TensorLoader(inputs, rewards)
+    for k, xin, reward in dataloader:sampleiter(batch_size, memsize) do
+        xinput = xin[1]
+        actions_in = xin[2]
+        local function feval(params)
+            gradParams:zero()
+            local maskLayer = nn.MaskedSelect()
+            if use_cuda then 
+             maskLayer = maskLayer:cuda()
+            end
+            local predQ = model:forward(xinput)
+            local predQOnActions = maskLayer:forward({predQ, actions_in}) 
+            local lossf = criterion:forward(predQOnActions, reward)
+            local gradOutput = criterion:backward(predQOnActions, reward)
+            local gradMaskLayer = maskLayer:backward({predQ, actions_in}, gradOutput)
+            model:backward(xinput, gradMaskLayer[1])
+            return lossf, gradParams
+        end
+     --- optim.rmsprop returns \theta, f(\theta):= loss function
+     _, lossv  = optim.rmsprop(feval, params, optimParams)   
+    end
+    return lossv[1]
+end
+
 vocabSize = 0
 maxseqlen = 0
 maxseqlenq = getMaxseq(query_file)
@@ -133,19 +160,19 @@ for query_id = 1, #inputs do
         ntdm = tableConcat(table.unpack(nuggets), ntdm)
     end
     -- Initializing the bookkeeping variables and storing them
-    query = LongTensor{inputs[query_id]['query'] }
-    sentenceStream = LongTensor(padZeros(xtdm, K_tokens))
-    streamSize = sentenceStream:size(1)
-    refSummary = Tensor{ntdm}
-    refCounts = buildTokenCounts(refSummary)
-    buffer = Tensor(1, maxSummarySize):zero()
-    actions = ByteTensor(streamSize, 2):fill(0)
-    exploreDraws = Tensor(streamSize)
-    summaryBuffer = LongTensor(streamSize + 1, maxSummarySize):zero()
-    qValues = Tensor(streamSize, 2):zero()
-    rouge = Tensor(streamSize + 1):zero()
-    rouge[1] = 0
-    summary = summaryBuffer:zero():narrow(1,1,1)
+    local query = LongTensor{inputs[query_id]['query'] }
+    local sentenceStream = LongTensor(padZeros(xtdm, K_tokens))
+    local streamSize = sentenceStream:size(1)
+    local refSummary = Tensor{ntdm}
+    local refCounts = buildTokenCounts(refSummary)
+    local buffer = Tensor(1, maxSummarySize):zero()
+    local actions = ByteTensor(streamSize, 2):fill(0)
+    local exploreDraws = Tensor(streamSize)
+    local summaryBuffer = LongTensor(streamSize + 1, maxSummarySize):zero()
+    local qValues = Tensor(streamSize, 2):zero()
+    local rouge = Tensor(streamSize + 1):zero()
+    -- local rouge[1] = 0
+    local summary = summaryBuffer:zero():narrow(1,1,1)
     
     query_data[query_id] = {
         query,
@@ -163,7 +190,7 @@ for query_id = 1, #inputs do
     }
 end
 
-local model = buildModel(nnmod, vocabSize, embeddingSize, use_cuda)
+model = buildModel(nnmod, vocabSize, embeddingSize, use_cuda)
 params, gradParams = model:getParameters()
 criterion = nn.MSECriterion()
 
@@ -175,27 +202,45 @@ end
 local perf = io.open(string.format("%s_perf.txt", nnmod), 'w')
 for epoch=0, nepochs do
     for query_id=1, #inputs do
-        query = query_data[query_id][1]
-        sentenceStream = query_data[query_id][2]
-        streamSize = query_data[query_id][3]
-        refSummary = query_data[query_id][4]
-        refCounts = query_data[query_id][5]
-        buffer = query_data[query_id][6]
-        actions = query_data[query_id][7]
-        exploreDraws = query_data[query_id][8]
-        summaryBuffer = query_data[query_id][9]
-        qValues = query_data[query_id][10]
-        rouge = query_data[query_id][11]
-        summary = query_data[query_id][12]
+        local query = query_data[query_id][1]
+        local sentenceStream = query_data[query_id][2]
+        local streamSize = query_data[query_id][3]
+        local refSummary = query_data[query_id][4]
+        local refCounts = query_data[query_id][5]
+        local buffer = query_data[query_id][6]
+        local actions = query_data[query_id][7]
+        local exploreDraws = query_data[query_id][8]
+        local summaryBuffer = query_data[query_id][9]
+        local qValues = query_data[query_id][10]
+        local rouge = query_data[query_id][11]
+        local summary = query_data[query_id][12]
 
-        rouge = Tensor(streamSize + 1):zero()
-        --- This is an intermediate set of actions for choosing the optimal
-        -- optactions = ByteTensor(streamSize, 2):fill(0)
-        rougeOpt = Tensor(streamSize + 1):zero()
+        local actions = actions:fill(0)
+        local rouge = rouge:zero()
+        local qValues = qValues:zero()
+        local summaryBuffer = summaryBuffer:zero()
+        local buffer = buffer:zero()
+        local summary = summary:zero()
         exploreDraws:uniform(0, 1)
+        -- rouge = Tensor(streamSize + 1):zero()
+
+        --- This is an intermediate set of actions for choosing the optimal
+        -- local rougeOpt = Tensor(streamSize + 1):zero()
+        -- optactions = ByteTensor(streamSize, 2):fill(0)
+        -- buffer = buffer:zero()
+        -- local summaryBuffer = summaryBuffer:zero()
+
+        -- actions = ByteTensor(streamSize, 2):fill(0)
+        -- local exploreDraws = Tensor(streamSize)
+        -- local summaryBuffer = LongTensor(streamSize + 1, maxSummarySize):zero()
+        -- local qValues = Tensor(streamSize, 2):zero()
+        -- rouge = Tensor(streamSize + 1):zero()
+        -- local summary = summaryBuffer:zero():narrow(1,1,1)
+
         for i=1, streamSize do      -- Iterating through individual sentences
             local sentence = sentenceStream:narrow(1, i, 1)
             qValues[i]:copy(model:forward({sentence, query, summary}))
+
             if exploreDraws[i]  <=  epsilon then        -- epsilon greedy strategy
                 actions[i][torch.random(SKIP, SELECT)] = 1
             else 
@@ -240,13 +285,14 @@ for epoch=0, nepochs do
         local queryBatch = query:view(1, querySize):expand(streamSize, querySize) 
         local input = {sentenceStream, queryBatch, summaryBatch}
         --- Storing the data
-        local memory = {input, reward, actions}
+        memory = {input, reward, actions}
 
         if epoch == 0 then
             fullmemory = memory 
         else
-            fullmemory = buildMemory(memory, fullmemory, mem_size, batch_size, use_cuda)
-            -- fullmemory = buildMemoryOld(memory, fullmemory, mem_size, batch_size, use_cuda)
+            local tmp = buildMemoryOld(memory, fullmemory, mem_size, batch_size, use_cuda)
+            -- local tmp = buildMemory(memory, fullmemory, mem_size, batch_size, use_cuda)
+            fullmemory = tmp
         end
         --- Running backprop
         loss = backPropOld(memory, params, model, criterion, batch_size, mem_size, use_cuda)
@@ -284,7 +330,7 @@ for epoch=0, nepochs do
             refSummary,
             refCounts,
             buffer,
-            actions:fill(0),
+            actions,
             exploreDraws,
             summaryBuffer,
             qValues,

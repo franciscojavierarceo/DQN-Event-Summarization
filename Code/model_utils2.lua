@@ -200,30 +200,3 @@ function backProp(input_memory, params, gradParams, optimParams, model, criterio
     return loss/n_backprops
 end
 
-function backPropOld(input_memory, params, model, criterion, batch_size, memsize, use_cuda)
-
-     local inputs = {input_memory[1], input_memory[3]}
-     local rewards = input_memory[2]
-     local dataloader = dl.TensorLoader(inputs, rewards)
-     for k, xin, reward in dataloader:sampleiter(batch_size, memsize) do
-         xinput = xin[1]
-         actions_in = xin[2]
-         local function feval(params)
-             gradParams:zero()
-             local maskLayer = nn.MaskedSelect()
-             if use_cuda then 
-                 maskLayer = maskLayer:cuda()
-             end
-             local predQ = model:forward(xinput)
-             local predQOnActions = maskLayer:forward({predQ, actions_in}) 
-             local lossf = criterion:forward(predQOnActions, reward)
-             local gradOutput = criterion:backward(predQOnActions, reward)
-             local gradMaskLayer = maskLayer:backward({predQ, actions_in}, gradOutput)
-             model:backward(xinput, gradMaskLayer[1])
-             return lossf, gradParams
-         end
-         --- optim.rmsprop returns \theta, f(\theta):= loss function
-         _, lossv  = optim.rmsprop(feval, params, optimParams)   
-     end
-     return lossv[1]
- end
