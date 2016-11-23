@@ -160,19 +160,19 @@ for query_id = 1, #inputs do
         ntdm = tableConcat(table.unpack(nuggets), ntdm)
     end
     -- Initializing the bookkeeping variables and storing them
-    local query = LongTensor{inputs[query_id]['query'] }
-    local sentenceStream = LongTensor(padZeros(xtdm, K_tokens))
-    local streamSize = sentenceStream:size(1)
-    local refSummary = Tensor{ntdm}
-    local refCounts = buildTokenCounts(refSummary)
-    local buffer = Tensor(1, maxSummarySize):zero()
-    local actions = ByteTensor(streamSize, 2):fill(0)
-    local exploreDraws = Tensor(streamSize)
-    local summaryBuffer = LongTensor(streamSize + 1, maxSummarySize):zero()
-    local qValues = Tensor(streamSize, 2):zero()
-    local rouge = Tensor(streamSize + 1):zero()
+    query = LongTensor{inputs[query_id]['query'] }
+    sentenceStream = LongTensor(padZeros(xtdm, K_tokens))
+    streamSize = sentenceStream:size(1)
+    refSummary = Tensor{ntdm}
+    refCounts = buildTokenCounts(refSummary)
+    buffer = Tensor(1, maxSummarySize):zero()
+    actions = ByteTensor(streamSize, 2):fill(0)
+    exploreDraws = Tensor(streamSize)
+    summaryBuffer = LongTensor(streamSize + 1, maxSummarySize):zero()
+    qValues = Tensor(streamSize, 2):zero()
+    rouge = Tensor(streamSize + 1):zero()
     -- local rouge[1] = 0
-    local summary = summaryBuffer:zero():narrow(1,1,1)
+    summary = summaryBuffer:zero():narrow(1,1,1)
     
     query_data[query_id] = {
         query,
@@ -190,7 +190,38 @@ for query_id = 1, #inputs do
     }
 end
 
-model = buildModel(nnmod, vocabSize, embeddingSize, use_cuda)
+-- model = buildModel(nnmod, vocabSize, embeddingSize, use_cuda)
+
+if nnmod=='bow' then
+    print(string.format("Running bag-of-words model to learn %s", metric))
+    sentenceLookup = nn.Sequential()
+                :add(nn.LookupTableMaskZero(vocabSize, embeddingSize))
+                :add(nn.Sum(2, 3, false))
+                :add(nn.Tanh())
+else
+    print(string.format("Running LSTM model to learn %s", metric))
+    sentenceLookup = nn.Sequential()
+                :add(nn.LookupTableMaskZero(vocabSize, embeddingSize))
+                :add(nn.SplitTable(2))
+                :add(nn.Sequencer(nn.LSTM(embeddingSize, embeddingSize)))
+                :add(nn.SelectTable(-1))            -- selects last state of the LSTM
+                :add(nn.Linear(embeddingSize, embeddingSize))
+                :add(nn.Tanh())
+end
+local queryLookup = sentenceLookup:clone("weight", "gradWeight") 
+local summaryLookup = sentenceLookup:clone("weight", "gradWeight")
+
+local pmodule = nn.ParallelTable()
+            :add(sentenceLookup)
+            :add(queryLookup)
+            :add(summaryLookup)
+
+local model = nn.Sequential()
+        :add(pmodule)
+        :add(nn.JoinTable(2))
+        :add(nn.Tanh())
+        :add(nn.Linear(embeddingSize * 3, 2))
+
 params, gradParams = model:getParameters()
 criterion = nn.MSECriterion()
 
@@ -199,48 +230,75 @@ if use_cuda then
     model = model:cuda()
 end
 
+refSummary = Tensor{ntdm}
+refCounts = buildTokenCounts(refSummary)
+streamSize = sentenceStream:size(1)
+buffer = Tensor(1, maxSummarySize):zero()
+sentenceStream = LongTensor(padZeros(xtdm, K_tokens))
+
+actions = ByteTensor(streamSize, 2):fill(0)
+summaryBuffer = LongTensor(streamSize + 1, maxSummarySize):zero()
+score = 0
+for i=1, streamSize do
+    actions[i][SELECT] = 1
+    summary = buildSummary(
+        actions:narrow(1, 1, i), 
+        sentenceStream:narrow(1, 1, i),
+        summaryBuffer:narrow(1, i + 1, 1),
+        use_cuda
+        )
+    local generatedCounts = buildTokenCounts(summary) 
+    local recall, prec, f1 = rougeScores(generatedCounts, refCounts)
+    if f1 < score then
+        actions[i][SELECT] = 0
+        actions[i][SKIP] = 1
+    end
+    if f1 > score then
+        score = f1
+    end
+-- print(score)
+end
+print(score)
+print(torch.totable(actions:sum(1))[1][SELECT])
+
 local perf = io.open(string.format("%s_perf.txt", nnmod), 'w')
 for epoch=0, nepochs do
     for query_id=1, #inputs do
-        local query = query_data[query_id][1]
-        local sentenceStream = query_data[query_id][2]
-        local streamSize = query_data[query_id][3]
-        local refSummary = query_data[query_id][4]
-        local refCounts = query_data[query_id][5]
-        local buffer = query_data[query_id][6]
-        local actions = query_data[query_id][7]
-        local exploreDraws = query_data[query_id][8]
-        local summaryBuffer = query_data[query_id][9]
-        local qValues = query_data[query_id][10]
-        local rouge = query_data[query_id][11]
-        local summary = query_data[query_id][12]
-
-        local actions = actions:fill(0)
-        local rouge = rouge:zero()
-        local qValues = qValues:zero()
-        local summaryBuffer = summaryBuffer:zero()
-        local buffer = buffer:zero()
-        local summary = summary:zero()
+        query = LongTensor{inputs[query_id]['query'] }
+        actions = ByteTensor(streamSize, 2):fill(0)
+        local exploreDraws = Tensor(streamSize)
+        local summaryBuffer = LongTensor(streamSize + 1, maxSummarySize):zero()
+        local qValues = Tensor(streamSize, 2):zero()
+        rouge = Tensor(streamSize + 1):zero()
         exploreDraws:uniform(0, 1)
-        -- rouge = Tensor(streamSize + 1):zero()
 
-        --- This is an intermediate set of actions for choosing the optimal
-        -- local rougeOpt = Tensor(streamSize + 1):zero()
-        -- optactions = ByteTensor(streamSize, 2):fill(0)
-        -- buffer = buffer:zero()
+        local summary = summaryBuffer:zero():narrow(1,1,1)
+        -- local query = query_data[query_id][1]
+        -- local sentenceStream = query_data[query_id][2]
+        -- local streamSize = query_data[query_id][3]
+        -- local refSummary = query_data[query_id][4]
+        -- local refCounts = query_data[query_id][5]
+        -- local buffer = query_data[query_id][6]
+        -- local actions = query_data[query_id][7]
+        -- local exploreDraws = query_data[query_id][8]
+        -- local summaryBuffer = query_data[query_id][9]
+        -- local qValues = query_data[query_id][10]
+        -- local rouge = query_data[query_id][11]
+        -- local summary = query_data[query_id][12]
+
+        -- local actions = actions:fill(0)
+        -- local rouge = rouge:zero()
+        -- local qValues = qValues:zero()
         -- local summaryBuffer = summaryBuffer:zero()
+        -- local buffer = buffer:zero()
+        -- local summary = summary:zero()
+        -- exploreDraws:uniform(0, 1)
+        -- -- rouge = Tensor(streamSize + 1):zero()
 
-        -- actions = ByteTensor(streamSize, 2):fill(0)
-        -- local exploreDraws = Tensor(streamSize)
-        -- local summaryBuffer = LongTensor(streamSize + 1, maxSummarySize):zero()
-        -- local qValues = Tensor(streamSize, 2):zero()
-        -- rouge = Tensor(streamSize + 1):zero()
-        -- local summary = summaryBuffer:zero():narrow(1,1,1)
-
+ 
         for i=1, streamSize do      -- Iterating through individual sentences
             local sentence = sentenceStream:narrow(1, i, 1)
             qValues[i]:copy(model:forward({sentence, query, summary}))
-
             if exploreDraws[i]  <=  epsilon then        -- epsilon greedy strategy
                 actions[i][torch.random(SKIP, SELECT)] = 1
             else 
