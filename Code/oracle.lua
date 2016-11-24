@@ -73,7 +73,6 @@ nugget_file = csvigo.load({path = data_path .. inputs['nuggets'], mode = "large"
 input_file = geti_n(input_file, 2, n) 
 -- input_file = geti_n(input_file, 2, #input_file) 
 local vocabSize = getVocabSize(input_file)
-nugget_file = geti_n(nugget_file, 2, n)
 -- nugget_file = geti_n(nugget_file, 2, #nugget_file) 
 K_nuggs = getMaxseq(nugget_file)
 
@@ -269,10 +268,11 @@ local epsilon = 1.0
 local query = LongTensor{qs}
 local sentenceStream = LongTensor(padZeros(xtdm, K_tokens))
 
-local refSummary = Tensor{ntdm}
-local refCounts = buildTokenCounts(refSummary)
-local streamSize = sentenceStream:size(1)
-local buffer = Tensor(1, maxSummarySize):zero()
+refSummary = Tensor{ntdm}
+refCounts = buildTokenCounts(refSummary)
+streamSize = sentenceStream:size(1)
+buffer = Tensor(1, maxSummarySize):zero()
+sentenceStream = LongTensor(padZeros(xtdm, K_tokens))
 
 memory = {}
 
