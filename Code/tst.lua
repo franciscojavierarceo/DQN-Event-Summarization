@@ -13,7 +13,7 @@ cmd = torch.CmdLine()
 
 cmd:option('--nepochs', 5, 'running for 50 epochs')
 cmd:option('--learning_rate', 1e-5, 'using a learning rate of 1e-5')
-cmd:option('--gamma', 0., 'Discount rate parameter in backprop step')
+cmd:option('--gamma', 0.4, 'Discount rate parameter in backprop step')
 cmd:option('--cuts', 4, 'Discount rate parameter in backprop step')
 cmd:option('--base_explore_rate', 0.0, 'Base rate')
 cmd:option('--n_rand', 0, 'Base rate')
@@ -46,7 +46,6 @@ SKIP = 1
 SELECT = 2
 bow = false
 export = true
-local epsilon = 1.0
 
 local optimParams = {
     learningRate = opt.learning_rate,
@@ -74,7 +73,8 @@ nugget_file = csvigo.load({path = data_path .. inputs['nuggets'], mode = "large"
 input_file = geti_n(input_file, 2, n) 
 -- input_file = geti_n(input_file, 2, #input_file) 
 local vocabSize = getVocabSize(input_file)
-nugget_file = geti_n(nugget_file, 2, #nugget_file) 
+nugget_file = geti_n(nugget_file, 2, n)
+-- nugget_file = geti_n(nugget_file, 2, #nugget_file) 
 K_nuggs = getMaxseq(nugget_file)
 
 nuggets = buildTermDocumentTable(nugget_file, nil)
@@ -99,7 +99,7 @@ else
                 :add(nn.Sequencer(nn.LSTM(embeddingSize, embeddingSize)))
                 :add(nn.SelectTable(-1))            -- selects last state of the LSTM
                 :add(nn.Linear(embeddingSize, embeddingSize))
-                :add(nn.ReLU())
+                :add(nn.Tanh())
 end
 local queryLookup = sentenceLookup:clone("weight", "gradWeight") 
 local summaryLookup = sentenceLookup:clone("weight", "gradWeight")
@@ -112,7 +112,7 @@ local pmodule = nn.ParallelTable()
 local model = nn.Sequential()
         :add(pmodule)
         :add(nn.JoinTable(2))
-        :add(nn.ReLU())
+        :add(nn.Tanh())
         :add(nn.Linear(embeddingSize * 3, 2))
 
 local criterion = nn.MSECriterion()
@@ -240,6 +240,7 @@ function backProp(input_memory, params, model, criterion, batch_size, memsize, u
     local dataloader = dl.TensorLoader(inputs, rewards)
     local err = 0.    
 
+    den = 1
     for k, xin, reward in dataloader:sampleiter(batch_size, memsize) do
         xinput = xin[1]
         actions_in = xin[2]
@@ -264,6 +265,7 @@ function backProp(input_memory, params, model, criterion, batch_size, memsize, u
     return lossv[1]
 end
 
+local epsilon = 1.0
 local query = LongTensor{qs}
 local sentenceStream = LongTensor(padZeros(xtdm, K_tokens))
 
@@ -272,33 +274,8 @@ local refCounts = buildTokenCounts(refSummary)
 local streamSize = sentenceStream:size(1)
 local buffer = Tensor(1, maxSummarySize):zero()
 
-actions = ByteTensor(streamSize, 2):fill(0)
-summaryBuffer = LongTensor(streamSize + 1, maxSummarySize):zero()
-score = 0
-for i=1, streamSize do
-    actions[i][SELECT] = 1
-    summary = buildSummary(
-        actions:narrow(1, 1, i), 
-        sentenceStream:narrow(1, 1, i),
-        summaryBuffer:narrow(1, i + 1, 1),
-        use_cuda
-        )
-    local generatedCounts = buildTokenCounts(summary) 
-    local recall, prec, f1 = rougeScores(generatedCounts, refCounts)
-    if f1 < score then
-        actions[i][SELECT] = 0
-        actions[i][SKIP] = 1
-    end
-    if f1 > score then
-        score = f1
-    end
--- print(score)
-end
-print(score)
-print(torch.totable(actions:sum(1))[1][SELECT])
-
+local perf = io.open("perf.txt", 'w')
 memory = {}
-local perf = io.open(string.format("%s_perf.txt", nnmod), 'w')
 for epoch=0, nepochs do
     actions = ByteTensor(streamSize, 2):fill(0)
     local exploreDraws = Tensor(streamSize)
@@ -352,9 +329,12 @@ for epoch=0, nepochs do
 
     local max, argmax = torch.max(qValues, 2)
     local reward0 = rouge:narrow(1,2, streamSize) - rouge:narrow(1,1, streamSize)
+    local reward_tp1 = gamma * reward0:narrow(1, 2, streamSize - 1):resize(streamSize)
     --- occasionally the zeros result in a nan, which is strange
+    reward_tp1[reward_tp1:ne(reward_tp1)] = 0
+    reward_tp1 = torch.clamp(reward_tp1, -1, 1)
     -- local reward = rouge:narrow(1,2, streamSize)
-    local reward = reward0
+    local reward = reward0 + reward_tp1
     
     local querySize = query:size(2)
     local summaryBatch = summaryBuffer:narrow(1, 1, streamSize)
@@ -371,25 +351,35 @@ for epoch=0, nepochs do
         fullmemory = tmp
     end
     --- Running backprop
-    loss = backProp(memory, params, model, criterion, batch_size, mem_size, use_cuda)
+    if(epoch > n_rand) then 
+        loss = backProp(memory, params, model, criterion, batch_size, mem_size, use_cuda)
+    else 
+        loss = 0.
+    end
 
-     if epoch==0 then
-        out = string.format("epoch;epsilon;loss;rougeF1;rougeRecall;rougePrecision;actual;pred;nselect;nskip\n")
+    if epoch==0 then
+        out = string.format("epoch;epsilon;loss;rougeF1;rougeRecall;rougePrecision;actual;pred\n")
         perf:write(out)
     end
-    nactions = torch.totable(actions:sum(1))[1]
-    out = string.format("%i; %.3f; %.6f; %.6f; %.6f; %.6f; {min=%.3f, max=%.3f}; {min=%.3f, max=%.3f}; %i; %i\n", 
+
+    out = string.format("%i; %.3f; %.6f; %.6f; %.6f; %.6f; {min=%.3f, max=%.3f}; {min=%.3f, max=%.3f}\n", 
         epoch, epsilon, loss, rougeF1, rougeRecall, rougePrecision,
         reward:min(), reward:max(),
-        qValues:min(), qValues:max(),
-        nactions[SELECT], nactions[SKIP]
-    )
-    perf:write(out)
+        qValues:min(), qValues:max()
+        )
+        perf:write(out)
 
+    if export then 
+        local ofile = io.open(string.format("plotdata/%s/%i_epoch.txt", nnmod, epoch), 'w')
+        ofile:write("predSelect;predSkip;actual;Skip;Select\n")
+        for i=1, streamSize do
+            ofile:write(string.format("%.6f;%.6f;%6f;%i;%i\n", qValues[i][SKIP], qValues[i][SELECT], rouge[i], actions[i][SKIP], actions[i][SELECT]))
+        end
+        ofile:close()
+    end 
     if (epsilon - delta) <= base_explore_rate then
         epsilon = base_explore_rate
     else 
         epsilon = epsilon - delta
     end
 end
-print(string.format("Model complete {Selected = %i; Skipped  = %i}; Final Rouge Recall, Precision, F1 = {%.6f;%.6f;%.6f}", nactions[SELECT], nactions[SKIP], rougeRecall, rougePrecision,rougeF1))

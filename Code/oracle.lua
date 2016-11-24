@@ -203,67 +203,6 @@ function rougeScores(genSummary, refSummary)
     return recall, prec, f1
 end
 
-function buildMemory(newinput, memory_hist, memsize, use_cuda)
-    local sentMemory = torch.cat(newinput[1][1]:double(), memory_hist[1][1]:double(), 1)
-    local queryMemory = torch.cat(newinput[1][2]:double(), memory_hist[1][2]:double(), 1)
-    local sumryMemory = torch.cat(newinput[1][3]:double(), memory_hist[1][3]:double(), 1)
-    local rewardMemory = torch.cat(newinput[2]:double(), memory_hist[2]:double(), 1)
-    local actionMemory = torch.cat(newinput[3]:double(), memory_hist[3]:double(), 1)
-    --- specifying rows to index 
-    if sentMemory:size(1) < memsize then
-        nend = sentMemory:size(1)
-        nstart = 1
-    else 
-        nend = memsize
-        nstart = 1
-        -- nstart = math.max(memsize - sentMemory:size(1), 1)
-    end
-    --- Selecting n last data points
-    sentMemory = sentMemory[{{nstart, nend}}]
-    queryMemory= queryMemory[{{nstart, nend}}]
-    sumryMemory= sumryMemory[{{nstart, nend}}]
-    rewardMemory = rewardMemory[{{nstart, nend}}]
-    actionMemory = actionMemory[{{nstart, nend}}]
-
-    local inputMemory = {sentMemory, queryMemory, sumryMemory}
-
-    if use_cuda then
-        inputMemory = {sentMemory:cuda(), queryMemory:cuda(), sumryMemory:cuda()}
-    end
-    return {inputMemory, rewardMemory, actionMemory}
-end
-
-function backProp(input_memory, params, model, criterion, batch_size, memsize, use_cuda)
-    local inputs = {input_memory[1], input_memory[3]}
-    local rewards = input_memory[2]
-    local dataloader = dl.TensorLoader(inputs, rewards)
-    local err = 0.    
-
-    den = 1
-    for k, xin, reward in dataloader:sampleiter(batch_size, memsize) do
-        xinput = xin[1]
-        actions_in = xin[2]
-        local function feval(params)
-            gradParams:zero()
-            local predQ = model:forward(xinput)
-            local maskLayer = nn.MaskedSelect()
-            if use_cuda then 
-                maskLayer = maskLayer:cuda()
-            end
-            local predQOnActions = maskLayer:forward({predQ, actions_in})
-
-            local lossf = criterion:forward(predQOnActions, reward)
-            local gradOutput = criterion:backward(predQOnActions, reward)
-            local gradMaskLayer = maskLayer:backward({predQ, actions_in}, gradOutput)
-            model:backward(xinput, gradMaskLayer[1])
-            return lossf, gradParams
-        end
-        --- optim.rmsprop returns \theta, f(\theta):= loss function
-        _, lossv  = optim.rmsprop(feval, params, optimParams)   
-    end
-    return lossv[1]
-end
-
 local epsilon = 1.0
 local query = LongTensor{qs}
 local sentenceStream = LongTensor(padZeros(xtdm, K_tokens))
