@@ -240,7 +240,7 @@ local buffer = Tensor(1, maxSummarySize):zero()
 
 actions = ByteTensor(streamSize, 2):fill(0)
 summaryBuffer = LongTensor(streamSize + 1, maxSummarySize):zero()
-score = 0
+oracleF1 = 0
 for i=1, streamSize do
     actions[i][SELECT] = 1
     summary = buildSummary(
@@ -251,17 +251,16 @@ for i=1, streamSize do
         )
     local generatedCounts = buildTokenCounts(summary) 
     local recall, prec, f1 = rougeScores(generatedCounts, refCounts)
-    if f1 < score then
+    if f1 < oracleF1 then
         actions[i][SELECT] = 0
         actions[i][SKIP] = 1
     end
-    if f1 > score then
-        score = f1
+    if f1 > oracleF1 then
+        oracleF1 = f1
     end
--- print(score)
 end
-print(score)
-print(torch.totable(actions:sum(1))[1][SELECT])
+print(string.format("Oracle - Greedy Search F1 = %.6f with %i sentences selected", 
+    oracleF1, torch.totable(actions:sum(1))[1][SELECT]))
 
 local perf = io.open(string.format("%s_perf.txt", nnmod), 'w')
 for epoch=0, nepochs do
@@ -359,12 +358,12 @@ for epoch=0, nepochs do
         -- loss = backProp(memory, params, gradParams, optimParams, model, criterion, batch_size, n_backprops, use_cuda)
 
         if epoch==0 then
-            out = string.format("epoch;epsilon;loss;rougeF1;rougeRecall;rougePrecision;actual;pred;nselect;nskip;query\n")
+            out = string.format("epoch;epsilon;loss;oracleF1;rougeF1;rougeRecall;rougePrecision;actual;pred;nselect;nskip;query\n")
             perf:write(out)
         end
         nactions = torch.totable(actions:sum(1))[1]
-        out = string.format("%i; %.3f; %.6f; %.6f; %.6f; %.6f; {min=%.3f, max=%.3f}; {min=%.3f, max=%.3f}; %i; %i; %s\n", 
-            epoch, epsilon, loss, rougeF1, rougeRecall, rougePrecision,
+        out = string.format("%i; %.3f; %.6f; %.6f; %.6f; %.6f; %.6f; {min=%.3f, max=%.3f}; {min=%.3f, max=%.3f}; %i; %i; %s\n", 
+            epoch, epsilon, loss, oracleF1, rougeF1, rougeRecall, rougePrecision,
             reward:min(), reward:max(),
             qValues:min(), qValues:max(),
             nactions[SELECT], nactions[SKIP],
@@ -409,6 +408,6 @@ for epoch=0, nepochs do
     end
 
 end
-print(string.format("Model complete {Selected = %i; Skipped  = %i}; Final Rouge Recall, Precision, F1 = {%.6f;%.6f;%.6f}", nactions[SELECT], nactions[SKIP], rougeRecall, rougePrecision,rougeF1))
+print(string.format("Model complete {Selected = %i; Skipped  = %i}; Final Rouge Recall, Precision, F1 = {%.6f;%.6f;%.6f}", nactions[SELECT], nactions[SKIP], rougeRecall, rougePrecision, rougeF1))
 
 -- os.execute(string.format("python make_density_gif.py %i %s %s", nepochs, nnmod, metric))
