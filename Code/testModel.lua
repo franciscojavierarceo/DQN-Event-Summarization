@@ -348,6 +348,7 @@ for epoch=0, nepochs do
 
         if epoch == 0 then
             fullmemory = memory 
+            randomF1 = f1
         else
             local tmp = buildMemoryOld(memory, fullmemory, mem_size, batch_size, use_cuda)
             -- local tmp = buildMemory(memory, fullmemory, mem_size, batch_size, use_cuda)
@@ -358,12 +359,12 @@ for epoch=0, nepochs do
         -- loss = backProp(memory, params, gradParams, optimParams, model, criterion, batch_size, n_backprops, use_cuda)
 
         if epoch==0 then
-            out = string.format("epoch;epsilon;loss;oracleF1;rougeF1;rougeRecall;rougePrecision;actual;pred;nselect;nskip;query\n")
+            out = string.format("epoch;epsilon;loss;randomF1;oracleF1;rougeF1;rougeRecall;rougePrecision;actual;pred;nselect;nskip;query\n")
             perf:write(out)
         end
         nactions = torch.totable(actions:sum(1))[1]
-        out = string.format("%i; %.3f; %.6f; %.6f; %.6f; %.6f; %.6f; {min=%.3f, max=%.3f}; {min=%.3f, max=%.3f}; %i; %i; %s\n", 
-            epoch, epsilon, loss, oracleF1, rougeF1, rougeRecall, rougePrecision,
+        out = string.format("%i; %.3f; %.6f; %.6f; %.6f; %.6f; %.6f; %.6f; {min=%.3f, max=%.3f}; {min=%.3f, max=%.3f}; %i; %i; %s\n", 
+            epoch, epsilon, loss, randomF1, oracleF1, rougeF1, rougeRecall, rougePrecision,
             reward:min(), reward:max(),
             qValues:min(), qValues:max(),
             nactions[SELECT], nactions[SKIP],
