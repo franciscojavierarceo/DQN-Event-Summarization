@@ -272,30 +272,31 @@ local refCounts = buildTokenCounts(refSummary)
 local streamSize = sentenceStream:size(1)
 local buffer = Tensor(1, maxSummarySize):zero()
 
-actions = ByteTensor(streamSize, 2):fill(0)
-summaryBuffer = LongTensor(streamSize + 1, maxSummarySize):zero()
-score = 0
-for i=1, streamSize do
-    actions[i][SELECT] = 1
-    summary = buildSummary(
-        actions:narrow(1, 1, i), 
-        sentenceStream:narrow(1, 1, i),
-        summaryBuffer:narrow(1, i + 1, 1),
-        use_cuda
-        )
-    local generatedCounts = buildTokenCounts(summary) 
-    local recall, prec, f1 = rougeScores(generatedCounts, refCounts)
-    if f1 < score then
-        actions[i][SELECT] = 0
-        actions[i][SKIP] = 1
+-- Initializing variables to calculate Oracle Performance
+function scoreOracle(sentenceStream)
+
+    local actions = ByteTensor(streamSize, 2):fill(0)
+    summaryBuffer = LongTensor(streamSize + 1, maxSummarySize):zero()
+    score = 0
+    for i=1, streamSize do
+        actions[i][SELECT] = 1
+        summary = buildSummary(
+            actions:narrow(1, 1, i), 
+            sentenceStream:narrow(1, 1, i),
+            summaryBuffer:narrow(1, i + 1, 1),
+            use_cuda
+            )
+        local generatedCounts = buildTokenCounts(summary) 
+        local recall, prec, f1 = rougeScores(generatedCounts, refCounts)
+        if f1 < score then
+            actions[i][SELECT] = 0
+            actions[i][SKIP] = 1
+        end
+        if f1 > score then
+            score = f1
+        end
     end
-    if f1 > score then
-        score = f1
-    end
--- print(score)
 end
-print(score)
-print(torch.totable(actions:sum(1))[1][SELECT])
 
 memory = {}
 local perf = io.open(string.format("%s_perf.txt", nnmod), 'w')
