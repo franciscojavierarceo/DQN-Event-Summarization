@@ -1,3 +1,30 @@
+function scoreOracle(sentenceStream, maxSummarySize, refCounts)
+    local buffer = Tensor(1, maxSummarySize):zero()
+    local streamSize = sentenceStream:size(1)
+    local actions = ByteTensor(streamSize, 2):fill(0)
+    local summaryBuffer = LongTensor(streamSize + 1, maxSummarySize):zero()
+    local oracleF1 = 0
+    for i=1, streamSize do
+        actions[i][SELECT] = 1
+        summary = buildSummary(
+            actions:narrow(1, 1, i), 
+            sentenceStream:narrow(1, 1, i),
+            summaryBuffer:narrow(1, i + 1, 1),
+            use_cuda
+            )
+        local generatedCounts = buildTokenCounts(summary) 
+        local recall, prec, f1 = rougeScores(generatedCounts, refCounts)
+        if f1 < oracleF1 then
+            actions[i][SELECT] = 0
+            actions[i][SKIP] = 1
+        end
+        if f1 > oracleF1 then
+            oracleF1 = f1
+        end
+    end
+    return oracleF1, actions
+end
+
 function buildModel(model, vocabSize, embeddingSize, use_cuda)
     if model == 'bow' then
         print(string.format("Running bag-of-words model to learn %s", metric))
@@ -121,7 +148,8 @@ function buildMemory(newinput, memory_hist, memsize, use_cuda)
     --- specifying rows to index 
     if sentMemory:size(1) >= memsize then
         -- My hack for sampling uniformly distribution
-        local p = torch.ones(memsize) / memsize
+        local p = torch.abs(rewardMemory) / torch.abs(rewardMemory):sum()
+        -- local p = torch.ones(memsize) / memsize
         local indxs = torch.multinomial(p, memsize, true)
         local sentMemory = sentMemory:index(1, indxs)
         local queryMemory = queryMemory:index(1, indxs)

@@ -237,35 +237,7 @@ local refSummary = Tensor{ntdm}
 local refCounts = buildTokenCounts(refSummary)
 
 -- Initializing variables to calculate Oracle Performance
-function scoreOracle(sentenceStream, maxSummarySize, refCounts)
-    local buffer = Tensor(1, maxSummarySize):zero()
-    local streamSize = sentenceStream:size(1)
-    local actions = ByteTensor(streamSize, 2):fill(0)
-    local summaryBuffer = LongTensor(streamSize + 1, maxSummarySize):zero()
-    local oracleF1 = 0
-    for i=1, streamSize do
-        actions[i][SELECT] = 1
-        summary = buildSummary(
-            actions:narrow(1, 1, i), 
-            sentenceStream:narrow(1, 1, i),
-            summaryBuffer:narrow(1, i + 1, 1),
-            use_cuda
-            )
-        local generatedCounts = buildTokenCounts(summary) 
-        local recall, prec, f1 = rougeScores(generatedCounts, refCounts)
-        if f1 < oracleF1 then
-            actions[i][SELECT] = 0
-            actions[i][SKIP] = 1
-        end
-        if f1 > oracleF1 then
-            oracleF1 = f1
-        end
-    end
-    return oracleF1, actions
-end
-
 oracleF1, oracleActions = scoreOracle(sentenceStream, maxSummarySize, refCounts)
-
 print(string.format("Oracle - Greedy Search F1 = %.6f with %i sentences selected", 
     oracleF1, torch.totable(oracleActions:sum(1))[1][SELECT]))
 
@@ -352,18 +324,16 @@ for epoch=0, nepochs do
         local input = {sentenceStream, queryBatch, summaryBatch}
         --- Storing the data
         memory = {input, reward, actions}
-
         if epoch == 0 then
             fullmemory = memory 
             randomF1 = f1
         else
-            local tmp = buildMemoryOld(memory, fullmemory, mem_size, batch_size, use_cuda)
-            -- local tmp = buildMemory(memory, fullmemory, mem_size, batch_size, use_cuda)
-            fullmemory = tmp
+            fullmemory = buildMemory(memory, fullmemory, mem_size, batch_size, use_cuda)
+            -- fullmemory = buildMemoryOld(memory, fullmemory, mem_size, batch_size, use_cuda)
         end
         --- Running backprop
-        loss = backPropOld(memory, params, model, criterion, batch_size, mem_size, use_cuda)
-        -- loss = backProp(memory, params, gradParams, optimParams, model, criterion, batch_size, n_backprops, use_cuda)
+        -- loss = backPropOld(memory, params, model, criterion, batch_size, mem_size, use_cuda)
+        loss = backProp(memory, params, gradParams, optimParams, model, criterion, batch_size, n_backprops, use_cuda)
 
         if epoch==0 then
             out = string.format("epoch;epsilon;loss;randomF1;oracleF1;rougeF1;rougeRecall;rougePrecision;actual;pred;nselect;nskip;query\n")
