@@ -141,10 +141,12 @@ for query_id = 1, #inputs do
     local refCounts = buildTokenCounts(refSummary)
     local buffer = Tensor(1, maxSummarySize):zero()
     local actions = ByteTensor(streamSize, 2):fill(0)
+    local actionsOpt = ByteTensor(streamSize, 2):fill(0)
     local exploreDraws = Tensor(streamSize)
     local summaryBuffer = LongTensor(streamSize + 1, maxSummarySize):zero()
     local qValues = Tensor(streamSize, 2):zero()
     local rouge = Tensor(streamSize + 1):zero()
+    local rougeOpt = Tensor(streamSize + 1):zero()
     local summary = summaryBuffer:zero():narrow(1,1,1)
 
     query_data[query_id] = {
@@ -187,33 +189,20 @@ print(string.format("Oracle - Greedy Search F1 = %.6f with %i sentences selected
 local perf = io.open(string.format("%s_perf.txt", nnmod), 'w')
 for epoch=0, nepochs do
     for query_id=1, #inputs do
-        local streamSize = sentenceStream:size(1)
-        local query = LongTensor{inputs[query_id]['query'] }
-        local actions = ByteTensor(streamSize, 2):fill(0)
-        local exploreDraws = Tensor(streamSize)
-        local buffer = Tensor(1, maxSummarySize):zero()
-        local summaryBuffer = LongTensor(streamSize + 1, maxSummarySize):zero()
-        local qValues = Tensor(streamSize, 2):zero()
-        local rouge = Tensor(streamSize + 1):zero()
-        local actionsOpt = ByteTensor(streamSize, 2):fill(0)
-        local rougeOpt = Tensor(streamSize + 1):zero()
-        local summary = summaryBuffer:zero():narrow(1,1,1)
+        local sentenceStream = query_data[query_id][1]
+        local streamSize = query_data[query_id][2]
+        local query = query_data[query_id][3]
+        local actions = query_data[query_id][4]
+        local exploreDraws = query_data[query_id][5]
+        local summaryBuffer = query_data[query_id][6]
+        local qValues = query_data[query_id][7]
+        local rouge = query_data[query_id][8]
+        local actionsOpt = query_data[query_id][9]
+        local rougeOpt = query_data[query_id][10]
+        local refSummary = query_data[query_id][11]
+        local refCounts = query_data[query_id][12]
+        local buffer = query_data[query_id][13]
         exploreDraws:uniform(0, 1)
-
-        -- local sentenceStream = query_data[query_id][1]
-        -- local streamSize = query_data[query_id][2]
-        -- local query = query_data[query_id][3]
-        -- local actions = query_data[query_id][4]
-        -- local exploreDraws = query_data[query_id][5]
-        -- local summaryBuffer = query_data[query_id][6]
-        -- local qValues = query_data[query_id][7]
-        -- local rouge = query_data[query_id][8]
-        -- local actionsOpt = query_data[query_id][9]
-        -- local rougeOpt = query_data[query_id][10]
-        -- local refSummary = query_data[query_id][11]
-        -- local refCounts = query_data[query_id][12]
-        -- local buffer = query_data[query_id][13]
-        -- exploreDraws:uniform(0, 1)
 
         -- Clearing out the variables from the last time
 
