@@ -227,4 +227,3 @@ function backProp(input_memory, params, gradParams, optimParams, model, criterio
     end
     return loss/n_backprops
 end
-

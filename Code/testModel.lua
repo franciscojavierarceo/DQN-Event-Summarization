@@ -244,12 +244,15 @@ print(string.format("Oracle - Greedy Search F1 = %.6f with %i sentences selected
 local perf = io.open(string.format("%s_perf.txt", nnmod), 'w')
 for epoch=0, nepochs do
     for query_id=1, #inputs do
-        query = LongTensor{inputs[query_id]['query'] }
-        actions = ByteTensor(streamSize, 2):fill(0)
+        local query = LongTensor{inputs[query_id]['query'] }
+        local actions = ByteTensor(streamSize, 2):fill(0)
         local exploreDraws = Tensor(streamSize)
         local summaryBuffer = LongTensor(streamSize + 1, maxSummarySize):zero()
         local qValues = Tensor(streamSize, 2):zero()
-        rouge = Tensor(streamSize + 1):zero()
+        local rouge = Tensor(streamSize + 1):zero()
+        local actionsOpt = ByteTensor(streamSize, 2):fill(0)
+        local rougeOpt = Tensor(streamSize + 1):zero()
+
         exploreDraws:uniform(0, 1)
 
         local summary = summaryBuffer:zero():narrow(1,1,1)
@@ -275,7 +278,6 @@ for epoch=0, nepochs do
         -- exploreDraws:uniform(0, 1)
         -- -- rouge = Tensor(streamSize + 1):zero()
 
- 
         for i=1, streamSize do      -- Iterating through individual sentences
             local sentence = sentenceStream:narrow(1, i, 1)
             qValues[i]:copy(model:forward({sentence, query, summary}))
@@ -288,6 +290,12 @@ for epoch=0, nepochs do
                     actions[i][SELECT] = 1
                 end
             end
+
+            if qValues[i][SKIP] > qValues[i][SELECT] then
+                actionsOpt[i][SKIP] = 1
+            else
+                actionsOpt[i][SELECT] = 1
+            end
             
             summary = buildSummary(
                 actions:narrow(1, 1, i), 
@@ -295,15 +303,29 @@ for epoch=0, nepochs do
                 summaryBuffer:narrow(1, i + 1, 1),
                 use_cuda
             )
-            local generatedCounts = buildTokenCounts(summary) 
+
+            summaryOpt = buildSummary(
+                actionsOpt:narrow(1, 1, i), 
+                sentenceStream:narrow(1, 1, i),
+                summaryBuffer:narrow(1, i + 1, 1),
+                use_cuda
+            )
+
+            local generatedCounts = buildTokenCounts(summary)
             local recall, prec, f1 = rougeScores(generatedCounts, refCounts)
+
+            local generatedCountsOpt = buildTokenCounts(summaryOpt)
+            local recallOpt, precOpt, f1Opt = rougeScores(generatedCounts, generatedCountsOpt)
 
             if metric == "f1" then
                 rouge[i + 1]  = threshold(f1, thresh)
+                rougeOpt[i]  = threshold(f1Opt, thresh)
             elseif metric == "recall" then
                 rouge[i + 1]  = threshold(recall, thresh)
+                rougeOpt[i]  = threshold(recallOpt, thresh)
             elseif metric == "precision" then
                 rouge[i + 1] = threshold(prec, thresh)
+                rougeOpt[i] = threshold(precOpt, thresh)
             end
 
             if i==streamSize then
@@ -315,8 +337,8 @@ for epoch=0, nepochs do
 
         local max, argmax = torch.max(qValues, 2)
         local reward0 = rouge:narrow(1,2, streamSize) - rouge:narrow(1,1, streamSize)
-        -- local reward_tp1 = gamma * reward0:narrow(1, 2, streamSize - 1):resize(streamSize)
-        local reward = reward0 --- + reward_tp1
+        local reward_tm1 =  rougeOpt:narrow(1,2, streamSize) - rougeOpt:narrow(1,1, streamSize)
+        local reward = reward0 + gamma * reward_tm1
         
         local querySize = query:size(2)
         local summaryBatch = summaryBuffer:narrow(1, 1, streamSize)
@@ -349,16 +371,14 @@ for epoch=0, nepochs do
         )
         perf:write(out)
 
-        if export then 
-            local ofile = io.open(string.format("plotdata/%s/%i_epoch.txt", nnmod, epoch), 'w')
-            ofile:write("predSkip;predSelect;actual;Skip;Select\n")
-            for i=1, streamSize do
-                ofile:write(string.format("%.6f;%.6f;%6f;%i;%i\n", 
-                        qValues[i][SKIP], qValues[i][SELECT], rouge[i], 
-                        actions[i][SKIP], actions[i][SELECT]))
-            end
-            ofile:close()
-        end 
+        local ofile = io.open(string.format("plotdata/%s/%i_epoch.txt", nnmod, epoch), 'w')
+        ofile:write("predSkip;predSelect;actual;Skip;Select\n")
+        for i=1, streamSize do
+            ofile:write(string.format("%.6f;%.6f;%6f;%i;%i\n", 
+                    qValues[i][SKIP], qValues[i][SELECT], rouge[i], 
+                    actions[i][SKIP], actions[i][SELECT]))
+        end
+        ofile:close()
 
         query_data[query_id] = {
             query,
