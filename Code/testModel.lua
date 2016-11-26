@@ -134,18 +134,18 @@ for query_id = 1, #inputs do
         ntdm = tableConcat(table.unpack(nuggets), ntdm)
     end
     -- Initializing the bookkeeping variables and storing them
-    query = LongTensor{inputs[query_id]['query'] }
-    sentenceStream = LongTensor(padZeros(xtdm, K_tokens))
-    streamSize = sentenceStream:size(1)
-    refSummary = Tensor{ntdm}
-    refCounts = buildTokenCounts(refSummary)
-    buffer = Tensor(1, maxSummarySize):zero()
-    actions = ByteTensor(streamSize, 2):fill(0)
-    exploreDraws = Tensor(streamSize)
-    summaryBuffer = LongTensor(streamSize + 1, maxSummarySize):zero()
-    qValues = Tensor(streamSize, 2):zero()
-    rouge = Tensor(streamSize + 1):zero()
-    summary = summaryBuffer:zero():narrow(1,1,1)
+    local query = LongTensor{inputs[query_id]['query'] }
+    local sentenceStream = LongTensor(padZeros(xtdm, K_tokens))
+    local streamSize = sentenceStream:size(1)
+    local refSummary = Tensor{ntdm}
+    local refCounts = buildTokenCounts(refSummary)
+    local buffer = Tensor(1, maxSummarySize):zero()
+    local actions = ByteTensor(streamSize, 2):fill(0)
+    local exploreDraws = Tensor(streamSize)
+    local summaryBuffer = LongTensor(streamSize + 1, maxSummarySize):zero()
+    local qValues = Tensor(streamSize, 2):zero()
+    local rouge = Tensor(streamSize + 1):zero()
+    local summary = summaryBuffer:zero():narrow(1,1,1)
 
     query_data[query_id] = {
         sentenceStream,
@@ -153,7 +153,7 @@ for query_id = 1, #inputs do
         query,
         actions,
         exploreDraws,
-        summaryBuffer.
+        summaryBuffer,
         qValues,
         rouge,
         actionsOpt,
@@ -187,22 +187,25 @@ print(string.format("Oracle - Greedy Search F1 = %.6f with %i sentences selected
 local perf = io.open(string.format("%s_perf.txt", nnmod), 'w')
 for epoch=0, nepochs do
     for query_id=1, #inputs do
+        local streamSize = sentenceStream:size(1)
         local query = LongTensor{inputs[query_id]['query'] }
         local actions = ByteTensor(streamSize, 2):fill(0)
         local exploreDraws = Tensor(streamSize)
+        local buffer = Tensor(1, maxSummarySize):zero()
         local summaryBuffer = LongTensor(streamSize + 1, maxSummarySize):zero()
         local qValues = Tensor(streamSize, 2):zero()
         local rouge = Tensor(streamSize + 1):zero()
         local actionsOpt = ByteTensor(streamSize, 2):fill(0)
         local rougeOpt = Tensor(streamSize + 1):zero()
+        local summary = summaryBuffer:zero():narrow(1,1,1)
         exploreDraws:uniform(0, 1)
 
-        local sentenceStream = query_data[query_id][1]
-        local streamSize = query_data[query_id][2]
-        local query = query_data[query_id][3]
-        local actions = query_data[query_id][4]
-        local exploreDraws = query_data[query_id][5]
-        local summaryBuffer = query_data[query_id][6]
+        -- local sentenceStream = query_data[query_id][1]
+        -- local streamSize = query_data[query_id][2]
+        -- local query = query_data[query_id][3]
+        -- local actions = query_data[query_id][4]
+        -- local exploreDraws = query_data[query_id][5]
+        -- local summaryBuffer = query_data[query_id][6]
         -- local qValues = query_data[query_id][7]
         -- local rouge = query_data[query_id][8]
         -- local actionsOpt = query_data[query_id][9]
@@ -211,7 +214,6 @@ for epoch=0, nepochs do
         -- local refCounts = query_data[query_id][12]
         -- local buffer = query_data[query_id][13]
         -- exploreDraws:uniform(0, 1)
-        -- summary = summaryBuffer:zero():narrow(1,1,1)
 
         -- Clearing out the variables from the last time
 
