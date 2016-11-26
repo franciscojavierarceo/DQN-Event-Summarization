@@ -318,14 +318,14 @@ for epoch=0, nepochs do
             local recallOpt, precOpt, f1Opt = rougeScores(generatedCounts, generatedCountsOpt)
 
             if metric == "f1" then
-                rouge[i + 1]  = threshold(f1, thresh)
+                rouge[i + 1] = threshold(f1, thresh)
                 rougeOpt[i]  = threshold(f1Opt, thresh)
             elseif metric == "recall" then
-                rouge[i + 1]  = threshold(recall, thresh)
+                rouge[i + 1] = threshold(recall, thresh)
                 rougeOpt[i]  = threshold(recallOpt, thresh)
             elseif metric == "precision" then
                 rouge[i + 1] = threshold(prec, thresh)
-                rougeOpt[i] = threshold(precOpt, thresh)
+                rougeOpt[i]  = threshold(precOpt, thresh)
             end
 
             if i==streamSize then
@@ -345,7 +345,7 @@ for epoch=0, nepochs do
         local queryBatch = query:view(1, querySize):expand(streamSize, querySize) 
         local input = {sentenceStream, queryBatch, summaryBatch}
         --- Storing the data
-        memory = {input, reward, actions}
+        local memory = {input, reward, actions}
         if epoch == 0 then
             fullmemory = memory 
             randomF1 = f1
@@ -407,5 +407,4 @@ for epoch=0, nepochs do
 
 end
 print(string.format("Model complete {Selected = %i; Skipped  = %i}; Final Rouge Recall, Precision, F1 = {%.6f;%.6f;%.6f}", nactions[SELECT], nactions[SKIP], rougeRecall, rougePrecision, rougeF1))
-
 -- os.execute(string.format("python make_density_gif.py %i %s %s", nepochs, nnmod, metric))
