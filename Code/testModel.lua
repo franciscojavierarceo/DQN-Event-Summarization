@@ -109,32 +109,6 @@ else
     print("...running on CPU")
 end
 
-function backPropOld(input_memory, params, model, criterion, batch_size, memsize, use_cuda)
-    local inputs = {input_memory[1], input_memory[3]}
-    local rewards = input_memory[2]
-    local dataloader = dl.TensorLoader(inputs, rewards)
-    for k, xin, reward in dataloader:sampleiter(batch_size, memsize) do
-        xinput = xin[1]
-        actions_in = xin[2]
-        local function feval(params)
-            gradParams:zero()
-            local maskLayer = nn.MaskedSelect()
-            if use_cuda then 
-             maskLayer = maskLayer:cuda()
-            end
-            local predQ = model:forward(xinput)
-            local predQOnActions = maskLayer:forward({predQ, actions_in}) 
-            local lossf = criterion:forward(predQOnActions, reward)
-            local gradOutput = criterion:backward(predQOnActions, reward)
-            local gradMaskLayer = maskLayer:backward({predQ, actions_in}, gradOutput)
-            model:backward(xinput, gradMaskLayer[1])
-            return lossf, gradParams
-        end
-     --- optim.rmsprop returns \theta, f(\theta):= loss function
-     _, lossv  = optim.rmsprop(feval, params, optimParams)   
-    end
-    return lossv[1]
-end
 
 vocabSize = 0
 maxseqlen = 0
@@ -190,37 +164,7 @@ for query_id = 1, #inputs do
     }
 end
 
--- model = buildModel(nnmod, vocabSize, embeddingSize, use_cuda)
-
-if nnmod=='bow' then
-    print(string.format("Running bag-of-words model to learn %s", metric))
-    sentenceLookup = nn.Sequential()
-                :add(nn.LookupTableMaskZero(vocabSize, embeddingSize))
-                :add(nn.Sum(2, 3, false))
-                :add(nn.Tanh())
-else
-    print(string.format("Running LSTM model to learn %s", metric))
-    sentenceLookup = nn.Sequential()
-                :add(nn.LookupTableMaskZero(vocabSize, embeddingSize))
-                :add(nn.SplitTable(2))
-                :add(nn.Sequencer(nn.LSTM(embeddingSize, embeddingSize)))
-                :add(nn.SelectTable(-1))            -- selects last state of the LSTM
-                :add(nn.Linear(embeddingSize, embeddingSize))
-                :add(nn.ReLU())
-end
-local queryLookup = sentenceLookup:clone("weight", "gradWeight") 
-local summaryLookup = sentenceLookup:clone("weight", "gradWeight")
-
-local pmodule = nn.ParallelTable()
-            :add(sentenceLookup)
-            :add(queryLookup)
-            :add(summaryLookup)
-
-local model = nn.Sequential()
-        :add(pmodule)
-        :add(nn.JoinTable(2))
-        :add(nn.ReLU())
-        :add(nn.Linear(embeddingSize * 3, 2))
+local model = buildModel(nnmod, vocabSize, embeddingSize, use_cuda)
 
 params, gradParams = model:getParameters()
 criterion = nn.MSECriterion()
