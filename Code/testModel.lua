@@ -93,7 +93,7 @@ sandy = {
 inputs = {
         aurora, 
         pakistan,
-        -- sandy
+        sandy
     }
 
 if use_cuda then
