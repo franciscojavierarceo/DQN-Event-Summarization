@@ -92,7 +92,7 @@ sandy = {
 
 inputs = {
         aurora, 
-        -- pakistan,
+        pakistan,
         -- sandy
     }
 
@@ -209,7 +209,9 @@ for epoch=0, nepochs do
         for i=1, streamSize do      -- Iterating through individual sentences
             local sentence = sentenceStream:narrow(1, i, 1)
             qValues[i]:copy(model:forward({sentence, query, summary}))
-            if exploreDraws[i]  <=  epsilon then        -- epsilon greedy strategy
+
+            -- epsilon greedy strategy
+            if exploreDraws[i]  <=  epsilon then        
                 actions[i][torch.random(SKIP, SELECT)] = 1
             else 
                 if qValues[i][SKIP] > qValues[i][SELECT] then
@@ -219,6 +221,7 @@ for epoch=0, nepochs do
                 end
             end
 
+            -- Storing the optimal predictions
             if qValues[i][SKIP] > qValues[i][SELECT] then
                 actionsOpt[i][SKIP] = 1
             else
@@ -239,21 +242,18 @@ for epoch=0, nepochs do
                 use_cuda
             )
 
-            local generatedCounts = buildTokenCounts(summary)
-            local recall, prec, f1 = rougeScores(generatedCounts, refCounts)
-
-            local generatedCountsOpt = buildTokenCounts(summaryOpt)
-            local recallOpt, precOpt, f1Opt = rougeScores(generatedCounts, generatedCountsOpt)
+            local recall, prec, f1 = rougeScores(buildTokenCounts(summary), refCounts)
+            local rOpt, pOpt, f1Opt = rougeScores(buildTokenCounts(summaryOpt), refCounts)
 
             if metric == "f1" then
                 rouge[i + 1] = threshold(f1, thresh)
                 rougeOpt[i]  = threshold(f1Opt, thresh)
             elseif metric == "recall" then
                 rouge[i + 1] = threshold(recall, thresh)
-                rougeOpt[i]  = threshold(recallOpt, thresh)
+                rougeOpt[i]  = threshold(rOpt, thresh)
             elseif metric == "precision" then
                 rouge[i + 1] = threshold(prec, thresh)
-                rougeOpt[i]  = threshold(precOpt, thresh)
+                rougeOpt[i]  = threshold(pOpt, thresh)
             end
 
             if i==streamSize then
@@ -274,7 +274,8 @@ for epoch=0, nepochs do
         local input = {sentenceStream, queryBatch, summaryBatch}
         --- Storing the data
         local memory = {input, reward, actions}
-        if epoch == 0 then
+
+        if epoch == 0 and query_id = 1 then
             fullmemory = memory 
             randomF1 = f1
         else
@@ -282,10 +283,8 @@ for epoch=0, nepochs do
             -- fullmemory = buildMemoryOld(memory, fullmemory, mem_size, batch_size, use_cuda)
         end
         --- Running backprop
-        -- loss = backPropOld(memory, params, model, criterion, batch_size, mem_size, use_cuda)
-        loss = backProp(memory, params, gradParams, optimParams, model, criterion, batch_size, n_backprops, use_cuda)
 
-        if epoch==0 then
+        if epoch == 0 and query_id = 1 then
             out = string.format("epoch;epsilon;loss;randomF1;oracleF1;rougeF1;rougeRecall;rougePrecision;actual;pred;nselect;nskip;query\n")
             perf:write(out)
         end
@@ -295,16 +294,16 @@ for epoch=0, nepochs do
             reward:min(), reward:max(),
             qValues:min(), qValues:max(),
             nactions[SELECT], nactions[SKIP],
-            inputs[query_id]['query_name']
+            query_id
         )
         perf:write(out)
 
-        local ofile = io.open(string.format("plotdata/%s/%i_epoch.txt", nnmod, epoch), 'w')
-        ofile:write("predSkip;predSelect;actual;Skip;Select\n")
+        local ofile = io.open(string.format("plotdata/%s/%i/%i_epoch.txt", nnmod, query_id, epoch), 'w')
+        ofile:write("predSkip;predSelect;actual;Skip;Select;query\n")
         for i=1, streamSize do
             ofile:write(string.format("%.6f;%.6f;%6f;%i;%i\n", 
                     qValues[i][SKIP], qValues[i][SELECT], rouge[i], 
-                    actions[i][SKIP], actions[i][SELECT]))
+                    actions[i][SKIP], actions[i][SELECT], query_id))
         end
         ofile:close()
 
@@ -325,6 +324,8 @@ for epoch=0, nepochs do
         }
 
     end
+    -- loss = backPropOld(memory, params, model, criterion, batch_size, mem_size, use_cuda)
+    loss = backProp(memory, params, gradParams, optimParams, model, criterion, batch_size, n_backprops, use_cuda)
 
     if (epsilon - delta) <= base_explore_rate then
         epsilon = base_explore_rate
