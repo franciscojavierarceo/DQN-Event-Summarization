@@ -149,6 +149,8 @@ for query_id = 1, #inputs do
     local rougeOpt = Tensor(streamSize + 1):zero()
     local summary = summaryBuffer:zero():narrow(1,1,1)
 
+    local oracleF1, oracleActions = scoreOracle(sentenceStream, maxSummarySize, refCounts)
+
     query_data[query_id] = {
         sentenceStream,
         streamSize,
@@ -162,7 +164,8 @@ for query_id = 1, #inputs do
         rougeOpt,
         refSummary,
         refCounts,
-        buffer
+        buffer,
+        oracleF1
     }
 end
 
@@ -175,16 +178,6 @@ if use_cuda then
     criterion = criterion:cuda()
     model = model:cuda()
 end
-
-local query = LongTensor{qs}
-local sentenceStream = LongTensor(padZeros(xtdm, K_tokens))
-local refSummary = Tensor{ntdm}
-local refCounts = buildTokenCounts(refSummary)
-
--- Initializing variables to calculate Oracle Performance
-oracleF1, oracleActions = scoreOracle(sentenceStream, maxSummarySize, refCounts)
-print(string.format("Oracle - Greedy Search F1 = %.6f with %i sentences selected", 
-    oracleF1, torch.totable(oracleActions:sum(1))[1][SELECT]))
 
 local perf = io.open(string.format("%s_perf.txt", nnmod), 'w')
 for epoch=0, nepochs do
@@ -202,6 +195,7 @@ for epoch=0, nepochs do
         local refSummary = query_data[query_id][11]
         local refCounts = query_data[query_id][12]
         local buffer = query_data[query_id][13]
+        local oracleF1 = query_data[query_id][14]
         exploreDraws:uniform(0, 1)
 
         -- Clearing out the variables from the last time
@@ -275,7 +269,7 @@ for epoch=0, nepochs do
         --- Storing the data
         local memory = {input, reward, actions}
 
-        if epoch == 0 and query_id = 1 then
+        if epoch == 0 and query_id == 1 then
             fullmemory = memory 
             randomF1 = f1
         else
@@ -283,13 +277,15 @@ for epoch=0, nepochs do
             -- fullmemory = buildMemoryOld(memory, fullmemory, mem_size, batch_size, use_cuda)
         end
         --- Running backprop
+        -- loss = backPropOld(memory, params, model, criterion, batch_size, mem_size, use_cuda)
+        loss = backProp(memory, params, gradParams, optimParams, model, criterion, batch_size, n_backprops, use_cuda)
 
-        if epoch == 0 and query_id = 1 then
+        if epoch == 0 and query_id == 1 then
             out = string.format("epoch;epsilon;loss;randomF1;oracleF1;rougeF1;rougeRecall;rougePrecision;actual;pred;nselect;nskip;query\n")
             perf:write(out)
         end
         nactions = torch.totable(actions:sum(1))[1]
-        out = string.format("%i; %.3f; %.6f; %.6f; %.6f; %.6f; %.6f; %.6f; {min=%.3f, max=%.3f}; {min=%.3f, max=%.3f}; %i; %i; %s\n", 
+        out = string.format("%i; %.3f; %.6f; %.6f; %.6f; %.6f; %.6f; %.6f; {min=%.3f, max=%.3f}; {min=%.3f, max=%.3f}; %i; %i; %i\n", 
             epoch, epsilon, loss, randomF1, oracleF1, rougeF1, rougeRecall, rougePrecision,
             reward:min(), reward:max(),
             qValues:min(), qValues:max(),
@@ -301,7 +297,7 @@ for epoch=0, nepochs do
         local ofile = io.open(string.format("plotdata/%s/%i/%i_epoch.txt", nnmod, query_id, epoch), 'w')
         ofile:write("predSkip;predSelect;actual;Skip;Select;query\n")
         for i=1, streamSize do
-            ofile:write(string.format("%.6f;%.6f;%6f;%i;%i\n", 
+            ofile:write(string.format("%.6f;%.6f;%6f;%i;%i;%i\n", 
                     qValues[i][SKIP], qValues[i][SELECT], rouge[i], 
                     actions[i][SKIP], actions[i][SELECT], query_id))
         end
@@ -320,12 +316,11 @@ for epoch=0, nepochs do
             rougeOpt:zero(),
             refSummary,
             refCounts,
-            buffer:zero()
+            buffer:zero(),
+            oracleF1
         }
 
     end
-    -- loss = backPropOld(memory, params, model, criterion, batch_size, mem_size, use_cuda)
-    loss = backProp(memory, params, gradParams, optimParams, model, criterion, batch_size, n_backprops, use_cuda)
 
     if (epsilon - delta) <= base_explore_rate then
         epsilon = base_explore_rate
