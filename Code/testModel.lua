@@ -145,22 +145,22 @@ for query_id = 1, #inputs do
     summaryBuffer = LongTensor(streamSize + 1, maxSummarySize):zero()
     qValues = Tensor(streamSize, 2):zero()
     rouge = Tensor(streamSize + 1):zero()
-    -- local rouge[1] = 0
     summary = summaryBuffer:zero():narrow(1,1,1)
-    
+
     query_data[query_id] = {
-        query,
         sentenceStream,
         streamSize,
-        refSummary,
-        refCounts,
-        buffer,
+        query,
         actions,
         exploreDraws,
-        summaryBuffer,
+        summaryBuffer.
         qValues,
         rouge,
-        summary
+        actionsOpt,
+        rougeOpt,
+        refSummary,
+        refCounts,
+        buffer
     }
 end
 
@@ -176,7 +176,6 @@ end
 
 local query = LongTensor{qs}
 local sentenceStream = LongTensor(padZeros(xtdm, K_tokens))
-
 local refSummary = Tensor{ntdm}
 local refCounts = buildTokenCounts(refSummary)
 
@@ -196,31 +195,25 @@ for epoch=0, nepochs do
         local rouge = Tensor(streamSize + 1):zero()
         local actionsOpt = ByteTensor(streamSize, 2):fill(0)
         local rougeOpt = Tensor(streamSize + 1):zero()
-
         exploreDraws:uniform(0, 1)
 
-        local summary = summaryBuffer:zero():narrow(1,1,1)
-        -- local query = query_data[query_id][1]
-        -- local sentenceStream = query_data[query_id][2]
-        -- local streamSize = query_data[query_id][3]
-        -- local refSummary = query_data[query_id][4]
-        -- local refCounts = query_data[query_id][5]
-        -- local buffer = query_data[query_id][6]
-        -- local actions = query_data[query_id][7]
-        -- local exploreDraws = query_data[query_id][8]
-        -- local summaryBuffer = query_data[query_id][9]
-        -- local qValues = query_data[query_id][10]
-        -- local rouge = query_data[query_id][11]
-        -- local summary = query_data[query_id][12]
-
-        -- local actions = actions:fill(0)
-        -- local rouge = rouge:zero()
-        -- local qValues = qValues:zero()
-        -- local summaryBuffer = summaryBuffer:zero()
-        -- local buffer = buffer:zero()
-        -- local summary = summary:zero()
+        local sentenceStream = query_data[query_id][1]
+        local streamSize = query_data[query_id][2]
+        local query = query_data[query_id][3]
+        local actions = query_data[query_id][4]
+        local exploreDraws = query_data[query_id][5]
+        local summaryBuffer = query_data[query_id][6]
+        -- local qValues = query_data[query_id][7]
+        -- local rouge = query_data[query_id][8]
+        -- local actionsOpt = query_data[query_id][9]
+        -- local rougeOpt = query_data[query_id][10]
+        -- local refSummary = query_data[query_id][11]
+        -- local refCounts = query_data[query_id][12]
+        -- local buffer = query_data[query_id][13]
         -- exploreDraws:uniform(0, 1)
-        -- -- rouge = Tensor(streamSize + 1):zero()
+        -- summary = summaryBuffer:zero():narrow(1,1,1)
+
+        -- Clearing out the variables from the last time
 
         for i=1, streamSize do      -- Iterating through individual sentences
             local sentence = sentenceStream:narrow(1, i, 1)
@@ -325,19 +318,21 @@ for epoch=0, nepochs do
         ofile:close()
 
         query_data[query_id] = {
-            query,
             sentenceStream,
             streamSize,
+            query,
+            actions:fill(0),
+            exploreDraws,
+            summaryBuffer:zero(),
+            qValues:zero(),
+            rouge:zero(),
+            actionsOpt:zero(),
+            rougeOpt:zero(),
             refSummary,
             refCounts,
-            buffer,
-            actions,
-            exploreDraws,
-            summaryBuffer,
-            qValues,
-            rouge,
-            summary
+            buffer:zero()
         }
+
     end
 
     if (epsilon - delta) <= base_explore_rate then
