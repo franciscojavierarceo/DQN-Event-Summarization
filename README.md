@@ -10,7 +10,7 @@ Repo currently has 2 folders
 This is the repo for our {Francisco Javier Arceo, Chris Kedzie} implementation 
 of a DQN-LSTM for Event Summarization. 
 
-The code has  main files, to run the code simply enter in the command line:
+The code has <TBD> main files, to run the code simply enter in the command line:
 
     source run_models.sh
 
