@@ -279,7 +279,7 @@ function backPropOld(input_memory, params, gradParams, optimParams, model, crite
             return lossf, gradParams
         end
      --- optim.rmsprop returns \theta, f(\theta):= loss function
-     _, lossv  = optim.rmsprop(feval, params, optimParams)   
+     _, lossv  = optim.rmsprop(feval, params, optimParams)
     end
     return lossv[1]
 end
@@ -455,8 +455,8 @@ function train(inputs, query_data, model, nepochs, nnmod, metric, thresh, gamma,
             end
             --- Running backprop
             -- loss = backPropOld(memory, params, model, criterion, batch_size, mem_size, use_cuda)
-            -- loss = backProp(memory, params, gradParams, optimParams, model, criterion, batch_size, n_backprops, use_cuda)
-            loss = backPropOld(memory, params, gradParams, optimParams, model, criterion, batch_size, memsize, use_cuda)
+            loss = backProp(memory, params, gradParams, optimParams, model, criterion, batch_size, n_backprops, use_cuda)
+            -- loss = backPropOld(memory, params, gradParams, optimParams, model, criterion, batch_size, memsize, use_cuda)
 
             if epoch == 0 and query_id == 1 then
                 out = string.format("epoch;epsilon;loss;randomF1;oracleF1;rougeF1;rougeRecall;rougePrecision;actual;pred;nselect;nskip;query\n")
