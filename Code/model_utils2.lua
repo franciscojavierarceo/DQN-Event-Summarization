@@ -25,7 +25,7 @@ function scoreOracle(sentenceStream, maxSummarySize, refCounts)
     return oracleF1, actions
 end
 
-function buildModel(model, vocabSize, embeddingSize, use_cuda)
+function buildModel(model, vocabSize, embeddingSize, metric, use_cuda)
     --- Small experiments seem to show that the Tanh activations performed better than the ReLU
     if model == 'bow' then
         print(string.format("Running bag-of-words model to learn %s", metric))
@@ -33,8 +33,8 @@ function buildModel(model, vocabSize, embeddingSize, use_cuda)
                     :add(nn.LookupTableMaskZero(vocabSize, embeddingSize))
                     -- Note not averaging really blows up the model so keep this true
                     :add(nn.Sum(2, 3, true))
-                    :add(nn.ReLU())
-                    -- :add(nn.Tanh())
+                    -- :add(nn.ReLU())
+                    :add(nn.Tanh())
     else
         print(string.format("Running LSTM model to learn %s", metric))
         sentenceLookup = nn.Sequential()
@@ -56,8 +56,8 @@ function buildModel(model, vocabSize, embeddingSize, use_cuda)
     local nnmodel = nn.Sequential()
             :add(pmodule)
             :add(nn.JoinTable(2))
-            -- :add(nn.Tanh())
-            :add(nn.ReLU())
+            :add(nn.Tanh())
+            -- :add(nn.ReLU())
             :add(nn.Linear(embeddingSize * 3, 2))
             -- :add(nn.Tanh())
     if use_cuda then
@@ -231,32 +231,7 @@ function backProp(input_memory, params, gradParams, optimParams, model, criterio
     end
     return loss/n_backprops
 end
--- function backPropOld(input_memory, params, model, criterion, batch_size, memsize, use_cuda)
---     local inputs = {input_memory[1], input_memory[3]}
---     local rewards = input_memory[2]
---     local dataloader = dl.TensorLoader(inputs, rewards)
---     for k, xin, reward in dataloader:sampleiter(batch_size, memsize) do
---         xinput = xin[1]
---         actions_in = xin[2]
---         local function feval(params)
---             gradParams:zero()
---             local maskLayer = nn.MaskedSelect()
---             if use_cuda then 
---              maskLayer = maskLayer:cuda()
---             end
---             local predQ = model:forward(xinput)
---             local predQOnActions = maskLayer:forward({predQ, actions_in}) 
---             local lossf = criterion:forward(predQOnActions, reward)
---             local gradOutput = criterion:backward(predQOnActions, reward)
---             local gradMaskLayer = maskLayer:backward({predQ, actions_in}, gradOutput)
---             model:backward(xinput, gradMaskLayer[1])
---             return lossf, gradParams
---         end
---      --- optim.rmsprop returns \theta, f(\theta):= loss function
---      _, lossv  = optim.rmsprop(feval, params, optimParams)   
---     end
---     return lossv[1]
--- end
+
 function backPropOld(input_memory, params, gradParams, optimParams, model, criterion, batch_size, memsize, use_cuda)
     local inputs = {input_memory[1], input_memory[3]}
     local rewards = input_memory[2]
@@ -343,6 +318,12 @@ function intialize_variables(query_file, inputs, n_samples, input_path, K_tokens
         }
     end
     return vocabSize, query_data
+end
+
+
+
+function forwardpass()
+
 end
 
 function train(inputs, query_data, model, nepochs, nnmod, metric, thresh, gamma, epsilon, delta, base_explore_rate, end_baserate, mem_size, batch_size, optimParams, n_backprops, use_cuda)
