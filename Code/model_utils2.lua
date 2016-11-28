@@ -1,3 +1,64 @@
+function intialize_variables(query_file, inputs, input_path, K_tokens, maxSummarySize)
+    local vocabSize = 0
+    local maxseqlen = 0
+    local maxseqlenq = getMaxseq(query_file)
+    local vocabSizeq = getVocabSize(query_file)
+    local query_data = {}
+    for query_id = 1, #inputs do
+        input_fn = inputs[query_id]['inputs']
+        nugget_fn = inputs[query_id]['nuggets']
+
+        input_file = csvigo.load({path = input_path .. input_fn, mode = "large", verbose = false})
+        nugget_file = csvigo.load({path = input_path .. nugget_fn, mode = "large", verbose = false})
+        -- input_file = geti_n(input_file, 2, #input_file) 
+        input_file = geti_n(input_file, 2, n) 
+        nugget_file = geti_n(nugget_file, 2, #nugget_file) 
+
+        vocabSize = math.max(vocabSize, vocabSizeq, getVocabSize(input_file))
+        maxseqlen = math.max(maxseqlen, maxseqlenq, getMaxseq(input_file))
+        xtdm  = buildTermDocumentTable(input_file, K_tokens)
+        nuggets = buildTermDocumentTable(nugget_file, nil)
+        ntdm = {}
+        for i=1, #nuggets do
+            ntdm = tableConcat(table.unpack(nuggets), ntdm)
+        end
+        -- Initializing the bookkeeping variables and storing them
+        local query = LongTensor{inputs[query_id]['query'] }
+        local sentenceStream = LongTensor(padZeros(xtdm, K_tokens))
+        local streamSize = sentenceStream:size(1)
+        local refSummary = Tensor{ntdm}
+        local refCounts = buildTokenCounts(refSummary)
+        local buffer = Tensor(1, maxSummarySize):zero()
+        local actions = ByteTensor(streamSize, 2):fill(0)
+        local actionsOpt = ByteTensor(streamSize, 2):fill(0)
+        local exploreDraws = Tensor(streamSize)
+        local summaryBuffer = LongTensor(streamSize + 1, maxSummarySize):zero()
+        local qValues = Tensor(streamSize, 2):zero()
+        local rouge = Tensor(streamSize + 1):zero()
+        local rougeOpt = Tensor(streamSize + 1):zero()
+        local summary = summaryBuffer:zero():narrow(1,1,1)
+        local oracleF1, oracleActions = scoreOracle(sentenceStream, maxSummarySize, refCounts)
+
+        query_data[query_id] = {
+            sentenceStream,
+            streamSize,
+            query,
+            actions,
+            exploreDraws,
+            summaryBuffer,
+            qValues,
+            rouge,
+            actionsOpt,
+            rougeOpt,
+            refSummary,
+            refCounts,
+            buffer,
+            oracleF1
+        }
+    end
+    return vocabSize, query_data
+end
+
 function scoreOracle(sentenceStream, maxSummarySize, refCounts)
     local buffer = Tensor(1, maxSummarySize):zero()
     local streamSize = sentenceStream:size(1)

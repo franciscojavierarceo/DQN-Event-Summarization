@@ -109,68 +109,12 @@ else
     print("...running on CPU")
 end
 
-
-vocabSize = 0
-maxseqlen = 0
-maxseqlenq = getMaxseq(query_file)
-vocabSizeq = getVocabSize(query_file)
-query_data = {}
-for query_id = 1, #inputs do
-    input_fn = inputs[query_id]['inputs']
-    nugget_fn = inputs[query_id]['nuggets']
-
-    input_file = csvigo.load({path = input_path .. input_fn, mode = "large", verbose = false})
-    nugget_file = csvigo.load({path = input_path .. nugget_fn, mode = "large", verbose = false})
-    -- input_file = geti_n(input_file, 2, #input_file) 
-    input_file = geti_n(input_file, 2, n) 
-    nugget_file = geti_n(nugget_file, 2, #nugget_file) 
-
-    vocabSize = math.max(vocabSize, vocabSizeq, getVocabSize(input_file))
-    maxseqlen = math.max(maxseqlen, maxseqlenq, getMaxseq(input_file))
-    xtdm  = buildTermDocumentTable(input_file, K_tokens)
-    nuggets = buildTermDocumentTable(nugget_file, nil)
-    ntdm = {}
-    for i=1, #nuggets do
-        ntdm = tableConcat(table.unpack(nuggets), ntdm)
-    end
-    -- Initializing the bookkeeping variables and storing them
-    local query = LongTensor{inputs[query_id]['query'] }
-    local sentenceStream = LongTensor(padZeros(xtdm, K_tokens))
-    local streamSize = sentenceStream:size(1)
-    local refSummary = Tensor{ntdm}
-    local refCounts = buildTokenCounts(refSummary)
-    local buffer = Tensor(1, maxSummarySize):zero()
-    local actions = ByteTensor(streamSize, 2):fill(0)
-    local actionsOpt = ByteTensor(streamSize, 2):fill(0)
-    local exploreDraws = Tensor(streamSize)
-    local summaryBuffer = LongTensor(streamSize + 1, maxSummarySize):zero()
-    local qValues = Tensor(streamSize, 2):zero()
-    local rouge = Tensor(streamSize + 1):zero()
-    local rougeOpt = Tensor(streamSize + 1):zero()
-    local summary = summaryBuffer:zero():narrow(1,1,1)
-
-    local oracleF1, oracleActions = scoreOracle(sentenceStream, maxSummarySize, refCounts)
-
-    query_data[query_id] = {
-        sentenceStream,
-        streamSize,
-        query,
-        actions,
-        exploreDraws,
-        summaryBuffer,
-        qValues,
-        rouge,
-        actionsOpt,
-        rougeOpt,
-        refSummary,
-        refCounts,
-        buffer,
-        oracleF1
-    }
-end
+-- Initializing the model variables
+vocabSize, query_data = intialize_variables(query_file, inputs, 
+                                            input_path, K_tokens, 
+                                            maxSummarySize)
 
 local model = buildModel(nnmod, vocabSize, embeddingSize, use_cuda)
-
 params, gradParams = model:getParameters()
 criterion = nn.MSECriterion()
 
@@ -182,6 +126,9 @@ end
 local perf = io.open(string.format("%s_perf.txt", nnmod), 'w')
 for epoch=0, nepochs do
     for query_id=1, #inputs do
+        -- Initializing local variables
+            -- in principal I could use the query_data[query_id][1] 
+            -- as the argument but that's much less readable
         local sentenceStream = query_data[query_id][1]
         local streamSize = query_data[query_id][2]
         local query = query_data[query_id][3]
@@ -265,8 +212,8 @@ for epoch=0, nepochs do
         local querySize = query:size(2)
         local summaryBatch = summaryBuffer:narrow(1, 1, streamSize)
         local queryBatch = query:view(1, querySize):expand(streamSize, querySize) 
-        local input = {sentenceStream, queryBatch, summaryBatch}
         --- Storing the data
+        local input = {sentenceStream, queryBatch, summaryBatch}
         local memory = {input, reward, actions}
 
         if epoch == 0 and query_id == 1 then
@@ -297,7 +244,7 @@ for epoch=0, nepochs do
         local avpfile = io.open(string.format("plotdata/%s/%i/%i_epoch.txt", nnmod, query_id, epoch), 'w')
         avpfile:write("predSkip;predSelect;actual;Skip;Select;query\n")
         for i=1, streamSize do
-            ofile:write(string.format("%.6f;%.6f;%6f;%i;%i;%i\n", 
+            avpfile:write(string.format("%.6f;%.6f;%6f;%i;%i;%i\n", 
                     qValues[i][SKIP], qValues[i][SELECT], rouge[i], 
                     actions[i][SKIP], actions[i][SELECT], query_id))
         end
