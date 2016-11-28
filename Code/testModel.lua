@@ -294,14 +294,14 @@ for epoch=0, nepochs do
         )
         perf:write(out)
 
-        local ofile = io.open(string.format("plotdata/%s/%i/%i_epoch.txt", nnmod, query_id, epoch), 'w')
-        ofile:write("predSkip;predSelect;actual;Skip;Select;query\n")
+        local avpfile = io.open(string.format("plotdata/%s/%i/%i_epoch.txt", nnmod, query_id, epoch), 'w')
+        avpfile:write("predSkip;predSelect;actual;Skip;Select;query\n")
         for i=1, streamSize do
             ofile:write(string.format("%.6f;%.6f;%6f;%i;%i;%i\n", 
                     qValues[i][SKIP], qValues[i][SELECT], rouge[i], 
                     actions[i][SKIP], actions[i][SELECT], query_id))
         end
-        ofile:close()
+        avpfile:close()
 
         query_data[query_id] = {
             sentenceStream,
