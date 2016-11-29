@@ -113,7 +113,7 @@ local vocabSize, query_data = intialize_variables(query_file, inputs,
 
 local model = buildModel(nnmod, vocabSize, embeddingSize, use_cuda)
 
-train(inputs, query_data, model, nepochs, nnmod, metric, thresh, 
+train2(inputs, query_data, model, nepochs, nnmod, metric, thresh, 
       gamma, epsilon, delta, base_explore_rate, end_baserate, 
       mem_size, batch_size, optimParams, n_backprops, use_cuda)
 

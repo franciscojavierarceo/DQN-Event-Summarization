@@ -276,6 +276,7 @@ for epoch=1,nepochs do
     local queryBatch = query:view(1, querySize):expand(streamSize, querySize) 
 
     local input = {sentenceStream, queryBatch, summaryBatch}
+    print(summaryBatch:size())
     --- Storing the data
     memory = {input, reward, actions}
 
