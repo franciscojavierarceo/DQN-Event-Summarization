@@ -1,4 +1,7 @@
 function scoreOracle(sentenceStream, maxSummarySize, refCounts)
+    SKIP = 1
+    SELECT = 2
+    
     local buffer = Tensor(1, maxSummarySize):zero()
     local streamSize = sentenceStream:size(1)
     local actions = ByteTensor(streamSize, 2):fill(0)
@@ -151,7 +154,7 @@ function buildMemory(newinput, memory_hist, memsize, use_cuda)
     local actionMemory = torch.cat(newinput[3]:double(), memory_hist[3]:double(), 1)
     --- specifying rows to index 
     if sentMemory:size(1) >= memsize then
-        -- My hack for sampling uniformly distribution
+        -- My hack for sampling based on non-zero
         local p = torch.abs(rewardMemory) / torch.abs(rewardMemory):sum()
         -- local p = torch.ones(memsize) / memsize
         local indxs = torch.multinomial(p, memsize, true)
@@ -169,7 +172,7 @@ function buildMemory(newinput, memory_hist, memsize, use_cuda)
     return {inputMemory, rewardMemory, actionMemory}
 end
 
-function buildMemoryOld(newinput, memory_hist, memsize, use_cuda)
+function stackdemory(newinput, memory_hist, memsize, use_cuda)
     local sentMemory = torch.cat(newinput[1][1]:double(), memory_hist[1][1]:double(), 1)
     local queryMemory = torch.cat(newinput[1][2]:double(), memory_hist[1][2]:double(), 1)
     local sumryMemory = torch.cat(newinput[1][3]:double(), memory_hist[1][3]:double(), 1)
@@ -264,6 +267,7 @@ function intialize_variables(query_file, inputs, n_samples, input_path, K_tokens
     local maxseqlenq = getMaxseq(query_file)
     local vocabSizeq = getVocabSize(query_file)
     local query_data = {}
+
     for query_id = 1, #inputs do
         input_fn = inputs[query_id]['inputs']
         nugget_fn = inputs[query_id]['nuggets']
@@ -321,6 +325,9 @@ function intialize_variables(query_file, inputs, n_samples, input_path, K_tokens
 end
 
 function forwardpass(query_data, query_id, model, epsilon, gamma, metric, thresh)
+    SKIP = 1
+    SELECT = 2
+
     -- Extact variables
     local sentenceStream = query_data[query_id][1]
     local streamSize = query_data[query_id][2]
@@ -413,10 +420,13 @@ function forwardpass(query_data, query_id, model, epsilon, gamma, metric, thresh
     return memory, rougeRecall, rougePrecision, rougeF1, qValues
 end
 
-function train2(inputs, query_data, model, nepochs, nnmod, metric, thresh, gamma, epsilon, delta, base_explore_rate, end_baserate, mem_size, batch_size, optimParams, n_backprops, use_cuda)
+function train(inputs, query_data, model, nepochs, nnmod, metric, thresh, gamma, epsilon, delta, base_explore_rate, end_baserate, mem_size, batch_size, optimParams, n_backprops, use_cuda)
     math.randomseed(420)
     torch.manualSeed(420)
     criterion = nn.MSECriterion()
+    SKIP = 1
+    SELECT = 2
+    export = true
 
     if use_cuda then
         criterion = criterion:cuda()
@@ -441,14 +451,14 @@ function train2(inputs, query_data, model, nepochs, nnmod, metric, thresh, gamma
                 randomF1 = rougeF1
             else
                 fullmemory = buildMemory(memory, fullmemory, mem_size, batch_size, use_cuda)
-                -- fullmemory = buildMemoryOld(memory, fullmemory, mem_size, batch_size, use_cuda)
+                -- fullmemory = stackMemory(memory, fullmemory, mem_size, batch_size, use_cuda)
             end
             --- Running backprop
             -- loss = backProp(memory, params, gradParams, optimParams, model, criterion, batch_size, n_backprops, use_cuda)
             loss = backPropOld(memory, params, gradParams, optimParams, model, criterion, batch_size, mem_size, use_cuda)
 
             nactions = torch.totable(memory[3]:sum(1))[1]
-            out = string.format("%i; %.3f; %.6f; %.6f; %.6f; %.6f; %.6f; %.6f; {min=%.3f, max=%.3f}; {min=%.3f, max=%.3f}; %i; %i; %i\n", 
+            perf_string = string.format("%i; %.3f; %.6f; %.6f; %.6f; %.6f; %.6f; %.6f; {min=%.3f, max=%.3f}; {min=%.3f, max=%.3f}; %i; %i; %i\n", 
                 epoch, epsilon, loss, randomF1, query_data[query_id][14],  -- this is the oracle
                 rougeF1, rougeRecall, rougePrecision,
                 memory[2]:min(), memory[2]:max(),
@@ -456,183 +466,17 @@ function train2(inputs, query_data, model, nepochs, nnmod, metric, thresh, gamma
                 nactions[SELECT], nactions[SKIP],
                 query_id
             )
-            perf:write(out)
+            perf:write(perf_string)
 
             local avpfile = io.open(string.format("plotdata/%s/%i/%i_epoch.txt", nnmod, query_id, epoch), 'w')
             avpfile:write("predSkip;predSelect;actual;Skip;Select;query\n")
             for i=1, memory[1][1]:size(1) do
-                avpfile:write(string.format("%.6f;%.6f;%6f;%i;%i;%i\n", 
+                avp_string = string.format("%.6f;%.6f;%6f;%i;%i;%i\n", 
                         qValues[i][SKIP], qValues[i][SELECT], memory[2][i], 
-                        memory[3][i][SKIP], memory[3][i][SELECT], query_id))
+                        memory[3][i][SKIP], memory[3][i][SELECT], query_id)
+                avpfile:write(avp_string)
             end
             avpfile:close()
-        end
-
-        if (epsilon - delta) <= base_explore_rate then
-            epsilon = base_explore_rate
-            if epoch > end_baserate then 
-                base_explore_rate = 0.
-            end
-        else 
-            epsilon = epsilon - delta
-        end
-
-    end
-    print(string.format("Model complete {Selected = %i; Skipped  = %i}; Final Rouge Recall, Precision, F1 = {%.6f;%.6f;%.6f}", 
-                nactions[SELECT], nactions[SKIP], rougeRecall, rougePrecision, rougeF1))
-end
-function train(inputs, query_data, model, nepochs, nnmod, metric, thresh, gamma, epsilon, delta, base_explore_rate, end_baserate, mem_size, batch_size, optimParams, n_backprops, use_cuda)
-    math.randomseed(420)
-    torch.manualSeed(420)
-    criterion = nn.MSECriterion()
-
-    if use_cuda then
-        criterion = criterion:cuda()
-        model = model:cuda()
-    end
-
-    local params, gradParams = model:getParameters()
-    local perf = io.open(string.format("%s_perf.txt", nnmod), 'w')
-    for epoch=0, nepochs do
-        for query_id=1, #inputs do
-            -- Initializing local variables
-                -- in principal I could use the query_data[query_id][1] 
-                -- as the argument but that's much less readable
-            local sentenceStream = query_data[query_id][1]
-            local streamSize = query_data[query_id][2]
-            local query = query_data[query_id][3]
-            local actions = query_data[query_id][4]
-            local exploreDraws = query_data[query_id][5]
-            local summaryBuffer = query_data[query_id][6]
-            local qValues = query_data[query_id][7]
-            local rouge = query_data[query_id][8]
-            local actionsOpt = query_data[query_id][9]
-            local rougeOpt = query_data[query_id][10]
-            local refSummary = query_data[query_id][11]
-            local refCounts = query_data[query_id][12]
-            local buffer = query_data[query_id][13]
-            local oracleF1 = query_data[query_id][14]
-            exploreDraws:uniform(0, 1)
-
-            for i=1, streamSize do      -- Iterating through individual sentences
-                local sentence = sentenceStream:narrow(1, i, 1)
-                qValues[i]:copy(model:forward({sentence, query, summary}))
-
-                -- epsilon greedy strategy
-                if exploreDraws[i]  <=  epsilon then        
-                    actions[i][torch.random(SKIP, SELECT)] = 1
-                else 
-                    if qValues[i][SKIP] > qValues[i][SELECT] then
-                        actions[i][SKIP] = 1
-                    else
-                        actions[i][SELECT] = 1
-                    end
-                end
-
-                -- Storing the optimal predictions
-                if qValues[i][SKIP] > qValues[i][SELECT] then
-                    actionsOpt[i][SKIP] = 1
-                else
-                    actionsOpt[i][SELECT] = 1
-                end
-                summary = buildSummary(
-                    actions:narrow(1, 1, i), 
-                    sentenceStream:narrow(1, 1, i),
-                    summaryBuffer:narrow(1, i + 1, 1),
-                    use_cuda
-                )
-
-                summaryOpt = buildSummary(
-                    actionsOpt:narrow(1, 1, i), 
-                    sentenceStream:narrow(1, 1, i),
-                    summaryBuffer:narrow(1, i + 1, 1),
-                    use_cuda
-                )
-
-                local recall, prec, f1 = rougeScores(buildTokenCounts(summary), refCounts)
-                local rOpt, pOpt, f1Opt = rougeScores(buildTokenCounts(summaryOpt), refCounts)
-
-                if metric == "f1" then
-                    rouge[i + 1] = threshold(f1, thresh)
-                    rougeOpt[i]  = threshold(f1Opt, thresh)
-                elseif metric == "recall" then
-                    rouge[i + 1] = threshold(recall, thresh)
-                    rougeOpt[i]  = threshold(rOpt, thresh)
-                elseif metric == "precision" then
-                    rouge[i + 1] = threshold(prec, thresh)
-                    rougeOpt[i]  = threshold(pOpt, thresh)
-                end
-
-                if i==streamSize then
-                    rougeRecall = recall
-                    rougePrecision = prec
-                    rougeF1 = f1
-                end
-            end
-
-            local max, argmax = torch.max(qValues, 2)
-            local reward0 = rouge:narrow(1,2, streamSize) - rouge:narrow(1,1, streamSize)
-            local reward_tm1 =  rougeOpt:narrow(1,2, streamSize) - rougeOpt:narrow(1,1, streamSize)
-            local reward = reward0 + gamma * reward_tm1
-            
-            local querySize = query:size(2)
-            local summaryBatch = summaryBuffer:narrow(1, 1, streamSize)
-            local queryBatch = query:view(1, querySize):expand(streamSize, querySize) 
-            --- Storing the data
-            local input = {sentenceStream, queryBatch, summaryBatch}
-            local memory = {input, reward, actions}
-
-            if epoch == 0 and query_id == 1 then
-                fullmemory = memory 
-                randomF1 = f1
-            else
-                fullmemory = buildMemory(memory, fullmemory, mem_size, batch_size, use_cuda)
-                -- fullmemory = buildMemoryOld(memory, fullmemory, mem_size, batch_size, use_cuda)
-            end
-            --- Running backprop
-            -- loss = backProp(memory, params, gradParams, optimParams, model, criterion, batch_size, n_backprops, use_cuda)
-            loss = backPropOld(memory, params, gradParams, optimParams, model, criterion, batch_size, mem_size, use_cuda)
-
-            if epoch == 0 and query_id == 1 then
-                out = string.format("epoch;epsilon;loss;randomF1;oracleF1;rougeF1;rougeRecall;rougePrecision;actual;pred;nselect;nskip;query\n")
-                perf:write(out)
-            end
-            nactions = torch.totable(actions:sum(1))[1]
-            out = string.format("%i; %.3f; %.6f; %.6f; %.6f; %.6f; %.6f; %.6f; {min=%.3f, max=%.3f}; {min=%.3f, max=%.3f}; %i; %i; %i\n", 
-                epoch, epsilon, loss, randomF1, oracleF1, rougeF1, rougeRecall, rougePrecision,
-                reward:min(), reward:max(),
-                qValues:min(), qValues:max(),
-                nactions[SELECT], nactions[SKIP],
-                query_id
-            )
-            perf:write(out)
-
-            local avpfile = io.open(string.format("plotdata/%s/%i/%i_epoch.txt", nnmod, query_id, epoch), 'w')
-            avpfile:write("predSkip;predSelect;actual;Skip;Select;query\n")
-            for i=1, streamSize do
-                avpfile:write(string.format("%.6f;%.6f;%6f;%i;%i;%i\n", 
-                        qValues[i][SKIP], qValues[i][SELECT], rouge[i], 
-                        actions[i][SKIP], actions[i][SELECT], query_id))
-            end
-            avpfile:close()
-
-            -- Have to zero out a lot of these variables after the fact
-            query_data[query_id] = {
-                sentenceStream,
-                streamSize,
-                query,
-                actions:fill(0),
-                exploreDraws,
-                summaryBuffer:zero(),
-                qValues:zero(),
-                rouge:zero(),
-                actionsOpt:zero(),
-                rougeOpt:zero(),
-                refSummary,
-                refCounts,
-                buffer:zero(),
-                oracleF1
-            }
         end
 
         if (epsilon - delta) <= base_explore_rate then
