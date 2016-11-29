@@ -34,7 +34,6 @@ cmd:text()
 local opt = cmd:parse(arg or {})
 
 dofile("utils.lua")
-dofile("model_utils.lua")
 dofile("model_utils2.lua")
 
 input_path = '~/GitHub/DeepNLPQLearning/DO_NOT_UPLOAD_THIS_DATA/0-output/'
@@ -81,9 +80,7 @@ else
 end
 
 local delta = 1./(opt.nepochs/opt.cuts) 
-local optimParams = {
-    learningRate = opt.learning_rate,
-}
+local optimParams = { learningRate = opt.learning_rate }
 
 -- Initializing the model variables
 local vocabSize, query_data = intialize_variables(query_file, inputs, 

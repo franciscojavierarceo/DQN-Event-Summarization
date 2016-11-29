@@ -1,7 +1,7 @@
 function scoreOracle(sentenceStream, maxSummarySize, refCounts)
-    SKIP = 1
-    SELECT = 2
-    
+    local SKIP = 1
+    local SELECT = 2
+
     local buffer = Tensor(1, maxSummarySize):zero()
     local streamSize = sentenceStream:size(1)
     local actions = ByteTensor(streamSize, 2):fill(0)
@@ -154,7 +154,7 @@ function buildMemory(newinput, memory_hist, memsize, use_cuda)
     local actionMemory = torch.cat(newinput[3]:double(), memory_hist[3]:double(), 1)
     --- specifying rows to index 
     if sentMemory:size(1) >= memsize then
-        -- My hack for sampling based on non-zero
+        -- My hack for sampling based on non-zero rewards
         local p = torch.abs(rewardMemory) / torch.abs(rewardMemory):sum()
         -- local p = torch.ones(memsize) / memsize
         local indxs = torch.multinomial(p, memsize, true)
@@ -172,7 +172,7 @@ function buildMemory(newinput, memory_hist, memsize, use_cuda)
     return {inputMemory, rewardMemory, actionMemory}
 end
 
-function stackdemory(newinput, memory_hist, memsize, use_cuda)
+function stackmemory(newinput, memory_hist, memsize, use_cuda)
     local sentMemory = torch.cat(newinput[1][1]:double(), memory_hist[1][1]:double(), 1)
     local queryMemory = torch.cat(newinput[1][2]:double(), memory_hist[1][2]:double(), 1)
     local sumryMemory = torch.cat(newinput[1][3]:double(), memory_hist[1][3]:double(), 1)
@@ -324,9 +324,11 @@ function intialize_variables(query_file, inputs, n_samples, input_path, K_tokens
     return vocabSize, query_data
 end
 
-function forwardpass(query_data, query_id, model, epsilon, gamma, metric, thresh)
-    SKIP = 1
-    SELECT = 2
+function forwardpass(query_data, query_id, model, epsilon, gamma, metric, thresh, use_cuda)
+    local SKIP = 1
+    local SELECT = 2
+    math.randomseed(420)
+    torch.manualSeed(420)
 
     -- Extact variables
     local sentenceStream = query_data[query_id][1]
@@ -342,17 +344,19 @@ function forwardpass(query_data, query_id, model, epsilon, gamma, metric, thresh
     local refSummary = query_data[query_id][11]
     local refCounts = query_data[query_id][12]
     local buffer = query_data[query_id][13]
+    local summary = summaryBuffer:zero():narrow(1,1,1)
+    
     -- Have to set clear the inputs at the beginning of each scoring round
     actions:fill(0)
-    summaryBuffer:fill(0)
-    qValues:fill(0)
-    rouge:fill(0)
     actionsOpt:fill(0)
+    rouge:fill(0)
     rougeOpt:fill(0)
+    qValues:fill(0)
+    summaryBuffer:fill(0)
     buffer:fill(0)
-
     exploreDraws:uniform(0, 1)
-    for i=1, streamSize do      -- Iterating through individual sentences
+
+    for i=1, streamSize do     -- Iterating through individual sentences
         local sentence = sentenceStream:narrow(1, i, 1)
         qValues[i]:copy(model:forward({sentence, query, summary}))
 
@@ -417,6 +421,7 @@ function forwardpass(query_data, query_id, model, epsilon, gamma, metric, thresh
     local queryBatch = query:view(1, querySize):expand(streamSize, querySize) 
     local input = {sentenceStream, queryBatch, summaryBatch}
     local memory = {input, reward, actions}
+
     return memory, rougeRecall, rougePrecision, rougeF1, qValues
 end
 
@@ -424,9 +429,9 @@ function train(inputs, query_data, model, nepochs, nnmod, metric, thresh, gamma,
     math.randomseed(420)
     torch.manualSeed(420)
     criterion = nn.MSECriterion()
-    SKIP = 1
-    SELECT = 2
-    export = true
+    local SKIP = 1
+    local SELECT = 2
+    local export = true
 
     if use_cuda then
         criterion = criterion:cuda()
@@ -443,7 +448,7 @@ function train(inputs, query_data, model, nepochs, nnmod, metric, thresh, gamma,
             memory, rougeRecall, rougePrecision, rougeF1, qValues = forwardpass(
                             query_data, query_id, 
                             model, epsilon, gamma, 
-                            metric, thresh
+                            metric, thresh, use_cuda
             )
             -- Build the memory
             if epoch == 0 and query_id == 1 then
