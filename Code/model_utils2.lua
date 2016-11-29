@@ -335,7 +335,6 @@ function forwardpass(query_data, query_id, model, epsilon, gamma, metric, thresh
     local refSummary = query_data[query_id][11]
     local refCounts = query_data[query_id][12]
     local buffer = query_data[query_id][13]
-    local oracleF1 = query_data[query_id][14]
     -- Have to set clear the inputs at the beginning of each scoring round
     actions:fill(0)
     summaryBuffer:fill(0)
@@ -426,6 +425,8 @@ function train2(inputs, query_data, model, nepochs, nnmod, metric, thresh, gamma
 
     local params, gradParams = model:getParameters()
     local perf = io.open(string.format("%s_perf.txt", nnmod), 'w')
+    out = string.format("epoch;epsilon;loss;randomF1;oracleF1;rougeF1;rougeRecall;rougePrecision;actual;pred;nselect;nskip;query\n")
+    perf:write(out)
     for epoch=0, nepochs do
         for query_id=1, #inputs do
             -- Score the queries
@@ -446,13 +447,10 @@ function train2(inputs, query_data, model, nepochs, nnmod, metric, thresh, gamma
             -- loss = backProp(memory, params, gradParams, optimParams, model, criterion, batch_size, n_backprops, use_cuda)
             loss = backPropOld(memory, params, gradParams, optimParams, model, criterion, batch_size, mem_size, use_cuda)
 
-            if epoch == 0 and query_id == 1 then
-                out = string.format("epoch;epsilon;loss;randomF1;oracleF1;rougeF1;rougeRecall;rougePrecision;actual;pred;nselect;nskip;query\n")
-                perf:write(out)
-            end
             nactions = torch.totable(memory[3]:sum(1))[1]
             out = string.format("%i; %.3f; %.6f; %.6f; %.6f; %.6f; %.6f; %.6f; {min=%.3f, max=%.3f}; {min=%.3f, max=%.3f}; %i; %i; %i\n", 
-                epoch, epsilon, loss, randomF1, oracleF1, rougeF1, rougeRecall, rougePrecision,
+                epoch, epsilon, loss, randomF1, query_data[query_id][14],  -- this is the oracle
+                rougeF1, rougeRecall, rougePrecision,
                 memory[2]:min(), memory[2]:max(),
                 qValues:min(), qValues:max(),
                 nactions[SELECT], nactions[SKIP],
@@ -462,9 +460,9 @@ function train2(inputs, query_data, model, nepochs, nnmod, metric, thresh, gamma
 
             local avpfile = io.open(string.format("plotdata/%s/%i/%i_epoch.txt", nnmod, query_id, epoch), 'w')
             avpfile:write("predSkip;predSelect;actual;Skip;Select;query\n")
-            for i=1, streamSize do
+            for i=1, memory[1][1]:size(1) do
                 avpfile:write(string.format("%.6f;%.6f;%6f;%i;%i;%i\n", 
-                        qValues[i][SKIP], qValues[i][SELECT], rouge[i], 
+                        qValues[i][SKIP], qValues[i][SELECT], memory[2][i], 
                         memory[3][i][SKIP], memory[3][i][SELECT], query_id))
             end
             avpfile:close()
