@@ -1,312 +1,499 @@
-function score_model(opt_action, sentence_xs, input_nuggets, thresh, skip_rate, metric)
-    --- Scores the model given the list of optimal actions, input sentences, and nuggets
-        --- Note: we calculate *change* in rouge from time t-1 to t for each sentence
-        --- The skip_rate controls this delta calculation
-            --- skip_rate == 0 turns skip_rate off ==> always updates the lag 
-                --- means we are computing s_t - s_{t-1}
-            --- skip_rate >= 1 turns skip_rate always ==> never updates the lag
-                --- means we are computing s_t - s_{t_0} and s_{t_0} == 0 ==> s_t
-    local s_t1 = 0.
-    local scores = {}
-    if metric=='f1' then
-        eval_func = rougeF1
-    elseif metric=='recall' then
-        eval_func = rougeRecall
-    elseif metric=='precision' then
-        eval_func = rougePrecision
-    end
-    for i=1, #opt_action do
-        local curr_summary= buildPredSummary(geti_n(opt_action, 1, i), 
-                                           geti_n(sentence_xs, 1, i),  nil)
+function scoreOracle(sentenceStream, maxSummarySize, refCounts)
+    local SKIP = 1
+    local SELECT = 2
 
-        scores[i] = threshold(eval_func({curr_summary[i]}, input_nuggets ) - s_t1, thresh)
-        --- Skip rate controls how often we skip updating the lag
-        --- e.g., if skip_rate = 0.25 <= [0, 1] ==> update lag 75% of the time
-        if skip_rate > 0 then 
-            if skip_rate <= torch.rand(1)[1] then
-                -- Keeping a lag
-                s_t1 = scores[i] + s_t1
-            end 
-        else 
-            -- Keeping a lag
-            s_t1 = scores[i] + s_t1
+    local buffer = Tensor(1, maxSummarySize):zero()
+    local streamSize = sentenceStream:size(1)
+    local actions = ByteTensor(streamSize, 2):fill(0)
+    local summaryBuffer = LongTensor(streamSize + 1, maxSummarySize):zero()
+    local oracleF1 = 0
+    for i=1, streamSize do
+        actions[i][SELECT] = 1
+        summary = buildSummary(
+            actions:narrow(1, 1, i), 
+            sentenceStream:narrow(1, 1, i),
+            summaryBuffer:narrow(1, i + 1, 1),
+            use_cuda
+            )
+        local generatedCounts = buildTokenCounts(summary) 
+        local recall, prec, f1 = rougeScores(generatedCounts, refCounts)
+        if f1 < oracleF1 then
+            actions[i][SELECT] = 0
+            actions[i][SKIP] = 1
+        end
+        if f1 > oracleF1 then
+            oracleF1 = f1
         end
     end
-    return scores
+    return oracleF1, actions
 end
 
-function build_bowmlp(nn_vocab_module, edim)
-    local model = nn.Sequential()
-    :add(nn_vocab_module)           -- returns a (sequence-length x batch-size x edim) tensor
-    :add(nn.Sum(1, edim, true))     -- splits into a sequence-length table with (batch-size x edim) entries
-    :add(nn.Linear(edim, edim))     -- map last state to a score for classification
-    :add(nn.ReLU())
-    -- :add(nn.Tanh())                 --     :add(nn.ReLU()) <- this one did worse
-   return model
-end
-
-function build_lstm(nn_vocab_module, edim)
-    local model = nn.Sequential()
-    :add(nn_vocab_module)            -- returns a (sequence-length x batch-size x edim) tensor
-    :add(nn.SplitTable(1, edim))     -- splits into a sequence-length table with (batch-size x edim) entries
-    :add(nn.Sequencer(nn.LSTM(edim, edim)))
-    :add(nn.SelectTable(-1))            -- selects last state of the LSTM
-    :add(nn.Linear(edim, edim))         -- map last state to a score for classification
-    :add(nn.ReLU())
-    -- :add(nn.Tanh())                     --     :add(nn.ReLU()) <- this one did worse
-   return model
-end
-
-function build_model(model, vocab_size, embed_dim, use_cuda)
-    local nn_vocab = nn.LookupTableMaskZero(vocab_size, embed_dim)
+function buildModel(model, vocabSize, embeddingSize, metric, use_cuda)
+    --- Small experiments seem to show that the Tanh activations performed better than the ReLU
     if model == 'bow' then
-        print("Running BOW model")
-        mod1 = build_bowmlp(nn_vocab, embed_dim)
-    end
-    if model == 'lstm' then         
-        print("Running LSTM model")
-        mod1 = build_lstm(nn_vocab, embed_dim)
-    end
-
-    mod2 = mod1:clone('weight','gradWeight')         --- Cloning the first model to share the weights
-    mod3 = mod1:clone('weight','gradWeight')         --- across the different inputs
-
-    local ParallelModel = nn.ParallelTable()
-    :add(mod1)                  --- Adding in the parts of the model
-    :add(mod2)                  --- for each of the 3 inputs
-    :add(mod3)                  --- i.e., sentence, summary, query
-
-    local FinalMLP = nn.Sequential()
-    :add(ParallelModel)         --- Adding in the components
-    :add(nn.JoinTable(2))       --- Joining the components back together
-    :add(nn.Linear(embed_dim * 3, 2) )      --- Adding linear layer to output 2 units
-
-    if use_cuda then
-        return FinalMLP:cuda()
+        print(string.format("Running bag-of-words model to learn %s", metric))
+        sentenceLookup = nn.Sequential()
+                    :add(nn.LookupTableMaskZero(vocabSize, embeddingSize))
+                    -- Note not averaging really blows up the model so keep this true
+                    :add(nn.Sum(2, 3, true))
+                    -- :add(nn.ReLU())
+                    :add(nn.Tanh())
     else
-        return FinalMLP
+        print(string.format("Running LSTM model to learn %s", metric))
+        sentenceLookup = nn.Sequential()
+                    :add(nn.LookupTableMaskZero(vocabSize, embeddingSize))
+                    :add(nn.SplitTable(2))
+                    :add(nn.Sequencer(nn.LSTM(embeddingSize, embeddingSize)))
+                    :add(nn.SelectTable(-1))            -- selects last state of the LSTM
+                    :add(nn.Linear(embeddingSize, embeddingSize))
+                    :add(nn.ReLU())
+                    -- :add(nn.Tanh())
+   end
+    local queryLookup = sentenceLookup:clone("weight", "gradWeight") 
+    local summaryLookup = sentenceLookup:clone("weight", "gradWeight")
+    local pmodule = nn.ParallelTable()
+                :add(sentenceLookup)
+                :add(queryLookup)
+                :add(summaryLookup)
+
+    local nnmodel = nn.Sequential()
+            :add(pmodule)
+            :add(nn.JoinTable(2))
+            :add(nn.Tanh())
+            -- :add(nn.ReLU())
+            :add(nn.Linear(embeddingSize * 3, 2))
+            -- :add(nn.Tanh())
+    if use_cuda then
+        return nnmodel:cuda()
     end
+    return nnmodel
 end
 
+function buildSummary(actions, sentences, buffer, use_cuda)
+    buffer:zero()
 
-function BuildTensors(actions, sentences, queries, sindex, K, J)
-    local tmp_actions = geti_n(actions, 1, sindex)
-    local tmp_sentences = geti_n(sentences, 1, sindex)
-    local summaries = buildCurrentSummary(tmp_actions, tmp_sentences, K * J)
-    -- Building the tensors         
-    local query = LongTensor(padZeros({queries}, 5) ):t()
-    local sentence = LongTensor(padZeros({sentences[sindex]}, K) ):t()
-    local summary =  LongTensor(padZeros({summaries[sindex]}, K) ):t()
-    return summary, sentence, query
-end
---- To do list:
-    --- 1. RMS prop in optim package
-            -- NOT DONE
+    if use_cuda then 
+        actions = actions:double()
+        sentences = sentences:double()
+        buffer = buffer:double()
+    end
+    local bufferSize = buffer:size(2)
+    local actionsSize = actions:size(1)
+    local sentencesSize = sentences:size(2)
 
-function iterateModelQueries(input_path, query_file, batch_size, nepochs, inputs, 
-                            nn_model, crit, thresh, embed_dim, epsilon, delta, 
-                            base_explore_rate, print_every,
-                            learning_rate, J_sentences, K_tokens, use_cuda,
-                            skiprate, emetric, export, gamma, rmsprop)
-    --- This function iterates over the epochs, queries, and sentences to learn the model
+    local mask1 = torch.eq(actions:select(2,2), 1):view(actionsSize, 1):expand(actionsSize, sentencesSize)
+    local allTokens = sentences:maskedSelect(mask1)
+    local mask2 = torch.gt(allTokens,0)
+    local allTokens = allTokens:maskedSelect(mask2)
+
+    if allTokens:dim() > 0 then
+        local copySize = math.min(bufferSize, allTokens:size(1))
+
+        buffer[1]:narrow(1, bufferSize - copySize + 1, copySize):copy(
+            allTokens:narrow(1, allTokens:size(1) - copySize + 1, copySize)
+            )
+    end
     if use_cuda then
-        Tensor = torch.CudaTensor
-        LongTensor = torch.CudaLongTensor
-        crit = crit:cuda()
-        print("...running on GPU")
-    else
-        torch.setnumthreads(8)
-        Tensor = torch.Tensor
-        LongTensor = torch.LongTensor
-        print("...running on CPU")
+        buffer = buffer:cuda()
+    end
+    return buffer
+end
+
+function buildTokenCounts(summary)
+    local counts = {}
+    for i=1,summary:size(2) do
+        if summary[1][i] > 0 then
+            local token = summary[1][i]
+            if counts[token] == nil then
+                counts[token] = 1
+            else
+                counts[token] = counts[token] + 1
+            end
+        end
+    end
+    return counts
+end
+
+function rougeScores(genSummary, refSummary)
+    local genTotal = 0
+    local refTotal = 0
+    local intersection = 0
+    for k, refCount in pairs(refSummary) do
+        local genCount = genSummary[k]
+        if genCount == nil then genCount = 0 end
+        intersection = intersection + math.min(refCount, genCount)
+        refTotal = refTotal + refCount
+    end
+    for k,genCount in pairs(genSummary) do
+        genTotal = genTotal + genCount
     end
 
-    print_string = string.format(
-        "training model with metric = %s, learning rate = %.3f, K = %i, J = %i, threshold = %.3f, embedding size = %i",
-                emetric, learning_rate, K_tokens, J_sentences, thresh, embed_dim, batch_size
-                )
+    if refTotal == 0 then 
+        refTotal = 1 
+    end
+    if genTotal == 0 then 
+        genTotal = 1 
+    end
+    local recall = intersection / refTotal
 
-    print(print_string)
+    local prec = intersection / genTotal
 
-    vocab_size = 0
-    maxseqlen = 0
-    maxseqlenq = getMaxseq(query_file)
+    if recall > 0 and prec > 0 then
+        f1 = 2 * recall * prec / (recall + prec)
+    else 
+        f1 = 0
+    end
+    return recall, prec, f1
+end
 
-    action_query_list = {}
-    yrouge_query_list = {}
-    pred_query_list = {}
+function buildMemory(newinput, memory_hist, memsize, use_cuda)
+    local sentMemory = torch.cat(newinput[1][1]:double(), memory_hist[1][1]:double(), 1)
+    local queryMemory = torch.cat(newinput[1][2]:double(), memory_hist[1][2]:double(), 1)
+    local sumryMemory = torch.cat(newinput[1][3]:double(), memory_hist[1][3]:double(), 1)
+    local rewardMemory = torch.cat(newinput[2]:double(), memory_hist[2]:double(), 1)
+    local actionMemory = torch.cat(newinput[3]:double(), memory_hist[3]:double(), 1)
+    --- specifying rows to index 
+    if sentMemory:size(1) >= memsize then
+        -- My hack for sampling based on non-zero rewards
+        local p = torch.abs(rewardMemory) / torch.abs(rewardMemory):sum()
+        -- local p = torch.ones(memsize) / memsize
+        local indxs = torch.multinomial(p, memsize, true)
+        local sentMemory = sentMemory:index(1, indxs)
+        local queryMemory = queryMemory:index(1, indxs)
+        local sumryMemory = sumryMemory:index(1, indxs)
+        local rewardMemory = rewardMemory:index(1, indxs)
+        local actionMemory = actionMemory:index(1, indxs)
+    end
+    --- Selecting random samples of the data
+    local inputMemory = {sentMemory, queryMemory, sumryMemory}
+    if use_cuda then
+        inputMemory = {sentMemory:cuda(), queryMemory:cuda(), sumryMemory:cuda()}
+    end
+    return {inputMemory, rewardMemory, actionMemory}
+end
 
-    --- Initializing query book-keeping 
+function stackmemory(newinput, memory_hist, memsize, use_cuda)
+    local sentMemory = torch.cat(newinput[1][1]:double(), memory_hist[1][1]:double(), 1)
+    local queryMemory = torch.cat(newinput[1][2]:double(), memory_hist[1][2]:double(), 1)
+    local sumryMemory = torch.cat(newinput[1][3]:double(), memory_hist[1][3]:double(), 1)
+    local rewardMemory = torch.cat(newinput[2]:double(), memory_hist[2]:double(), 1)
+    local actionMemory = torch.cat(newinput[3]:double(), memory_hist[3]:double(), 1)
+    --- specifying rows to index 
+    if sentMemory:size(1) < memsize then
+        nend = sentMemory:size(1)
+        nstart = 1
+    else 
+        nstart = math.max(memsize - sentMemory:size(1), 1)
+        nend = memsize + nstart
+    end
+    --- Selecting n last data points
+    sentMemory = sentMemory[{{nstart, nend}}]
+    queryMemory= queryMemory[{{nstart, nend}}]
+    sumryMemory= sumryMemory[{{nstart, nend}}]
+    rewardMemory = rewardMemory[{{nstart, nend}}]
+    actionMemory = actionMemory[{{nstart, nend}}]
+
+    local inputMemory = {sentMemory, queryMemory, sumryMemory}
+
+    if use_cuda then
+        inputMemory = {sentMemory:cuda(), queryMemory:cuda(), sumryMemory:cuda()}
+    end
+    return {inputMemory, rewardMemory, actionMemory}
+end
+
+function backProp(input_memory, params, gradParams, optimParams, model, criterion, batch_size, n_backprops, use_cuda)
+    local n = input_memory[1][1]:size(1)
+    local p = torch.ones(n) / n
+    local loss = 0
+    for i=1, n_backprops do
+        local indxs = torch.multinomial(p, batch_size, true)
+        local xinput = {  
+                    input_memory[1][1]:index(1, indxs), 
+                    input_memory[1][2]:index(1, indxs), 
+                    input_memory[1][3]:index(1, indxs)
+                }
+        local reward = input_memory[2]:index(1, indxs)
+        local actions_in = input_memory[3]:index(1, indxs)
+        local function feval(params)
+            gradParams:zero()
+            local maskLayer = nn.MaskedSelect()
+            if use_cuda then 
+                maskLayer = maskLayer:cuda()
+            end
+            local predQ = model:forward(xinput)
+            local predQOnActions = maskLayer:forward({predQ, actions_in})
+            local lossf = criterion:forward(predQOnActions, reward)
+            local gradOutput = criterion:backward(predQOnActions, reward)
+            local gradMaskLayer = maskLayer:backward({predQ, actions_in}, gradOutput)
+            model:backward(xinput, gradMaskLayer[1])
+            return lossf, gradParams
+        end
+        --- optim.rmsprop returns \theta, f(\theta):= loss function
+        _, lossv  = optim.rmsprop(feval, params, optimParams)   
+        loss = loss + lossv[1]
+    end
+    return loss/n_backprops
+end
+
+function backPropOld(input_memory, params, gradParams, optimParams, model, criterion, batch_size, memsize, use_cuda)
+    local inputs = {input_memory[1], input_memory[3]}
+    local rewards = input_memory[2]
+    local dataloader = dl.TensorLoader(inputs, rewards)
+    for k, xin, reward in dataloader:sampleiter(batch_size, memsize) do
+        xinput = xin[1]
+        actions_in = xin[2]
+        local function feval(params)
+            gradParams:zero()
+            local maskLayer = nn.MaskedSelect()
+            if use_cuda then 
+             maskLayer = maskLayer:cuda()
+            end
+            local predQ = model:forward(xinput)
+            local predQOnActions = maskLayer:forward({predQ, actions_in}) 
+            local lossf = criterion:forward(predQOnActions, reward)
+            local gradOutput = criterion:backward(predQOnActions, reward)
+            local gradMaskLayer = maskLayer:backward({predQ, actions_in}, gradOutput)
+            model:backward(xinput, gradMaskLayer[1])
+            return lossf, gradParams
+        end
+     --- optim.rmsprop returns \theta, f(\theta):= loss function
+     _, lossv  = optim.rmsprop(feval, params, optimParams)
+    end
+    return lossv[1]
+end
+function intialize_variables(query_file, inputs, n_samples, input_path, K_tokens, maxSummarySize)
+    local vocabSize = 0
+    local maxseqlen = 0
+    local maxseqlenq = getMaxseq(query_file)
+    local vocabSizeq = getVocabSize(query_file)
+    local query_data = {}
+
     for query_id = 1, #inputs do
         input_fn = inputs[query_id]['inputs']
         nugget_fn = inputs[query_id]['nuggets']
 
         input_file = csvigo.load({path = input_path .. input_fn, mode = "large", verbose = false})
         nugget_file = csvigo.load({path = input_path .. nugget_fn, mode = "large", verbose = false})
-        input_file = geti_n(input_file, 2, #input_file) 
+        -- This is just for experimentation
+        input_file = geti_n(input_file, 2,  n_samples) 
+        -- input_file = geti_n(input_file, 2, #input_file) 
         nugget_file = geti_n(nugget_file, 2, #nugget_file) 
 
-        vocab_sized = getVocabSize(input_file)
-        vocab_sizeq = getVocabSize(query_file)
-        vocab_size = math.max(vocab_size, vocab_sized, vocab_sizeq)
+        vocabSize = math.max(vocabSize, vocabSizeq, getVocabSize(input_file))
+        maxseqlen = math.max(maxseqlen, maxseqlenq, getMaxseq(input_file))
+        xtdm  = buildTermDocumentTable(input_file, K_tokens)
+        nuggets = buildTermDocumentTable(nugget_file, nil)
+        ntdm = {}
+        for i=1, #nuggets do
+            ntdm = tableConcat(table.unpack(nuggets), ntdm)
+        end
+        -- Initializing the bookkeeping variables and storing them
+        local query = LongTensor{inputs[query_id]['query'] }
+        local sentenceStream = LongTensor(padZeros(xtdm, K_tokens))
+        local streamSize = sentenceStream:size(1)
+        local refSummary = Tensor{ntdm}
+        local refCounts = buildTokenCounts(refSummary)
+        local buffer = Tensor(1, maxSummarySize):zero()
+        local actions = ByteTensor(streamSize, 2):fill(0)
+        local actionsOpt = ByteTensor(streamSize, 2):fill(0)
+        local exploreDraws = Tensor(streamSize)
+        local summaryBuffer = LongTensor(streamSize + 1, maxSummarySize):zero()
+        local qValues = Tensor(streamSize, 2):zero()
+        local rouge = Tensor(streamSize + 1):zero()
+        local rougeOpt = Tensor(streamSize + 1):zero()
+        local summary = summaryBuffer:zero():narrow(1,1,1)
+        local oracleF1, oracleActions = scoreOracle(sentenceStream, maxSummarySize, refCounts)
 
-        maxseqlend = getMaxseq(input_file)
-        maxseqlen = math.max(maxseqlen, maxseqlenq, maxseqlend)
-        action_list = torch.totable(torch.round(torch.rand(#input_file)))
+        query_data[query_id] = {
+            sentenceStream,
+            streamSize,
+            query,
+            actions,
+            exploreDraws,
+            summaryBuffer,
+            qValues,
+            rouge,
+            actionsOpt,
+            rougeOpt,
+            refSummary,
+            refCounts,
+            buffer,
+            oracleF1
+        }
+    end
+    return vocabSize, query_data
+end
 
-        --- initialize the query specific lists
-        action_query_list[query_id] = action_list
-        yrouge_query_list[query_id] = torch.totable(torch.rand(#input_file))     --- Actual
-        pred_query_list[query_id] = torch.totable(torch.zeros(#input_file))     --- Predicted
+function forwardpass(query_data, query_id, model, epsilon, gamma, metric, thresh, use_cuda)
+    local SKIP = 1
+    local SELECT = 2
+    math.randomseed(420)
+    torch.manualSeed(420)
+
+    -- Extact variables
+    local sentenceStream = query_data[query_id][1]
+    local streamSize = query_data[query_id][2]
+    local query = query_data[query_id][3]
+    local actions = query_data[query_id][4]
+    local exploreDraws = query_data[query_id][5]
+    local summaryBuffer = query_data[query_id][6]
+    local qValues = query_data[query_id][7]
+    local rouge = query_data[query_id][8]
+    local actionsOpt = query_data[query_id][9]
+    local rougeOpt = query_data[query_id][10]
+    local refSummary = query_data[query_id][11]
+    local refCounts = query_data[query_id][12]
+    local buffer = query_data[query_id][13]
+    local summary = summaryBuffer:zero():narrow(1,1,1)
+    
+    -- Have to set clear the inputs at the beginning of each scoring round
+    actions:fill(0)
+    actionsOpt:fill(0)
+    rouge:fill(0)
+    rougeOpt:fill(0)
+    qValues:fill(0)
+    summaryBuffer:fill(0)
+    buffer:fill(0)
+    exploreDraws:uniform(0, 1)
+
+    for i=1, streamSize do     -- Iterating through individual sentences
+        local sentence = sentenceStream:narrow(1, i, 1)
+        qValues[i]:copy(model:forward({sentence, query, summary}))
+
+        -- epsilon greedy strategy
+        if exploreDraws[i]  <=  epsilon then        
+            actions[i][torch.random(SKIP, SELECT)] = 1
+        else 
+            if qValues[i][SKIP] > qValues[i][SELECT] then
+                actions[i][SKIP] = 1
+            else
+                actions[i][SELECT] = 1
+            end
+        end
+
+        -- Storing the optimal predictions
+        if qValues[i][SKIP] > qValues[i][SELECT] then
+            actionsOpt[i][SKIP] = 1
+        else
+            actionsOpt[i][SELECT] = 1
+        end
+        summary = buildSummary(
+            actions:narrow(1, 1, i), 
+            sentenceStream:narrow(1, 1, i),
+            summaryBuffer:narrow(1, i + 1, 1),
+            use_cuda
+        )
+
+        summaryOpt = buildSummary(
+            actionsOpt:narrow(1, 1, i), 
+            sentenceStream:narrow(1, 1, i),
+            summaryBuffer:narrow(1, i + 1, 1),
+            use_cuda
+        )
+
+        local recall, prec, f1 = rougeScores(buildTokenCounts(summary), refCounts)
+        local rOpt, pOpt, f1Opt = rougeScores(buildTokenCounts(summaryOpt), refCounts)
+
+        if metric == "f1" then
+            rouge[i + 1] = threshold(f1, thresh)
+            rougeOpt[i]  = threshold(f1Opt, thresh)
+        elseif metric == "recall" then
+            rouge[i + 1] = threshold(recall, thresh)
+            rougeOpt[i]  = threshold(rOpt, thresh)
+        elseif metric == "precision" then
+            rouge[i + 1] = threshold(prec, thresh)
+            rougeOpt[i]  = threshold(pOpt, thresh)
+        end
+
+        if i==streamSize then
+            rougeRecall = recall
+            rougePrecision = prec
+            rougeF1 = f1
+        end
+    end
+    local max, argmax = torch.max(qValues, 2)
+    local reward0 = rouge:narrow(1,2, streamSize) - rouge:narrow(1,1, streamSize)
+    local reward_tm1 =  rougeOpt:narrow(1,2, streamSize) - rougeOpt:narrow(1,1, streamSize)
+    local reward = reward0 + gamma * reward_tm1
+    
+    local querySize = query:size(2)
+    local summaryBatch = summaryBuffer:narrow(1, 1, streamSize)
+    local queryBatch = query:view(1, querySize):expand(streamSize, querySize) 
+    local input = {sentenceStream, queryBatch, summaryBatch}
+    local memory = {input, reward, actions}
+
+    return memory, rougeRecall, rougePrecision, rougeF1, qValues
+end
+
+function train(inputs, query_data, model, nepochs, nnmod, metric, thresh, gamma, epsilon, delta, base_explore_rate, end_baserate, mem_size, batch_size, optimParams, n_backprops, use_cuda)
+    math.randomseed(420)
+    torch.manualSeed(420)
+    criterion = nn.MSECriterion()
+    local SKIP = 1
+    local SELECT = 2
+    local export = true
+
+    if use_cuda then
+        criterion = criterion:cuda()
+        model = model:cuda()
     end
 
-    --- Specify model
-    model  = build_model(nn_model, vocab_size, embed_dim, use_cuda)
-
-    --- This is the main training function
-    for epoch=0, nepochs, 1 do
-        --- Looping over each bach of sentences for a given query
-        for query_id = 1, #inputs do
-            --- Grabbing all of the input data
-            qs = inputs[query_id]['query']
-            input_file = csvigo.load({path = input_path .. inputs[query_id]['inputs'], mode = "large", verbose = false})
-            nugget_file = csvigo.load({path = input_path .. inputs[query_id]['nuggets'], mode = "large", verbose = false})
-            
-            --- Dropping the headers (which is the 1st row)
-            input_file = geti_n(input_file, 2, #input_file) 
-            nugget_file = geti_n(nugget_file, 2, #nugget_file) 
-            
-            --- Building table of indices for 
-                -- first K_tokens of the input sentences
-                -- and all tokens of the nuggets
-            nuggets = buildTermDocumentTable(nugget_file, nil)
-            xtdm  = buildTermDocumentTable(input_file, K_tokens)
-
-            --- Extracting the query specific actions, labels, and predictions
-            action_list = action_query_list[query_id]
-            yrouge = yrouge_query_list[query_id] 
-            preds = pred_query_list[query_id]
-            
-            --- Forward pass
-            for minibatch = 1, #xtdm do
-                --- Notice that the actionlist is optimized at after each iteration
-                --- Building the input data
-                summary, sentence, query = BuildTensors(action_list, xtdm, qs, minibatch, 
-                                                        K_tokens, J_sentences)
-
-                --- Retrieve intermediate optimal action in model.get(3).output
-                local pred_rouge = model:forward({sentence, summary, query})   
-                local pred_actions = torch.totable(model:get(3).output)     -- outputs the actions
-                
-                --- Epsilon greedy strategy
-                if torch.rand(1)[1] < epsilon then 
-                    opt_action = torch.round(torch.rand(1))[1]
-                else 
-                    --- Notice that pred_actions gives us our optimal action by returning
-                    ---  E[rouge | Skip]  > E[rouge | Select ] then skip {0} else select {1}
-                    opt_action = (pred_actions[1][1] > pred_actions[1][2]) and 0 or 1
-                end
-                -- Updating book-keeping tables at sentence level
-                preds[minibatch] = pred_rouge[1]
-                action_list[minibatch] = opt_action
-            end --- ends the sentence level loop
-            --- Note setting the skip_rate = 0 means no random skipping of delta calculation
-            yrouge = score_model(action_list, 
-                            xtdm,
-                            nuggets,
-                            thresh, 
-                            skiprate, 
-                            emetric)
-            if export then 
-                local pfile = io.open(string.format("plotdata/%s/%i_preds.txt", nn_model, epoch), 'w')
-                local yfile = io.open(string.format("plotdata/%s/%i_actual.txt", nn_model, epoch), 'w')
-                for i=1,#yrouge do
-                    pfile:write(string.format("%.6f\n", preds[i] ) )
-                    yfile:write(string.format("%.6f\n", yrouge[i] ) )
-                end
-                pfile:close()
-                yfile:close()
-            end 
-            --- Updating book-keeping tables at query level
-            pred_query_list[query_id] = preds
-            yrouge_query_list[query_id] = yrouge
-            action_query_list[query_id] = action_list
-
-            -- --- creating randomly sampled query and input indices
-            local xindices = {}
-            for i=1, batch_size do
-                xindices[i] = math.random(1, #xtdm)
+    local params, gradParams = model:getParameters()
+    local perf = io.open(string.format("%s_perf.txt", nnmod), 'w')
+    out = string.format("epoch;epsilon;loss;randomF1;oracleF1;rougeF1;rougeRecall;rougePrecision;actual;pred;nselect;nskip;query\n")
+    perf:write(out)
+    for epoch=0, nepochs do
+        for query_id=1, #inputs do
+            -- Score the queries
+            memory, rougeRecall, rougePrecision, rougeF1, qValues = forwardpass(
+                            query_data, query_id, 
+                            model, epsilon, gamma, 
+                            metric, thresh, use_cuda
+            )
+            -- Build the memory
+            if epoch == 0 and query_id == 1 then
+                fullmemory = memory 
+                randomF1 = rougeF1
+            else
+                fullmemory = buildMemory(memory, fullmemory, mem_size, batch_size, use_cuda)
+                -- fullmemory = stackMemory(memory, fullmemory, mem_size, batch_size, use_cuda)
             end
-            --- Building summaries on full set of input data then sampling after
-            --- Need to do summaries first b/c if you build after sampling 
-            --- you'll get incorrect summaries, also need to padZeros for empty summaries
-            local summaries = padZeros(buildCurrentSummary(action_list, xtdm, 
-                                        K_tokens * J_sentences), 
-                                        K_tokens * J_sentences)
-            loss = 0.
-            --- Backward pass
-            for i= 1, batch_size do
-                sentence = LongTensor(padZeros( {xtdm[xindices[i]]}, K_tokens) ):t()
-                summary = LongTensor({summaries[xindices[i]]}):t()
-                query = LongTensor(padZeros({qs}, 5)):t()
-                --- Line 23 in algorithm
-                if (xindices[i]) < #xtdm then
-                    labels = Tensor({yrouge[xindices[i]] + gamma * yrouge[xindices[i] + 1] })
-                else 
-                    labels = Tensor({yrouge[xindices[i]]})
-                end
+            --- Running backprop
+            -- loss = backProp(memory, params, gradParams, optimParams, model, criterion, batch_size, n_backprops, use_cuda)
+            loss = backPropOld(memory, params, gradParams, optimParams, model, criterion, batch_size, mem_size, use_cuda)
 
-                if rmsprop==false then
-                    local pred_rouge = model:forward({sentence, summary, query})
-                    --- Backprop model 
-                    err = crit:forward(pred_rouge, labels)
-                    loss = loss + err
-                    model:zeroGradParameters()
-                    local grads = crit:backward(pred_rouge, labels)
-                    model:backward({sentence, summary, query}, grads)
-                    model:updateParameters(learning_rate)
-                end
-                if rmsprop==true then
-                    params, gradParams = model:getParameters()
-                    local optimState = {learning_rate}
+            nactions = torch.totable(memory[3]:sum(1))[1]
+            perf_string = string.format("%i; %.3f; %.6f; %.6f; %.6f; %.6f; %.6f; %.6f; {min=%.3f, max=%.3f}; {min=%.3f, max=%.3f}; %i; %i; %i\n", 
+                epoch, epsilon, loss, randomF1, query_data[query_id][14],  -- this is the oracle
+                rougeF1, rougeRecall, rougePrecision,
+                memory[2]:min(), memory[2]:max(),
+                qValues:min(), qValues:max(),
+                nactions[SELECT], nactions[SKIP],
+                query_id
+            )
+            perf:write(perf_string)
 
-                    function feval(params)
-                      gradParams:zero()
-                      local pred_rouge = model:forward({sentence, summary, query})
-                      local loss = crit:forward(pred_rouge, labels)
-                      local grads = crit:backward(pred_rouge, labels)
-                      model:backward({sentence, summary, query}, grads)
-                      return loss, gradParams
-                    end                        
-                    optim.sgd(feval, params, optimState)
-                end
+            local avpfile = io.open(string.format("plotdata/%s/%i/%i_epoch.txt", nnmod, query_id, epoch), 'w')
+            avpfile:write("predSkip;predSelect;actual;Skip;Select;query\n")
+            for i=1, memory[1][1]:size(1) do
+                avp_string = string.format("%.6f;%.6f;%6f;%i;%i;%i\n", 
+                        qValues[i][SKIP], qValues[i][SELECT], memory[2][i], 
+                        memory[3][i][SKIP], memory[3][i][SELECT], query_id)
+                avpfile:write(avp_string)
             end
+            avpfile:close()
+        end
 
-            --- Rerunning the scoring on the full data and rescoring cumulatively
-            --- Execute policy and evaluation based on our E[rouge] after all of the minibatches
-            predsummary = buildFinalSummary(action_list, xtdm, nil)
-
-            rscore = rougeRecall({predsummary}, nuggets)
-            pscore = rougePrecision({predsummary}, nuggets)
-            fscore = rougeF1({predsummary}, nuggets)
-
-            if (epoch % print_every)==0 then
-                perf_string = string.format(
-                    "Epoch %i, loss  = %.3f, epsilon = %.3f, sum(y)/len(y) = %i/%i, {Recall = %.6f, Precision = %.6f, F1 = %.6f}, query = %s", 
-                    epoch, loss, epsilon, sumTable(action_list), #action_list, rscore, pscore, fscore, inputs[query_id]['query_name']
-                    )
-                print(perf_string)
-            end
-        end -- ends the query level loop
-        --- Reducing epsilon-greedy search linearly and setting it to the base rate
         if (epsilon - delta) <= base_explore_rate then
             epsilon = base_explore_rate
+            if epoch > end_baserate then 
+                base_explore_rate = 0.
+            end
         else 
             epsilon = epsilon - delta
         end
-    end -- ends the epoch level loop
-    if export then
-        print(string.format("Exporting %s density of predictions to ./density.gif", nn_model))
-        os.execute(string.format("python make_density_gif.py %i %s", nepochs, nn_model))
+
     end
+    print(string.format("Model complete {Selected = %i; Skipped  = %i}; Final Rouge Recall, Precision, F1 = {%.6f;%.6f;%.6f}", 
+                nactions[SELECT], nactions[SKIP], rougeRecall, rougePrecision, rougeF1))
 end
