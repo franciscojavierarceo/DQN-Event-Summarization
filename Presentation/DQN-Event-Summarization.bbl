@@ -26,4 +26,11 @@ Chris Kedzie, Kathleen McKeown, and Fernando Diaz.
   International Conference on Natural Language Processing}, pages 1608--1617,
   2015.
 
+\bibitem{narasimhan2015language}
+Karthik Narasimhan, Tejas~D Kulkarni, and Regina Barzilay.
+\newblock Language understanding for textbased games using deep reinforcement
+  learning.
+\newblock In {\em Proceedings of the Conference on Empirical Methods in Natural
+  Language Processing}. Citeseer, 2015.
+
 \end{thebibliography}

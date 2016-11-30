@@ -14,11 +14,11 @@
 \usepackage{tikz}
 \usetikzlibrary{shapes,arrows,shadows}
 
-
 \begin{document}
 
 \title{Deep Q-Networks for Event Summarization}  
-%\author{Francisco Javier Arceo, Chris Kedzie}
+\author{Francisco Javier Arceo, Chris Kedzie}
+% \contact{\href{mailto: fja2114@columbia.edu}{\small fja2114@columbia.edu}, \href{mailto: kedzie@cs.columbia.edu}{\small kedzie@cs.columbia.edu}}
 \institute{Columbia University in the City of New York}
 \date{December 13, 2016}
 
@@ -69,6 +69,13 @@ This leads us to explore Deep Q-Networks (DQN) for 3 reasons:
 
 
 \section{Deep Q-Networks}
+
+	\subsection{States}  
+	\begin{frame}
+			\frametitle{States}
+	A state $s(x_{t},\tilde{y}_{t}, d)$ at time $t$ is a function of the stream $X_d$, $\forall d \in D$, which represents the candidate sentence, $x_t$ to include in the summary, the state of the current summary $\tilde{y}_t$, and the query $d$. For brevity we use $s_t$ where the dependence on $x_{t},\tilde{y}_{t},$ and $d$ is assumed.
+	\end{frame}
+
 	\subsection{Actions}
 	\begin{frame}
 			\frametitle{Actions}
@@ -78,7 +85,7 @@ This leads us to explore Deep Q-Networks (DQN) for 3 reasons:
 	\subsection{Reward}
 	\begin{frame}
 			\frametitle{Reward}
-				The reward for a given action is measured by the change in ROUGE-N F1 score of the predicted summary $\tilde{y}_{t}$ measured against a gold standard summary $Y$. More formally, the reward $r$ at time $t$ is 
+				The reward for a given action is measured by the change in ROUGE-NF1 score of the predicted summary $\tilde{y}_{t}$ measured against a gold standard summary $Y$. More formally, the reward $r$ at time $t$ is 
 				\begin{equation}
 					r_t = \textrm{ROUGE-NF1}(\tilde{y}_{t}, Y) -  \textrm{ROUGE-NF1}(\tilde{y}_{t-1}, Y).
 				\end{equation}
@@ -217,11 +224,10 @@ This leads us to explore Deep Q-Networks (DQN) for 3 reasons:
 \section{Experiments}
 	\subsection{Benchmarking}
 		\begin{frame}
+		We benchmark our model against (1) an oracle that greedily chooses to include sentences if the increase in ROUGUE-NF1 is positive,  (2) random selection of sentences,  and (3) a bag-of-words multilayer perceptron.
 		\end{frame}
-	\subsection{DQN-BOW}
-		\begin{frame}
-		\end{frame}
-	\subsection{DQN-LSTM}
+
+	\subsection{Results}
 		\begin{frame}
 		\end{frame}
 

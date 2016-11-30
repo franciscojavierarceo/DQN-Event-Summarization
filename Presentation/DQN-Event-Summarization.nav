@@ -16,36 +16,36 @@
 \headcommand {\sectionentry {2}{Deep Q-Networks}{6}{Deep Q-Networks}{0}}
 \headcommand {\beamer@sectionpages {3}{5}}
 \headcommand {\beamer@subsectionpages {3}{5}}
-\headcommand {\beamer@subsectionentry {0}{2}{1}{6}{Actions}}\headcommand {\beamer@subsectionpages {6}{5}}
-\headcommand {\slideentry {2}{1}{1}{6/6}{Actions}{0}}
+\headcommand {\beamer@subsectionentry {0}{2}{1}{6}{States}}\headcommand {\beamer@subsectionpages {6}{5}}
+\headcommand {\slideentry {2}{1}{1}{6/6}{States}{0}}
 \headcommand {\beamer@framepages {6}{6}}
-\headcommand {\beamer@subsectionentry {0}{2}{2}{7}{Reward}}\headcommand {\beamer@subsectionpages {6}{6}}
-\headcommand {\slideentry {2}{2}{1}{7/7}{Reward}{0}}
+\headcommand {\beamer@subsectionentry {0}{2}{2}{7}{Actions}}\headcommand {\beamer@subsectionpages {6}{6}}
+\headcommand {\slideentry {2}{2}{1}{7/7}{Actions}{0}}
 \headcommand {\beamer@framepages {7}{7}}
-\headcommand {\beamer@subsectionentry {0}{2}{3}{8}{Policy}}\headcommand {\beamer@subsectionpages {7}{7}}
-\headcommand {\slideentry {2}{3}{1}{8/8}{Policy}{0}}
+\headcommand {\beamer@subsectionentry {0}{2}{3}{8}{Reward}}\headcommand {\beamer@subsectionpages {7}{7}}
+\headcommand {\slideentry {2}{3}{1}{8/8}{Reward}{0}}
 \headcommand {\beamer@framepages {8}{8}}
-\headcommand {\slideentry {2}{3}{2}{9/9}{Policy}{0}}
+\headcommand {\beamer@subsectionentry {0}{2}{4}{9}{Policy}}\headcommand {\beamer@subsectionpages {8}{8}}
+\headcommand {\slideentry {2}{4}{1}{9/9}{Policy}{0}}
 \headcommand {\beamer@framepages {9}{9}}
-\headcommand {\sectionentry {3}{Core Algorithm}{10}{Core Algorithm}{0}}
-\headcommand {\beamer@sectionpages {6}{9}}
-\headcommand {\beamer@subsectionpages {8}{9}}
-\headcommand {\slideentry {3}{0}{1}{10/10}{}{0}}
+\headcommand {\slideentry {2}{4}{2}{10/10}{Policy}{0}}
 \headcommand {\beamer@framepages {10}{10}}
-\headcommand {\sectionentry {4}{Experiments}{11}{Experiments}{0}}
-\headcommand {\beamer@sectionpages {10}{10}}
-\headcommand {\beamer@subsectionpages {10}{10}}
-\headcommand {\beamer@subsectionentry {0}{4}{1}{11}{Benchmarking}}\headcommand {\beamer@subsectionpages {11}{10}}
-\headcommand {\slideentry {4}{1}{1}{11/11}{Benchmarking}{0}}
+\headcommand {\sectionentry {3}{Core Algorithm}{11}{Core Algorithm}{0}}
+\headcommand {\beamer@sectionpages {6}{10}}
+\headcommand {\beamer@subsectionpages {9}{10}}
+\headcommand {\slideentry {3}{0}{1}{11/11}{}{0}}
 \headcommand {\beamer@framepages {11}{11}}
-\headcommand {\beamer@subsectionentry {0}{4}{2}{12}{DQN-BOW}}\headcommand {\beamer@subsectionpages {11}{11}}
-\headcommand {\slideentry {4}{2}{1}{12/12}{DQN-BOW}{0}}
+\headcommand {\sectionentry {4}{Experiments}{12}{Experiments}{0}}
+\headcommand {\beamer@sectionpages {11}{11}}
+\headcommand {\beamer@subsectionpages {11}{11}}
+\headcommand {\beamer@subsectionentry {0}{4}{1}{12}{Benchmarking}}\headcommand {\beamer@subsectionpages {12}{11}}
+\headcommand {\slideentry {4}{1}{1}{12/12}{Benchmarking}{0}}
 \headcommand {\beamer@framepages {12}{12}}
-\headcommand {\beamer@subsectionentry {0}{4}{3}{13}{DQN-LSTM}}\headcommand {\beamer@subsectionpages {12}{12}}
-\headcommand {\slideentry {4}{3}{1}{13/13}{DQN-LSTM}{0}}
+\headcommand {\beamer@subsectionentry {0}{4}{2}{13}{Results}}\headcommand {\beamer@subsectionpages {12}{12}}
+\headcommand {\slideentry {4}{2}{1}{13/13}{Results}{0}}
 \headcommand {\beamer@framepages {13}{13}}
 \headcommand {\sectionentry {5}{Resources}{14}{Resources}{0}}
-\headcommand {\beamer@sectionpages {11}{13}}
+\headcommand {\beamer@sectionpages {12}{13}}
 \headcommand {\beamer@subsectionpages {13}{13}}
 \headcommand {\slideentry {5}{0}{1}{14/14}{}{0}}
 \headcommand {\beamer@framepages {14}{14}}
