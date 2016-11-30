@@ -1,14 +1,13 @@
 \beamer@endinputifotherversion {3.36pt}
 \beamer@sectionintoc {1}{Event Summarization}{3}{0}{1}
 \beamer@subsectionintoc {1}{1}{Motivation}{3}{0}{1}
-\beamer@sectionintoc {2}{Deep Q-Networks}{4}{0}{2}
-\beamer@subsectionintoc {2}{1}{Policy}{4}{0}{2}
-\beamer@subsectionintoc {2}{2}{Reward}{5}{0}{2}
-\beamer@subsectionintoc {2}{3}{Q-Learner}{5}{0}{2}
-\beamer@subsectionintoc {2}{4}{Actions}{5}{0}{2}
-\beamer@sectionintoc {3}{Core Algorithm}{6}{0}{3}
-\beamer@sectionintoc {4}{Experiments}{6}{0}{4}
-\beamer@subsectionintoc {4}{1}{Benchmarking}{6}{0}{4}
-\beamer@subsectionintoc {4}{2}{DQN-BOW}{6}{0}{4}
-\beamer@subsectionintoc {4}{3}{DQN-LSTM}{6}{0}{4}
-\beamer@sectionintoc {5}{Resources}{7}{0}{5}
+\beamer@sectionintoc {2}{Deep Q-Networks}{6}{0}{2}
+\beamer@subsectionintoc {2}{1}{Actions}{6}{0}{2}
+\beamer@subsectionintoc {2}{2}{Reward}{7}{0}{2}
+\beamer@subsectionintoc {2}{3}{Policy}{8}{0}{2}
+\beamer@sectionintoc {3}{Core Algorithm}{10}{0}{3}
+\beamer@sectionintoc {4}{Experiments}{10}{0}{4}
+\beamer@subsectionintoc {4}{1}{Benchmarking}{10}{0}{4}
+\beamer@subsectionintoc {4}{2}{DQN-BOW}{10}{0}{4}
+\beamer@subsectionintoc {4}{3}{DQN-LSTM}{10}{0}{4}
+\beamer@sectionintoc {5}{Resources}{11}{0}{5}

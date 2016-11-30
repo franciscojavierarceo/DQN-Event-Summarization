@@ -1,0 +1,29 @@
+\begin{thebibliography}{1}
+
+\bibitem{diazquery}
+Fernando Diaz, Bhaskar Mitra, and Nick Craswell.
+\newblock Query expansion with locally-trained word embeddings.
+\newblock In {\em Proceedings of the 54th Annual Meeting of the Association for
+  Computational}. ACL--Association for Computational Linguistics.
+
+\bibitem{garbacea2015university}
+Cristina G{\^a}rbacea and Evangelos Kanoulas.
+\newblock The university of amsterdam (ilps. uva) at trec 2015 temporal
+  summarization track.
+
+\bibitem{kedzieextractive}
+Chris Kedzie and Kathleen McKeown.
+\newblock Extractive and abstractive event summarization over streaming web
+  text.
+\newblock In {\em Proceedings of the Twenty-Fifth International Joint
+  Conference on Artificial Intelligence, {IJCAI} 2016, New York, NY, USA, 9-15
+  July 2016}, pages 4002--4003, 2016.
+
+\bibitem{kedzie2015predicting}
+Chris Kedzie, Kathleen McKeown, and Fernando Diaz.
+\newblock Predicting salient updates for disaster summarization.
+\newblock In {\em Proceedings of the 53rd annual meeting of the ACL and the 7th
+  International Conference on Natural Language Processing}, pages 1608--1617,
+  2015.
+
+\end{thebibliography}

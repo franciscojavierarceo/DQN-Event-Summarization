@@ -18,10 +18,11 @@
 \begin{document}
 
 \title{Deep Q-Networks for Event Summarization}  
-\author{Francisco Javier Arceo, Chris Kedzie}
+%\author{Francisco Javier Arceo, Chris Kedzie}
 \institute{Columbia University in the City of New York}
 \date{December 13, 2016}
 
+\bibliographystyle{plain}
 
 \begin{frame}
 \titlepage
@@ -37,32 +38,61 @@
 	\subsection{Motivation}
 \begin{frame}
 	\frametitle{Event Summarization} 
-	\begin{equation}
-		\boldsymbol{\hat{\beta}}_{ridge} = argmin_{\beta} (\boldsymbol{y - x}^{T} \boldsymbol{\beta})^2 + \boldsymbol{\lambda \beta}^2
-	\end{equation}
+	\begin{itemize}
+	\item<1-> 	In the extractive streaming summarization task, we are given as input a query (i.e., a short text description of a topic or an event), a document stream, and a time ordered set of sentences relevant to the query. 
+	
+	\item<1-> Starting with an initially empty summary,  an extractive, streaming summarization algorithm is intended to examine each sentence in order and, when new and important (relative to the query) information is identified, add that sentence to the summary. 
+	\end{itemize}
+\end{frame}
+
+
+\begin{frame}
+	\frametitle{Event Summarization} 
 
 	\begin{itemize}
-		\item<1-> First published by the Russian Mathematician Andrey Nikolayevich Tikhonov (1906-1993) in 1943 % Use Next Page to go to Point 2
+		\item<1-> Recent research in text retrieval  has focused on extractive algorithms to identify important sentences from a large set of documents (e.g., \cite{diazquery}, \cite{kedzie2015predicting}, \cite{garbacea2015university}, and \cite{kedzieextractive}) for summarizing articles from different events in the news.
+		\item<1-> \cite{kedzie2015predicting}  has shown that it is possible to select relevant sentences from a massive number of documents on the web to create summaries with meaningful content by adapting classifiers to maximize search policies.
+		\item<1-> These systems have been shown to fall short of algorithms that employ simple heuristics \cite{garbacea2015university}, which may be due to inadequate capturing of the rich structure and often idiosyncratic information by traditional n-gram language models.
 	\end{itemize}
 
 \end{frame}
 
-\section{Deep Q-Networks}
-	\subsection{Policy}
+\begin{frame}
+	\frametitle{Event Summarization} 
+This leads us to explore Deep Q-Networks (DQN) for 3 reasons: 
+	\begin{itemize}
+	\item <1-> Both the representation and interaction between the stream, summary, and query can be learned
+	\item <1 -> The embeddings can learn a more robust semantic representations than classic n-gram models by using a RNN-LSTM
+	\item <1 -> By randomly exploring the state space, the $\epsilon$-greedy strategy learns a policy that yields more consistency between train and test distributions
+	\end{itemize}
+\end{frame}
 
+
+\section{Deep Q-Networks}
+	\subsection{Actions}
 	\begin{frame}
-			\frametitle{Policy}
-			\begin{itemize}
-				\item<1-> A policy takes as input a state and a set of possible actions and returns the optimal state
-				\item<1-> The policy can be deterministic or probabilistic
-			\end{itemize}
+			\frametitle{Actions}
+			We define an action, $a_t$, at each time step from our set of actions as $\mathcal{A} := \{select, skip\}$ where $select$ corresponds to adding the current sentence $x_t$ to the predicted summary $\tilde{y}_t$ and incrementing the current system time, or $skip$ where only $t$ is incremented without changing the current summary.
 	\end{frame}
 
 	\subsection{Reward}
+	\begin{frame}
+			\frametitle{Reward}
+				The reward for a given action is measured by the change in ROUGE-N F1 score of the predicted summary $\tilde{y}_{t}$ measured against a gold standard summary $Y$. More formally, the reward $r$ at time $t$ is 
+				\begin{equation}
+					r_t = \textrm{ROUGE-NF1}(\tilde{y}_{t}, Y) -  \textrm{ROUGE-NF1}(\tilde{y}_{t-1}, Y).
+				\end{equation}
+	\end{frame}
 
-	\subsection{Q-Learner}
-
-	\subsection{Actions}
+	\subsection{Policy}
+	\begin{frame}
+			\frametitle{Policy}
+			\begin{itemize}
+				\item<1-> A policy takes as input a state and a set of possible actions and returns the optimal state, this policy can be deterministic or probabilistic. We define our policy as a Q-Learner using both an LSTM and a bag-of-words model
+				\item<1-> We define an architecture similar to that of \cite{narasimhan2015language} and map our three inputs (query, sentence, and current predicted summary) into LSTM embeddings according to $\textbf{Figure 1}$
+				\item<1-> Our extraction policy then takes as input the state $s_t$ at time $t$ and returns the expected optimal action
+			\end{itemize}
+	\end{frame}
 
 \begin{frame}
 \begin{center}
@@ -200,5 +230,6 @@
 	\end{itemize}
 \end{frame}
 
+\bibliography{DQN-Event-Summarization}
 
 \end{document}
