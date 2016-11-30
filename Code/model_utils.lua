@@ -431,7 +431,6 @@ function train(inputs, query_data, model, nepochs, nnmod, metric, thresh, gamma,
     criterion = nn.MSECriterion()
     local SKIP = 1
     local SELECT = 2
-    local export = true
 
     if use_cuda then
         criterion = criterion:cuda()
