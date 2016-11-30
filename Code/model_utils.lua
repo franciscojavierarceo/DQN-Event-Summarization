@@ -436,6 +436,11 @@ function train(inputs, query_data, model, nepochs, nnmod, metric, thresh, gamma,
         criterion = criterion:cuda()
         model = model:cuda()
     end
+    if nfolds < #inputs then 
+        cvindices = torch.multinomial(torch.ones(nfolds)/nfolds , #inputs, true)
+    else
+        nfolds = torch.range(#inputs)
+    end    
 
     local params, gradParams = model:getParameters()
     local perf = io.open(string.format("%s_perf.txt", nnmod), 'w')
