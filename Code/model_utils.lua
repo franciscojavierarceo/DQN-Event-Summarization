@@ -415,7 +415,7 @@ function forwardpass(query_data, query_id, model, epsilon, gamma, metric, thresh
     local reward0 = rouge:narrow(1,2, streamSize) - rouge:narrow(1,1, streamSize)
     local reward_tm1 =  rougeOpt:narrow(1,2, streamSize) - rougeOpt:narrow(1,1, streamSize)
     local reward = reward0 + gamma * reward_tm1
-    
+
     local querySize = query:size(2)
     local summaryBatch = summaryBuffer:narrow(1, 1, streamSize)
     local queryBatch = query:view(1, querySize):expand(streamSize, querySize) 

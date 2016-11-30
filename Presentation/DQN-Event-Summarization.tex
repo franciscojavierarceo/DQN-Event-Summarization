@@ -1,0 +1,204 @@
+\documentclass[]{beamer}
+\usepackage{beamerthemesplit} 
+\usefonttheme{professionalfonts}
+\usefonttheme{serif}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{amssymb}
+\usepackage{ bm }
+\usepackage{amsmath}
+\usepackage{hyperref}
+\usepackage{caption}
+\usepackage{algorithm}
+\usepackage[noend]{algorithmic}
+\usepackage{tikz}
+\usetikzlibrary{shapes,arrows,shadows}
+
+
+\begin{document}
+
+\title{Deep Q-Networks for Event Summarization}  
+\author{Francisco Javier Arceo, Chris Kedzie}
+\institute{Columbia University in the City of New York}
+\date{December 13, 2016}
+
+
+\begin{frame}
+\titlepage
+\end{frame}
+
+\begin{frame}
+	\tableofcontents
+\end{frame}
+
+% Slide 1
+
+\section{Event Summarization}
+	\subsection{Motivation}
+\begin{frame}
+	\frametitle{Event Summarization} 
+	\begin{equation}
+		\boldsymbol{\hat{\beta}}_{ridge} = argmin_{\beta} (\boldsymbol{y - x}^{T} \boldsymbol{\beta})^2 + \boldsymbol{\lambda \beta}^2
+	\end{equation}
+
+	\begin{itemize}
+		\item<1-> First published by the Russian Mathematician Andrey Nikolayevich Tikhonov (1906-1993) in 1943 % Use Next Page to go to Point 2
+	\end{itemize}
+
+\end{frame}
+
+\section{Deep Q-Networks}
+	\subsection{Policy}
+
+	\begin{frame}
+			\frametitle{Policy}
+			\begin{itemize}
+				\item<1-> A policy takes as input a state and a set of possible actions and returns the optimal state
+				\item<1-> The policy can be deterministic or probabilistic
+			\end{itemize}
+	\end{frame}
+
+	\subsection{Reward}
+
+	\subsection{Q-Learner}
+
+	\subsection{Actions}
+
+\begin{frame}
+\begin{center}
+
+    \pgfdeclarelayer{background}
+    \pgfdeclarelayer{foreground}
+    \pgfsetlayers{background,main,foreground}
+        % Define the layers to draw the diagram
+        \tikzstyle{sensor}=[draw, fill=blue!10, text width=5em,  text centered, minimum height=2.0em,drop shadow]
+        \tikzstyle{term}=[draw, fill=gray!10, text width=5em,  text centered, minimum height=2.0em,drop shadow]
+        \tikzstyle{wa} = [sensor, fill=gray!10, text width=5em,  minimum height=2em, rounded corners, drop shadow]
+        \tikzstyle{wa} = [sensor, fill=gray!10, text width=5em,  minimum height=2em, rounded corners, drop shadow]
+        \tikzstyle{wa2} = [sensor, fill=gray!10, text width=6em,  minimum height=12em, drop shadow]
+        \tikzstyle{om} = [draw, fill=green!05, text width=5em,  text centered, minimum height=2.0em,drop shadow]
+
+    \begin{tikzpicture}[scale=0.6, transform shape]
+            \node (wa) [wa2] {Joined \textbf{ReLU Layer}  \\ \scriptsize (3 x Embedding) };
+            \path (wa.west)+(-3.0 ,  2.0) node (asr1)[sensor] { $Query$ \textbf{LSTM}};
+            \path (wa.west)+(-3.0 ,  0.0) node (asr2)[sensor] {$Sentence_t$  \textbf{LSTM}};
+            \path (wa.west)+(-3.0 , -2.0) node (asr3)[sensor] {$Summary_t$  \textbf{LSTM}};
+            \path (wa.east)+(3.0,  1) node (vote) [term] {\textbf{ReLU} \\ \scriptsize $\{Select\}$ };
+            \path (wa.east)+(3.0, -1) node (vote2) [term] {\textbf{ReLU} \\ \scriptsize $\{Skip\}$ } ;
+            \path (wa.east)+(6.5,  0) node (output) [om] {\textbf{Linear} \\ \scriptsize E[Rouge]} ;
+
+            \path [draw, ->] (asr1.east) -- node [above] {}     (wa.125);
+            \path [draw, ->] (asr2.east) -- node [above] {}     (wa.180);
+            \path [draw, ->] (asr3.east) -- node [above] {}     (wa.235);
+            \path [draw, ->] (wa.east) -- node [above] {}       (vote.west);
+            \path [draw, ->] (wa.east) -- node [above] {}       (vote2.west);
+            \path [draw, ->] (vote.east) -- node [above] {}     (output.175);
+            \path [draw, ->] (vote2.east) -- node [above] {}   (output.185);
+
+         \begin{pgfonlayer}{background}[transparency group,opacity=.5]
+                \path (asr1.north  |- asr1.south)+(-2.0, 1.6) node (a) {};
+                \path (asr3.west  |- vote.east)+(+10.0, -3.5) node (b) {};
+                \path (asr3.west  |- vote.east)+(+10.0, -2.5) node (c) {};
+                \path (asr3.east  |- output.east)+(+13, -4.50) node (d) {};
+                \path[fill=white!20,rounded corners, draw=black!100, dashed]         (a) rectangle (d);
+            \end{pgfonlayer}
+
+         \begin{pgfonlayer}{background}[transparency group,opacity=.5]
+                \path (asr1.north  |- asr1.south)+(-1.7, 1.3) node (a) {};
+                \path (asr3.west  |- asr3.east)+(+10.0, -3.5) node (b) {};
+                \path (asr3.west  |- asr3.east)+(+10.0, -2.5) node (c) {};
+                \path (asr3.west  |- asr3.east)+(+2.9, -1.50) node (d) {};
+                \path[fill=white!20,rounded corners, draw=blue!100, dashed]         (a) rectangle (d);
+            \end{pgfonlayer}
+
+         \begin{pgfonlayer}{background}[transparency group,opacity=.5]
+                \path (asr1.north  |- asr1.south)+(2.7, 1.3) node (a) {};
+                \path (asr3.west  |- asr3.east)+(+10.0, -3.5) node (b) {};
+                \path (asr3.west  |- asr3.east)+(+10.0, -2.5) node (c) {};
+                \path (asr3.west  |- asr3.east)+(+11.5, -1.50) node (d) {};
+                \path[fill=white!20,rounded corners, draw=gray!100, dashed]         (a) rectangle (d);
+            \end{pgfonlayer}
+
+         \begin{pgfonlayer}{background}[transparency group,opacity=.5]
+                \path (asr1.north  |- asr1.south)+(7.4, 1.0) node (a) {};
+                \path (asr3.west  |- asr3.east)+(+10.0, -3.5) node (b) {};
+                \path (asr3.west  |- asr3.east)+(+10.0, -2.5) node (c) {};
+                \path (asr3.west  |- asr3.east)+(+11.3, -0.50) node (d) {};
+                \path[fill=red!05,rounded corners, draw=black!100, dashed]         (a) rectangle (d);
+            \end{pgfonlayer}
+
+         \begin{pgfonlayer}{background}[transparency group,opacity=.5]
+                \path (asr1.north  |- asr1.south)+(10.7, 1.3) node (a) {};
+                \path (asr3.west  |- asr3.east)+(+10.0, -3.5) node (b) {};
+                \path (asr3.west  |- asr3.east)+(+10.0, -2.5) node (c) {};
+                \path (asr3.west  |- asr3.east)+(+15.1, -1.50) node (d) {};
+                \path[fill=white!20,rounded corners, draw=green!100, dashed]         (a) rectangle (d);
+            \end{pgfonlayer}
+
+            \path (wa.west) + (5.8,    2.25)  node (vote.east) {\scriptsize \textbf{Action} }; 
+            \path (wa.west) + (5.8,    1.95)  node (vote.east) {\scriptsize $\{argmax(a_t)$\}}; 
+            \path (wa.west) + (-2.90, -3.2)  node (vote.east) {Input}; 
+            \path (wa.west) + (3.5,    -3.2)  node (vote.east) {State-Action Representation }; 
+            \path (wa.west) + (9.30,  -3.2)  node (vote.east) {Output};
+            \path (wa.east) + (0.5, -4.2)  node (vote.east) {\textbf{Figure 1: DQN-LSTM Architecture}};
+    \end{tikzpicture}
+    \end{center}
+\end{frame}
+
+\section{Core Algorithm}
+	
+\section{Experiments}
+	\subsection{Benchmarking}
+	\subsection{DQN-BOW}
+	\subsection{DQN-LSTM}
+
+\begin{frame}
+\begin{algorithm}[H]
+  \algsetup{linenosize=\tiny}
+  \tiny
+        \textbf{Input:} { \rm  \{$\mathcal{D}$: Event queries, $X_d$: Input sentences, $N$: Number of epochs\} } \\
+        \underline{\textbf{Output:} \rm \{$\hat{Q}$: extraction policy, $\tilde{Y}_d$: event summary for query $d$\} }
+\begin{algorithmic}[1]
+    \STATE \rm Initialize extraction policy $\hat{Q}$ with random weights
+    \STATE \rm Initialize memory and summary: $\Gamma, \tilde{Y} =  \{\emptyset \}^{\mathcal{|D|}}_{d=1},  \{\emptyset \}^{\mathcal{|D|}}_{d=1} $
+    \FOR{$epoch=1,..,N\ $}
+        \FOR{query $d \in \mathcal{D}$}
+            \STATE $X_{d}, \tilde{Y}_{d}$ = \{Extract $t=1,...,T_d$ ($sentences_d$, $summary_d$)\}
+            \FOR{$x_t, \tilde{y}_t \in X_d, \tilde{Y}_d$ }
+                \STATE Set $s_t = s(x_t, \tilde{y}_t, d)$
+                \STATE $ \forall a_t \in \mathcal{A}(s_t)$ \textrm{compute} $\hat{Q}(s_t, a_t)$ and select $a^{*}_t =$ argmax$_{a_{t}}\hat{Q}(s_t, a_t)$
+                \STATE  \textbf{if} $random() < \epsilon$ \textbf{then} select $a^{*}_t $ at random with $\Pr(a_t) =\frac{1}{| \mathcal{A} |} $
+                \STATE Update $\tilde{y}_{t+1}$ according to equation (1)
+                \STATE Execute action $a^{*}_t$ and observe reward $r_t$ and new state $s_{t+1}$
+                \STATE Update $\Gamma_d = \Gamma_d \cup \{ [s_t, a^{*}_t, r_t, s_{t+1}]\}$
+            \ENDFOR
+        \ENDFOR
+            \FOR{ $j=1,...,J$ transitions sampled from $\Gamma$}
+                \STATE \[\textrm{Set } y_j =
+                        \begin{cases}
+                            r_j                                             & \text{if $s_{j+1}$ is terminal } \\
+                                r_j + \gamma $max$_{a'}\hat{Q}(s_{j+1}, a'; \theta)     & \text{if $s_{j+1}$ is non-terminal } 
+                        \end{cases} 
+                        \]
+                        \STATE Perform gradient step on $\mathcal{L}(\theta) = (y_j - \hat{Q}(s_j, a_j; \theta))^2$
+            \ENDFOR
+    \ENDFOR
+\end{algorithmic}
+\caption*{ DQN-LSTM for Event Summarization Training Procedure}
+\label{alg:seq}
+\end{algorithm}
+\end{frame}
+
+
+
+\section{Resources}
+\begin{frame}
+	\frametitle{Useful Links below}
+	Thank you
+	\begin{itemize}
+	\item<1-> \href{https://github.com/franciscojavierarceo/DQN-Event-Summarization}{GitHub}
+	\end{itemize}
+\end{frame}
+
+
+\end{document}
