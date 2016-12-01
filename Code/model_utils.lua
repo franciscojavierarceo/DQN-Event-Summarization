@@ -436,11 +436,7 @@ function train(inputs, query_data, model, nepochs, nnmod, metric, thresh, gamma,
         criterion = criterion:cuda()
         model = model:cuda()
     end
-    if nfolds < #inputs then 
-        cvindices = torch.multinomial(torch.ones(nfolds)/nfolds , #inputs, true)
-    else
-        nfolds = torch.range(#inputs)
-    end    
+    train_indices = torch.range(1, #inputs)
 
     local params, gradParams = model:getParameters()
     local perf = io.open(string.format("%s_perf.txt", nnmod), 'w')
@@ -455,10 +451,13 @@ function train(inputs, query_data, model, nepochs, nnmod, metric, thresh, gamma,
                             metric, thresh, use_cuda
             )
             -- Build the memory
-            if epoch == 0 and query_id == 1 then
-                fullmemory = memory 
+            if epoch == 0 then
                 randomF1 = rougeF1
+                if query_id == 1 then 
+                    fullmemory = memory
+                end
             else
+                if query_id != 
                 fullmemory = buildMemory(memory, fullmemory, mem_size, batch_size, use_cuda)
                 -- fullmemory = stackMemory(memory, fullmemory, mem_size, batch_size, use_cuda)
             end
