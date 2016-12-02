@@ -16,41 +16,44 @@
 \headcommand {\sectionentry {2}{Deep Q-Networks}{6}{Deep Q-Networks}{0}}
 \headcommand {\beamer@sectionpages {3}{5}}
 \headcommand {\beamer@subsectionpages {3}{5}}
-\headcommand {\beamer@subsectionentry {0}{2}{1}{6}{States}}\headcommand {\beamer@subsectionpages {6}{5}}
-\headcommand {\slideentry {2}{1}{1}{6/6}{States}{0}}
+\headcommand {\beamer@subsectionentry {0}{2}{1}{6}{Review}}\headcommand {\beamer@subsectionpages {6}{5}}
+\headcommand {\slideentry {2}{1}{1}{6/6}{Review}{0}}
 \headcommand {\beamer@framepages {6}{6}}
-\headcommand {\beamer@subsectionentry {0}{2}{2}{7}{Actions}}\headcommand {\beamer@subsectionpages {6}{6}}
-\headcommand {\slideentry {2}{2}{1}{7/7}{Actions}{0}}
+\headcommand {\beamer@subsectionentry {0}{2}{2}{7}{States}}\headcommand {\beamer@subsectionpages {6}{6}}
+\headcommand {\slideentry {2}{2}{1}{7/7}{States}{0}}
 \headcommand {\beamer@framepages {7}{7}}
-\headcommand {\beamer@subsectionentry {0}{2}{3}{8}{Reward}}\headcommand {\beamer@subsectionpages {7}{7}}
-\headcommand {\slideentry {2}{3}{1}{8/8}{Reward}{0}}
+\headcommand {\beamer@subsectionentry {0}{2}{3}{8}{Actions}}\headcommand {\beamer@subsectionpages {7}{7}}
+\headcommand {\slideentry {2}{3}{1}{8/8}{Actions}{0}}
 \headcommand {\beamer@framepages {8}{8}}
-\headcommand {\beamer@subsectionentry {0}{2}{4}{9}{Policy}}\headcommand {\beamer@subsectionpages {8}{8}}
-\headcommand {\slideentry {2}{4}{1}{9/9}{Policy}{0}}
+\headcommand {\beamer@subsectionentry {0}{2}{4}{9}{Reward}}\headcommand {\beamer@subsectionpages {8}{8}}
+\headcommand {\slideentry {2}{4}{1}{9/9}{Reward}{0}}
 \headcommand {\beamer@framepages {9}{9}}
-\headcommand {\slideentry {2}{4}{2}{10/10}{Policy}{0}}
+\headcommand {\beamer@subsectionentry {0}{2}{5}{10}{Policy}}\headcommand {\beamer@subsectionpages {9}{9}}
+\headcommand {\slideentry {2}{5}{1}{10/10}{Policy}{0}}
 \headcommand {\beamer@framepages {10}{10}}
-\headcommand {\sectionentry {3}{Core Algorithm}{11}{Core Algorithm}{0}}
-\headcommand {\beamer@sectionpages {6}{10}}
-\headcommand {\beamer@subsectionpages {9}{10}}
-\headcommand {\slideentry {3}{0}{1}{11/11}{}{0}}
+\headcommand {\slideentry {2}{5}{2}{11/11}{Policy}{0}}
 \headcommand {\beamer@framepages {11}{11}}
-\headcommand {\sectionentry {4}{Experiments}{12}{Experiments}{0}}
-\headcommand {\beamer@sectionpages {11}{11}}
-\headcommand {\beamer@subsectionpages {11}{11}}
-\headcommand {\beamer@subsectionentry {0}{4}{1}{12}{Benchmarking}}\headcommand {\beamer@subsectionpages {12}{11}}
-\headcommand {\slideentry {4}{1}{1}{12/12}{Benchmarking}{0}}
+\headcommand {\sectionentry {3}{Core Algorithm}{12}{Core Algorithm}{0}}
+\headcommand {\beamer@sectionpages {6}{11}}
+\headcommand {\beamer@subsectionpages {10}{11}}
+\headcommand {\slideentry {3}{0}{1}{12/12}{}{0}}
 \headcommand {\beamer@framepages {12}{12}}
-\headcommand {\beamer@subsectionentry {0}{4}{2}{13}{Results of Simulation}}\headcommand {\beamer@subsectionpages {12}{12}}
-\headcommand {\slideentry {4}{2}{1}{13/13}{Results of Simulation}{0}}
+\headcommand {\sectionentry {4}{Experiments}{13}{Experiments}{0}}
+\headcommand {\beamer@sectionpages {12}{12}}
+\headcommand {\beamer@subsectionpages {12}{12}}
+\headcommand {\beamer@subsectionentry {0}{4}{1}{13}{Benchmarking}}\headcommand {\beamer@subsectionpages {13}{12}}
+\headcommand {\slideentry {4}{1}{1}{13/13}{Benchmarking}{0}}
 \headcommand {\beamer@framepages {13}{13}}
-\headcommand {\sectionentry {5}{Resources}{14}{Resources}{0}}
-\headcommand {\beamer@sectionpages {12}{13}}
-\headcommand {\beamer@subsectionpages {13}{13}}
-\headcommand {\slideentry {5}{0}{1}{14/14}{}{0}}
+\headcommand {\beamer@subsectionentry {0}{4}{2}{14}{Results of Simulation}}\headcommand {\beamer@subsectionpages {13}{13}}
+\headcommand {\slideentry {4}{2}{1}{14/14}{Results of Simulation}{0}}
 \headcommand {\beamer@framepages {14}{14}}
-\headcommand {\beamer@partpages {1}{16}}
-\headcommand {\beamer@subsectionpages {14}{16}}
-\headcommand {\beamer@sectionpages {14}{16}}
-\headcommand {\beamer@documentpages {16}}
-\headcommand {\def \inserttotalframenumber {14}}
+\headcommand {\sectionentry {5}{Resources}{15}{Resources}{0}}
+\headcommand {\beamer@sectionpages {13}{14}}
+\headcommand {\beamer@subsectionpages {14}{14}}
+\headcommand {\slideentry {5}{0}{1}{15/15}{}{0}}
+\headcommand {\beamer@framepages {15}{15}}
+\headcommand {\beamer@partpages {1}{18}}
+\headcommand {\beamer@subsectionpages {15}{18}}
+\headcommand {\beamer@sectionpages {15}{18}}
+\headcommand {\beamer@documentpages {18}}
+\headcommand {\def \inserttotalframenumber {15}}

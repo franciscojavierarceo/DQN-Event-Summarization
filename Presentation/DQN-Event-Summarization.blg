@@ -9,45 +9,45 @@ Warning--I didn't find a database entry for "DBLP:conf/ijcai/2016"
 Warning--empty year in diazquery
 Warning--empty booktitle in garbacea2015university
 Warning--empty year in garbacea2015university
-You've used 5 entries,
+You've used 6 entries,
             2118 wiz_defined-function locations,
-            523 strings with 5220 characters,
-and the built_in function-call counts, 1926 in all, are:
-= -- 185
-> -- 80
+            530 strings with 5446 characters,
+and the built_in function-call counts, 2325 in all, are:
+= -- 219
+> -- 118
 < -- 2
-+ -- 32
-- -- 26
-* -- 114
-:= -- 292
-add.period$ -- 16
-call.type$ -- 5
-change.case$ -- 28
++ -- 47
+- -- 40
+* -- 148
+:= -- 368
+add.period$ -- 19
+call.type$ -- 6
+change.case$ -- 38
 chr.to.int$ -- 0
-cite$ -- 8
-duplicate$ -- 91
-empty$ -- 171
-format.name$ -- 26
-if$ -- 429
+cite$ -- 9
+duplicate$ -- 101
+empty$ -- 188
+format.name$ -- 40
+if$ -- 503
 int.to.chr$ -- 0
-int.to.str$ -- 5
-missing$ -- 5
-newline$ -- 27
-num.names$ -- 10
-pop$ -- 51
+int.to.str$ -- 6
+missing$ -- 6
+newline$ -- 32
+num.names$ -- 12
+pop$ -- 59
 preamble$ -- 1
-purify$ -- 23
+purify$ -- 32
 quote$ -- 0
-skip$ -- 63
+skip$ -- 71
 stack$ -- 0
-substring$ -- 106
-swap$ -- 31
+substring$ -- 111
+swap$ -- 32
 text.length$ -- 2
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 20
+type$ -- 24
 warning$ -- 3
-while$ -- 16
-width$ -- 6
-write$ -- 52
+while$ -- 18
+width$ -- 7
+write$ -- 63
 (There was 1 error message)

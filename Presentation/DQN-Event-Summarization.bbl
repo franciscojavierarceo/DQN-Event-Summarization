@@ -26,6 +26,12 @@ Chris Kedzie, Kathleen McKeown, and Fernando Diaz.
   International Conference on Natural Language Processing}, pages 1608--1617,
   2015.
 
+\bibitem{MnihKSGAWR13}
+Volodymyr Mnih, Koray Kavukcuoglu, David Silver, Alex Graves, Ioannis
+  Antonoglou, Daan Wierstra, and Martin~A. Riedmiller.
+\newblock Playing atari with deep reinforcement learning.
+\newblock {\em CoRR}, abs/1312.5602, 2013.
+
 \bibitem{narasimhan2015language}
 Karthik Narasimhan, Tejas~D Kulkarni, and Regina Barzilay.
 \newblock Language understanding for textbased games using deep reinforcement

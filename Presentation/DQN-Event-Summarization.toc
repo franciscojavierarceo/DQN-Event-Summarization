@@ -2,12 +2,13 @@
 \beamer@sectionintoc {1}{Event Summarization}{3}{0}{1}
 \beamer@subsectionintoc {1}{1}{Motivation}{3}{0}{1}
 \beamer@sectionintoc {2}{Deep Q-Networks}{6}{0}{2}
-\beamer@subsectionintoc {2}{1}{States}{6}{0}{2}
-\beamer@subsectionintoc {2}{2}{Actions}{7}{0}{2}
-\beamer@subsectionintoc {2}{3}{Reward}{8}{0}{2}
-\beamer@subsectionintoc {2}{4}{Policy}{9}{0}{2}
-\beamer@sectionintoc {3}{Core Algorithm}{11}{0}{3}
-\beamer@sectionintoc {4}{Experiments}{12}{0}{4}
-\beamer@subsectionintoc {4}{1}{Benchmarking}{12}{0}{4}
-\beamer@subsectionintoc {4}{2}{Results of Simulation}{13}{0}{4}
-\beamer@sectionintoc {5}{Resources}{14}{0}{5}
+\beamer@subsectionintoc {2}{1}{Review}{6}{0}{2}
+\beamer@subsectionintoc {2}{2}{States}{7}{0}{2}
+\beamer@subsectionintoc {2}{3}{Actions}{8}{0}{2}
+\beamer@subsectionintoc {2}{4}{Reward}{9}{0}{2}
+\beamer@subsectionintoc {2}{5}{Policy}{10}{0}{2}
+\beamer@sectionintoc {3}{Core Algorithm}{12}{0}{3}
+\beamer@sectionintoc {4}{Experiments}{13}{0}{4}
+\beamer@subsectionintoc {4}{1}{Benchmarking}{13}{0}{4}
+\beamer@subsectionintoc {4}{2}{Results of Simulation}{14}{0}{4}
+\beamer@sectionintoc {5}{Resources}{15}{0}{5}

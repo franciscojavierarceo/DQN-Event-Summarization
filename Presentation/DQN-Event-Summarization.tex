@@ -39,9 +39,9 @@
 \begin{frame}
 	\frametitle{Event Summarization} 
 	\begin{itemize}
-	\item<1-> 	In the extractive streaming summarization task, we are given as input a query (i.e., a short text description of a topic or an event), a document stream, and a time ordered set of sentences relevant to the query. 
+	\item<1-> 	Extractive streaming summarization takes as input a short text description of a topic or an event known as a query, a document stream, and a time ordered set of sentences relevant to the query. 
 	
-	\item<1-> Starting with an initially empty summary,  an extractive, streaming summarization algorithm is intended to examine each sentence in order and, when new and important (relative to the query) information is identified, add that sentence to the summary. 
+	\item<1-> An extractive summarization algorithm sequentially examines sentences from a document stream and includes the candidate sentence into the summary when novel and important information is detected. 
 	\end{itemize}
 \end{frame}
 
@@ -52,7 +52,7 @@
 	\begin{itemize}
 		\item<1-> Recent research in text retrieval  has focused on extractive algorithms to identify important sentences from a large set of documents (e.g., \cite{diazquery}, \cite{kedzie2015predicting}, \cite{garbacea2015university}, and \cite{kedzieextractive}) for summarizing articles from different events in the news.
 		\item<1-> \cite{kedzie2015predicting}  has shown that it is possible to select relevant sentences from a massive number of documents on the web to create summaries with meaningful content by adapting classifiers to maximize search policies.
-		\item<1-> These systems have been shown to fall short of algorithms that employ simple heuristics \cite{garbacea2015university}, which may be due to inadequate capturing of the rich structure and often idiosyncratic information by traditional n-gram language models.
+		\item<1-> These systems how been shown to  fall short of simple heuristic algorithms \cite{garbacea2015university}, which may be due to the limited ability of traditional n-gram models to capture the rich and often idiosyncratic structure of language.
 	\end{itemize}
 
 \end{frame}
@@ -60,16 +60,24 @@
 \begin{frame}
 	\frametitle{Event Summarization} 
 This leads us to explore Deep Q-Networks (DQN) for 3 reasons: 
-	\begin{itemize}
-	\item <1-> Both the representation and interaction between the stream, summary, and query can be learned
-	\item <1 -> The embeddings can learn a more robust semantic representations than classic n-gram models by using a RNN-LSTM
-	\item <1 -> By randomly exploring the state space, the $\epsilon$-greedy strategy learns a policy that yields more consistency between train and test distributions
-	\end{itemize}
+	 \begin{enumerate}
+	\item <1-> We can define an architecture that propagates information end-to-end about the inputs, actions, and rewards 
+	\item <1-> The representation and interaction between the stream, summary, and query can be learned jointly
+	\item <1 -> RNN-LSTM embeddings can learn a more robust semantic representation than classic n-gram models
+	\end{enumerate}
 \end{frame}
 
 
 \section{Deep Q-Networks}
-
+	\subsection{Review}  
+	\begin{frame}
+		\begin{itemize}
+		\item <1 -> Q-Learning is a Reinforcement Learning framework that finds an optimal policy by taking an input state, set of possible actions available,  and returning the action with the highest reward.
+		\item <1 -> When the state-action space becomes intractable, deterministic algorithms are no longer feasible for an optimal policy and researchers instead train a model to learn the policy. 
+		\item <1 -> Deep Q-Networks \cite{MnihKSGAWR13} are an increasingly popular framework for learning these policies from end-to-end.
+		\end{itemize}
+	\end{frame}
+	
 	\subsection{States}  
 	\begin{frame}
 			\frametitle{States}
