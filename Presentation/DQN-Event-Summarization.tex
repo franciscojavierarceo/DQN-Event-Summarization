@@ -85,7 +85,7 @@ This leads us to explore Deep Q-Networks (DQN) for 3 reasons:
 	\subsection{Reward}
 	\begin{frame}
 			\frametitle{Reward}
-				The reward for a given action is measured by the change in ROUGE-NF1 score of the predicted summary $\tilde{y}_{t}$ measured against a gold standard summary $Y$. More formally, the reward $r$ at time $t$ is 
+				The reward $r$ for a given action $a$ at time $t$ is measured by the change in ROUGE-NF1 score of the predicted summary $\tilde{y}_{t}$ measured against a gold standard summary $Y$. That is, 
 				\begin{equation}
 					r_t = \textrm{ROUGE-NF1}(\tilde{y}_{t}, Y) -  \textrm{ROUGE-NF1}(\tilde{y}_{t-1}, Y).
 				\end{equation}
