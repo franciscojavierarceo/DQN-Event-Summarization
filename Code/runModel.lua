@@ -34,7 +34,7 @@ cmd:text()
 local opt = cmd:parse(arg or {})
 
 dofile("utils.lua")
-dofile("model_utils.lua")
+dofile("utilsNN.lua")
 
 input_path = '~/GitHub/DeepNLPQLearning/DO_NOT_UPLOAD_THIS_DATA/0-output/'
 query_fn = input_path .. 'queries_numtext.csv'

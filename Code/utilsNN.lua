@@ -151,7 +151,7 @@ function buildMemory(newinput, memory_hist, memsize, use_cuda)
     local queryMemory = torch.cat(newinput[1][2]:double(), memory_hist[1][2]:double(), 1)
     local sumryMemory = torch.cat(newinput[1][3]:double(), memory_hist[1][3]:double(), 1)
     local rewardMemory = torch.cat(newinput[2]:double(), memory_hist[2]:double(), 1)
-    local actionMemory = torch.cat(newinput[3]:double(), memory_hist[3]:double(), 1)
+    local actionMemory = torch.cat(newinput[3], memory_hist[3], 1)
     --- specifying rows to index 
     if sentMemory:size(1) >= memsize then
         -- My hack for sampling based on non-zero rewards
@@ -177,7 +177,7 @@ function stackmemory(newinput, memory_hist, memsize, use_cuda)
     local queryMemory = torch.cat(newinput[1][2]:double(), memory_hist[1][2]:double(), 1)
     local sumryMemory = torch.cat(newinput[1][3]:double(), memory_hist[1][3]:double(), 1)
     local rewardMemory = torch.cat(newinput[2]:double(), memory_hist[2]:double(), 1)
-    local actionMemory = torch.cat(newinput[3]:double(), memory_hist[3]:double(), 1)
+    local actionMemory = torch.cat(newinput[3], memory_hist[3], 1)
     --- specifying rows to index 
     if sentMemory:size(1) < memsize then
         nend = sentMemory:size(1)
@@ -401,7 +401,7 @@ function forwardpass(query_data, query_id, model, epsilon, gamma, metric, thresh
         elseif metric == "recall" then
             rouge[i + 1] = threshold(recall, thresh)
             rougeOpt[i]  = threshold(rOpt, thresh)
-            
+
         elseif metric == "precision" then
             rouge[i + 1] = threshold(prec, thresh)
             rougeOpt[i]  = threshold(pOpt, thresh)
@@ -462,8 +462,7 @@ function train(inputs, query_data, model, nepochs, nnmod, metric, thresh, gamma,
                 -- fullmemory = stackMemory(memory, fullmemory, mem_size, batch_size, use_cuda)
             end
             --- Running backprop
-            -- loss = backProp(memory, params, gradParams, optimParams, model, criterion, batch_size, n_backprops, use_cuda)
-            loss = backPropOld(memory, params, gradParams, optimParams, model, criterion, batch_size, mem_size, use_cuda)
+            loss = backPropOld(fullmemory, params, gradParams, optimParams, model, criterion, batch_size, mem_size, use_cuda)
 
             nactions = torch.totable(memory[3]:sum(1))[1]
             perf_string = string.format("%i; %.3f; %.6f; %.6f; %.6f; %.6f; %.6f; %.6f; {min=%.3f, max=%.3f}; {min=%.3f, max=%.3f}; %i; %i; %i\n", 
