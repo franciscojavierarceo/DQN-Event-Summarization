@@ -79,7 +79,7 @@ else
     print("...running on CPU")
 end
 
-local delta = 1./(opt.nepochs/opt.cuts) 
+local delta = opt.cuts/opt.nepochs
 local optimParams = { learningRate = opt.learning_rate }
 
 -- Initializing the model variables
