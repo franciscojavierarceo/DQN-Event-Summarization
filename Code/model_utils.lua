@@ -440,8 +440,7 @@ function train(inputs, query_data, model, nepochs, nnmod, metric, thresh, gamma,
 
     local params, gradParams = model:getParameters()
     local perf = io.open(string.format("%s_perf.txt", nnmod), 'w')
-    out = string.format("epoch;epsilon;loss;randomF1;oracleF1;rougeF1;rougeRecall;rougePrecision;actual;pred;nselect;nskip;query\n")
-    perf:write(out)
+    perf:write(string.format("epoch;epsilon;loss;randomF1;oracleF1;rougeF1;rougeRecall;rougePrecision;actual;pred;nselect;nskip;query\n"))
     for epoch=0, nepochs do
         for query_id=1, #inputs do
             -- Score the queries
@@ -457,7 +456,6 @@ function train(inputs, query_data, model, nepochs, nnmod, metric, thresh, gamma,
                     fullmemory = memory
                 end
             else
-                if query_id != 
                 fullmemory = buildMemory(memory, fullmemory, mem_size, batch_size, use_cuda)
                 -- fullmemory = stackMemory(memory, fullmemory, mem_size, batch_size, use_cuda)
             end

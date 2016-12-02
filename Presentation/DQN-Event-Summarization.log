@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015) (preloaded format=pdflatex 2015.5.24)  2 DEC 2016 15:12
+This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015) (preloaded format=pdflatex 2015.5.24)  3 DEC 2016 06:20
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -1324,10 +1324,16 @@ Package atveryend Info: Empty hook `AfterLastShipout' on input line 246.
  (./DQN-Event-Summarization.aux)
 Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 246.
 Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 246.
-Package rerunfilecheck Info: File `DQN-Event-Summarization.out' has not changed
-.
-(rerunfilecheck)             Checksum: 2D7D16E2408E0128F18A53A41C1997D4;645.
 
+
+Package rerunfilecheck Warning: File `DQN-Event-Summarization.out' has changed.
+
+(rerunfilecheck)                Rerun to get outlines right
+(rerunfilecheck)                or use package `bookmark'.
+
+Package rerunfilecheck Info: Checksums for `DQN-Event-Summarization.out':
+(rerunfilecheck)             Before: 6124F4B4CD5C94E3846C7922606D1A11;649
+(rerunfilecheck)             After:  0B823652A746C635A831C05D41C02AD4;659.
 
 LaTeX Font Warning: Size substitutions with differences
 (Font)              up to 1.0pt have occurred.
@@ -1337,7 +1343,7 @@ Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 246.
 Here is how much of TeX's memory you used:
  23613 strings out of 493089
  489581 string characters out of 6134842
- 606930 words of memory out of 5000000
+ 606937 words of memory out of 5000000
  26498 multiletter control sequences out of 15000+600000
  13568 words of font info for 50 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
@@ -1361,7 +1367,7 @@ ve/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/local/texlive/
 texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/local/texlive/2015/te
 xmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb></usr/local/texlive/2015/tex
 mf-dist/fonts/type1/public/amsfonts/symbols/msam10.pfb>
-Output written on DQN-Event-Summarization.pdf (16 pages, 266427 bytes).
+Output written on DQN-Event-Summarization.pdf (16 pages, 266441 bytes).
 PDF statistics:
  749 PDF objects out of 1000 (max. 8388607)
  674 compressed objects within 7 object streams
