@@ -397,9 +397,11 @@ function forwardpass(query_data, query_id, model, epsilon, gamma, metric, thresh
         if metric == "f1" then
             rouge[i + 1] = threshold(f1, thresh)
             rougeOpt[i]  = threshold(f1Opt, thresh)
+
         elseif metric == "recall" then
             rouge[i + 1] = threshold(recall, thresh)
             rougeOpt[i]  = threshold(rOpt, thresh)
+            
         elseif metric == "precision" then
             rouge[i + 1] = threshold(prec, thresh)
             rougeOpt[i]  = threshold(pOpt, thresh)
@@ -439,7 +441,7 @@ function train(inputs, query_data, model, nepochs, nnmod, metric, thresh, gamma,
     train_indices = torch.range(1, #inputs)
 
     local params, gradParams = model:getParameters()
-    local perf = io.open(string.format("%s_%s_perf.txt", nnmod, metric), 'w')
+    local perf = io.open(string.format("./Performance/%s_%s_perf.txt", nnmod, metric), 'w')
     perf:write(string.format("epoch;epsilon;loss;randomF1;oracleF1;rougeF1;rougeRecall;rougePrecision;actual;pred;nselect;nskip;query\n"))
     for epoch=0, nepochs do
         for query_id=1, #inputs do
@@ -474,7 +476,7 @@ function train(inputs, query_data, model, nepochs, nnmod, metric, thresh, gamma,
             )
             perf:write(perf_string)
 
-            local avpfile = io.open(string.format("plotdata/%s/%i/%i_epoch.txt", nnmod, query_id, epoch), 'w')
+            local avpfile = io.open(string.format("./plotdata/%s/%i/%i_epoch.txt", nnmod, query_id, epoch), 'w')
             avpfile:write("predSkip;predSelect;actual;Skip;Select;query\n")
             for i=1, memory[1][1]:size(1) do
                 avp_string = string.format("%.6f;%.6f;%6f;%i;%i;%i\n", 

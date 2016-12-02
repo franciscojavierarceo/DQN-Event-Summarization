@@ -1,4 +1,0 @@
-...Utils file loaded	
-...running on CPU	
-training model with metric = f1, learning rate = 0.200, K = 20, J = 10, threshold = 0.000, embedding size = 50	
-Running LSTM model	
