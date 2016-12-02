@@ -439,7 +439,7 @@ function train(inputs, query_data, model, nepochs, nnmod, metric, thresh, gamma,
     train_indices = torch.range(1, #inputs)
 
     local params, gradParams = model:getParameters()
-    local perf = io.open(string.format("%s_perf.txt", nnmod), 'w')
+    local perf = io.open(string.format("%s_%s_perf.txt", nnmod, metric), 'w')
     perf:write(string.format("epoch;epsilon;loss;randomF1;oracleF1;rougeF1;rougeRecall;rougePrecision;actual;pred;nselect;nskip;query\n"))
     for epoch=0, nepochs do
         for query_id=1, #inputs do
