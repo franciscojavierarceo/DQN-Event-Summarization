@@ -440,7 +440,7 @@ function train(inputs, query_data, model, nepochs, nnmod, metric, thresh, gamma,
     end
 
     local params, gradParams = model:getParameters()
-    local perf = io.open(string.format("./Performance/%s_%s_perf.txt", nnmod, metric), 'w')
+    local perf = io.open(string.format("./Performance/Simulation/%s_%s_perf.txt", nnmod, metric), 'w')
     perf:write(string.format("epoch;epsilon;loss;randomF1;oracleF1;rougeF1;rougeRecall;rougePrecision;actual;pred;nselect;nskip;query\n"))
     for epoch=0, nepochs do
         for query_id=1, #inputs do
@@ -512,7 +512,7 @@ function trainCV(inputs, query_data, model, nepochs, nnmod, metric, thresh, gamm
     end
 
     local params, gradParams = model:getParameters()
-    local perf = io.open(string.format("./Performance/%s_%s_perf.txt", nnmod, metric), 'w')
+    local perf = io.open(string.format("./Performance/CV/%s_%s_perf.txt", nnmod, metric), 'w')
     perf:write(string.format("epoch;epsilon;loss;randomF1;oracleF1;rougeF1;rougeRecall;rougePrecision;actual;pred;nselect;nskip;query\n"))
 
     for test_query=1, #inputs do
@@ -524,12 +524,9 @@ function trainCV(inputs, query_data, model, nepochs, nnmod, metric, thresh, gamm
                                 model, epsilon, gamma, 
                                 metric, thresh, use_cuda
                 )
-                if query_id == test_query then
-                    test_f1 = rougeF1
-                end
                 -- Build the memory
                 if epoch == 0 then
-                    randomF1 = rougeF1
+                    randomF1 = rougeF1                    
                     if query_id == 1 and query_id ~= test_query then 
                         fullmemory = memory
                     end
@@ -537,8 +534,17 @@ function trainCV(inputs, query_data, model, nepochs, nnmod, metric, thresh, gamm
                     --- By not storing the memory of the test query we won't back prop on it
                     if query_id ~= test_query then 
                         fullmemory = buildMemory(memory, fullmemory, mem_size, batch_size, use_cuda)
+                        -- fullmemory = stackMemory(memory, fullmemory, mem_size, batch_size, use_cuda)
                     end
-                    -- fullmemory = stackMemory(memory, fullmemory, mem_size, batch_size, use_cuda)
+                end
+                -- Storing the test performance
+                if query_id == test_query then
+                    testf1 = rougeF1
+                    if epoch==0 then
+                        -- Only need to get these once
+                        testrandomF1 = rougeF1
+                        testOracleF1 = query_data[query_id][14]
+                    end
                 end
                 --- Running backprop
                 loss = backPropOld(fullmemory, params, gradParams, optimParams, model, criterion, batch_size, mem_size, use_cuda)

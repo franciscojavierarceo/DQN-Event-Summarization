@@ -38,17 +38,19 @@
 	\subsection{Motivation}
 \begin{frame}
 	\frametitle{Event Summarization} 
+	The primary goal of Event Summarization is to summarize an event over time.
 	\begin{itemize}
-	\item<1-> 	As crises unfold and many articles are generated about a given event, it is beneficial to have a meaningful summary about the incident. 
-	\item<1-> Given the seemingly countless number of news and media outlets, reading and summarizing all of this content is impractical. 
-	\item<1-> 	Instead, it is beneficial to have a system that evaluates these articles automatically and returns the most valuable information.
+	\item<2-> 	As crises unfold and many articles are generated about a given event, it is beneficial to have a meaningful summary about the incident. 
+	\item<2-> Given the seemingly countless number of news and media outlets, reading and summarizing all of this content is impractical. 
+	\item<2-> 	Instead, it is useful to have a system that evaluates these articles automatically and returns the most valuable information.
 	\end{itemize}
 \end{frame}
 \begin{frame}
 	\frametitle{Extractive Event Summarization} 
+	We can structure this problem analytically and find methods to solve Event Summarization (or at least try to). 
 	\begin{itemize}
-	\item<1-> 	Extractive streaming summarization takes as input a short text description of a topic or an event known as a query, a document stream, and a time ordered set of sentences relevant to the query. 
-	\item<1-> The algorithm sequentially examines each sentence from the document stream and includes the candidate sentence into the summary when novel and important information is detected. 
+	\item<2-> 	Extractive streaming summarization takes as input a short text description of a topic or an event known as a query, a document stream, and a time ordered set of sentences relevant to the query. 
+	\item<2-> The algorithm sequentially examines each sentence from the document stream and includes the candidate sentence into the summary when novel and important information is detected. 
 	\end{itemize}
 \end{frame}
 
