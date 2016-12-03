@@ -111,7 +111,7 @@ This leads us to explore Deep Q-Networks (DQN) for 3 reasons:
 
 	\end{frame}
 
-	\subsection{Reward}
+	\subsection{Rewards}
 	\begin{frame}
 			\frametitle{Reward}
 				The reward $r$ for a given action $a$ at time $t$ is measured by the change in ROUGE-1F1 score of the predicted summary $\tilde{y}_{t}$ measured against a gold standard summary $Y$. 
@@ -267,16 +267,39 @@ This leads us to explore Deep Q-Networks (DQN) for 3 reasons:
 
 	
 \section{Experiments}
+	\subsection{Simulation}
+		\begin{frame}
+			\frametitle{Small Problems}
+		Before evaluating the model on test data, it is illuminating to understand the in-sample training behavior of the architecture on a small-sample problem. Small sample experimentation allows us to
+		\begin{enumerate}
+		\item<1-> Verify that the model is able to solve our specified problem
+		\item<1-> Understand the number of iterations required to explore the state-space
+		\item<1-> Gain intuition about the impact of hyperparameters on the speed at which it takes to solve the problem
+		\end{enumerate}
+		\end{frame}
+
+		\begin{frame}
+			\frametitle{DQN-LSTM for 1 Query and 20 Sentences: Precision}
+			\begin{centering}
+			\framebox{
+%			  \includegraphics[height=2.0in,width=2.0in]{ModelPerformance}
+			  \includegraphics[height=2.0in,width=4.0in]{DQN_LSTM_Precision}
+				}
+			\end{centering}
+		\end{frame}
+		\begin{frame}
+			\frametitle{DQN-LSTM for 1 Query and 20 Sentences: Recall}
+		\end{frame}
+		\begin{frame}
+			\frametitle{DQN-LSTM for 1 Query and 20 Sentences: F1}
+		\end{frame}
+
 	\subsection{Benchmarking}
 		\begin{frame}
 			\frametitle{Evaluation}
-		We benchmark our model against (1) an oracle that greedily chooses to include sentences if the increase in ROUGUE-NF1 is positive,  (2) random selection of sentences,  and (3) a bag-of-words multilayer perceptron.
+		We benchmark our model against (1) an Oracle that greedily chooses to include sentences if the increase in ROUGUE-F1 is positive,  (2) random selection of sentences,  and (3) a bag-of-words multilayer perceptron.
 		\end{frame}
 
-	\subsection{Results of Simulation}
-		\begin{frame}
-		
-		\end{frame}
 
 
 \section{Resources}
