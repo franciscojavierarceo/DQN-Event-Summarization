@@ -17,9 +17,12 @@
 \begin{document}
 
 \title{Deep Q-Networks for Event Summarization}  
-\author{Francisco Javier Arceo, Chris Kedzie}
-% \contact{\href{mailto: fja2114@columbia.edu}{\small fja2114@columbia.edu}, \href{mailto: kedzie@cs.columbia.edu}{\small kedzie@cs.columbia.edu}}
-\institute{Columbia University in the City of New York}
+\author[Francisco Javier Arceo \& Chris Kedzie]
+       {\parbox[t]{1.5in}{Francisco Javier Arceo \\ \href{mailto: fja2114@columbia.edu}{\color{blue} \small  fja2114@columbia.edu} } \and 
+        \parbox[t]{1.5in}{Chris Kedzie \\  \and \href{mailto: kedzie@cs.columbia.edu}{\color{blue} \small kedzie@cs.columbia.edu} }}
+%\author{Francisco Javier Arceo, Chris Kedzie} % \\ fja2114@columbia.edu, kedzie@cs.columbia.edu }
+% \contact{, }
+\institute{ \large Columbia University in the City of New York}
 \date{December 13, 2016}
 
 \bibliographystyle{plain}
@@ -280,18 +283,28 @@ This leads us to explore Deep Q-Networks (DQN) for 3 reasons:
 
 		\begin{frame}
 			\frametitle{DQN-LSTM for 1 Query and 20 Sentences: Precision}
-			\begin{centering}
+			\begin{center}
 			\framebox{
-%			  \includegraphics[height=2.0in,width=2.0in]{ModelPerformance}
 			  \includegraphics[height=2.0in,width=4.0in]{DQN_LSTM_Precision}
 				}
-			\end{centering}
+			\end{center}
 		\end{frame}
+		
 		\begin{frame}
 			\frametitle{DQN-LSTM for 1 Query and 20 Sentences: Recall}
+			\begin{center}
+			\framebox{
+			  \includegraphics[height=2.0in,width=4.0in]{DQN_LSTM_Recall}
+				}
+			\end{center}
 		\end{frame}
 		\begin{frame}
 			\frametitle{DQN-LSTM for 1 Query and 20 Sentences: F1}
+			\begin{center}
+			\framebox{
+			  \includegraphics[height=2.0in,width=4.0in]{DQN_LSTM_F1}
+				}
+			\end{center}
 		\end{frame}
 
 	\subsection{Benchmarking}
