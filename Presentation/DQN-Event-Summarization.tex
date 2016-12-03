@@ -39,31 +39,37 @@
 \begin{frame}
 	\frametitle{Event Summarization} 
 	\begin{itemize}
-	\item<1-> 	Extractive streaming summarization takes as input a short text description of a topic or an event known as a query, a document stream, and a time ordered set of sentences relevant to the query. 
-	
-	\item<1-> An extractive summarization algorithm sequentially examines sentences from a document stream and includes the candidate sentence into the summary when novel and important information is detected. 
+	\item<1-> 	As crises unfold and many articles are generated about a given event, it is beneficial to have a meaningful summary about the incident. 
+	\item<1-> Given the seemingly countless number of news and media outlets, reading and summarizing all of this content is impractical. 
+	\item<1-> 	Instead, it is beneficial to have a system that evaluates these articles automatically and returns the most valuable information.
 	\end{itemize}
 \end{frame}
-
-
 \begin{frame}
-	\frametitle{Event Summarization} 
-
+	\frametitle{Extractive Event Summarization} 
 	\begin{itemize}
-		\item<1-> Recent research in text retrieval  has focused on extractive algorithms to identify important sentences from a large set of documents (e.g., \cite{diazquery}, \cite{kedzie2015predicting}, \cite{garbacea2015university}, and \cite{kedzieextractive}) for summarizing articles from different events in the news.
+	\item<1-> 	Extractive streaming summarization takes as input a short text description of a topic or an event known as a query, a document stream, and a time ordered set of sentences relevant to the query. 
+	\item<1-> The algorithm sequentially examines each sentence from the document stream and includes the candidate sentence into the summary when novel and important information is detected. 
+	\end{itemize}
+\end{frame}
+
+
+\begin{frame}
+	\frametitle{Previous Work in Extractive Event Summarization} 
+	\begin{itemize}
+		\item<1-> Recent research in text retrieval  has focused on extractive algorithms to identify important sentences from a large set of documents for summarizing articles from different events in the news (e.g., \cite{diazquery}, \cite{kedzie2015predicting}, \cite{garbacea2015university}, and \cite{kedzieextractive}).
 		\item<1-> \cite{kedzie2015predicting}  has shown that it is possible to select relevant sentences from a massive number of documents on the web to create summaries with meaningful content by adapting classifiers to maximize search policies.
-		\item<1-> These systems how been shown to  fall short of simple heuristic algorithms \cite{garbacea2015university}, which may be due to the limited ability of traditional n-gram models to capture the rich and often idiosyncratic structure of language.
+		\item<1-> These systems have been shown to  fall short of simple heuristic algorithms \cite{garbacea2015university}, which may be due to the limited ability of traditional n-gram models to capture the rich and often idiosyncratic structure of language.
 	\end{itemize}
 
 \end{frame}
 
 \begin{frame}
-	\frametitle{Event Summarization} 
+	\frametitle{Deep Q-Networks for Event Summarization} 
 This leads us to explore Deep Q-Networks (DQN) for 3 reasons: 
-	 \begin{enumerate}
+	 \vspace{-0.2cm} \begin{enumerate}
 	\item <1-> We can define an architecture that propagates information end-to-end about the inputs, actions, and rewards 
 	\item <1-> The representation and interaction between the stream, summary, and query can be learned jointly
-	\item <1 -> RNN-LSTM embeddings can learn a more robust semantic representation than classic n-gram models
+	\item <1 -> RNN-LSTM embeddings can learn a more robust semantic representation than classical n-gram models
 	\end{enumerate}
 \end{frame}
 
@@ -71,6 +77,7 @@ This leads us to explore Deep Q-Networks (DQN) for 3 reasons:
 \section{Deep Q-Networks}
 	\subsection{Review}  
 	\begin{frame}
+			\frametitle{Deep Q-Networks: A Brief Introduction}
 		\begin{itemize}
 		\item <1 -> Q-Learning is a Reinforcement Learning framework that finds an optimal policy by taking an input state, set of possible actions available,  and returning the action with the highest reward.
 		\item <1 -> When the state-action space becomes intractable, deterministic algorithms are no longer feasible for an optimal policy and researchers instead train a model to learn the policy. 
@@ -80,22 +87,50 @@ This leads us to explore Deep Q-Networks (DQN) for 3 reasons:
 	
 	\subsection{States}  
 	\begin{frame}
-			\frametitle{States}
-	A state $s(x_{t},\tilde{y}_{t}, d)$ at time $t$ is a function of the stream $X_d$, $\forall d \in D$, which represents the candidate sentence, $x_t$ to include in the summary, the state of the current summary $\tilde{y}_t$, and the query $d$. For brevity we use $s_t$ where the dependence on $x_{t},\tilde{y}_{t},$ and $d$ is assumed.
+		\frametitle{States}
+		\begin{itemize}
+	\item<1 ->  A state $s(x_{t},\tilde{y}_{t}, d)$ at time $t$ is a function of the stream $X_d$, $\forall d \in D$, which represents the candidate sentence, $x_t$ to include in the summary, the state of the current summary $\tilde{y}_t$, and the query $d$. 	
+	\item<1 -> For brevity we use $s_t$ where the dependence on $x_{t},\tilde{y}_{t},$ and $d$ is assumed.
+		\end{itemize}
 	\end{frame}
 
 	\subsection{Actions}
 	\begin{frame}
 			\frametitle{Actions}
-			We define an action, $a_t$, at each time step from our set of actions as $\mathcal{A} := \{select, skip\}$ where $select$ corresponds to adding the current sentence $x_t$ to the predicted summary $\tilde{y}_t$ and incrementing the current system time, or $skip$ where only $t$ is incremented without changing the current summary.
+			We define our set of actions as $\mathcal{A} := \{select, skip\}$ where $select$ corresponds to adding the current sentence $x_t$ to the predicted summary $\tilde{y}_t$ and incrementing the current system time, or $skip$ where only $t$ is incremented without changing the current summary. Simply, 
+			
+	\begin{equation}
+		\tilde{y}_{t + 1} =
+		\begin{cases}
+			\tilde{y}_{t} \cup \{ x_t \},	& \text{if } a_t = select  \\
+			\tilde{y}_{t}, 			& \text{if } a_t = skip.
+		\end{cases}
+	\end{equation}
+
 	\end{frame}
 
 	\subsection{Reward}
 	\begin{frame}
 			\frametitle{Reward}
-				The reward $r$ for a given action $a$ at time $t$ is measured by the change in ROUGE-NF1 score of the predicted summary $\tilde{y}_{t}$ measured against a gold standard summary $Y$. That is, 
+				The reward $r$ for a given action $a$ at time $t$ is measured by the change in ROUGE-1F1 score of the predicted summary $\tilde{y}_{t}$ measured against a gold standard summary $Y$. 
+	\begin{equation}
+		 \textrm{ROUGE-R}(\tilde{y}, Y) = 
+		    \frac{\sum_{g \in Y} 
+		    \min \left(\textrm{count}(g, \tilde{y}), \textrm{count}(g, Y)\right)}{
+		    \sum_{g \in Y} 
+		    \textrm{count}(g, Y)
+	    }
+	\end{equation}
+	\begin{equation}
+		 \textrm{ROUGE-P}(\tilde{y}, Y) = 
+		    \frac{\sum_{g \in \tilde{Y}} 
+		    \min \left(\textrm{count}(g, \tilde{y}), \textrm{count}(g, Y)\right)}{
+		    \sum_{g \in \tilde{Y}} 
+		    \textrm{count}(g, \tilde{Y})
+	    }
+	\end{equation}
 				\begin{equation}
-					r_t = \textrm{ROUGE-NF1}(\tilde{y}_{t}, Y) -  \textrm{ROUGE-NF1}(\tilde{y}_{t-1}, Y).
+					r_t = \textrm{ROUGE-F1}(\tilde{y}_{t}, Y) -  \textrm{ROUGE-F1}(\tilde{y}_{t-1}, Y).
 				\end{equation}
 	\end{frame}
 
@@ -103,14 +138,14 @@ This leads us to explore Deep Q-Networks (DQN) for 3 reasons:
 	\begin{frame}
 			\frametitle{Policy}
 			\begin{itemize}
-				\item<1-> A policy takes as input a state and a set of possible actions and returns the optimal state, this policy can be deterministic or probabilistic. We define our policy as a Q-Learner using both an LSTM and a bag-of-words model
+				\item<1-> We define our Q-Learner as an RNN-LSTM that is trained by randomly exploring the state-space using an $\epsilon$-greedy search over actions and states. 
+				\item<1->We train our Q-Learner by iteratively updating the learned extraction policy through backpropagation of the observed reward for each action.
 				\item<1-> We define an architecture similar to that of \cite{narasimhan2015language} and map our three inputs (query, sentence, and current predicted summary) into LSTM embeddings according to $\textbf{Figure 1}$
-				\item<1-> Our extraction policy then takes as input the state $s_t$ at time $t$ and returns the expected optimal action
 			\end{itemize}
 	\end{frame}
 \begin{frame}
 \begin{center}
-
+	\frametitle{Architecture of the Q-Learner}
     \pgfdeclarelayer{background}
     \pgfdeclarelayer{foreground}
     \pgfsetlayers{background,main,foreground}
@@ -190,7 +225,7 @@ This leads us to explore Deep Q-Networks (DQN) for 3 reasons:
 \end{frame}
 
 
-\section{Core Algorithm}
+\subsection{Algorithm}
 \begin{frame}
 \begin{algorithm}[H]
   \algsetup{linenosize=\tiny}
@@ -232,6 +267,7 @@ This leads us to explore Deep Q-Networks (DQN) for 3 reasons:
 \section{Experiments}
 	\subsection{Benchmarking}
 		\begin{frame}
+			\frametitle{Evaluation}
 		We benchmark our model against (1) an oracle that greedily chooses to include sentences if the increase in ROUGUE-NF1 is positive,  (2) random selection of sentences,  and (3) a bag-of-words multilayer perceptron.
 		\end{frame}
 
