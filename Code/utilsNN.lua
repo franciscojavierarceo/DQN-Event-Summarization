@@ -438,7 +438,6 @@ function train(inputs, query_data, model, nepochs, nnmod, metric, thresh, gamma,
         criterion = criterion:cuda()
         model = model:cuda()
     end
-    train_indices = torch.range(1, #inputs)
 
     local params, gradParams = model:getParameters()
     local perf = io.open(string.format("./Performance/%s_%s_perf.txt", nnmod, metric), 'w')
@@ -454,7 +453,7 @@ function train(inputs, query_data, model, nepochs, nnmod, metric, thresh, gamma,
             -- Build the memory
             if epoch == 0 then
                 randomF1 = rougeF1
-                if query_id == 1 then 
+                if query_id == 1 and query_id ~= test_query then 
                     fullmemory = memory
                 end
             else
@@ -495,6 +494,87 @@ function train(inputs, query_data, model, nepochs, nnmod, metric, thresh, gamma,
             epsilon = epsilon - delta
         end
 
+    end
+    print(string.format("Model complete {Selected = %i; Skipped  = %i}; Final Rouge Recall, Precision, F1 = {%.6f;%.6f;%.6f}", 
+                nactions[SELECT], nactions[SKIP], rougeRecall, rougePrecision, rougeF1))
+end
+
+function trainCV(inputs, query_data, model, nepochs, nnmod, metric, thresh, gamma, epsilon, delta, base_explore_rate, end_baserate, mem_size, batch_size, optimParams, n_backprops, use_cuda)
+    math.randomseed(420)
+    torch.manualSeed(420)
+    criterion = nn.MSECriterion()
+    local SKIP = 1
+    local SELECT = 2
+
+    if use_cuda then
+        criterion = criterion:cuda()
+        model = model:cuda()
+    end
+
+    local params, gradParams = model:getParameters()
+    local perf = io.open(string.format("./Performance/%s_%s_perf.txt", nnmod, metric), 'w')
+    perf:write(string.format("epoch;epsilon;loss;randomF1;oracleF1;rougeF1;rougeRecall;rougePrecision;actual;pred;nselect;nskip;query\n"))
+
+    for test_query=1, #inputs do
+        for epoch=0, nepochs do
+            for query_id=1, #inputs do
+                -- Score the queries
+                memory, rougeRecall, rougePrecision, rougeF1, qValues = forwardpass(
+                                query_data, query_id, 
+                                model, epsilon, gamma, 
+                                metric, thresh, use_cuda
+                )
+                if query_id == test_query then
+                    test_f1 = rougeF1
+                end
+                -- Build the memory
+                if epoch == 0 then
+                    randomF1 = rougeF1
+                    if query_id == 1 and query_id ~= test_query then 
+                        fullmemory = memory
+                    end
+                else
+                    --- By not storing the memory of the test query we won't back prop on it
+                    if query_id ~= test_query then 
+                        fullmemory = buildMemory(memory, fullmemory, mem_size, batch_size, use_cuda)
+                    end
+                    -- fullmemory = stackMemory(memory, fullmemory, mem_size, batch_size, use_cuda)
+                end
+                --- Running backprop
+                loss = backPropOld(fullmemory, params, gradParams, optimParams, model, criterion, batch_size, mem_size, use_cuda)
+
+                nactions = torch.totable(memory[3]:sum(1))[1]
+                perf_string = string.format("%i; %.3f; %.6f; %.6f; %.6f; %.6f; %.6f; %.6f; {min=%.3f, max=%.3f}; {min=%.3f, max=%.3f}; %i; %i; %i\n", 
+                    epoch, epsilon, loss, randomF1, query_data[query_id][14],  -- this is the oracle
+                    rougeF1, rougeRecall, rougePrecision,
+                    memory[2]:min(), memory[2]:max(),
+                    qValues:min(), qValues:max(),
+                    nactions[SELECT], nactions[SKIP],
+                    query_id
+                )
+                perf:write(perf_string)
+
+                local avpfile = io.open(string.format("./plotdata/%s/%i/%i_epoch.txt", nnmod, query_id, epoch), 'w')
+                avpfile:write("predSkip;predSelect;actual;Skip;Select;query\n")
+                for i=1, memory[1][1]:size(1) do
+                    avp_string = string.format("%.6f;%.6f;%6f;%i;%i;%i\n", 
+                            qValues[i][SKIP], qValues[i][SELECT], memory[2][i], 
+                            memory[3][i][SKIP], memory[3][i][SELECT], query_id)
+                    avpfile:write(avp_string)
+                end
+                avpfile:close()
+            end
+
+            if (epsilon - delta) <= base_explore_rate then
+                epsilon = base_explore_rate
+                if epoch > end_baserate then 
+                    base_explore_rate = 0.
+                end
+            else 
+                epsilon = epsilon - delta
+            end
+
+        end
     end
     print(string.format("Model complete {Selected = %i; Skipped  = %i}; Final Rouge Recall, Precision, F1 = {%.6f;%.6f;%.6f}", 
                 nactions[SELECT], nactions[SKIP], rougeRecall, rougePrecision, rougeF1))

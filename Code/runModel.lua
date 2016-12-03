@@ -62,8 +62,8 @@ local sandy = {
 
 local inputs = {
         aurora, 
-        -- pakistan,
-        -- sandy
+        pakistan,
+        sandy
 }
 
 if opt.usecuda then
