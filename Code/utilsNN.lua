@@ -537,8 +537,8 @@ function trainCV(inputs, query_data, model, nepochs, nnmod, metric, thresh, gamm
                 else
                     --- By not storing the memory of the test query we won't back prop on it
                     if query_id ~= test_query then 
-                        -- fullmemory = buildMemory(memory, fullmemory, mem_size, batch_size, use_cuda)
                         fullmemory = stackMemory(memory, fullmemory, mem_size, batch_size, use_cuda)
+                        -- fullmemory = buildMemory(memory, fullmemory, mem_size, batch_size, use_cuda)
                     end
                 end
 
