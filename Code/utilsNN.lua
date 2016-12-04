@@ -29,14 +29,13 @@ function scoreOracle(sentenceStream, maxSummarySize, refCounts)
 end
 
 function buildModel(model, vocabSize, embeddingSize, metric, use_cuda)
-    --- Small experiments seem to show that the Tanh activations performed better than the ReLU
+    -- Small experiments seem to show that the Tanh activations performed better\
+    --      than the ReLU for the bow model
     if model == 'bow' then
         print(string.format("Running bag-of-words model to learn %s", metric))
         sentenceLookup = nn.Sequential()
                     :add(nn.LookupTableMaskZero(vocabSize, embeddingSize))
-                    -- Note not averaging really blows up the model so keep this true
-                    :add(nn.Sum(2, 3, true))
-                    -- :add(nn.ReLU())
+                    :add(nn.Sum(2, 3, true)) -- Not averaging blows up model so keep this true
                     :add(nn.Tanh())
     else
         print(string.format("Running LSTM model to learn %s", metric))
@@ -47,8 +46,7 @@ function buildModel(model, vocabSize, embeddingSize, metric, use_cuda)
                     :add(nn.SelectTable(-1))            -- selects last state of the LSTM
                     :add(nn.Linear(embeddingSize, embeddingSize))
                     :add(nn.ReLU())
-                    -- :add(nn.Tanh())
-   end
+    end
     local queryLookup = sentenceLookup:clone("weight", "gradWeight") 
     local summaryLookup = sentenceLookup:clone("weight", "gradWeight")
     local pmodule = nn.ParallelTable()
@@ -56,13 +54,19 @@ function buildModel(model, vocabSize, embeddingSize, metric, use_cuda)
                 :add(queryLookup)
                 :add(summaryLookup)
 
-    local nnmodel = nn.Sequential()
-            :add(pmodule)
-            :add(nn.JoinTable(2))
-            :add(nn.Tanh())
-            -- :add(nn.ReLU())
-            :add(nn.Linear(embeddingSize * 3, 2))
-            -- :add(nn.Tanh())
+    if model == 'bow' then
+        nnmodel = nn.Sequential()
+                :add(pmodule)
+                :add(nn.JoinTable(2))
+                :add(nn.Tanh())
+                :add(nn.Linear(embeddingSize * 3, 2))
+    else
+        nnmodel = nn.Sequential()
+                :add(pmodule)
+                :add(nn.JoinTable(2))
+                :add(nn.ReLU())
+                :add(nn.Linear(embeddingSize * 3, 2))
+    end
     if use_cuda then
         return nnmodel:cuda()
     end
@@ -513,8 +517,7 @@ function trainCV(inputs, query_data, model, nepochs, nnmod, metric, thresh, gamm
 
     local params, gradParams = model:getParameters()
     local perf = io.open(string.format("./Performance/CV/%s_%s_perf.txt", nnmod, metric), 'w')
-    perf:write(string.format("epoch;epsilon;loss;randomF1;oracleF1;rougeF1;rougeRecall;rougePrecision;actual;pred;nselect;nskip;query\n"))
-
+    perf:write(string.format("epoch;epsilon;loss;randomF1;oracleF1;rougeF1;rougeRecall;rougePrecision;actual;pred;nselect;nskip;query;TestQuery\n"))
     for test_query=1, #inputs do
         for epoch=0, nepochs do
             for query_id=1, #inputs do
@@ -527,7 +530,7 @@ function trainCV(inputs, query_data, model, nepochs, nnmod, metric, thresh, gamm
                 -- Build the memory
                 if epoch == 0 then
                     randomF1 = rougeF1                    
-                    if query_id == 1 and query_id ~= test_query then 
+                    if query_id ~= test_query and fullmemory == nil then 
                         fullmemory = memory
                     end
                 else
@@ -537,26 +540,22 @@ function trainCV(inputs, query_data, model, nepochs, nnmod, metric, thresh, gamm
                         fullmemory = stackMemory(memory, fullmemory, mem_size, batch_size, use_cuda)
                     end
                 end
-                -- Storing the test performance
-                if query_id == test_query then
-                    testf1 = rougeF1
-                    if epoch==0 then
-                        -- Only need to get these once
-                        testrandomF1 = rougeF1
-                        testOracleF1 = query_data[query_id][14]
-                    end
+
+                if query_id ~= test_query then 
+                    --- Running backprop
+                    loss = backPropOld(fullmemory, params, gradParams, optimParams, model, criterion, batch_size, mem_size, use_cuda)
+                else 
+                    loss = 0.
                 end
-                --- Running backprop
-                loss = backPropOld(fullmemory, params, gradParams, optimParams, model, criterion, batch_size, mem_size, use_cuda)
 
                 nactions = torch.totable(memory[3]:sum(1))[1]
-                perf_string = string.format("%i; %.3f; %.6f; %.6f; %.6f; %.6f; %.6f; %.6f; {min=%.3f, max=%.3f}; {min=%.3f, max=%.3f}; %i; %i; %i\n", 
+                perf_string = string.format("%i; %.3f; %.6f; %.6f; %.6f; %.6f; %.6f; %.6f; {min=%.3f, max=%.3f}; {min=%.3f, max=%.3f}; %i; %i; %i; %i; %s\n", 
                     epoch, epsilon, loss, randomF1, query_data[query_id][14],  -- this is the oracle
                     rougeF1, rougeRecall, rougePrecision,
                     memory[2]:min(), memory[2]:max(),
                     qValues:min(), qValues:max(),
                     nactions[SELECT], nactions[SKIP],
-                    query_id
+                    query_id, test_query, query_id==test_query
                 )
                 perf:write(perf_string)
             end

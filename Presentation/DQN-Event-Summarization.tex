@@ -31,7 +31,9 @@
 \end{frame}
 
 \begin{frame}
+	\frametitle{Outline} 
 	\tableofcontents
+	
 \end{frame}
 
 % Slide 1
@@ -282,6 +284,7 @@ This leads us to explore Deep Q-Networks (DQN) for 3 reasons:
 
 		\begin{frame}
 			\frametitle{DQN-LSTM for 1 Query and 20 Sentences: Precision}
+			Model learned to select the single best sentence.
 			\begin{center}
 			\framebox{
 			  \includegraphics[height=2.0in,width=4.0in]{DQN_LSTM_Precision}
@@ -291,6 +294,7 @@ This leads us to explore Deep Q-Networks (DQN) for 3 reasons:
 		
 		\begin{frame}
 			\frametitle{DQN-LSTM for 1 Query and 20 Sentences: Recall}
+			Model learned to select all sentences.
 			\begin{center}
 			\framebox{
 			  \includegraphics[height=2.0in,width=4.0in]{DQN_LSTM_Recall}
@@ -299,17 +303,18 @@ This leads us to explore Deep Q-Networks (DQN) for 3 reasons:
 		\end{frame}
 	
 		\begin{frame}
+			Model learned to maximize F1.
 			\frametitle{DQN-LSTM for 1 Query and 20 Sentences: F1}
 			\begin{center}
 			\framebox{
-%			  \includegraphics[height=2.0in,width=4.0in]{DQN_LSTM_F1}
+			  \includegraphics[height=2.0in,width=4.0in]{DQN_LSTM_F1}
 				}
 			\end{center}
 		\end{frame}
 
 		\begin{frame}
 			\frametitle{What did we learn?}
-			The experiments are extremely useful in understanding the implications of the specification of the network. More specifically, we learned that 
+			The experiments are extremely useful in understanding the implications of the specification of the network. We found that 
 			\begin{center}
 				\begin{enumerate}
 					\item<1-> Maximizing Precision is easier than maximizing Recall.
