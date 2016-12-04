@@ -515,9 +515,10 @@ function trainCV(inputs, query_data, model, nepochs, nnmod, metric, thresh, gamm
         model = model:cuda()
     end
 
+    ranF1s = {}
     local params, gradParams = model:getParameters()
     local perf = io.open(string.format("./Performance/CV/%s_%s_perf.txt", nnmod, metric), 'w')
-    perf:write(string.format("epoch;epsilon;loss;randomF1;oracleF1;rougeF1;rougeRecall;rougePrecision;actual;pred;nselect;nskip;query;TestQuery\n"))
+    perf:write(string.format("epoch;epsilon;loss;randomF1;oracleF1;rougeF1;rougeRecall;rougePrecision;actual;pred;nselect;nskip;query;testQuery;Test\n"))
     for test_query=1, #inputs do
         for epoch=0, nepochs do
             for query_id=1, #inputs do
@@ -529,7 +530,7 @@ function trainCV(inputs, query_data, model, nepochs, nnmod, metric, thresh, gamm
                 )
                 -- Build the memory
                 if epoch == 0 then
-                    randomF1 = rougeF1                    
+                    ranF1s[query_id] = rougeF1
                     if query_id ~= test_query and fullmemory == nil then 
                         fullmemory = memory
                     end
@@ -550,7 +551,7 @@ function trainCV(inputs, query_data, model, nepochs, nnmod, metric, thresh, gamm
 
                 nactions = torch.totable(memory[3]:sum(1))[1]
                 perf_string = string.format("%i; %.3f; %.6f; %.6f; %.6f; %.6f; %.6f; %.6f; {min=%.3f, max=%.3f}; {min=%.3f, max=%.3f}; %i; %i; %i; %i; %s\n", 
-                    epoch, epsilon, loss, randomF1, query_data[query_id][14],  -- this is the oracle
+                    epoch, epsilon, loss, ranF1s[query_id], query_data[query_id][14],  -- this is the oracle
                     rougeF1, rougeRecall, rougePrecision,
                     memory[2]:min(), memory[2]:max(),
                     qValues:min(), qValues:max(),
