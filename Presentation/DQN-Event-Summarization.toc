@@ -10,5 +10,5 @@
 \beamer@subsectionintoc {2}{6}{Algorithm}{15}{0}{2}
 \beamer@sectionintoc {3}{Experiments}{16}{0}{3}
 \beamer@subsectionintoc {3}{1}{Simulation}{16}{0}{3}
-\beamer@subsectionintoc {3}{2}{Benchmarking}{20}{0}{3}
-\beamer@sectionintoc {4}{Resources}{21}{0}{4}
+\beamer@subsectionintoc {3}{2}{Benchmarking}{21}{0}{3}
+\beamer@sectionintoc {4}{Resources}{22}{0}{4}

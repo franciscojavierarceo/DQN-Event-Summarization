@@ -20,8 +20,7 @@
 \author[Francisco Javier Arceo \& Chris Kedzie]
        {\parbox[t]{1.5in}{Francisco Javier Arceo \\ \href{mailto: fja2114@columbia.edu}{\color{blue} \small  fja2114@columbia.edu} } \and 
         \parbox[t]{1.5in}{Chris Kedzie \\  \and \href{mailto: kedzie@cs.columbia.edu}{\color{blue} \small kedzie@cs.columbia.edu} }}
-%\author{Francisco Javier Arceo, Chris Kedzie} % \\ fja2114@columbia.edu, kedzie@cs.columbia.edu }
-% \contact{, }
+        
 \institute{ \large Columbia University in the City of New York}
 \date{December 13, 2016}
 
@@ -117,7 +116,7 @@ This leads us to explore Deep Q-Networks (DQN) for 3 reasons:
 	\subsection{Rewards}
 	\begin{frame}
 			\frametitle{Reward}
-				The reward $r$ for a given action $a$ at time $t$ is measured by the change in ROUGE-1F1 score of the predicted summary $\tilde{y}_{t}$ measured against a gold standard summary $Y$. 
+				The reward $r$ for a given action $a$ at time $t$ is measured by the change in ROUGE-F1 score of the predicted summary $\tilde{y}_{t}$ measured against a gold standard summary $Y$. 
 	\begin{equation}
 		 \textrm{ROUGE-R}(\tilde{y}, Y) = 
 		    \frac{\sum_{g \in Y} 
@@ -298,12 +297,25 @@ This leads us to explore Deep Q-Networks (DQN) for 3 reasons:
 				}
 			\end{center}
 		\end{frame}
+	
 		\begin{frame}
 			\frametitle{DQN-LSTM for 1 Query and 20 Sentences: F1}
 			\begin{center}
 			\framebox{
-			  \includegraphics[height=2.0in,width=4.0in]{DQN_LSTM_F1}
+%			  \includegraphics[height=2.0in,width=4.0in]{DQN_LSTM_F1}
 				}
+			\end{center}
+		\end{frame}
+
+		\begin{frame}
+			\frametitle{What did we learn?}
+			The experiments are extremely useful in understanding the implications of the specification of the network. More specifically, we learned that 
+			\begin{center}
+				\begin{enumerate}
+					\item<1-> Maximizing Precision is easier than maximizing Recall.
+					\item<1-> Choosing either Precision or Recall yields obvious pathological results; i.e., selecting the single best sentence or selecting all sentences.
+					\item<1-> Optimizing F1 requires much longer training to choose the optimal strategy.
+				\end{enumerate}
 			\end{center}
 		\end{frame}
 

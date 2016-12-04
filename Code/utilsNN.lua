@@ -172,7 +172,7 @@ function buildMemory(newinput, memory_hist, memsize, use_cuda)
     return {inputMemory, rewardMemory, actionMemory}
 end
 
-function stackmemory(newinput, memory_hist, memsize, use_cuda)
+function stackMemory(newinput, memory_hist, memsize, use_cuda)
     local sentMemory = torch.cat(newinput[1][1]:double(), memory_hist[1][1]:double(), 1)
     local queryMemory = torch.cat(newinput[1][2]:double(), memory_hist[1][2]:double(), 1)
     local sumryMemory = torch.cat(newinput[1][3]:double(), memory_hist[1][3]:double(), 1)
@@ -377,14 +377,14 @@ function forwardpass(query_data, query_id, model, epsilon, gamma, metric, thresh
         else
             actionsOpt[i][SELECT] = 1
         end
-        summary = buildSummary(
+        local summary = buildSummary(
             actions:narrow(1, 1, i), 
             sentenceStream:narrow(1, 1, i),
             summaryBuffer:narrow(1, i + 1, 1),
             use_cuda
         )
 
-        summaryOpt = buildSummary(
+        local summaryOpt = buildSummary(
             actionsOpt:narrow(1, 1, i), 
             sentenceStream:narrow(1, 1, i),
             summaryBuffer:narrow(1, i + 1, 1),
@@ -457,8 +457,8 @@ function train(inputs, query_data, model, nepochs, nnmod, metric, thresh, gamma,
                     fullmemory = memory
                 end
             else
-                fullmemory = buildMemory(memory, fullmemory, mem_size, batch_size, use_cuda)
-                -- fullmemory = stackMemory(memory, fullmemory, mem_size, batch_size, use_cuda)
+                -- fullmemory = buildMemory(memory, fullmemory, mem_size, batch_size, use_cuda)
+                fullmemory = stackMemory(memory, fullmemory, mem_size, batch_size, use_cuda)
             end
             --- Running backprop
             loss = backPropOld(fullmemory, params, gradParams, optimParams, model, criterion, batch_size, mem_size, use_cuda)
@@ -533,8 +533,8 @@ function trainCV(inputs, query_data, model, nepochs, nnmod, metric, thresh, gamm
                 else
                     --- By not storing the memory of the test query we won't back prop on it
                     if query_id ~= test_query then 
-                        fullmemory = buildMemory(memory, fullmemory, mem_size, batch_size, use_cuda)
-                        -- fullmemory = stackMemory(memory, fullmemory, mem_size, batch_size, use_cuda)
+                        -- fullmemory = buildMemory(memory, fullmemory, mem_size, batch_size, use_cuda)
+                        fullmemory = stackMemory(memory, fullmemory, mem_size, batch_size, use_cuda)
                     end
                 end
                 -- Storing the test performance
@@ -559,16 +559,6 @@ function trainCV(inputs, query_data, model, nepochs, nnmod, metric, thresh, gamm
                     query_id
                 )
                 perf:write(perf_string)
-
-                local avpfile = io.open(string.format("./plotdata/%s/%i/%i_epoch.txt", nnmod, query_id, epoch), 'w')
-                avpfile:write("predSkip;predSelect;actual;Skip;Select;query\n")
-                for i=1, memory[1][1]:size(1) do
-                    avp_string = string.format("%.6f;%.6f;%6f;%i;%i;%i\n", 
-                            qValues[i][SKIP], qValues[i][SELECT], memory[2][i], 
-                            memory[3][i][SKIP], memory[3][i][SELECT], query_id)
-                    avpfile:write(avp_string)
-                end
-                avpfile:close()
             end
 
             if (epsilon - delta) <= base_explore_rate then
