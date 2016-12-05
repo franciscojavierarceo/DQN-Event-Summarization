@@ -89,7 +89,7 @@ local vocabSize, query_data = intialize_variables(query_file, inputs,
 local model = buildModel(opt.model, vocabSize, opt.embeddingSize, opt.metric, opt.usecuda)
 
 -- Running the model
-trainCV(inputs, query_data, model, opt.nepochs, opt.model, opt.metric, opt.thresh, 
+train(inputs, query_data, model, opt.nepochs, opt.model, opt.metric, opt.thresh, 
       opt.gamma, opt.epsilon, delta, opt.base_explore_rate, opt.end_baserate, 
       opt.mem_size, opt.batch_size, optimParams, opt.n_backprops, opt.usecuda)
 
