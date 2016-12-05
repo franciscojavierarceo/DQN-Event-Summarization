@@ -443,6 +443,7 @@ function train(inputs, query_data, model, nepochs, nnmod, metric, thresh, gamma,
         model = model:cuda()
     end
 
+    query_randomF1 = {}
     local params, gradParams = model:getParameters()
     local perf = io.open(string.format("./Performance/Simulation/%s_%s_perf.txt", nnmod, metric), 'w')
     perf:write(string.format("epoch;epsilon;loss;randomF1;oracleF1;rougeF1;rougeRecall;rougePrecision;actual;pred;nselect;nskip;query\n"))
@@ -456,7 +457,7 @@ function train(inputs, query_data, model, nepochs, nnmod, metric, thresh, gamma,
             )
             -- Build the memory
             if epoch == 0 then
-                randomF1 = rougeF1
+                query_randomF1[query_id] = rougeF1
                 if query_id == 1 and query_id ~= test_query then 
                     fullmemory = memory
                 end
@@ -469,7 +470,7 @@ function train(inputs, query_data, model, nepochs, nnmod, metric, thresh, gamma,
 
             nactions = torch.totable(memory[3]:sum(1))[1]
             perf_string = string.format("%i; %.3f; %.6f; %.6f; %.6f; %.6f; %.6f; %.6f; {min=%.3f, max=%.3f}; {min=%.3f, max=%.3f}; %i; %i; %i\n", 
-                epoch, epsilon, loss, randomF1, query_data[query_id][14],  -- this is the oracle
+                epoch, epsilon, loss, query_randomF1[query_id], query_data[query_id][14],  -- this is the oracle
                 rougeF1, rougeRecall, rougePrecision,
                 memory[2]:min(), memory[2]:max(),
                 qValues:min(), qValues:max(),
@@ -548,7 +549,6 @@ function trainCV(inputs, query_data, model, nepochs, nnmod, metric, thresh, gamm
                 else 
                     loss = 0.
                 end
-
                 nactions = torch.totable(memory[3]:sum(1))[1]
                 perf_string = string.format("%i; %.3f; %.6f; %.6f; %.6f; %.6f; %.6f; %.6f; {min=%.3f, max=%.3f}; {min=%.3f, max=%.3f}; %i; %i; %i; %i; %s\n", 
                     epoch, epsilon, loss, ranF1s[query_id], query_data[query_id][14],  -- this is the oracle
