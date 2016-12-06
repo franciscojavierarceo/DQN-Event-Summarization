@@ -16,7 +16,8 @@ model1:add(nn.LogSoftMax())
 model2 = nn.Sequential()
 model2:add(nn.Linear(1, 1))
 
-model3 = nn.Parallel(1, 1)
+--- Concat Table
+model3 = nn.Concat()
 model3:add(model1)
 model3:add(model2)
 

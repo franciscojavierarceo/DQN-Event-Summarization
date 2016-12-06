@@ -64,7 +64,7 @@ local wiscon = {
         ['inputs'] = 'wisconsin_sandy_first_sentence_numtext2.csv',
         ['nuggets'] ='wisconsin_nuggets_numtext.csv',
         ['query'] = queries[7],
-        ['query_name'] = 'sandy'
+        ['query_name'] = 'wisconsin'
 }
 
 local inputs = {
