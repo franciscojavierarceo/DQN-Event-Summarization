@@ -28,6 +28,7 @@ cmd:option('--maxSummarySize', 300, 'Maximum summary size')
 cmd:option('--end_baserate', 5, 'Epoch number at which the base_rate ends')
 cmd:option('--K_tokens', 25, 'Maximum number of tokens for each sentence')
 cmd:option('--thresh', 0, 'Threshold operator')
+cmd:option('--adapt', false, 'Domain Adaptation Regularization')
 cmd:option('--n_backprops', 3, 'Number of times to backprop through the data')
 cmd:text()
 --- this retrieves the commands and stores them in opt.variable (e.g., opt.model)
@@ -59,6 +60,12 @@ local sandy = {
         ['query'] = queries[7],
         ['query_name'] = 'sandy'
 }
+local wiscon = {
+        ['inputs'] = 'wisconsin_sandy_first_sentence_numtext2.csv',
+        ['nuggets'] ='wisconsin_nuggets_numtext.csv',
+        ['query'] = queries[7],
+        ['query_name'] = 'sandy'
+}
 
 local inputs = {
         aurora, 
@@ -86,11 +93,11 @@ local optimParams = { learningRate = opt.learning_rate }
 local vocabSize, query_data = intialize_variables(query_file, inputs, 
                                             opt.n_samples, input_path, opt.K_tokens, 
                                             opt.maxSummarySize)
-local model = buildModel(opt.model, vocabSize, opt.embeddingSize, opt.metric, opt.usecuda)
+local model = buildModel(opt.model, vocabSize, opt.embeddingSize, opt.metric, opt.adapt, opt.usecuda)
 
 -- Running the model
 train(inputs, query_data, model, opt.nepochs, opt.model, opt.metric, opt.thresh, 
       opt.gamma, opt.epsilon, delta, opt.base_explore_rate, opt.end_baserate, 
-      opt.mem_size, opt.batch_size, optimParams, opt.n_backprops, opt.usecuda)
+      opt.mem_size, opt.batch_size, optimParams, opt.n_backprops, opt.regmodel, opt.usecuda)
 
 -- os.execute(string.format("python make_density_gif.py %i %s %s", nepochs, nnmod, metric))

@@ -28,7 +28,7 @@ function scoreOracle(sentenceStream, maxSummarySize, refCounts)
     return oracleF1, actions
 end
 
-function buildModel(model, vocabSize, embeddingSize, metric, use_cuda)
+function buildModel(model, vocabSize, embeddingSize, metric, adapt, use_cuda)
     -- Small experiments seem to show that the Tanh activations performed better\
     --      than the ReLU for the bow model
     if model == 'bow' then
@@ -67,6 +67,20 @@ function buildModel(model, vocabSize, embeddingSize, metric, use_cuda)
                 :add(nn.ReLU())
                 :add(nn.Linear(embeddingSize * 3, 2))
     end
+
+    if adapt then 
+        local regmodel = nn.Sequential()
+            :add(nn.Linear(embeddingSize, 1))
+            :add(nn.LogSigmoid())
+            :add(nn.SoftMax())
+
+        local jointregmodel = nn.ParallelTable()
+            :add(nnmodel)
+            :add(regmodel)
+        
+        nnmodel = jointregmodel
+    end
+
     if use_cuda then
         return nnmodel:cuda()
     end
@@ -239,7 +253,7 @@ function backProp(input_memory, params, gradParams, optimParams, model, criterio
     return loss/n_backprops
 end
 
-function backPropOld(input_memory, params, gradParams, optimParams, model, criterion, batch_size, memsize, use_cuda)
+function backPropOld(input_memory, params, gradParams, optimParams, model, criterion, batch_size, memsize, regmodel, use_cuda)
     local inputs = {input_memory[1], input_memory[3]}
     local rewards = input_memory[2]
     local dataloader = dl.TensorLoader(inputs, rewards)
@@ -431,10 +445,23 @@ function forwardpass(query_data, query_id, model, epsilon, gamma, metric, thresh
     return memory, rougeRecall, rougePrecision, rougeF1, qValues
 end
 
-function train(inputs, query_data, model, nepochs, nnmod, metric, thresh, gamma, epsilon, delta, base_explore_rate, end_baserate, mem_size, batch_size, optimParams, n_backprops, use_cuda)
+function train(inputs, query_data, model, nepochs, nnmod, metric, thresh, gamma, epsilon, delta, base_explore_rate, end_baserate, mem_size, batch_size, optimParams, n_backprops, regmodel, use_cuda)
     math.randomseed(420)
     torch.manualSeed(420)
     criterion = nn.MSECriterion()
+
+    -- input = {torch.rand(2,10), torch.randn(2,10)}
+    -- target = {torch.IntTensor{1,8}, torch.randn(2,10)}
+    -- nll = nn.ClassNLLCriterion()
+    -- mse = nn.MSECriterion()
+    -- pc = nn.ParallelCriterion():add(nll, 0.5):add(mse)
+    -- output = pc:forward(input, target)
+
+    if regmodel then 
+        criterion = nn.ParallelCriterion()
+                        :add(nn.MSECriterion(), 0.5)
+                        :add(nn.ClassNLLCriterion())
+    end
     local SKIP = 1
     local SELECT = 2
 
