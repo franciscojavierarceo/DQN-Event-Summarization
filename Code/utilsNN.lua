@@ -450,13 +450,6 @@ function train(inputs, query_data, model, nepochs, nnmod, metric, thresh, gamma,
     torch.manualSeed(420)
     criterion = nn.MSECriterion()
 
-    -- input = {torch.rand(2,10), torch.randn(2,10)}
-    -- target = {torch.IntTensor{1,8}, torch.randn(2,10)}
-    -- nll = nn.ClassNLLCriterion()
-    -- mse = nn.MSECriterion()
-    -- pc = nn.ParallelCriterion():add(nll, 0.5):add(mse)
-    -- output = pc:forward(input, target)
-
     if regmodel then 
         criterion = nn.ParallelCriterion()
                         :add(nn.MSECriterion(), 0.5)
