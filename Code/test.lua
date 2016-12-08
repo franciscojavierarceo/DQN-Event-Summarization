@@ -1,15 +1,6 @@
 require 'nn'
 math.randomseed(3)
 torch.manualSeed(3)
-
--- This is the example on the documentation
--- input = {torch.rand(2,10), torch.randn(2,10)}
--- target = {torch.IntTensor{1,8}, torch.randn(2,10)}
--- nll = nn.ClassNLLCriterion()
--- mse = nn.MSECriterion()
--- pc = nn.ParallelCriterion():add(nll, 0.5):add(mse)
--- output = pc:forward(input, target)
-
 -- Building data
 x = torch.rand(10):resize(10, 1)
 xhat = x + 0.01 * torch.rand(10)
@@ -28,13 +19,8 @@ model3:add(model1)
 model3:add(model2)
 
 model4 = nn.Sequential()
--- model4:add(nn.SelectTable(1))
-model4:add(nn.SplitTable(1))
-
-model5 = nn.ParallelTable()
-model5:add(model4)
-
--- model4:add(nn.SplitTable(2))
+model4:add(model3)
+model4:add(nn.SplitTable(2))
 
 print("Logistic Pred:")
 pred_log = model1:forward(x)
@@ -48,30 +34,28 @@ print("Logistic and Linear Pred:")
 pred_both = model3:forward(x)
 print(pred_both)
 
+print("Joined and separated")
 pred_final = model4:forward(x)
 print(pred_final)
 
-
-criterion = nn.CrossEntropyCriterion()
+nll = nn.CrossEntropyCriterion()
 mse = nn.MSECriterion()
-pc = nn.ParallelCriterion():add(criterion):add(mse)
+pc = nn.ParallelCriterion():add(nll):add(mse)
 -- Can put in scalar if you want
 -- pc = nn.ParallelCriterion():add(nll, 0.5):add(mse)
 
 print("NLL loss:")
-nll_loss = criterion:forward(pred_log, target)
+nll_loss = nll:forward(pred_log, target)
 print(nll_loss)
 
 print("MSE loss:")
 mse_loss = mse:forward(pred_reg, xhat)
 print(nll_loss)
 
-
 print("Parallel NLL-MSE loss:")
-pred_final = nn.SplitTable(2):forward(pred_both)
-pred_final = {pred_final[1]:resize(10, 1), pred_final[2]:resize(10, 1)}
-fullxs = {target, xhat}
-print(pred_final, fullxs)
-prl_loss = pc:forward(predfinal, fullxs)
+prl_loss = pc:forward( {pred_log, pred_reg} , {target, xhat} )
 print(prl_loss)
 
+print("Parallel Full NLL-MSE loss:")
+prl_final = pc:forward(pred_final, {target, xhat})
+print(prl_final)
