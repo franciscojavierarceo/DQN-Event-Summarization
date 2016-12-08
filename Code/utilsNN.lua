@@ -117,7 +117,7 @@ function buildSummary(actions, sentences, buffer, use_cuda)
     return buffer
 end
 
-function buildTokenCounts(summary)
+function buildTokenCounts(summary, stopwordlist)
     local counts = {}
     for i=1,summary:size(2) do
         if summary[1][i] > 0 then
@@ -129,14 +129,21 @@ function buildTokenCounts(summary)
             end
         end
     end
+    -- Removing stop words here
+    if stopwordlist ~= nil then 
+        for k, stopword in pairs(stopwordlist) do
+            if counts[stopword] ~= nil then
+                counts[stopword] = nil
+            end
+        end
+    end
     return counts
 end
 
-function rougeScores(genSummary, refSummary, stopwordlist)
+function rougeScores(genSummary, refSummary)
     local genTotal = 0
     local refTotal = 0
     local intersection = 0
-
     for k, refCount in pairs(refSummary) do
         local genCount = genSummary[k]
         if genCount == nil then 
@@ -154,15 +161,6 @@ function rougeScores(genSummary, refSummary, stopwordlist)
     end
     if genTotal == 0 then 
         genTotal = 1 
-    end
-
-    -- Removing stop words here
-    if stopwordlist ~= nil then 
-        for k, stopword in pairs(stopwordlist) do
-            if intersection[stopword] ~= nil then
-                intersection[stopword] = nil
-            end
-        end
     end
     
     local recall = intersection / refTotal
@@ -273,22 +271,19 @@ function backProp(input_memory, params, gradParams, optimParams, model, criterio
 end
 
 function backPropOld(input_memory, params, gradParams, optimParams, model, criterion, batch_size, memsize, regmodel, use_cuda)
-    print("Back prop")
+    maskLayer = nn.MaskedSelect()
     local inputs = {input_memory[1], input_memory[3]}
     local rewards = input_memory[2]
     local dataloader = dl.TensorLoader(inputs, rewards)
     for k, xin, reward in dataloader:sampleiter(batch_size, memsize) do
         xinput = xin[1]
         actions_in = xin[2]
+        if use_cuda then
+            maskLayer = nn.MaskedSelect():cuda()
+            actions_in = torch.CudaByteTensor(#actions_in):copy(actions_in)
+        end
         local function feval(params)
             gradParams:zero()
-            local maskLayer = nn.MaskedSelect():cuda()
-            if use_cuda then 
-                print("USING CUDA FOR BACKPROP")
-                maskLayer = maskLayer:cuda()
-                xinput = xinput:cuda()
-                actions_in = actions_in:cuda()
-            end
             local predQ = model:forward(xinput)
             local predQOnActions = maskLayer:forward({predQ, actions_in}) 
             local lossf = criterion:forward(predQOnActions, reward)
@@ -333,7 +328,7 @@ function intialize_variables(query_file, inputs, n_samples, input_path, K_tokens
         local sentenceStream = LongTensor(padZeros(xtdm, K_tokens))
         local streamSize = sentenceStream:size(1)
         local refSummary = Tensor{ntdm}
-        local refCounts = buildTokenCounts(refSummary)
+        local refCounts = buildTokenCounts(refSummary, stopwordlist)
         local buffer = Tensor(1, maxSummarySize):zero()
         local actions = ByteTensor(streamSize, 2):fill(0)
         local actionsOpt = ByteTensor(streamSize, 2):fill(0)
@@ -432,8 +427,8 @@ function forwardpass(query_data, query_id, model, epsilon, gamma, metric, thresh
             use_cuda
         )
 
-        local recall, prec, f1 = rougeScores(buildTokenCounts(summary), refCounts, stopwordlist)
-        local rOpt, pOpt, f1Opt = rougeScores(buildTokenCounts(summaryOpt), refCounts, stopwordlist)
+        local recall, prec, f1 = rougeScores(buildTokenCounts(summary, stopwordlist), refCounts)
+        local rOpt, pOpt, f1Opt = rougeScores(buildTokenCounts(summaryOpt, stopwordlist), refCounts)
 
         if metric == "f1" then
             rouge[i + 1] = threshold(f1, thresh)
@@ -512,7 +507,7 @@ function train(inputs, query_data, model, nepochs, nnmod, metric, thresh, gamma,
                 fullmemory = stackMemory(memory, fullmemory, mem_size, use_cuda)
             end
             --- Running backprop
-            loss = backPropOld(fullmemory, params, gradParams, optimParams, model, criterion, batch_size, mem_size, use_cuda)
+            loss = backPropOld(fullmemory, params, gradParams, optimParams, model, criterion, batch_size, mem_size, regmodel, use_cuda)
 
             nactions = torch.totable(memory[3]:sum(1))[1]
             perf_string = string.format("%i; %.3f; %.6f; %.6f; %.6f; %.6f; %.6f; %.6f; {min=%.3f, max=%.3f}; {min=%.3f, max=%.3f}; %i; %i; %i\n", 
