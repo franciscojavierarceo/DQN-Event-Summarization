@@ -195,7 +195,12 @@ function stackMemory(newinput, memory_hist, memsize, use_cuda)
     local queryMemory = torch.cat(newinput[1][2]:double(), memory_hist[1][2]:double(), 1)
     local sumryMemory = torch.cat(newinput[1][3]:double(), memory_hist[1][3]:double(), 1)
     local rewardMemory = torch.cat(newinput[2]:double(), memory_hist[2]:double(), 1)
-    local actionMemory = torch.cat(newinput[3], memory_hist[3], 1)
+
+    if use_cuda then 
+        actionMemory = torch.cat(newinput[3]:double(), memory_hist[3]:double(), 1)
+    else 
+        actionMemory = torch.cat(newinput[3], memory_hist[3], 1)
+    end
     --- specifying rows to index 
     if sentMemory:size(1) < memsize then
         nend = sentMemory:size(1)
@@ -206,8 +211,8 @@ function stackMemory(newinput, memory_hist, memsize, use_cuda)
     end
     --- Selecting n last data points
     sentMemory = sentMemory[{{nstart, nend}}]
-    queryMemory= queryMemory[{{nstart, nend}}]
-    sumryMemory= sumryMemory[{{nstart, nend}}]
+    queryMemory = queryMemory[{{nstart, nend}}]
+    sumryMemory = sumryMemory[{{nstart, nend}}]
     rewardMemory = rewardMemory[{{nstart, nend}}]
     actionMemory = actionMemory[{{nstart, nend}}]
 
@@ -215,6 +220,8 @@ function stackMemory(newinput, memory_hist, memsize, use_cuda)
 
     if use_cuda then
         inputMemory = {sentMemory:cuda(), queryMemory:cuda(), sumryMemory:cuda()}
+        rewardMemory = rewardMemory:cuda()
+        actionMemory = torch.ByteTensor(#actionMemory):copy(actionMemory):cuda()
     end
     return {inputMemory, rewardMemory, actionMemory}
 end
@@ -254,6 +261,7 @@ function backProp(input_memory, params, gradParams, optimParams, model, criterio
 end
 
 function backPropOld(input_memory, params, gradParams, optimParams, model, criterion, batch_size, memsize, regmodel, use_cuda)
+    print("Back prop")
     local inputs = {input_memory[1], input_memory[3]}
     local rewards = input_memory[2]
     local dataloader = dl.TensorLoader(inputs, rewards)
@@ -262,9 +270,12 @@ function backPropOld(input_memory, params, gradParams, optimParams, model, crite
         actions_in = xin[2]
         local function feval(params)
             gradParams:zero()
-            local maskLayer = nn.MaskedSelect()
+            local maskLayer = nn.MaskedSelect():cuda()
             if use_cuda then 
-             maskLayer = maskLayer:cuda()
+                print("USING CUDA FOR BACKPROP")
+                maskLayer = maskLayer:cuda()
+                xinput = xinput:cuda()
+                actions_in = actions_in:cuda()
             end
             local predQ = model:forward(xinput)
             local predQOnActions = maskLayer:forward({predQ, actions_in}) 
@@ -441,6 +452,10 @@ function forwardpass(query_data, query_id, model, epsilon, gamma, metric, thresh
     local queryBatch = query:view(1, querySize):expand(streamSize, querySize) 
     local input = {sentenceStream, queryBatch, summaryBatch}
     local memory = {input, reward, actions}
+    if use_cuda then
+        local input = {sentenceStream:cuda(), queryBatch:cuda(), summaryBatch:cuda()}
+        local memory = {input, reward:cuda(), actions:cuda()}
+    end
 
     return memory, rougeRecall, rougePrecision, rougeF1, qValues
 end
@@ -482,8 +497,8 @@ function train(inputs, query_data, model, nepochs, nnmod, metric, thresh, gamma,
                     fullmemory = memory
                 end
             else
-                -- fullmemory = buildMemory(memory, fullmemory, mem_size, batch_size, use_cuda)
-                fullmemory = stackMemory(memory, fullmemory, mem_size, batch_size, use_cuda)
+                -- fullmemory = buildMemory(memory, fullmemory, mem_size, use_cuda)
+                fullmemory = stackMemory(memory, fullmemory, mem_size, use_cuda)
             end
             --- Running backprop
             loss = backPropOld(fullmemory, params, gradParams, optimParams, model, criterion, batch_size, mem_size, use_cuda)
@@ -558,8 +573,8 @@ function trainCV(inputs, query_data, model, nepochs, nnmod, metric, thresh, gamm
                 else
                     --- By not storing the memory of the test query we won't back prop on it
                     if query_id ~= test_query then 
-                        fullmemory = stackMemory(memory, fullmemory, mem_size, batch_size, use_cuda)
-                        -- fullmemory = buildMemory(memory, fullmemory, mem_size, batch_size, use_cuda)
+                        fullmemory = stackMemory(memory, fullmemory, mem_size, use_cuda)
+                        -- fullmemory = buildMemory(memory, fullmemory, mem_size,  use_cuda)
                     end
                 end
 

@@ -1,0 +1,2 @@
+epoch;epsilon;loss;randomF1;oracleF1;rougeF1;rougeRecall;rougePrecision;actual;pred;nselect;nskip;query
+0; 1.000; 0.092878; 0.046784; 0.071698; 0.046784; 0.024666; 0.452830; {min=-0.100, max=0.640}; {min=-0.038, max=0.109}; 5; 4; 1
