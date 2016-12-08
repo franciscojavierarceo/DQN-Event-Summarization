@@ -22,7 +22,7 @@ function threshold(x, thresh)
     --- Threshold function written mostly for clarity :note: done on absolute value
     if math.abs(x) <= thresh then
         return 0
-    else 
+    else
         return x 
     end
 end

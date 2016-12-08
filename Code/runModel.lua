@@ -42,6 +42,14 @@ query_fn = input_path .. 'queries_numtext.csv'
 query_file =  csvigo.load({path = query_fn, mode = "large", verbose = false})
 queries = padZeros(buildTermDocumentTable(query_file, nil), 5)
 
+stoplist = input_path .. 'stopwordids.csv'
+stopfile =  csvigo.load({path = stoplist, mode = "large", verbose = false})
+stoplist = buildTermDocumentTable(stopfile, nil)
+stopwords = {}
+for k,v in pairs(stoplist) do 
+    stopwords[k]  = v[1]
+end
+
 local pakistan = {
         ['inputs'] = '2012_pakistan_garment_factory_fires_first_sentence_numtext2.csv',
         ['nuggets'] ='pakistan_nuggets_numtext.csv',
