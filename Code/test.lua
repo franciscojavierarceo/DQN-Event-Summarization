@@ -28,8 +28,8 @@ model3:add(model1)
 model3:add(model2)
 
 model4 = nn.Sequential()
-model4:add(nn.SelectTable(2))
--- model4:add(nn.SplitTable(2))
+-- model4:add(nn.SelectTable(1))
+model4:add(nn.SplitTable(1))
 
 model5 = nn.ParallelTable()
 model5:add(model4)
@@ -68,5 +68,10 @@ print(nll_loss)
 
 
 print("Parallel NLL-MSE loss:")
-prl_loss = pc:forward(pred_both, {target, xhat})
+pred_final = nn.SplitTable(2):forward(pred_both)
+pred_final = {pred_final[1]:resize(10, 1), pred_final[2]:resize(10, 1)}
+fullxs = {target, xhat}
+print(pred_final, fullxs)
+prl_loss = pc:forward(predfinal, fullxs)
 print(prl_loss)
+
