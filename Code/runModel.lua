@@ -68,7 +68,7 @@ local sandy = {
         ['query'] = queries[7],
         ['query_name'] = 'sandy'
 }
-local wiscon = {
+local wisconsin = {
         ['inputs'] = 'wisconsin_sandy_first_sentence_numtext2.csv',
         ['nuggets'] ='wisconsin_nuggets_numtext.csv',
         ['query'] = queries[7],
@@ -106,6 +106,7 @@ local model = buildModel(opt.model, vocabSize, opt.embeddingSize, opt.metric, op
 -- Running the model
 train(inputs, query_data, model, opt.nepochs, opt.model, opt.metric, opt.thresh, 
       opt.gamma, opt.epsilon, delta, opt.base_explore_rate, opt.end_baserate, 
-      opt.mem_size, opt.batch_size, optimParams, opt.n_backprops, opt.regmodel, opt.usecuda)
+      opt.mem_size, opt.batch_size, optimParams, opt.n_backprops, opt.regmodel, 
+      stopwords, opt.usecuda)
 
 -- os.execute(string.format("python make_density_gif.py %i %s %s", nepochs, nnmod, metric))

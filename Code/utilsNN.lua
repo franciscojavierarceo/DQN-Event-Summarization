@@ -1,4 +1,4 @@
-function scoreOracle(sentenceStream, maxSummarySize, refCounts)
+function scoreOracle(sentenceStream, maxSummarySize, refCounts, stopwordlist)
     local SKIP = 1
     local SELECT = 2
 
@@ -16,7 +16,7 @@ function scoreOracle(sentenceStream, maxSummarySize, refCounts)
             use_cuda
             )
         local generatedCounts = buildTokenCounts(summary) 
-        local recall, prec, f1 = rougeScores(generatedCounts, refCounts)
+        local recall, prec, f1 = rougeScores(generatedCounts, refCounts, stopwordlist)
         if f1 < oracleF1 then
             actions[i][SELECT] = 0
             actions[i][SKIP] = 1
@@ -132,17 +132,20 @@ function buildTokenCounts(summary)
     return counts
 end
 
-function rougeScores(genSummary, refSummary)
+function rougeScores(genSummary, refSummary, stopwordlist)
     local genTotal = 0
     local refTotal = 0
     local intersection = 0
+
     for k, refCount in pairs(refSummary) do
         local genCount = genSummary[k]
-        if genCount == nil then genCount = 0 end
+        if genCount == nil then 
+            genCount = 0 
+        end
         intersection = intersection + math.min(refCount, genCount)
         refTotal = refTotal + refCount
     end
-    for k,genCount in pairs(genSummary) do
+    for k, genCount in pairs(genSummary) do
         genTotal = genTotal + genCount
     end
 
@@ -152,8 +155,17 @@ function rougeScores(genSummary, refSummary)
     if genTotal == 0 then 
         genTotal = 1 
     end
-    local recall = intersection / refTotal
 
+    -- Removing stop words here
+    if stopwordlist ~= nil then 
+        for k, stopword in pairs(stopwordlist) do
+            if intersection[stopword] ~= nil then
+                intersection[stopword] = nil
+            end
+        end
+    end
+    
+    local recall = intersection / refTotal
     local prec = intersection / genTotal
 
     if recall > 0 and prec > 0 then
@@ -353,7 +365,7 @@ function intialize_variables(query_file, inputs, n_samples, input_path, K_tokens
     return vocabSize, query_data
 end
 
-function forwardpass(query_data, query_id, model, epsilon, gamma, metric, thresh, use_cuda)
+function forwardpass(query_data, query_id, model, epsilon, gamma, metric, thresh, stopwordlist, use_cuda)
     local SKIP = 1
     local SELECT = 2
     math.randomseed(420)
@@ -420,8 +432,8 @@ function forwardpass(query_data, query_id, model, epsilon, gamma, metric, thresh
             use_cuda
         )
 
-        local recall, prec, f1 = rougeScores(buildTokenCounts(summary), refCounts)
-        local rOpt, pOpt, f1Opt = rougeScores(buildTokenCounts(summaryOpt), refCounts)
+        local recall, prec, f1 = rougeScores(buildTokenCounts(summary), refCounts, stopwordlist)
+        local rOpt, pOpt, f1Opt = rougeScores(buildTokenCounts(summaryOpt), refCounts, stopwordlist)
 
         if metric == "f1" then
             rouge[i + 1] = threshold(f1, thresh)
@@ -460,7 +472,7 @@ function forwardpass(query_data, query_id, model, epsilon, gamma, metric, thresh
     return memory, rougeRecall, rougePrecision, rougeF1, qValues
 end
 
-function train(inputs, query_data, model, nepochs, nnmod, metric, thresh, gamma, epsilon, delta, base_explore_rate, end_baserate, mem_size, batch_size, optimParams, n_backprops, regmodel, use_cuda)
+function train(inputs, query_data, model, nepochs, nnmod, metric, thresh, gamma, epsilon, delta, base_explore_rate, end_baserate, mem_size, batch_size, optimParams, n_backprops, regmodel, stopwordlist, use_cuda)
     math.randomseed(420)
     torch.manualSeed(420)
     criterion = nn.MSECriterion()
@@ -486,9 +498,8 @@ function train(inputs, query_data, model, nepochs, nnmod, metric, thresh, gamma,
         for query_id=1, #inputs do
             -- Score the queries
             memory, rougeRecall, rougePrecision, rougeF1, qValues = forwardpass(
-                            query_data, query_id, 
-                            model, epsilon, gamma, 
-                            metric, thresh, use_cuda
+                            query_data, query_id, model, epsilon, gamma, 
+                            metric, thresh, stopwordlist, use_cuda
             )
             -- Build the memory
             if epoch == 0 then
