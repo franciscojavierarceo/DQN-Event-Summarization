@@ -78,7 +78,8 @@ local wisconsin = {
 local inputs = {
         aurora, 
         -- pakistan,
-        -- sandy
+        -- sandy,
+        -- wisconsin
 }
 
 if opt.usecuda then
