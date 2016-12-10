@@ -396,7 +396,6 @@ function forwardpass(query_data, query_id, model, epsilon, gamma, metric, thresh
     local refSummary = query_data[query_id][11]
     local refCounts = query_data[query_id][12]
     local buffer = query_data[query_id][13]
-    local summary = summaryBuffer:zero():narrow(1,1,1)
     
     -- Have to set clear the inputs at the beginning of each scoring round
     actions:fill(0)
@@ -407,6 +406,7 @@ function forwardpass(query_data, query_id, model, epsilon, gamma, metric, thresh
     summaryBuffer:fill(0)
     buffer:fill(0)
     exploreDraws:uniform(0, 1)
+    summary = summaryBuffer:zero():narrow(1,1,1) -- summary starts empty
 
     for i=1, streamSize do     -- Iterating through individual sentences
         local sentence = sentenceStream:narrow(1, i, 1)
@@ -445,11 +445,12 @@ function forwardpass(query_data, query_id, model, epsilon, gamma, metric, thresh
         predsummary = buildFullSummary(actions:narrow(1, 1, i),
                                     sentenceStream:narrow(1, 1, i), 
                                     use_cuda)
-        predsummaryOpt = buildFullSummary(actionsOpt, sentenceStream, use_cuda)
+        predsummaryOpt = buildFullSummary(actionsOpt:narrow(1, 1, i),
+                                    sentenceStream:narrow(1, 1, i), 
+                                    use_cuda)
 
-        summaryCounts = buildTokenCounts(predsummary, stopwordlist)
-        summaryCountsOpt = buildTokenCounts(predsummaryOpt, stopwordlist)
-
+        local summaryCounts = buildTokenCounts(predsummary, stopwordlist)
+        local summaryCountsOpt = buildTokenCounts(predsummaryOpt, stopwordlist)
         local recall, prec, f1 = rougeScores(summaryCounts, refCounts)
         local rOpt, pOpt, f1Opt = rougeScores(summaryCountsOpt, refCounts)
 
