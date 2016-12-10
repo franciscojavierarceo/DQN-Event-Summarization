@@ -113,6 +113,28 @@ function buildSummary(actions, sentences, buffer, use_cuda)
     return buffer
 end
 
+function buildFullSummary(actions, sentences, use_cuda)
+    local SKIP = 1
+    local SELECT = 2
+
+    if use_cuda then 
+        actions = actions:double()
+        sentences = sentences:double()
+    end
+
+    local actionsSize = actions:size(1)
+    local sentencesSize = sentences:size(2)
+
+    local selected = torch.ByteTensor(actions:narrow(2, SELECT, 1))
+    local indxs = selected:eq(1):resize(3):nonzero()
+    indxs = indxs:resize(indxs:size(1))
+    predictedsummary = sentences:index(1, indxs)
+     if use_cuda then
+        predictedsummary = predictedsummary:cuda()
+    end
+    return predictedsummary
+end
+
 function buildTokenCounts(summary, stopwordlist)
     local counts = {}
     for i=1, summary:size(2) do
@@ -140,7 +162,7 @@ function rougeScores(genSummary, refSummary)
     local genTotal = 0
     local refTotal = 0
     local intersection = 0
-    
+
     for k, refCount in pairs(refSummary) do
         local genCount = genSummary[k]
         if genCount == nil then 
@@ -423,9 +445,16 @@ function forwardpass(query_data, query_id, model, epsilon, gamma, metric, thresh
             summaryBuffer:narrow(1, i + 1, 1),
             use_cuda
         )
+        predsummary = buildFullSummary(actions:narrow(1, 1, i),
+                                    sentenceStream:narrow(1, 1, i), 
+                                    use_cuda)
+        predsummaryOpt = buildFullSummary(actionsOpt, sentenceStream, use_cuda)
 
-        local recall, prec, f1 = rougeScores(buildTokenCounts(summary, stopwordlist), refCounts)
-        local rOpt, pOpt, f1Opt = rougeScores(buildTokenCounts(summaryOpt, stopwordlist), refCounts)
+        summaryCounts = buildTokenCounts(predsummary, stopwordlist)
+        summaryCountsOpt = buildTokenCounts(predsummaryOpt, stopwordlist)
+
+        local recall, prec, f1 = rougeScores(summaryCounts, refCounts)
+        local rOpt, pOpt, f1Opt = rougeScores(summaryCountsOpt, refCounts)
 
         if metric == "f1" then
             rouge[i + 1] = threshold(f1, thresh)
