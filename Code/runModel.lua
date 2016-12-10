@@ -62,17 +62,17 @@ local aurora = {
         ['query'] = queries[3],
         ['query_name'] = 'aurora'
 }
+local wisconsin = {
+        ['inputs'] = 'wisconsin_sikh_temple_shooting_first_sentence_numtext.csv',
+        ['nuggets'] ='wisconsin_nuggets_numtext.csv',
+        ['query'] = queries[4],
+        ['query_name'] = 'wisconsin'
+}
 local sandy = {
         ['inputs'] = 'hurricane_sandy_first_sentence_numtext2.csv',
         ['nuggets'] ='sandy_nuggets_numtext.csv',
-        ['query'] = queries[7],
+        ['query'] = queries[6],
         ['query_name'] = 'sandy'
-}
-local wisconsin = {
-        ['inputs'] = 'wisconsin_sandy_first_sentence_numtext2.csv',
-        ['nuggets'] ='wisconsin_nuggets_numtext.csv',
-        ['query'] = queries[7],
-        ['query_name'] = 'wisconsin'
 }
 
 local inputs = {
@@ -108,6 +108,6 @@ local model = buildModel(opt.model, vocabSize, opt.embeddingSize, opt.metric, op
 train(inputs, query_data, model, opt.nepochs, opt.model, opt.metric, opt.thresh, 
       opt.gamma, opt.epsilon, delta, opt.base_explore_rate, opt.end_baserate, 
       opt.mem_size, opt.batch_size, optimParams, opt.n_backprops, opt.adapt, 
-      stopwords, opt.usecuda)
+      nil, opt.usecuda)
 
 -- os.execute(string.format("python make_density_gif.py %i %s %s", nepochs, nnmod, metric))

@@ -56,6 +56,7 @@ function buildModel(model, vocabSize, embeddingSize, metric, adapt, use_cuda)
                 :add(nn.JoinTable(2))
                 :add(nn.Tanh())
                 :add(nn.Linear(embeddingSize * 3, 2))
+                :add(nn.Tanh())
     else
         nnmodel = nn.Sequential()
                 :add(pmodule)
@@ -123,12 +124,15 @@ function buildFullSummary(actions, sentences, use_cuda)
     end
 
     local selected = torch.ByteTensor(actions:narrow(2, SELECT, 1))
-    local indxs = selected:eq(1):resize(3):nonzero()
-    indxs = indxs:resize(indxs:size(1))
+    local indxs = selected:eq(1):resize(selected:size(1)):nonzero()
+    local indxs = indxs:resize(indxs:size(1))
+    
     predictedsummary = sentences:index(1, indxs)
-     if use_cuda then
+
+    if use_cuda then
         predictedsummary = predictedsummary:cuda()
     end
+
     return predictedsummary
 end
 
@@ -442,10 +446,10 @@ function forwardpass(query_data, query_id, model, epsilon, gamma, metric, thresh
             summaryBuffer:narrow(1, i + 1, 1),
             use_cuda
         )
-        predsummary = buildFullSummary(actions:narrow(1, 1, i),
+        local predsummary = buildFullSummary(actions:narrow(1, 1, i),
                                     sentenceStream:narrow(1, 1, i), 
                                     use_cuda)
-        predsummaryOpt = buildFullSummary(actionsOpt:narrow(1, 1, i),
+        local predsummaryOpt = buildFullSummary(actionsOpt:narrow(1, 1, i),
                                     sentenceStream:narrow(1, 1, i), 
                                     use_cuda)
 
