@@ -1,4 +1,4 @@
-function scoreOracle(sentenceStream, maxSummarySize, refCounts, stopwordlist)
+function scoreOracle(sentenceStream, maxSummarySize, refCounts, stopwordlist, thresh)
     local SKIP = 1
     local SELECT = 2
 
@@ -17,15 +17,11 @@ function scoreOracle(sentenceStream, maxSummarySize, refCounts, stopwordlist)
             )
         local generatedCounts = buildTokenCounts(summary) 
         local recall, prec, f1 = rougeScores(generatedCounts, refCounts, stopwordlist)
-        if f1 < oracleF1 then
-            actions[i][SELECT] = 0
-            actions[i][SKIP] = 1
-        end
-        if f1 > oracleF1 then
+        if oracleF1 - f1 > thresh then
             oracleF1 = f1
         end
     end
-    return oracleF1, actions
+    return oracleF1
 end
 
 function buildModel(model, vocabSize, embeddingSize, metric, adapt, use_cuda)
@@ -338,7 +334,7 @@ function intialize_variables(query_file, inputs, n_samples, input_path, K_tokens
         local rouge = Tensor(streamSize + 1):zero()
         local rougeOpt = Tensor(streamSize + 1):zero()
         local summary = summaryBuffer:zero():narrow(1,1,1)
-        local oracleF1, oracleActions = scoreOracle(sentenceStream, maxSummarySize, refCounts)
+        local oracleF1 = scoreOracle(sentenceStream, maxSummarySize, refCounts)
 
         query_data[query_id] = {
             sentenceStream,
