@@ -52,16 +52,13 @@
 \headcommand {\beamer@framepages {19}{19}}
 \headcommand {\slideentry {3}{1}{5}{20/20}{Simulation}{0}}
 \headcommand {\beamer@framepages {20}{20}}
-\headcommand {\beamer@subsectionentry {0}{3}{2}{21}{Benchmarking}}\headcommand {\beamer@subsectionpages {16}{20}}
-\headcommand {\slideentry {3}{2}{1}{21/21}{Benchmarking}{0}}
+\headcommand {\sectionentry {4}{Resources}{21}{Resources}{0}}
+\headcommand {\beamer@sectionpages {16}{20}}
+\headcommand {\beamer@subsectionpages {16}{20}}
+\headcommand {\slideentry {4}{0}{1}{21/21}{}{0}}
 \headcommand {\beamer@framepages {21}{21}}
-\headcommand {\sectionentry {4}{Resources}{22}{Resources}{0}}
-\headcommand {\beamer@sectionpages {16}{21}}
-\headcommand {\beamer@subsectionpages {21}{21}}
-\headcommand {\slideentry {4}{0}{1}{22/22}{}{0}}
-\headcommand {\beamer@framepages {22}{22}}
-\headcommand {\beamer@partpages {1}{25}}
-\headcommand {\beamer@subsectionpages {22}{25}}
-\headcommand {\beamer@sectionpages {22}{25}}
-\headcommand {\beamer@documentpages {25}}
-\headcommand {\def \inserttotalframenumber {20}}
+\headcommand {\beamer@partpages {1}{24}}
+\headcommand {\beamer@subsectionpages {21}{24}}
+\headcommand {\beamer@sectionpages {21}{24}}
+\headcommand {\beamer@documentpages {24}}
+\headcommand {\def \inserttotalframenumber {19}}
