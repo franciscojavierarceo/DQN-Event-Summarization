@@ -140,6 +140,7 @@ function rougeScores(genSummary, refSummary)
     local genTotal = 0
     local refTotal = 0
     local intersection = 0
+    
     for k, refCount in pairs(refSummary) do
         local genCount = genSummary[k]
         if genCount == nil then 
