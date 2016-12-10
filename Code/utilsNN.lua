@@ -17,7 +17,7 @@ function scoreOracle(sentenceStream, maxSummarySize, refCounts, stopwordlist, th
             )
         local generatedCounts = buildTokenCounts(summary) 
         local recall, prec, f1 = rougeScores(generatedCounts, refCounts, stopwordlist)
-        if oracleF1 - f1 > thresh then
+        if (oracleF1 - f1) >= thresh then
             oracleF1 = f1
         end
     end
@@ -115,7 +115,7 @@ end
 
 function buildTokenCounts(summary, stopwordlist)
     local counts = {}
-    for i=1,summary:size(2) do
+    for i=1, summary:size(2) do
         if summary[1][i] > 0 then
             local token = summary[1][i]
             if counts[token] == nil then
@@ -293,7 +293,7 @@ function backPropOld(input_memory, params, gradParams, optimParams, model, crite
     end
     return lossv[1]
 end
-function intialize_variables(query_file, inputs, n_samples, input_path, K_tokens, maxSummarySize)
+function intialize_variables(query_file, inputs, n_samples, input_path, K_tokens, maxSummarySize, stopwordlist, thresh)
     local vocabSize = 0
     local maxseqlen = 0
     local maxseqlenq = getMaxseq(query_file)
@@ -334,7 +334,7 @@ function intialize_variables(query_file, inputs, n_samples, input_path, K_tokens
         local rouge = Tensor(streamSize + 1):zero()
         local rougeOpt = Tensor(streamSize + 1):zero()
         local summary = summaryBuffer:zero():narrow(1,1,1)
-        local oracleF1 = scoreOracle(sentenceStream, maxSummarySize, refCounts)
+        local oracleF1 = scoreOracle(sentenceStream, maxSummarySize, refCounts, stopwordlist, thresh)
 
         query_data[query_id] = {
             sentenceStream,
