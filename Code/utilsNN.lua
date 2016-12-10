@@ -122,9 +122,6 @@ function buildFullSummary(actions, sentences, use_cuda)
         sentences = sentences:double()
     end
 
-    local actionsSize = actions:size(1)
-    local sentencesSize = sentences:size(2)
-
     local selected = torch.ByteTensor(actions:narrow(2, SELECT, 1))
     local indxs = selected:eq(1):resize(3):nonzero()
     indxs = indxs:resize(indxs:size(1))
