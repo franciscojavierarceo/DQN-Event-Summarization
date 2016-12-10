@@ -56,7 +56,6 @@ function buildModel(model, vocabSize, embeddingSize, metric, adapt, use_cuda)
                 :add(nn.JoinTable(2))
                 :add(nn.Tanh())
                 :add(nn.Linear(embeddingSize * 3, 2))
-                :add(nn.Tanh())
     else
         nnmodel = nn.Sequential()
                 :add(pmodule)
@@ -66,6 +65,7 @@ function buildModel(model, vocabSize, embeddingSize, metric, adapt, use_cuda)
     end
 
     if adapt then 
+        print("Using adaptive regularization")
         local regmodel = nn.Sequential()
             :add(nn.Linear(embeddingSize, 1))
             :add(nn.LogSigmoid())
@@ -126,8 +126,10 @@ function buildFullSummary(actions, sentences, use_cuda)
     local selected = torch.ByteTensor(actions:narrow(2, SELECT, 1))
     local indxs = selected:eq(1):resize(selected:size(1)):nonzero()
     local indxs = indxs:resize(indxs:size(1))
-    
+
     predictedsummary = sentences:index(1, indxs)
+    -- out = predictedsummary:size()
+    -- predictedsummary = predictedsummary:resize(out[1] * out[2])
 
     if use_cuda then
         predictedsummary = predictedsummary:cuda()
@@ -138,24 +140,26 @@ end
 
 function buildTokenCounts(summary, stopwordlist)
     local counts = {}
-    for i=1, summary:size(2) do
-        if summary[1][i] > 0 then
-            local token = summary[1][i]
-            if counts[token] == nil then
-                counts[token] = 1
-            else
-                counts[token] = counts[token] + 1
+    for i=1, summary:size(1) do
+        for j=1, summary:size(2) do
+            if summary[i][j] > 0 then
+                local token = summary[i][j]
+                if counts[token] == nil then
+                    counts[token] = 1
+                else
+                    counts[token] = counts[token] + 1
+                end
             end
         end
     end
     -- Removing stop words here
-    if stopwordlist ~= nil then 
-        for k, stopword in pairs(stopwordlist) do
-            if counts[stopword] ~= nil then
-                counts[stopword] = nil
-            end
-        end
-    end
+    -- if stopwordlist ~= nil then 
+    --     for k, stopword in pairs(stopwordlist) do
+    --         if counts[stopword] ~= nil then
+    --             counts[stopword] = nil
+    --         end
+    --     end
+    -- end
     return counts
 end
 
@@ -409,6 +413,7 @@ function forwardpass(query_data, query_id, model, epsilon, gamma, metric, thresh
     qValues:fill(0)
     summaryBuffer:fill(0)
     buffer:fill(0)
+    exploreDraws:fill(0)
     exploreDraws:uniform(0, 1)
     summary = summaryBuffer:zero():narrow(1,1,1) -- summary starts empty
 
@@ -417,7 +422,7 @@ function forwardpass(query_data, query_id, model, epsilon, gamma, metric, thresh
         qValues[i]:copy(model:forward({sentence, query, summary}))
 
         -- epsilon greedy strategy
-        if exploreDraws[i]  <=  epsilon then        
+        if exploreDraws[i]  <=  epsilon then
             actions[i][torch.random(SKIP, SELECT)] = 1
         else 
             if qValues[i][SKIP] > qValues[i][SELECT] then
@@ -433,30 +438,29 @@ function forwardpass(query_data, query_id, model, epsilon, gamma, metric, thresh
         else
             actionsOpt[i][SELECT] = 1
         end
-        local summary = buildSummary(
+        
+        summary = buildSummary(
             actions:narrow(1, 1, i), 
             sentenceStream:narrow(1, 1, i),
             summaryBuffer:narrow(1, i + 1, 1),
             use_cuda
         )
 
-        local summaryOpt = buildSummary(
+        summaryOpt = buildSummary(
             actionsOpt:narrow(1, 1, i), 
             sentenceStream:narrow(1, 1, i),
             summaryBuffer:narrow(1, i + 1, 1),
             use_cuda
         )
-        local predsummary = buildFullSummary(actions:narrow(1, 1, i),
-                                    sentenceStream:narrow(1, 1, i), 
-                                    use_cuda)
-        local predsummaryOpt = buildFullSummary(actionsOpt:narrow(1, 1, i),
-                                    sentenceStream:narrow(1, 1, i), 
-                                    use_cuda)
+        predsummary = buildFullSummary(actions:narrow(1, 1, i),
+                            sentenceStream:narrow(1, 1, i), use_cuda)
+        predsummaryOpt = buildFullSummary(actionsOpt:narrow(1, 1, i),
+                            sentenceStream:narrow(1, 1, i), use_cuda)
 
-        local summaryCounts = buildTokenCounts(predsummary, stopwordlist)
-        local summaryCountsOpt = buildTokenCounts(predsummaryOpt, stopwordlist)
-        local recall, prec, f1 = rougeScores(summaryCounts, refCounts)
-        local rOpt, pOpt, f1Opt = rougeScores(summaryCountsOpt, refCounts)
+        summaryCounts = buildTokenCounts(predsummary, stopwordlist)
+        summaryCountsOpt = buildTokenCounts(predsummaryOpt, stopwordlist)
+        recall, prec, f1 = rougeScores(summaryCounts, refCounts)
+        rOpt, pOpt, f1Opt = rougeScores(summaryCountsOpt, refCounts)
 
         if metric == "f1" then
             rouge[i + 1] = threshold(f1, thresh)
@@ -477,6 +481,7 @@ function forwardpass(query_data, query_id, model, epsilon, gamma, metric, thresh
             rougeF1 = f1
         end
     end
+
     local max, argmax = torch.max(qValues, 2)
     local reward0 = rouge:narrow(1,2, streamSize) - rouge:narrow(1,1, streamSize)
     local reward_tm1 =  rougeOpt:narrow(1,2, streamSize) - rougeOpt:narrow(1,1, streamSize)
