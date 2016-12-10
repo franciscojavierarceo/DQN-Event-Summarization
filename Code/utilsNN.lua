@@ -153,13 +153,13 @@ function buildTokenCounts(summary, stopwordlist)
         end
     end
     -- Removing stop words here
-    -- if stopwordlist ~= nil then 
-    --     for k, stopword in pairs(stopwordlist) do
-    --         if counts[stopword] ~= nil then
-    --             counts[stopword] = nil
-    --         end
-    --     end
-    -- end
+    if stopwordlist ~= nil then 
+        for k, stopword in pairs(stopwordlist) do
+            if counts[stopword] ~= nil then
+                counts[stopword] = nil
+            end
+        end
+    end
     return counts
 end
 

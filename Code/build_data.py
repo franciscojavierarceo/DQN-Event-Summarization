@@ -4,11 +4,27 @@ import sys
 import pickle
 import csv
 import numpy as np
+from itertools import chain
 from bs4 import BeautifulSoup
 import pandas as pd
 from gensim import corpora
 from gensim.parsing.preprocessing import STOPWORDS
 from collections import defaultdict    
+
+def read_queries(inputdir, fname):
+    f = open(inputdir + fname, 'rb')
+    out = f.readlines()
+    ox = BeautifulSoup(''.join(out),'lxml').contents[1]
+
+    qs = []
+    ids = []
+    xmlid = []
+    for i in ox.findAll('event'):
+        qs.append(i.findAll('query')[0].text.replace(" ", "_"))
+        ids.append(int(i.findAll("id")[0].text))
+        xmlid.append(fname.replace("trec20", "TS").replace("-ts-topics-test.xml", "")
+    
+    return zip(xmlid, ids, qs)
 
 def loadQuery(qfilename):
     """
@@ -183,6 +199,16 @@ def TokenizeData(infile_list, qfilename, outfile_list, word2idx, top_n, qtexts, 
 
 if __name__ == '__main__':
     os.chdir('/Users/franciscojavierarceo/GitHub/DeepNLPQLearning/DO_NOT_UPLOAD_THIS_DATA/')
+
+    xml_list = [ 'trec%i-ts-topics-test.xml' % x for x in range(2013, 2016)]
+    qtuple = []
+    for xml_file in xml_list:
+        qtuple.append( read_queries(idir, xml_file))
+
+    qtuple = list(chain(*qtuple))
+
+    infilelist = [ './corpus-data/%s.tsv.gz' % q for (y, i, q)  in qtuple]
+
     # Original
     infilelist = [
             './corpus-data/2012_aurora_shooting.tsv.gz', 
