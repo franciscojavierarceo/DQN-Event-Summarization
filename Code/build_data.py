@@ -11,20 +11,16 @@ from gensim import corpora
 from gensim.parsing.preprocessing import STOPWORDS
 from collections import defaultdict    
 
-def read_queries(inputdir, fname):
-    f = open(inputdir + fname, 'rb')
+def read_queries(fname):
+    f = open(fname, 'rb')
     out = f.readlines()
     ox = BeautifulSoup(''.join(out),'lxml').contents[1]
-
-    qs = []
-    ids = []
-    xmlid = []
+    qdata = []
     for i in ox.findAll('event'):
-        qs.append(i.findAll('query')[0].text.replace(" ", "_"))
-        ids.append(int(i.findAll("id")[0].text))
-        xmlid.append(fname.replace("trec20", "TS").replace("-ts-topics-test.xml", "")
-    
-    return zip(xmlid, ids, qs)
+        qdata.append( (i.findAll('query')[0].text, 
+                  int(i.findAll("id")[0].text),
+                  fname.replace("./trec-data/trec20", "TS").replace("-ts-topics-test.xml", "") ))
+    return qdata
 
 def loadQuery(qfilename):
     """
@@ -40,34 +36,36 @@ def loadQuery(qfilename):
 
     return [t.split(" ") for t in qs]
 
-def BuildIndexFiles(infile_list, qfilename):
+def BuildIndexFiles(infile_list, qfilenames):
     """
     :type  infile_list:  list
     :param infile_list:  List of file names to import
 
-    :type   qfilename:    str
-    :param  qfilename:    String indicating query file name
+    :type   qfilenames:  list
+    :param  qfilenames:  List of query file names
     """
     reload(sys)
     sys.setdefaultencoding('utf-8')
     all_tokens = []
+    ntexts, qtexts = [], []
     frequency = defaultdict(int)
     for idx, infilename in enumerate(infile_list):        
         print('Loading and tokenizing %s (%i of %i)' % (infilename, idx+1, len(infile_list)) )
-        if (qfilename not in infilename) and 'nuggets' not in infilename:
+
+        if (infilename not inqfilenames) and 'nuggets' not in infilename:
             df = pd.read_csv(infilename, sep='\t', encoding='latin-1')
             df['text'] = df['text'].str.replace('[^A-Za-z0-9]+', ' ').str.strip().str.lower()
-            texts = [ t.split(" ") for t in df['text'] ]
+            texts = [t.split(" ") for t in df['text'] ]
 
         if 'nuggets' in infilename:
             df = pd.read_csv(infilename, sep='\t', encoding='latin-1')
             df['nugget_text'] = df['nugget_text'].str.replace('[^A-Za-z0-9]+', ' ').str.strip().str.lower()
-            texts = [ t.split(" ") for t in df['nugget_text'] ]
-            ntexts = texts 
+            texts = [t.split(" ") for t in df['nugget_text'] ]
+            ntexts.append(texts)
 
-        if infilename == qfilename:
+        if infilename in qfilenames:
             texts = loadQuery(infilename)
-            qtexts =  texts
+            qtexts.append(texts)
 
         for text in texts:
             for token in text:
@@ -75,10 +73,6 @@ def BuildIndexFiles(infile_list, qfilename):
         texts = [ [token for token in text ]  for text in texts]
         # Collecting all the list of tokens
         all_tokens.append(texts)
-        
-
-    if qtexts == None:
-        qtexts = []
 
     texts = sum(all_tokens, [])
     qtexts = sum(qtexts, [])
@@ -138,12 +132,6 @@ def TokenizeData(infile_list, qfilename, outfile_list, word2idx, top_n, qtexts, 
     :type   qtexts:     list
     :param  qtexts:     List from the queries so they're not removed
     """
-
-    if qtexts == None:
-        qtexts = []
-    if ntexts == None:
-        ntexts = []
-
     # Loading the token frequencies
     tfdf = pd.read_csv('./0-output/total_corpus_smry.csv')
     tfdf['qfile'] = tfdf['token'].isin(qtexts)
@@ -198,91 +186,31 @@ def TokenizeData(infile_list, qfilename, outfile_list, word2idx, top_n, qtexts, 
     print('...Exporting of tokenized data complete')
 
 if __name__ == '__main__':
-    os.chdir('/Users/franciscojavierarceo/GitHub/DeepNLPQLearning/DO_NOT_UPLOAD_THIS_DATA/')
+    os.chdir('/Users/franciscojavierarceo/GitHub/DeepNLPQLearning/DO_NOT_UPLOAD_THIS_DATA/')    
+    nuggfiles = ['./trec-data/trec%i-ts-topics-test.xml' % x for x in range(2013, 2016)]
 
-    xml_list = [ 'trec%i-ts-topics-test.xml' % x for x in range(2013, 2016)]
+    # First we have to segment the nuggets
+    qfilenames = ['./trec-data/trec%i-ts-topics-test.xml' % x for x in range(2013, 2016)]
     qtuple = []
-    for xml_file in xml_list:
-        qtuple.append( read_queries(idir, xml_file))
-
+    for xml_file in qfilenames:
+        qtuple.append( read_queries(xml_file))
+ 
     qtuple = list(chain(*qtuple))
+    infilelist = [ './corpus-data/%s.tsv.gz' % q.replace(" ", "_") for (q, i, y)  in qtuple]
+    infilelist = infilelist + qfilenames
+    nuggetlist = [ '%s.%i' % (n, i) for (q, i, n)  in qtuple]
+    outfilelist = ['./0-output/%s_tokenized' % x.split("/")[2].split(".")[0] for x in infilelist]
 
-    infilelist = [ './corpus-data/%s.tsv.gz' % q for (y, i, q)  in qtuple]
-
-    # Original
-    infilelist = [
-            './corpus-data/2012_aurora_shooting.tsv.gz', 
-            './corpus-data/2012_pakistan_garment_factory_fires.tsv.gz',
-            './corpus-data/hurricane_sandy.tsv.gz',
-            './corpus-data/wisconsin_sikh_temple_shooting.tsv.gz',
-            './trec-2013-data/nuggets.tsv.gz',
-            './trec-2013-data/trec2013-ts-topics-test.xml'
-    ]
-    outfilelist = [
-            './0-output/2012_aurora_shooting',
-            './0-output/2012_pakistan_garment_factory_fires',
-            './0-output/hurricane_sandy',
-            './0-output/wisconsin_sikh_temple_shooting',
-            './0-output/nuggets',
-            './0-output/queries'
-    ]
-
-    qfilename = './trec-2013-data/trec2013-ts-topics-test.xml'
     # Exporting the raw files
-    mycorpora, qtext, ntext = BuildIndexFiles(infilelist, qfilename)
+    mycorpora, qtext, ntext = BuildIndexFiles(infilelist, qfilenames)
     TokenizeData(infile_list = infilelist, 
-                qfilename = qfilename, 
+                qfilenames = qfilenames, 
                 outfile_list = outfilelist, 
                 word2idx = mycorpora.token2id, 
                 top_n = 10000,
                 qtexts = qtext,
                 ntexts = ntext)
     
-    # Exporting the first setence files -- corpora based on the total list
-    infilelist_fs = [
-            './corpus-data/2012_aurora_shooting_first_sentence.tsv.gz', 
-            './corpus-data/2012_pakistan_garment_factory_fires_first_sentence.tsv.gz',
-            './corpus-data/hurricane_sandy_first_sentence.tsv.gz',
-            './corpus-data/wisconsin_sikh_temple_shooting_first_sentence.tsv.gz',
-            './trec-2013-data/nuggets.tsv.gz',
-    ]
-    outfilelist_fs = [
-            './0-output/2012_aurora_shooting_first_sentence',
-            './0-output/2012_pakistan_garment_factory_fires_first_sentence',
-            './0-output/hurricane_sandy_first_sentence',
-            './0-output/wisconsin_sikh_temple_shooting_first_sentence',
-            './0-output/nuggets_first_sentence',
-    ]
-    TokenizeData(infile_list = infilelist_fs, 
-                qfilename = qfilename, 
-                outfile_list = outfilelist_fs, 
-                word2idx = mycorpora.token2id, 
-                top_n = 10000,
-                qtexts = qtext,
-                ntexts = ntext)
-
-    # Exporting the nuggets only -- corpora based on the total list
-    infile_nuggets = [
-            './trec-2013-data/aurora_nuggets.tsv.gz',
-            './trec-2013-data/pakistan_nuggets.tsv.gz',
-            './trec-2013-data/sandy_nuggets.tsv.gz',
-            './trec-2013-data/wisconsin_nuggets.tsv.gz'
-    ]
-    outfile_nuggets = [
-            './0-output/aurora_nuggets',
-            './0-output/pakistan_nuggets',
-            './0-output/sandy_nuggets',
-            './0-output/wisconsin_nuggets'
-    ]
-    TokenizeData(infile_list = infile_nuggets, 
-                qfilename = qfilename, 
-                outfile_list = outfile_nuggets, 
-                word2idx = mycorpora.token2id, 
-                top_n = 10000,
-                qtexts = qtext,
-                ntexts = ntext)
-    # Extracting the stop words
-
     tdf = pd.read_csv("./total_corpus_smry.csv")
     tdf['stopword'] = tdf['token'].isin(STOPWORDS)
     tdfss = tdf[tdf['stopword']==True]
@@ -290,3 +218,48 @@ if __name__ == '__main__':
 
     os.system('source /Users/franciscojavierarceo/GitHub/DeepNLPQLearning/Code/trim_data.sh')
     print("----- END ------")
+
+    # # Exporting the first setence files -- corpora based on the total list
+    # infilelist_fs = [
+    #         './corpus-data/2012_aurora_shooting_first_sentence.tsv.gz', 
+    #         './corpus-data/2012_pakistan_garment_factory_fires_first_sentence.tsv.gz',
+    #         './corpus-data/hurricane_sandy_first_sentence.tsv.gz',
+    #         './corpus-data/wisconsin_sikh_temple_shooting_first_sentence.tsv.gz',
+    #         './trec-2013-data/nuggets.tsv.gz',
+    # ]
+    # outfilelist_fs = [
+    #         './0-output/2012_aurora_shooting_first_sentence',
+    #         './0-output/2012_pakistan_garment_factory_fires_first_sentence',
+    #         './0-output/hurricane_sandy_first_sentence',
+    #         './0-output/wisconsin_sikh_temple_shooting_first_sentence',
+    #         './0-output/nuggets_first_sentence',
+    # ]
+    # TokenizeData(infile_list = infilelist_fs, 
+    #             qfilename = qfilename, 
+    #             outfile_list = outfilelist_fs, 
+    #             word2idx = mycorpora.token2id, 
+    #             top_n = 10000,
+    #             qtexts = qtext,
+    #             ntexts = ntext)
+
+    # # Exporting the nuggets only -- corpora based on the total list
+    # infile_nuggets = [
+    #         './trec-2013-data/aurora_nuggets.tsv.gz',
+    #         './trec-2013-data/pakistan_nuggets.tsv.gz',
+    #         './trec-2013-data/sandy_nuggets.tsv.gz',
+    #         './trec-2013-data/wisconsin_nuggets.tsv.gz'
+    # ]
+    # outfile_nuggets = [
+    #         './0-output/aurora_nuggets',
+    #         './0-output/pakistan_nuggets',
+    #         './0-output/sandy_nuggets',
+    #         './0-output/wisconsin_nuggets'
+    # ]
+    # TokenizeData(infile_list = infile_nuggets, 
+    #             qfilename = qfilename, 
+    #             outfile_list = outfile_nuggets, 
+    #             word2idx = mycorpora.token2id, 
+    #             top_n = 10000,
+    #             qtexts = qtext,
+    #             ntexts = ntext)
+    # # Extracting the stop words

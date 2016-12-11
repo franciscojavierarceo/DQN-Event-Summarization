@@ -108,6 +108,6 @@ local model = buildModel(opt.model, vocabSize, opt.embeddingSize, opt.metric, op
 train(inputs, query_data, model, opt.nepochs, opt.model, opt.metric, opt.thresh, 
       opt.gamma, opt.epsilon, delta, opt.base_explore_rate, opt.end_baserate, 
       opt.mem_size, opt.batch_size, optimParams, opt.n_backprops, opt.adapt, 
-      nil, opt.usecuda)
+      stopwords, opt.usecuda)
 
 -- os.execute(string.format("python make_density_gif.py %i %s %s", nepochs, nnmod, metric))
