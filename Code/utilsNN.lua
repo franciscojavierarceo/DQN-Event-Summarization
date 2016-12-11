@@ -531,7 +531,7 @@ function train(inputs, query_data, model, nepochs, nnmod, metric, thresh, gamma,
             -- Build the memory
             if epoch == 0 then
                 query_randomF1[query_id] = rougeF1
-                if query_id == 1 and query_id ~= test_query then 
+                if query_id == 1 then 
                     fullmemory = memory
                 end
             else
@@ -572,7 +572,6 @@ function train(inputs, query_data, model, nepochs, nnmod, metric, thresh, gamma,
         else 
             epsilon = epsilon - delta
         end
-
     end
     print(string.format("Model complete {Selected = %i; Skipped  = %i}; Final Rouge Recall, Precision, F1 = {%.6f;%.6f;%.6f}", 
                 nactions[SELECT], nactions[SKIP], rougeRecall, rougePrecision, rougeF1))
@@ -599,9 +598,8 @@ function trainCV(inputs, query_data, model, nepochs, nnmod, metric, thresh, gamm
             for query_id=1, #inputs do
                 -- Score the queries
                 memory, rougeRecall, rougePrecision, rougeF1, qValues = forwardpass(
-                                query_data, query_id, 
-                                model, epsilon, gamma, 
-                                metric, thresh, use_cuda
+                                query_data, query_id, model, epsilon, gamma, 
+                                metric, thresh, stopwordlist, use_cuda
                 )
                 -- Build the memory
                 if epoch == 0 then
