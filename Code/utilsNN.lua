@@ -197,7 +197,7 @@ function rougeScores(genSummary, refSummary)
     return recall, prec, f1
 end
 
-function buildMemory(newinput, memory_hist, memsize, use_cuda)
+function sampleMemory(newinput, memory_hist, memsize, use_cuda)
     local sentMemory = torch.cat(newinput[1][1]:double(), memory_hist[1][1]:double(), 1)
     local queryMemory = torch.cat(newinput[1][2]:double(), memory_hist[1][2]:double(), 1)
     local sumryMemory = torch.cat(newinput[1][3]:double(), memory_hist[1][3]:double(), 1)
@@ -259,7 +259,7 @@ function stackMemory(newinput, memory_hist, memsize, use_cuda)
     return {inputMemory, rewardMemory, actionMemory}
 end
 
-function backProp(input_memory, params, gradParams, optimParams, model, criterion, batch_size, n_backprops, use_cuda)
+function backPropSampled(input_memory, params, gradParams, optimParams, model, criterion, batch_size, n_backprops, use_cuda)
     local n = input_memory[1][1]:size(1)
     local p = torch.ones(n) / n
     local loss = 0
@@ -293,7 +293,7 @@ function backProp(input_memory, params, gradParams, optimParams, model, criterio
     return loss/n_backprops
 end
 
-function backPropOld(input_memory, params, gradParams, optimParams, model, criterion, batch_size, memsize, regmodel, use_cuda)
+function backProp(input_memory, params, gradParams, optimParams, model, criterion, batch_size, memsize, regmodel, use_cuda)
     maskLayer = nn.MaskedSelect()
     local inputs = {input_memory[1], input_memory[3]}
     local rewards = input_memory[2]
@@ -535,11 +535,12 @@ function train(inputs, query_data, model, nepochs, nnmod, metric, thresh, gamma,
                     fullmemory = memory
                 end
             else
-                -- fullmemory = buildMemory(memory, fullmemory, mem_size, use_cuda)
+                -- fullmemory = sampleMemory(memory, fullmemory, mem_size, use_cuda)
                 fullmemory = stackMemory(memory, fullmemory, mem_size, use_cuda)
             end
             --- Running backprop
-            loss = backPropOld(fullmemory, params, gradParams, optimParams, model, criterion, batch_size, mem_size, regmodel, use_cuda)
+            loss = backProp(fullmemory, params, gradParams, optimParams, model, criterion, batch_size, mem_size, regmodel, use_cuda)
+            -- loss = backPropSampled(fullmemory, params, gradParams, optimParams, model, criterion, batch_size, n_backprops, use_cuda)
 
             nactions = torch.totable(memory[3]:sum(1))[1]
             perf_string = string.format("%i; %.3f; %.6f; %.6f; %.6f; %.6f; %.6f; %.6f; {min=%.3f, max=%.3f}; {min=%.3f, max=%.3f}; %i; %i; %i\n", 
@@ -612,13 +613,14 @@ function trainCV(inputs, query_data, model, nepochs, nnmod, metric, thresh, gamm
                     --- By not storing the memory of the test query we won't back prop on it
                     if query_id ~= test_query then 
                         fullmemory = stackMemory(memory, fullmemory, mem_size, use_cuda)
-                        -- fullmemory = buildMemory(memory, fullmemory, mem_size,  use_cuda)
+                        -- fullmemory = sampleMemory(memory, fullmemory, mem_size,  use_cuda)
                     end
                 end
 
                 if query_id ~= test_query then 
                     --- Running backprop
-                    loss = backPropOld(fullmemory, params, gradParams, optimParams, model, criterion, batch_size, mem_size, use_cuda)
+                    loss = backProp(fullmemory, params, gradParams, optimParams, model, criterion, batch_size, mem_size, use_cuda)
+                    -- loss = backPropSampled(input_memory, params, gradParams, optimParams, model, criterion, batch_size, n_backprops, use_cuda)
                 else 
                     loss = 0.
                 end
