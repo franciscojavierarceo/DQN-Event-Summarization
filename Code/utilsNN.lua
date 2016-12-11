@@ -9,16 +9,15 @@ function scoreOracle(sentenceStream, maxSummarySize, refCounts, stopwordlist, th
     local oracleF1 = 0
     for i=1, streamSize do
         actions[i][SELECT] = 1
-        summary = buildSummary(
-            actions:narrow(1, 1, i), 
-            sentenceStream:narrow(1, 1, i),
-            summaryBuffer:narrow(1, i + 1, 1),
-            use_cuda
-            )
-        local generatedCounts = buildTokenCounts(summary) 
-        local recall, prec, f1 = rougeScores(generatedCounts, refCounts, stopwordlist)
-        if (oracleF1 - f1) >= thresh then
+        predsummary = buildFullSummary(actions:narrow(1, 1, i),
+                            sentenceStream:narrow(1, 1, i), use_cuda)
+        summaryCounts = buildTokenCounts(predsummary, stopwordlist)
+        recall, prec, f1 = rougeScores(summaryCounts, refCounts)
+        if (f1 - oracleF1) >= thresh then
             oracleF1 = f1
+        else 
+            actions[i][SELECT] = 0
+            actions[i][SKIP] = 1
         end
     end
     return oracleF1
