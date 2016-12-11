@@ -78,7 +78,7 @@ local sandy = {
 
 local inputs = {
         aurora, 
-        -- pakistan,
+        pakistan,
         -- sandy,
         -- wisconsin
 }
@@ -106,7 +106,7 @@ local vocabSize, query_data = intialize_variables(query_file, inputs,
 local model = buildModel(opt.model, vocabSize, opt.embeddingSize, opt.metric, opt.adapt, opt.usecuda)
 
 -- Running the model
-train(inputs, query_data, model, opt.nepochs, opt.model, opt.metric, opt.thresh, 
+trainCV(inputs, query_data, model, opt.nepochs, opt.model, opt.metric, opt.thresh, 
       opt.gamma, opt.epsilon, delta, opt.base_explore_rate, opt.end_baserate, 
       opt.mem_size, opt.batch_size, optimParams, opt.n_backprops, opt.adapt, 
       stopwords, opt.usecuda)

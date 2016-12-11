@@ -167,6 +167,12 @@ function rougeScores(genSummary, refSummary)
     local refTotal = 0
     local intersection = 0
 
+    -- Inserting the missing keys
+    for k, genCount in pairs(genSummary) do
+        if refSummary[k] == nil then
+            refSummary[k] = 0
+        end
+    end
     for k, refCount in pairs(refSummary) do
         local genCount = genSummary[k]
         if genCount == nil then 
@@ -174,27 +180,57 @@ function rougeScores(genSummary, refSummary)
         end
         intersection = intersection + math.min(refCount, genCount)
         refTotal = refTotal + refCount
-    end
-    for k, genCount in pairs(genSummary) do
         genTotal = genTotal + genCount
     end
 
-    if refTotal == 0 then 
-        refTotal = 1 
-    end
-    if genTotal == 0 then 
-        genTotal = 1 
-    end
-    
     local recall = intersection / refTotal
     local prec = intersection / genTotal
-
-    if recall > 0 and prec > 0 then
-        f1 = 2 * recall * prec / (recall + prec)
+    tmp = {intersection, refTotal, genTotal}
+    if recall == 0 and prec == 0 then
+        f1 = 0
     else 
+        f1 = (2 * recall * prec) / (recall + prec)
+    end
+    return recall, prec, f1, tmp
+end
+function rougeScores2(pred_summary, ref_summaries)
+    local rsd = ref_summaries
+    local psd = pred_summary
+    for k, v in pairs(rsd) do
+        if psd[k] == nil then
+            psd[k] = 0
+        end
+    end
+
+    for k, v in pairs(psd) do
+        if rsd[k] == nil then
+            rsd[k] = 0 
+        end
+    end
+    -- For Recall we normalize by the prediction dictionary
+    intersectionCount = 0.
+    predTotalCount = 0.
+    refTotalCount = 0.
+    -- It's okay to use this now because we inserted the keys in both
+    for k, v in pairs(rsd) do
+        intersectionCount = intersectionCount + math.min(rsd[k], psd[k])
+        predTotalCount = predTotalCount + rsd[k]
+        refTotalCount = refTotalCount + psd[k]
+    end
+
+    prec  = intersectionCount / predTotalCount
+    recall = intersectionCount / refTotalCount 
+    if predTotalCount == 0 then 
+        prec = 0
+    end
+    if refTotalCount == 0 then
+        recall = 0
+    end
+    f1 = (2 * recall * prec) / (recall + prec)
+    if (recall + prec) == 0 then 
         f1 = 0
     end
-    return recall, prec, f1
+    return prec, recall, f1
 end
 
 function sampleMemory(newinput, memory_hist, memsize, use_cuda)
@@ -458,8 +494,9 @@ function forwardpass(query_data, query_id, model, epsilon, gamma, metric, thresh
 
         summaryCounts = buildTokenCounts(predsummary, stopwordlist)
         summaryCountsOpt = buildTokenCounts(predsummaryOpt, stopwordlist)
-        recall, prec, f1 = rougeScores(summaryCounts, refCounts)
-        rOpt, pOpt, f1Opt = rougeScores(summaryCountsOpt, refCounts)
+        
+        recall, prec, f1, tmp = rougeScores(summaryCounts, refCounts)
+        rOpt, pOpt, f1Opt, tmp2 = rougeScores(summaryCountsOpt, refCounts)
 
         if metric == "f1" then
             rouge[i + 1] = threshold(f1, thresh)
@@ -474,13 +511,8 @@ function forwardpass(query_data, query_id, model, epsilon, gamma, metric, thresh
             rougeOpt[i]  = threshold(pOpt, thresh)
         end
 
-        if i==streamSize then
-            rougeRecall = recall
-            rougePrecision = prec
-            rougeF1 = f1
-        end
     end
-
+    print(query_id, tmp)
     local max, argmax = torch.max(qValues, 2)
     local reward0 = rouge:narrow(1,2, streamSize) - rouge:narrow(1,1, streamSize)
     local reward_tm1 =  rougeOpt:narrow(1,2, streamSize) - rougeOpt:narrow(1,1, streamSize)
@@ -495,8 +527,9 @@ function forwardpass(query_data, query_id, model, epsilon, gamma, metric, thresh
         local input = {sentenceStream:cuda(), queryBatch:cuda(), summaryBatch:cuda()}
         local memory = {input, reward:cuda(), actions:cuda()}
     end
-
-    return memory, rougeRecall, rougePrecision, rougeF1, qValues
+    --- Last ones are the total performance
+    return memory, recall, prec, f1, qValues
+    -- return memory, rougeRecall, rougePrecision, rougeF1, qValues
 end
 
 function train(inputs, query_data, model, nepochs, nnmod, metric, thresh, gamma, epsilon, delta, base_explore_rate, end_baserate, mem_size, batch_size, optimParams, n_backprops, regmodel, stopwordlist, use_cuda)
