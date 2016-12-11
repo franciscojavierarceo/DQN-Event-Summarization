@@ -37,7 +37,7 @@ def main(nepochs, model, metric):
     if type(nepochs) == str:
         nepochs = int(nepochs)
     
-    pdf = pd.read_csv('./Performance/%s_%s_perf.txt' % () , sep=';')
+    pdf = pd.read_csv('./Performance/Simulation/%s_%s_perf.txt' % (model, metric) , sep=';')
     md = {"f1": "rougeF1", "recall": "rougeRecall", "precision": "rougePrecision"}
     emetric = md[metric]
     c = mcolors.ColorConverter().to_rgb

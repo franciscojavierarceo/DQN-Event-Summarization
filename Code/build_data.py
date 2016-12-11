@@ -70,11 +70,11 @@ def BuildIndexFiles(infile_list, qfilenames):
         for text in texts:
             for token in text:
                 frequency[token] += 1
-        texts = [ [token for token in text ]  for text in texts]
+        texts = [ [token for token in text] for text in texts]
         # Collecting all the list of tokens
         all_tokens.append(texts)
 
-    texts = sum(all_tokens, [])
+    texts  = sum(all_tokens, [])
     qtexts = sum(qtexts, [])
     ntexts = sum(ntexts, [])
 
@@ -205,11 +205,7 @@ if __name__ == '__main__':
     nuggetlist = [ '%s.%i_nuggets.csv' % (n, i) for (q, i, n)  in qtuple]
     outfilelist = ['./0-output/%s_tokenized' % x.split("/")[2].split(".")[0] for x in infilelist]
 
-    qdf = pd.DataFrame(qtuple, columns=['query', 'query_id', 'trec'])
-    qdf['nugget_file'] = qdf['trec'] + "." + qdf['query_id'].astype(str) + "_nuggets.csv"
-    qdf['stream_file'] = qdf['query_id'].str.replace(" ", "_") + ".csv"
-
-    # Exporting the raw files
+    # Exporting the raw files and tokenizing the data
     mycorpora, qtext, ntext = BuildIndexFiles(infilelist, qfilenames)
     TokenizeData(infile_list = infilelist, 
                 qfilenames = qfilenames, 
@@ -219,10 +215,32 @@ if __name__ == '__main__':
                 qtexts = qtext,
                 ntexts = ntext)
     
+    # Exporting corpus summary table
     tdf = pd.read_csv("./total_corpus_smry.csv")
     tdf['stopword'] = tdf['token'].isin(STOPWORDS)
     tdfss = tdf[tdf['stopword']==True]
     tdfss['id'].to_csv("stopwordids.csv", index=False)
+
+    # Exporting Metadata for loading into torch
+    qdf = pd.DataFrame(qtuple, columns=['query', 'query_id', 'trec'])
+    qdf['nugget_file'] = qdf['trec'] + "." + qdf['query_id'].astype(str) + "_nuggets.csv"
+    qdf['stream_file'] = qdf['query_id'].str.replace(" ", "_") + ".csv"
+    qdf = qdf[['query_id','query','trec','nugget_file','stream_file']]
+    # Adding the tokens into the file -- need to convert this to a lambda at some point
+    # qdf['tokens'] = [' '.join([str(tdf.ix[tdf['token']==token, 'id'].values[0]) for token in q.split(" ")]) for q in qdf['query']]
+    qtokens = []
+    for q in qdf["query"]:
+        tokens = []
+        for token in q.split(" "):
+            try:
+                tval = str(tdf.ix[tdf['token']==token, 'id'].values[0])
+            except:
+                tval = str(0)
+            tokens.append(tval)
+        qtokens.append(' '.join(tokens))
+
+    qdf['tokens'] = qtokens
+    qdf.to_csv("./0-output/dqn_metadata.csv", index=False)
 
     os.system('source /Users/franciscojavierarceo/GitHub/DeepNLPQLearning/Code/trim_data.sh')
     print("----- END ------")

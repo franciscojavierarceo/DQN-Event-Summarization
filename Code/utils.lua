@@ -58,6 +58,23 @@ function makeInt(x)
     return out 
 end
 
+function loadMetadata(inputfile)
+    local metadata = csvigo.load({path = inputfile, mode = "large", verbose = false})
+    inputs = {}
+    for k, v in pairs(metadata) do
+        out = {
+            ['inputs'] = v[5],
+            ['nuggets'] = v[4],
+            ['query'] = makeInt(split(v[6])),
+            ['query_id'] = v[1]
+        }
+        if k > 1 then 
+            table.insert(inputs, out)
+        end
+    end
+    return inputs
+end
+
 function buildTermDocumentTable(x, K)
     --- This builds the data into tables after reading in from a csv
     --- If K == nil then getFirstKtokens() returns x

@@ -38,12 +38,13 @@ dofile("utils.lua")
 dofile("utilsNN.lua")
 
 input_path = '~/GitHub/DeepNLPQLearning/DO_NOT_UPLOAD_THIS_DATA/0-output/'
+
 query_fn = input_path .. 'queries_numtext.csv'
 query_file =  csvigo.load({path = query_fn, mode = "large", verbose = false})
 queries = padZeros(buildTermDocumentTable(query_file, nil), 5)
 
 stoplist = input_path .. 'stopwordids.csv'
-stopfile =  csvigo.load({path = stoplist, mode = "large", verbose = false})
+stopfile = csvigo.load({path = stoplist, mode = "large", verbose = false})
 stoplist = buildTermDocumentTable(stopfile, nil)
 stopwords = {}
 for k,v in pairs(stoplist) do 

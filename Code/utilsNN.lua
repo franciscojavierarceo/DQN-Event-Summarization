@@ -548,7 +548,7 @@ function train(inputs, query_data, model, nepochs, nnmod, metric, thresh, gamma,
                 memory[2]:min(), memory[2]:max(),
                 qValues:min(), qValues:max(),
                 nactions[SELECT], nactions[SKIP],
-                query_id
+                inputs[query_id]['query_id']
             )
             perf:write(perf_string)
 
