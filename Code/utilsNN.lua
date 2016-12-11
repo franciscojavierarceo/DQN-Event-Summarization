@@ -125,11 +125,11 @@ function buildFullSummary(actions, sentences, use_cuda)
 
     local selected = torch.ByteTensor(actions:narrow(2, SELECT, 1))
     local indxs = selected:eq(1):resize(selected:size(1)):nonzero()
+    if #torch.totable(indxs) == 0 then
+        return torch.zeros(1, 2)
+    end
     local indxs = indxs:resize(indxs:size(1))
-
     predictedsummary = sentences:index(1, indxs)
-    -- out = predictedsummary:size()
-    -- predictedsummary = predictedsummary:resize(out[1] * out[2])
 
     if use_cuda then
         predictedsummary = predictedsummary:cuda()

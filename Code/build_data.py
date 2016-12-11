@@ -187,19 +187,27 @@ def TokenizeData(infile_list, qfilename, outfile_list, word2idx, top_n, qtexts, 
 
 if __name__ == '__main__':
     os.chdir('/Users/franciscojavierarceo/GitHub/DeepNLPQLearning/DO_NOT_UPLOAD_THIS_DATA/')    
-    nuggfiles = ['./trec-data/trec%i-ts-topics-test.xml' % x for x in range(2013, 2016)]
+    nuggfiles = ['./nuggets-data/nuggets_%i.tsv.gz' % x for x in range(2013, 2016)]
+    # Exporting nuggets
+    for nuggfile in nuggfiles:
+        tmpnuggets = pd.read_csv(nuggfile, sep='\t')
+        for q in tmpnuggets['query_id'].unique():
+             if "TEST" not in q:
+                tmpnuggets[tmpnuggets['query_id']==q].to_csv(
+                    "./nuggets-data/%s_nuggets.csv" % q, index=False
+                )
 
     # First we have to segment the nuggets
     qfilenames = ['./trec-data/trec%i-ts-topics-test.xml' % x for x in range(2013, 2016)]
-    qtuple = []
-    for xml_file in qfilenames:
-        qtuple.append( read_queries(xml_file))
- 
-    qtuple = list(chain(*qtuple))
+    qtuple = list(chain(*[read_queries(xml_file) for xml_file in qfilenames ]))
     infilelist = [ './corpus-data/%s.tsv.gz' % q.replace(" ", "_") for (q, i, y)  in qtuple]
     infilelist = infilelist + qfilenames
-    nuggetlist = [ '%s.%i' % (n, i) for (q, i, n)  in qtuple]
+    nuggetlist = [ '%s.%i_nuggets.csv' % (n, i) for (q, i, n)  in qtuple]
     outfilelist = ['./0-output/%s_tokenized' % x.split("/")[2].split(".")[0] for x in infilelist]
+
+    qdf = pd.DataFrame(qtuple, columns=['query', 'query_id', 'trec'])
+    qdf['nugget_file'] = qdf['trec'] + "." + qdf['query_id'].astype(str) + "_nuggets.csv"
+    qdf['stream_file'] = qdf['query_id'].str.replace(" ", "_") + ".csv"
 
     # Exporting the raw files
     mycorpora, qtext, ntext = BuildIndexFiles(infilelist, qfilenames)
@@ -218,48 +226,3 @@ if __name__ == '__main__':
 
     os.system('source /Users/franciscojavierarceo/GitHub/DeepNLPQLearning/Code/trim_data.sh')
     print("----- END ------")
-
-    # # Exporting the first setence files -- corpora based on the total list
-    # infilelist_fs = [
-    #         './corpus-data/2012_aurora_shooting_first_sentence.tsv.gz', 
-    #         './corpus-data/2012_pakistan_garment_factory_fires_first_sentence.tsv.gz',
-    #         './corpus-data/hurricane_sandy_first_sentence.tsv.gz',
-    #         './corpus-data/wisconsin_sikh_temple_shooting_first_sentence.tsv.gz',
-    #         './trec-2013-data/nuggets.tsv.gz',
-    # ]
-    # outfilelist_fs = [
-    #         './0-output/2012_aurora_shooting_first_sentence',
-    #         './0-output/2012_pakistan_garment_factory_fires_first_sentence',
-    #         './0-output/hurricane_sandy_first_sentence',
-    #         './0-output/wisconsin_sikh_temple_shooting_first_sentence',
-    #         './0-output/nuggets_first_sentence',
-    # ]
-    # TokenizeData(infile_list = infilelist_fs, 
-    #             qfilename = qfilename, 
-    #             outfile_list = outfilelist_fs, 
-    #             word2idx = mycorpora.token2id, 
-    #             top_n = 10000,
-    #             qtexts = qtext,
-    #             ntexts = ntext)
-
-    # # Exporting the nuggets only -- corpora based on the total list
-    # infile_nuggets = [
-    #         './trec-2013-data/aurora_nuggets.tsv.gz',
-    #         './trec-2013-data/pakistan_nuggets.tsv.gz',
-    #         './trec-2013-data/sandy_nuggets.tsv.gz',
-    #         './trec-2013-data/wisconsin_nuggets.tsv.gz'
-    # ]
-    # outfile_nuggets = [
-    #         './0-output/aurora_nuggets',
-    #         './0-output/pakistan_nuggets',
-    #         './0-output/sandy_nuggets',
-    #         './0-output/wisconsin_nuggets'
-    # ]
-    # TokenizeData(infile_list = infile_nuggets, 
-    #             qfilename = qfilename, 
-    #             outfile_list = outfile_nuggets, 
-    #             word2idx = mycorpora.token2id, 
-    #             top_n = 10000,
-    #             qtexts = qtext,
-    #             ntexts = ntext)
-    # # Extracting the stop words
