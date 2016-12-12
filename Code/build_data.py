@@ -17,9 +17,10 @@ def read_queries(fname):
     ox = BeautifulSoup(''.join(out),'lxml').contents[1]
     qdata = []
     for i in ox.findAll('event'):
-        qdata.append( (i.findAll('query')[0].text, 
+        qdata.append((i.findAll('query')[0].text, 
                   int(i.findAll("id")[0].text),
-                  fname.replace("./trec-data/trec20", "TS").replace("-ts-topics-test.xml", "") ))
+                  fname.replace("./trec-data/trec20", "TS").replace("-ts-topics-test.xml", ""),
+                    i.findAll('title')[0].text))
     return qdata
 
 def loadQuery(qfilename):
@@ -200,9 +201,9 @@ if __name__ == '__main__':
     # First we have to segment the nuggets
     qfilenames = ['./trec-data/trec%i-ts-topics-test.xml' % x for x in range(2013, 2016)]
     qtuple = list(chain(*[read_queries(xml_file) for xml_file in qfilenames ]))
-    infilelist = [ './corpus-data/%s.tsv.gz' % q.replace(" ", "_") for (q, i, y)  in qtuple]
+    infilelist = ['./corpus-data/%s.tsv.gz' % q.replace(" ", "_") for (q, i, n, t)  in qtuple]
     infilelist = infilelist + qfilenames
-    nuggetlist = [ '%s.%i_nuggets.csv' % (n, i) for (q, i, n)  in qtuple]
+    nuggetlist = ['%s.%i_nuggets.csv' % (n, i) for (q, i, n, t)  in qtuple]
     outfilelist = ['./0-output/%s_tokenized' % x.split("/")[2].split(".")[0] for x in infilelist]
 
     # Exporting the raw files and tokenizing the data
@@ -222,12 +223,11 @@ if __name__ == '__main__':
     tdfss['id'].to_csv("stopwordids.csv", index=False)
 
     # Exporting Metadata for loading into torch
-    qdf = pd.DataFrame(qtuple, columns=['query', 'query_id', 'trec'])
+    qdf = pd.DataFrame(qtuple, columns=['query', 'query_id', 'trec', 'title'])
     qdf['nugget_file'] = qdf['trec'] + "." + qdf['query_id'].astype(str) + "_nuggets.csv"
-    qdf['stream_file'] = qdf['query_id'].str.replace(" ", "_") + ".csv"
+    qdf['stream_file'] = qdf['title'].str.replace(" ", "_").str.lower() + ".csv"
     qdf = qdf[['query_id','query','trec','nugget_file','stream_file']]
     # Adding the tokens into the file -- need to convert this to a lambda at some point
-    # qdf['tokens'] = [' '.join([str(tdf.ix[tdf['token']==token, 'id'].values[0]) for token in q.split(" ")]) for q in qdf['query']]
     qtokens = []
     for q in qdf["query"]:
         tokens = []

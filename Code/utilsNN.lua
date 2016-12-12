@@ -372,6 +372,7 @@ function intialize_variables(query_file, inputs, n_samples, input_path, K_tokens
         -- This is just for experimentation
         input_file = geti_n(input_file, 2,  n_samples) 
         -- input_file = geti_n(input_file, 2, #input_file) 
+        -- have to drop the header
         nugget_file = geti_n(nugget_file, 2, #nugget_file) 
 
         vocabSize = math.max(vocabSize, vocabSizeq, getVocabSize(input_file))
