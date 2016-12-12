@@ -422,8 +422,8 @@ end
 function forwardpass(query_data, query_id, model, epsilon, gamma, metric, thresh, stopwordlist, use_cuda)
     local SKIP = 1
     local SELECT = 2
-    math.randomseed(420)
-    torch.manualSeed(420)
+    -- math.randomseed(420)
+    -- torch.manualSeed(420)
 
     -- Extact variables
     local sentenceStream = query_data[query_id][1]
@@ -512,7 +512,6 @@ function forwardpass(query_data, query_id, model, epsilon, gamma, metric, thresh
         end
 
     end
-    print(query_id, tmp)
     local max, argmax = torch.max(qValues, 2)
     local reward0 = rouge:narrow(1,2, streamSize) - rouge:narrow(1,1, streamSize)
     local reward_tm1 =  rougeOpt:narrow(1,2, streamSize) - rougeOpt:narrow(1,1, streamSize)
@@ -528,7 +527,7 @@ function forwardpass(query_data, query_id, model, epsilon, gamma, metric, thresh
         local memory = {input, reward:cuda(), actions:cuda()}
     end
     --- Last ones are the total performance
-    return memory, recall, prec, f1, qValues
+    return memory, recall, prec, f1, qValues, tmp
     -- return memory, rougeRecall, rougePrecision, rougeF1, qValues
 end
 
@@ -557,7 +556,7 @@ function train(inputs, query_data, model, nepochs, nnmod, metric, thresh, gamma,
     for epoch=0, nepochs do
         for query_id=1, #inputs do
             -- Score the queries
-            memory, rougeRecall, rougePrecision, rougeF1, qValues = forwardpass(
+            memory, rougeRecall, rougePrecision, rougeF1, qValues, tmp = forwardpass(
                             query_data, query_id, model, epsilon, gamma, 
                             metric, thresh, stopwordlist, use_cuda
             )
@@ -634,6 +633,7 @@ function trainCV(inputs, query_data, model, nepochs, nnmod, metric, thresh, gamm
                                 query_data, query_id, model, epsilon, gamma, 
                                 metric, thresh, stopwordlist, use_cuda
                 )
+                print(query_id, epoch, tmp)
                 -- Build the memory
                 if epoch == 0 then
                     ranF1s[query_id] = rougeF1
