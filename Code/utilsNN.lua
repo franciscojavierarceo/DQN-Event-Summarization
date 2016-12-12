@@ -528,8 +528,8 @@ function forwardpass(query_data, query_id, model, epsilon, gamma, metric, thresh
         local memory = {input, reward:cuda(), actions:cuda()}
     end
     --- Last ones are the total performance
-    return memory, recall, prec, f1, qValues, tmp
-    -- return memory, rougeRecall, rougePrecision, rougeF1, qValues
+    -- return memory, recall, prec, f1, qValues, tmp
+    return memory, rougeRecall, rougePrecision, rougeF1, qValues
 end
 
 function train(inputs, query_data, model, nepochs, nnmod, metric, thresh, gamma, epsilon, delta, base_explore_rate, end_baserate, mem_size, batch_size, optimParams, n_backprops, regmodel, stopwordlist, use_cuda)
@@ -557,7 +557,7 @@ function train(inputs, query_data, model, nepochs, nnmod, metric, thresh, gamma,
     for epoch=0, nepochs do
         for query_id=1, #inputs do
             -- Score the queries
-            memory, rougeRecall, rougePrecision, rougeF1, qValues, tmp = forwardpass(
+            memory, rougeRecall, rougePrecision, rougeF1, qValues = forwardpass(
                             query_data, query_id, model, epsilon, gamma, 
                             metric, thresh, stopwordlist, use_cuda
             )
@@ -634,7 +634,7 @@ function trainCV(inputs, query_data, model, nepochs, nnmod, metric, thresh, gamm
                                 query_data, query_id, model, epsilon, gamma, 
                                 metric, thresh, stopwordlist, use_cuda
                 )
-                print(query_id, epoch, tmp)
+                -- print(query_id, epoch, tmp)
                 -- Build the memory
                 if epoch == 0 then
                     ranF1s[query_id] = rougeF1
