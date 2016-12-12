@@ -1,4 +1,4 @@
-import os
+ import os
 import re
 import sys
 import pickle
@@ -186,8 +186,8 @@ def TokenizeData(infile_list, qfilename, outfile_list, word2idx, top_n, qtexts, 
 
     print('...Exporting of tokenized data complete')
 
-if __name__ == '__main__':
-    os.chdir('/Users/franciscojavierarceo/GitHub/DeepNLPQLearning/DO_NOT_UPLOAD_THIS_DATA/')    
+def main(inputdir):
+    os.chdir(inputdir)
     nuggfiles = ['./nuggets-data/nuggets_%i.tsv.gz' % x for x in range(2013, 2016)]
     # Exporting nuggets
     for nuggfile in nuggfiles:
@@ -244,3 +244,6 @@ if __name__ == '__main__':
 
     os.system('source /Users/franciscojavierarceo/GitHub/DeepNLPQLearning/Code/trim_data.sh')
     print("----- END ------")
+
+if __name__ == '__main__':
+    main('/Users/franciscojavierarceo/GitHub/DeepNLPQLearning/DO_NOT_UPLOAD_THIS_DATA/')    

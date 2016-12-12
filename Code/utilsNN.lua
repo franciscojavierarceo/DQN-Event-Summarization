@@ -39,7 +39,7 @@ function buildModel(model, vocabSize, embeddingSize, metric, adapt, use_cuda)
                     :add(nn.SplitTable(2))
                     :add(nn.Sequencer(nn.LSTM(embeddingSize, embeddingSize)))
                     :add(nn.SelectTable(-1))            -- selects last state of the LSTM
-                    :add(nn.Linear(embeddingSize, embeddingSize))
+                    -- :add(nn.Linear(embeddingSize, embeddingSize))
                     :add(nn.ReLU())
     end
     local queryLookup = sentenceLookup:clone("weight", "gradWeight") 
