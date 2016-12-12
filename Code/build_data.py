@@ -1,4 +1,4 @@
- import os
+import os
 import re
 import sys
 import pickle
@@ -246,4 +246,5 @@ def main(inputdir):
     print("----- END ------")
 
 if __name__ == '__main__':
-    main('/Users/franciscojavierarceo/GitHub/DeepNLPQLearning/DO_NOT_UPLOAD_THIS_DATA/')    
+    # '/Users/franciscojavierarceo/GitHub/DeepNLPQLearning/DO_NOT_UPLOAD_THIS_DATA/'
+    main(sys.argv[1])
