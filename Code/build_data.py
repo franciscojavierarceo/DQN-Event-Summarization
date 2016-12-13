@@ -37,7 +37,7 @@ def loadQuery(qfilename):
 
     return [t.split(" ") for t in qs]
 
-def BuildIndexFiles(infile_list, qfilenames):
+def BuildIndexFiles(infile_list, qfilenames, inputdir):
     """
     :type  infile_list:  list
     :param infile_list:  List of file names to import
@@ -53,7 +53,7 @@ def BuildIndexFiles(infile_list, qfilenames):
     for idx, infilename in enumerate(infile_list):        
         print('Loading and tokenizing %s (%i of %i)' % (infilename, idx+1, len(infile_list)) )
 
-        if (infilename not inqfilenames) and 'nuggets' not in infilename:
+        if (infilename not in qfilenames) and ('nuggets' not in infilename):
             df = pd.read_csv(infilename, sep='\t', encoding='latin-1')
             df['text'] = df['text'].str.replace('[^A-Za-z0-9]+', ' ').str.strip().str.lower()
             texts = [t.split(" ") for t in df['text'] ]
@@ -91,11 +91,11 @@ def BuildIndexFiles(infile_list, qfilenames):
     
     # Exporting the dictionaries
     print("Exporting word to index and dictionary to word indices")
-    output = open('./0-output/LSTMDQN_Dic_token2id.pkl', 'ab+')
+    output = open(os.path.join(inputdir,'./0-output/LSTMDQN_Dic_token2id.pkl', 'ab+'))
     pickle.dump(word2idx, output)
     output.close()
 
-    output = open('./0-output/LSTMDQN_Dic_id2token.pkl', 'ab+')
+    output = open(os.path.join(inputdir,'./0-output/LSTMDQN_Dic_id2token.pkl', 'ab+'))
     pickle.dump(idx2word, output)
     output.close()
     
@@ -113,7 +113,7 @@ def BuildIndexFiles(infile_list, qfilenames):
 
     return dictionary, qtexts, ntexts
     
-def TokenizeData(infile_list, qfilename, outfile_list, word2idx, top_n, qtexts, ntexts):
+def TokenizeData(inputdir, infile_list, qfilename, outfile_list, word2idx, top_n, qtexts, ntexts):
     """
     :type  infile_list:  list
     :param infile_list:  List of file names to import
@@ -134,7 +134,7 @@ def TokenizeData(infile_list, qfilename, outfile_list, word2idx, top_n, qtexts, 
     :param  qtexts:     List from the queries so they're not removed
     """
     # Loading the token frequencies
-    tfdf = pd.read_csv('./0-output/total_corpus_smry.csv')
+    tfdf = pd.read_csv(os.path.join(inputdir, './0-output/total_corpus_smry.csv'))
     tfdf['qfile'] = tfdf['token'].isin(qtexts)
     tfdf['nfile'] = tfdf['token'].isin(ntexts)
     tfdf.sort_values(by='frequency', ascending=False, inplace=True)
@@ -188,27 +188,28 @@ def TokenizeData(infile_list, qfilename, outfile_list, word2idx, top_n, qtexts, 
 
 def main(inputdir):
     os.chdir(inputdir)
-    nuggfiles = ['./nuggets-data/nuggets_%i.tsv.gz' % x for x in range(2013, 2016)]
+    nuggfiles = [os.path.join(inputdir, './nuggets-data/nuggets_%i.tsv.gz') % x for x in range(2013, 2016)]
     # Exporting nuggets
     for nuggfile in nuggfiles:
         tmpnuggets = pd.read_csv(nuggfile, sep='\t')
         for q in tmpnuggets['query_id'].unique():
              if "TEST" not in q:
                 tmpnuggets[tmpnuggets['query_id']==q].to_csv(
-                    "./nuggets-data/%s_nuggets.csv" % q, index=False
+                    os.path.join(inputdir, "./nuggets-data/%s_nuggets.csv" % q), index=False
                 )
 
     # First we have to segment the nuggets
-    qfilenames = ['./trec-data/trec%i-ts-topics-test.xml' % x for x in range(2013, 2016)]
+    qfilenames = [os.path.join(inputdir, './trec-data/trec%i-ts-topics-test.xml') % x for x in range(2013, 2016)]
     qtuple = list(chain(*[read_queries(xml_file) for xml_file in qfilenames ]))
-    infilelist = ['./corpus-data/%s.tsv.gz' % q.replace(" ", "_") for (q, i, n, t)  in qtuple]
+    infilelist = [os.path.join(inputdir, './corpus-data/%s.tsv.gz' % q.replace(" ", "_")) for (q, i, n, t)  in qtuple]
     infilelist = infilelist + qfilenames
-    nuggetlist = ['%s.%i_nuggets.csv' % (n, i) for (q, i, n, t)  in qtuple]
-    outfilelist = ['./0-output/%s_tokenized' % x.split("/")[2].split(".")[0] for x in infilelist]
+    nuggetlist = [os.path.join(inputdir, '%s.%i_nuggets.csv' % (n, i)) for (q, i, n, t)  in qtuple]
+    outfilelist = [os.path.join(inputdir, './0-output/%s_tokenized' % x.split("/")[2].split(".")[0]) for x in infilelist]
 
     # Exporting the raw files and tokenizing the data
-    mycorpora, qtext, ntext = BuildIndexFiles(infilelist, qfilenames)
-    TokenizeData(infile_list = infilelist, 
+    mycorpora, qtext, ntext = BuildIndexFiles(infilelist, qfilenames, inputdir)
+    TokenizeData(inputdir = inputdir, 
+                infile_list = infilelist, 
                 qfilenames = qfilenames, 
                 outfile_list = outfilelist, 
                 word2idx = mycorpora.token2id, 
@@ -217,7 +218,7 @@ def main(inputdir):
                 ntexts = ntext)
     
     # Exporting corpus summary table
-    tdf = pd.read_csv("./total_corpus_smry.csv")
+    tdf = pd.read_csv(os.path.join(inputdir, "./0-output/total_corpus_smry.csv"))
     tdf['stopword'] = tdf['token'].isin(STOPWORDS)
     tdfss = tdf[tdf['stopword']==True]
     tdfss['id'].to_csv("stopwordids.csv", index=False)
@@ -240,9 +241,9 @@ def main(inputdir):
         qtokens.append(' '.join(tokens))
 
     qdf['tokens'] = qtokens
-    qdf.to_csv("./0-output/dqn_metadata.csv", index=False)
+    qdf.to_csv(os.path.join(inputdir, "./0-output/dqn_metadata.csv"), index=False)
 
-    os.system('source /Users/franciscojavierarceo/GitHub/DeepNLPQLearning/Code/trim_data.sh')
+    # os.system('source /Users/franciscojavierarceo/GitHub/DeepNLPQLearning/Code/trim_data.sh')
     print("----- END ------")
 
 if __name__ == '__main__':
