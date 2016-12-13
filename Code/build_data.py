@@ -175,7 +175,7 @@ def TokenizeData(inputdir, infile_list, qfilenames, outfile_list, word2idx, top_
         text_numindex = [ [word2idx[i] if i in token_ss else maxidv for i in t] for t in texts]
 
         # Exporting files
-        print('...file exported to %s.csv' % outfilename+ '_numtext.csv')
+        print('...file exported to %s.csv' % outfilename + '_numtext.csv')
 
         with open(outfilename + '_numtext.csv', 'wb') as csvfile:
             data = csv.writer(csvfile, delimiter=' ', quotechar='|', quoting=csv.QUOTE_MINIMAL)
@@ -210,7 +210,7 @@ def main(inputdir):
 
     infilelist = infilelist + qfilenames
     nuggetlist = [os.path.join(inputdir, '%s.%i_nuggets.csv' % (n, i)) for (q, i, n, t)  in qtuple]
-    outfilelist = [os.path.join(inputdir, '0-output/%s_tokenized' % x.split("/")[2].split(".")[0]) for x in infilelist]
+    outfilelist = [os.path.join(inputdir, '0-output/%s_tokenized' % x.split("/")[-1].split(".")[0]) for x in infilelist]
 
     # Exporting the raw files and tokenizing the data
     mycorpora, qtext, ntext = BuildIndexFiles(infilelist, qfilenames, inputdir)
