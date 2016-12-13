@@ -12,6 +12,7 @@ from gensim.parsing.preprocessing import STOPWORDS
 from collections import defaultdict    
 
 def read_queries(fname):
+    print(fname)
     f = open(fname, 'rb')
     out = f.readlines()
     ox = BeautifulSoup(''.join(out),'lxml').contents[1]
@@ -134,6 +135,8 @@ def TokenizeData(inputdir, infile_list, qfilenames, outfile_list, word2idx, top_
     :param  qtexts:     List from the queries so they're not removed
     """
     # Loading the token frequencies
+    qtexts = sum(qtexts, [])
+    ntexts = sum(ntexts, [])
     tfdf = pd.read_csv(os.path.join(inputdir, '0-output/total_corpus_smry.csv'))
     tfdf['qfile'] = tfdf['token'].isin(qtexts)
     tfdf['nfile'] = tfdf['token'].isin(ntexts)
@@ -153,7 +156,7 @@ def TokenizeData(inputdir, infile_list, qfilenames, outfile_list, word2idx, top_
 
     for idx, (infilename, outfilename) in enumerate(zip(infile_list, outfile_list)):
         print('Loading and tokenizing %s (%i of %i)' % (infilename, idx+1, len(infile_list)) )
-        if (infilename not in qfilename) and 'nuggets' not in infilename:
+        if (infilename not in qfilenames) and 'nuggets' not in infilename:
             df = pd.read_csv(infilename, sep='\t', encoding='latin-1')
             df['text'] = df['text'].str.replace('[^A-Za-z0-9]+', ' ').str.strip()
             texts = [ t.split(" ") for t in df['text'] ]
@@ -198,9 +201,13 @@ def main(inputdir):
                 )
 
     # First we have to segment the nuggets
-    qfilenames = [os.path.join(inputdir, 'trec-data/trec%i-ts-topics-test.xml') % x for x in range(2013, 2016)]
+    qfilenames = [os.path.join(inputdir, 'trec-data/trec%i-ts-topics-test.xml') % x for x in range(2013, 2014)]
     qtuple = list(chain(*[read_queries(xml_file) for xml_file in qfilenames ]))
-    infilelist = [os.path.join(inputdir, 'corpus-data/%s.tsv.gz' % t.replace(" ", "_").tolower()) for (q, i, n, t)  in qtuple]
+    infilelist = [os.path.join(inputdir, 'corpus-data/%s.tsv.gz' % t.replace(" ", "_").lower()) for (q, i, n, t)  in qtuple if i != 7]
+    input_files = [os.path.join(inputdir, 'corpus-data/', x) for x in os.listdir(os.path.join(inputdir, 'corpus-data/')) if 'tsv.gz' in x]
+    # Limiting the files
+    infilelist = [x for x in infilelist if x in input_files]
+
     infilelist = infilelist + qfilenames
     nuggetlist = [os.path.join(inputdir, '%s.%i_nuggets.csv' % (n, i)) for (q, i, n, t)  in qtuple]
     outfilelist = [os.path.join(inputdir, '0-output/%s_tokenized' % x.split("/")[2].split(".")[0]) for x in infilelist]
