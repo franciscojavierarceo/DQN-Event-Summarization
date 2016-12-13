@@ -85,6 +85,21 @@ function buildTermDocumentTable(x, K)
     return out
 end
 
+function getMaxQuerylen(x)
+    local maxval = 0
+    for k,v in pairs(x) do
+        maxval = math.max(maxval, #v['query'])
+    end 
+    return maxval
+end
+
+function getVocabSizeQuery(x)
+    local maxval = 0
+    for k,v in pairs(x) do
+        maxval = math.max(maxval, math.max(table.unpack(v['query'])))
+    end 
+    return maxval
+end
 function getMaxseq(x)
     -- This gets the max sequence length of a table
     local maxval = 0

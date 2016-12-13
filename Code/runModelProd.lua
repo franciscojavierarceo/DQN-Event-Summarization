@@ -23,7 +23,7 @@ cmd:option('--model','bow','BOW/LSTM option')
 cmd:option('--embeddingSize', 64,'Embedding dimension')
 cmd:option('--usecuda', false, 'running on cuda')
 cmd:option('--metric', "f1", 'Metric to learn')
-cmd:option('--n_samples', 500, 'Number of samples to use')
+cmd:option('--n_samples', 20, 'Number of samples to use')
 cmd:option('--maxSummarySize', 300, 'Maximum summary size')
 cmd:option('--end_baserate', 5, 'Epoch number at which the base_rate ends')
 cmd:option('--K_tokens', 25, 'Maximum number of tokens for each sentence')
@@ -65,7 +65,7 @@ local delta = opt.cuts/opt.nepochs
 local optimParams = { learningRate = opt.learning_rate }
 
 -- Initializing the model variables
-local vocabSize, query_data = intialize_variables(query_file, inputs, 
+local vocabSize, query_data = intialize_variables(inputs, 
                                             opt.n_samples, input_path, opt.K_tokens, 
                                             opt.maxSummarySize, stopwords, opt.thresh)
 local model = buildModel(opt.model, vocabSize, opt.embeddingSize, opt.metric, opt.adapt, opt.usecuda)

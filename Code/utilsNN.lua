@@ -183,15 +183,15 @@ function rougeScores(genSummary, refSummary)
         genTotal = genTotal + genCount
     end
 
-    local recall = intersection / refTotal
-    local prec = intersection / genTotal
-    tmp = {intersection, refTotal, genTotal}
+    recall = intersection / refTotal
+    prec = intersection / genTotal
+    -- tmp = {intersection, refTotal, genTotal}
     if recall == 0 and prec == 0 then
         f1 = 0
     else 
         f1 = (2 * recall * prec) / (recall + prec)
     end
-    return recall, prec, f1, tmp
+    return recall, prec, f1
 end
 function rougeScores2(pred_summary, ref_summaries)
     local rsd = ref_summaries
@@ -356,13 +356,14 @@ function backProp(input_memory, params, gradParams, optimParams, model, criterio
     end
     return lossv[1]
 end
-function intialize_variables(query_file, inputs, n_samples, input_path, K_tokens, maxSummarySize, stopwordlist, thresh)
+function intialize_variables(inputs, n_samples, input_path, K_tokens, maxSummarySize, stopwordlist, thresh)
     local vocabSize = 0
     local maxseqlen = 0
-    local maxseqlenq = getMaxseq(query_file)
-    local vocabSizeq = getVocabSize(query_file)
+    local maxseqlenq = getMaxQuerylen(inputs)
+    local vocabSizeq = getVocabSizeQuery(inputs)
+    -- local maxseqlenq = getMaxseq(inputs)
+    -- local vocabSizeq = getVocabSize(inputs)
     local query_data = {}
-
     for query_id = 1, #inputs do
         input_fn = inputs[query_id]['inputs']
         nugget_fn = inputs[query_id]['nuggets']
@@ -496,8 +497,8 @@ function forwardpass(query_data, query_id, model, epsilon, gamma, metric, thresh
         summaryCounts = buildTokenCounts(predsummary, stopwordlist)
         summaryCountsOpt = buildTokenCounts(predsummaryOpt, stopwordlist)
         
-        recall, prec, f1, tmp = rougeScores(summaryCounts, refCounts)
-        rOpt, pOpt, f1Opt, tmp2 = rougeScores(summaryCountsOpt, refCounts)
+        recall, prec, f1 = rougeScores(summaryCounts, refCounts)
+        rOpt, pOpt, f1Opt = rougeScores(summaryCountsOpt, refCounts)
 
         if metric == "f1" then
             rouge[i + 1] = threshold(f1, thresh)
@@ -529,7 +530,7 @@ function forwardpass(query_data, query_id, model, epsilon, gamma, metric, thresh
     end
     --- Last ones are the total performance
     -- return memory, recall, prec, f1, qValues, tmp
-    return memory, rougeRecall, rougePrecision, rougeF1, qValues
+    return memory, recall, prec, f1, qValues
 end
 
 function train(inputs, query_data, model, nepochs, nnmod, metric, thresh, gamma, epsilon, delta, base_explore_rate, end_baserate, mem_size, batch_size, optimParams, n_backprops, regmodel, stopwordlist, use_cuda)
@@ -666,6 +667,7 @@ function trainCV(inputs, query_data, model, nepochs, nnmod, metric, thresh, gamm
                     query_id, test_query, query_id==test_query
                 )
                 perf:write(perf_string)
+                print(perf_string)
             end
 
             if (epsilon - delta) <= base_explore_rate then

@@ -176,7 +176,7 @@ def TokenizeData(inputdir, infile_list, qfilenames, outfile_list, word2idx, top_
         # Exporting files
         print('...file exported to %s.csv' % outfilename)
 
-        with open(outfilename + '_numtext.csv', 'wb') as csvfile:
+        with open(outfilename + '.csv', 'wb') as csvfile:
             data = csv.writer(csvfile, delimiter=' ', quotechar='|', quoting=csv.QUOTE_MINIMAL)
             if '0-output/queries' == outfilename:
                 data.writerow(['Query'])
@@ -196,7 +196,7 @@ def main(inputdir):
         tmpnuggets = pd.read_csv(nuggfile, sep='\t')
         for q in tmpnuggets['query_id'].unique():
              if "TEST" not in q:
-                nuggfile = os.path.join(inputdir, "0-output/%s_nuggets.csv" % q)
+                nuggfile = os.path.join(inputdir, "nuggets-data/%s_nuggets.csv" % q)
                 tmpnuggets[tmpnuggets['query_id']==q].to_csv(nuggfile, index=False)
                 nuggets.append(nuggfile)
 
@@ -212,11 +212,10 @@ def main(inputdir):
     # Incorporating the streams
     outfilelist = [os.path.join(inputdir, '0-output/%s_tokenized' % x.split("/")[-1].split(".")[0]) for x in infilelist]
     # Incporating the nuggets
-    infilelist += [os.path.join(inputdir, '0-output/%s.%i_nuggets.csv' % (n, i)) for (q, i, n, t)  in qtuple]
+    infilelist += [os.path.join(inputdir, 'nuggets-data/%s.%i_nuggets.csv' % (n, i)) for (q, i, n, t)  in qtuple]
 
     infilelist = infilelist + qfilenames + nuggets
-    nuggetlist = [os.path.join(inputdir, 'nuggets-data/%s.%i_nuggets.csv' % (n, i)) for (q, i, n, t)  in qtuple]
-    outfilelist = [os.path.join(inputdir, '0-output/%s_tokenized' % x.split("/")[-1].split(".")[0]) for x in infilelist]
+    outfilelist+= [os.path.join(inputdir, '0-output/%s.%i_nuggets_tokenized' % (n, i)) for (q, i, n, t)  in qtuple]
 
     # Exporting the raw files and tokenizing the data
     mycorpora, qtext, ntext = BuildIndexFiles(infilelist, qfilenames, inputdir)
@@ -237,8 +236,8 @@ def main(inputdir):
 
     # Exporting Metadata for loading into torch
     qdf = pd.DataFrame(qtuple, columns=['query', 'query_id', 'trec', 'title'])
-    qdf['nugget_file'] = qdf['trec'] + "." + qdf['query_id'].astype(str) + "_nuggets.csv"
-    qdf['stream_file'] = qdf['title'].str.replace(" ", "_").str.lower() + ".csv"
+    qdf['nugget_file'] = qdf['trec'] + "." + qdf['query_id'].astype(str) + "_nuggets_tokenized.csv"
+    qdf['stream_file'] = qdf['title'].str.replace(" ", "_").str.lower() + "_tokenized.csv"
     qdf = qdf[['query_id','query','trec','nugget_file','stream_file']]
     # Adding the tokens into the file -- need to convert this to a lambda at some point
     qtokens = []
