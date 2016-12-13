@@ -204,8 +204,8 @@ def main(inputdir):
     qfilenames = [os.path.join(inputdir, 'trec-data/trec%i-ts-topics-test.xml') % x for x in range(2013, 2014)]
     qtuple = list(chain(*[read_queries(xml_file) for xml_file in qfilenames ]))
     infilelist = [os.path.join(inputdir, 'corpus-data/%s.tsv.gz' % t.replace(" ", "_").lower()) for (q, i, n, t)  in qtuple if i != 7]
-    input_files = [os.path.join(inputdir, 'corpus-data/', x) for x in os.listdir(os.path.join(inputdir, 'corpus-data/')) if 'tsv.gz' in x]
     # Limiting the files
+    input_files = [os.path.join(inputdir, 'corpus-data/', x) for x in os.listdir(os.path.join(inputdir, 'corpus-data/')) if 'tsv.gz' in x]
     infilelist = [x for x in infilelist if x in input_files]
 
     infilelist = infilelist + qfilenames
