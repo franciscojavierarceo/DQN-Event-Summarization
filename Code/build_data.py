@@ -12,6 +12,7 @@ from gensim.parsing.preprocessing import STOPWORDS
 from collections import defaultdict    
 
 def read_queries(fname):
+    print(fname)
     f = open(fname, 'rb')
     out = f.readlines()
     ox = BeautifulSoup(''.join(out),'lxml').contents[1]
@@ -91,11 +92,11 @@ def BuildIndexFiles(infile_list, qfilenames, inputdir):
     
     # Exporting the dictionaries
     print("Exporting word to index and dictionary to word indices")
-    output = open(os.path.join(inputdir,'0-output/LSTMDQN_Dic_token2id.pkl', 'ab+'))
+    output = open(os.path.join(inputdir,'0-output/LSTMDQN_Dic_token2id.pkl'), 'ab+')
     pickle.dump(word2idx, output)
     output.close()
 
-    output = open(os.path.join(inputdir,'0-output/LSTMDQN_Dic_id2token.pkl', 'ab+'))
+    output = open(os.path.join(inputdir,'0-output/LSTMDQN_Dic_id2token.pkl'), 'ab+')
     pickle.dump(idx2word, output)
     output.close()
     
@@ -113,7 +114,7 @@ def BuildIndexFiles(infile_list, qfilenames, inputdir):
 
     return dictionary, qtexts, ntexts
     
-def TokenizeData(inputdir, infile_list, qfilename, outfile_list, word2idx, top_n, qtexts, ntexts):
+def TokenizeData(inputdir, infile_list, qfilenames, outfile_list, word2idx, top_n, qtexts, ntexts):
     """
     :type  infile_list:  list
     :param infile_list:  List of file names to import
@@ -153,7 +154,7 @@ def TokenizeData(inputdir, infile_list, qfilename, outfile_list, word2idx, top_n
 
     for idx, (infilename, outfilename) in enumerate(zip(infile_list, outfile_list)):
         print('Loading and tokenizing %s (%i of %i)' % (infilename, idx+1, len(infile_list)) )
-        if (qfilename not in infilename) and 'nuggets' not in infilename:
+        if (infilename not in qfilenames) and 'nuggets' not in infilename:
             df = pd.read_csv(infilename, sep='\t', encoding='latin-1')
             df['text'] = df['text'].str.replace('[^A-Za-z0-9]+', ' ').str.strip()
             texts = [ t.split(" ") for t in df['text'] ]
@@ -163,7 +164,7 @@ def TokenizeData(inputdir, infile_list, qfilename, outfile_list, word2idx, top_n
             df['nugget_text'] = df['nugget_text'].str.replace('[^A-Za-z0-9]+', ' ').str.strip()
             texts = [ t.split(" ") for t in df['nugget_text'] ]
 
-        if qfilename in infilename:
+        if infilename in qfilenames:
             texts = loadQuery(infilename)
         texts = [ [token for token in text ]  for text in texts]
 
@@ -176,7 +177,7 @@ def TokenizeData(inputdir, infile_list, qfilename, outfile_list, word2idx, top_n
 
         with open(outfilename + '_numtext.csv', 'wb') as csvfile:
             data = csv.writer(csvfile, delimiter=' ', quotechar='|', quoting=csv.QUOTE_MINIMAL)
-            if './0-output/queries' == outfilename:
+            if '0-output/queries' == outfilename:
                 data.writerow(['Query'])
                 data.writerows(text_numindex)
             else:
@@ -187,7 +188,7 @@ def TokenizeData(inputdir, infile_list, qfilename, outfile_list, word2idx, top_n
     print('...Exporting of tokenized data complete')
 
 def main(inputdir):
-    os.chdir(inputdir)
+#    os.chdir(inputdir)
     nuggfiles = [os.path.join(inputdir, 'nuggets-data/nuggets_%i.tsv.gz') % x for x in range(2013, 2016)]
     # Exporting nuggets
     for nuggfile in nuggfiles:
@@ -199,9 +200,9 @@ def main(inputdir):
                 )
 
     # First we have to segment the nuggets
-    qfilenames = [os.path.join(inputdir, 'trec-data/trec%i-ts-topics-test.xml') % x for x in range(2013, 2016)]
+    qfilenames = [os.path.join(inputdir, 'trec-data/trec%i-ts-topics-test.xml') % x for x in range(2013, 2014)]
     qtuple = list(chain(*[read_queries(xml_file) for xml_file in qfilenames ]))
-    infilelist = [os.path.join(inputdir, 'corpus-data/%s.tsv.gz' % q.replace(" ", "_")) for (q, i, n, t)  in qtuple]
+    infilelist = [os.path.join(inputdir, 'corpus-data/%s.tsv.gz' % t.replace(" ", "_").lower()) for (q, i, n, t)  in qtuple if i != 7]
     infilelist = infilelist + qfilenames
     nuggetlist = [os.path.join(inputdir, '%s.%i_nuggets.csv' % (n, i)) for (q, i, n, t)  in qtuple]
     outfilelist = [os.path.join(inputdir, '0-output/%s_tokenized' % x.split("/")[2].split(".")[0]) for x in infilelist]
