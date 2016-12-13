@@ -19,7 +19,7 @@ def read_queries(fname):
     for i in ox.findAll('event'):
         qdata.append((i.findAll('query')[0].text, 
                   int(i.findAll("id")[0].text),
-                  fname.replace("./trec-data/trec20", "TS").replace("-ts-topics-test.xml", ""),
+                  fname.replace("/trec-data/trec20", "TS").replace("-ts-topics-test.xml", ""),
                     i.findAll('title')[0].text))
     return qdata
 
