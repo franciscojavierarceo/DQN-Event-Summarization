@@ -11,8 +11,7 @@ from gensim import corpora
 from gensim.parsing.preprocessing import STOPWORDS
 from collections import defaultdict    
 
-def read_queries(fname):
-    print(fname)
+def read_queries(idir, fname):
     f = open(fname, 'rb')
     out = f.readlines()
     ox = BeautifulSoup(''.join(out),'lxml').contents[1]
@@ -20,7 +19,7 @@ def read_queries(fname):
     for i in ox.findAll('event'):
         qdata.append((i.findAll('query')[0].text, 
                   int(i.findAll("id")[0].text),
-                  fname.replace("/trec-data/trec20", "TS").replace("-ts-topics-test.xml", ""),
+                  fname.split("/")[-1].replace("-ts-topics-test.xml", "").replace("trec20","TS"),
                     i.findAll('title')[0].text))
     return qdata
 
@@ -60,7 +59,7 @@ def BuildIndexFiles(infile_list, qfilenames, inputdir):
             texts = [t.split(" ") for t in df['text'] ]
 
         if 'nuggets' in infilename:
-            df = pd.read_csv(infilename, sep='\t', encoding='latin-1')
+            df = pd.read_csv(infilename)
             df['nugget_text'] = df['nugget_text'].str.replace('[^A-Za-z0-9]+', ' ').str.strip().str.lower()
             texts = [t.split(" ") for t in df['nugget_text'] ]
             ntexts.append(texts)
@@ -162,7 +161,7 @@ def TokenizeData(inputdir, infile_list, qfilenames, outfile_list, word2idx, top_
             texts = [ t.split(" ") for t in df['text'] ]
 
         if 'nuggets' in infilename:
-            df = pd.read_csv(infilename, sep='\t', encoding='latin-1')
+            df = pd.read_csv(infilename)
             df['nugget_text'] = df['nugget_text'].str.replace('[^A-Za-z0-9]+', ' ').str.strip()
             texts = [ t.split(" ") for t in df['nugget_text'] ]
 
@@ -175,7 +174,7 @@ def TokenizeData(inputdir, infile_list, qfilenames, outfile_list, word2idx, top_
         text_numindex = [ [word2idx[i] if i in token_ss else maxidv for i in t] for t in texts]
 
         # Exporting files
-        print('...file exported to %s.csv' % outfilename + '_numtext.csv')
+        print('...file exported to %s.csv' % outfilename)
 
         with open(outfilename + '_numtext.csv', 'wb') as csvfile:
             data = csv.writer(csvfile, delimiter=' ', quotechar='|', quoting=csv.QUOTE_MINIMAL)
@@ -190,26 +189,33 @@ def TokenizeData(inputdir, infile_list, qfilenames, outfile_list, word2idx, top_
     print('...Exporting of tokenized data complete')
 
 def main(inputdir):
-    nuggfiles = [os.path.join(inputdir, 'nuggets-data/nuggets_%i.tsv.gz') % x for x in range(2013, 2016)]
     # Exporting nuggets
+    nuggets = []
+    nuggfiles = [os.path.join(inputdir, 'nuggets-data/nuggets_%i.tsv.gz') % x for x in range(2013, 2016)]
     for nuggfile in nuggfiles:
         tmpnuggets = pd.read_csv(nuggfile, sep='\t')
         for q in tmpnuggets['query_id'].unique():
              if "TEST" not in q:
-                tmpnuggets[tmpnuggets['query_id']==q].to_csv(
-                    os.path.join(inputdir, "nuggets-data/%s_nuggets.csv" % q), index=False
-                )
+                nuggfile = os.path.join(inputdir, "0-output/%s_nuggets.csv" % q)
+                tmpnuggets[tmpnuggets['query_id']==q].to_csv(nuggfile, index=False)
+                nuggets.append(nuggfile)
 
     # First we have to segment the nuggets
     qfilenames = [os.path.join(inputdir, 'trec-data/trec%i-ts-topics-test.xml') % x for x in range(2013, 2014)]
-    qtuple = list(chain(*[read_queries(xml_file) for xml_file in qfilenames ]))
+    qtuple = list(chain(*[read_queries(inputdir, xml_file) for xml_file in qfilenames ]))
     infilelist = [os.path.join(inputdir, 'corpus-data/%s.tsv.gz' % t.replace(" ", "_").lower()) for (q, i, n, t)  in qtuple if i != 7]
     # Limiting the files
     input_files = [os.path.join(inputdir, 'corpus-data/', x) for x in os.listdir(os.path.join(inputdir, 'corpus-data/')) if 'tsv.gz' in x]
     infilelist = [x for x in infilelist if x in input_files]
 
-    infilelist = infilelist + qfilenames
-    nuggetlist = [os.path.join(inputdir, '%s.%i_nuggets.csv' % (n, i)) for (q, i, n, t)  in qtuple]
+    infilelist += qfilenames
+    # Incorporating the streams
+    outfilelist = [os.path.join(inputdir, '0-output/%s_tokenized' % x.split("/")[-1].split(".")[0]) for x in infilelist]
+    # Incporating the nuggets
+    infilelist += [os.path.join(inputdir, '0-output/%s.%i_nuggets.csv' % (n, i)) for (q, i, n, t)  in qtuple]
+
+    infilelist = infilelist + qfilenames + nuggets
+    nuggetlist = [os.path.join(inputdir, 'nuggets-data/%s.%i_nuggets.csv' % (n, i)) for (q, i, n, t)  in qtuple]
     outfilelist = [os.path.join(inputdir, '0-output/%s_tokenized' % x.split("/")[-1].split(".")[0]) for x in infilelist]
 
     # Exporting the raw files and tokenizing the data
@@ -219,7 +225,7 @@ def main(inputdir):
                 qfilenames = qfilenames, 
                 outfile_list = outfilelist, 
                 word2idx = mycorpora.token2id, 
-                top_n = 10000,
+                top_n = 40000,
                 qtexts = qtext,
                 ntexts = ntext)
     
@@ -227,7 +233,7 @@ def main(inputdir):
     tdf = pd.read_csv(os.path.join(inputdir, "0-output/total_corpus_smry.csv"))
     tdf['stopword'] = tdf['token'].isin(STOPWORDS)
     tdfss = tdf[tdf['stopword']==True]
-    tdfss['id'].to_csv("stopwordids.csv", index=False)
+    tdfss['id'].to_csv(os.path.join(inputdir, "0-output/stopwordids.csv"), index=False)
 
     # Exporting Metadata for loading into torch
     qdf = pd.DataFrame(qtuple, columns=['query', 'query_id', 'trec', 'title'])
