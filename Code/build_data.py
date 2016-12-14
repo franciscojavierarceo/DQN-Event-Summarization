@@ -11,7 +11,7 @@ from gensim import corpora
 from gensim.parsing.preprocessing import STOPWORDS
 from collections import defaultdict    
 
-def read_queries(idir, fname):
+def read_queries(fname):
     f = open(fname, 'rb')
     out = f.readlines()
     ox = BeautifulSoup(''.join(out),'lxml').contents[1]
@@ -254,7 +254,6 @@ def main(inputdir):
     qdf['tokens'] = qtokens
     qdf.to_csv(os.path.join(inputdir, "0-output/dqn_metadata.csv"), index=False)
 
-    # os.system('source /Users/franciscojavierarceo/GitHub/DeepNLPQLearning/Code/trim_data.sh')
     print("----- END ------")
 
 if __name__ == '__main__':
