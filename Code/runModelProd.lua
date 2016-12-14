@@ -34,12 +34,12 @@ cmd:text()
 --- this retrieves the commands and stores them in opt.variable (e.g., opt.model)
 local opt = cmd:parse(arg or {})
 
-dofile("utils.lua")
-dofile("utilsNN.lua")
+dofile("Code/utils.lua")
+dofile("Code/utilsNN.lua")
 
-input_path = '~/GitHub/DeepNLPQLearning/DO_NOT_UPLOAD_THIS_DATA/0-output/'
+input_path = 'data/0-output/'
 
-inputs = loadMetadata(input_path .. "./dqn_metadata.csv")
+inputs = loadMetadata(input_path .. "dqn_metadata.csv")
 stopfile = csvigo.load({path = input_path .. 'stopwordids.csv', mode = "large", verbose = false})
 stoplist = buildTermDocumentTable(stopfile, nil)
 
