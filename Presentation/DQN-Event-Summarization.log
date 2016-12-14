@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015) (preloaded format=pdflatex 2015.5.24)  13 DEC 2016 08:48
+This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015) (preloaded format=pdflatex 2015.5.24)  13 DEC 2016 16:27
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -1139,7 +1139,7 @@ File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 \pgf@layerbox@foreground=\box84
 \pgf@layerboxsaved@foreground=\box85
 
-Overfull \hbox (4.17009pt too wide) in paragraph at lines 232--232
+Overfull \hbox (4.17009pt too wide) in paragraph at lines 241--241
  []$\OMS/cmsy/m/n/8 f\OML/cmm/m/it/8 Rouge; Select\OMS/cmsy/m/n/8 g$ 
  []
 
@@ -1299,19 +1299,19 @@ Missing character: There is no ] in font nullfont!
 File: DQN_LSTM_Algorithm.png Graphic file (type png)
 
 <use DQN_LSTM_Algorithm.png>
-Package pdftex.def Info: DQN_LSTM_Algorithm.png used on input line 242.
+Package pdftex.def Info: DQN_LSTM_Algorithm.png used on input line 251.
 (pdftex.def)             Requested size: 252.79811pt x 149.5975pt.
  [15
 
  <./DQN_LSTM_Algorithm.png>]
-LaTeX Font Info:    Try loading font information for OMS+cmr on input line 279.
+LaTeX Font Info:    Try loading font information for OMS+cmr on input line 288.
 
 
 (/usr/local/texlive/2015/texmf-dist/tex/latex/base/omscmr.fd
 File: omscmr.fd 2014/09/29 v2.5h Standard LaTeX font definitions
 )
 LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <6> not available
-(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 279.
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 288.
  [16
 
 ] [17
@@ -1321,7 +1321,7 @@ LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <6> not available
 File: DQN_LSTM_Precision.png Graphic file (type png)
 
 <use DQN_LSTM_Precision.png>
-Package pdftex.def Info: DQN_LSTM_Precision.png used on input line 302.
+Package pdftex.def Info: DQN_LSTM_Precision.png used on input line 311.
 (pdftex.def)             Requested size: 289.0667pt x 144.5422pt.
  [18
 
@@ -1330,7 +1330,7 @@ Package pdftex.def Info: DQN_LSTM_Precision.png used on input line 302.
 File: DQN_LSTM_Recall.png Graphic file (type png)
 
 <use DQN_LSTM_Recall.png>
-Package pdftex.def Info: DQN_LSTM_Recall.png used on input line 312.
+Package pdftex.def Info: DQN_LSTM_Recall.png used on input line 321.
 (pdftex.def)             Requested size: 289.0667pt x 144.5422pt.
  [19
 
@@ -1338,7 +1338,7 @@ Package pdftex.def Info: DQN_LSTM_Recall.png used on input line 312.
 <DQN_LSTM_F1.png, id=786, 957.5775pt x 538.01pt>
 File: DQN_LSTM_F1.png Graphic file (type png)
  <use DQN_LSTM_F1.png>
-Package pdftex.def Info: DQN_LSTM_F1.png used on input line 322.
+Package pdftex.def Info: DQN_LSTM_F1.png used on input line 331.
 (pdftex.def)             Requested size: 289.07268pt x 144.5422pt.
  [20
 
@@ -1366,25 +1366,25 @@ Underfull \vbox (badness 10000) has occurred while \output is active []
 \tf@snm=\write8
 \openout8 = `DQN-Event-Summarization.snm'.
 
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 358.
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 358.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 367.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 367.
  (./DQN-Event-Summarization.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 358.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 358.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 367.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 367.
 Package rerunfilecheck Info: File `DQN-Event-Summarization.out' has not changed
 .
-(rerunfilecheck)             Checksum: EAB56D1C49AB828308FE5197CB4DA87B;656.
+(rerunfilecheck)             Checksum: F9254133487FBFDCE9AEE84286ADFFFE;658.
 
 
 LaTeX Font Warning: Size substitutions with differences
 (Font)              up to 1.0pt have occurred.
 
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 358.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 367.
  ) 
 Here is how much of TeX's memory you used:
  23675 strings out of 493089
  490639 string characters out of 6134842
- 608854 words of memory out of 5000000
+ 608858 words of memory out of 5000000
  26536 multiletter control sequences out of 15000+600000
  13866 words of font info for 51 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
@@ -1409,7 +1409,7 @@ e/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/local/texlive/2
 exmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/local/texlive/2015/tex
 mf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb></usr/local/texlive/2015/texm
 f-dist/fonts/type1/public/amsfonts/symbols/msam10.pfb>
-Output written on DQN-Event-Summarization.pdf (25 pages, 524418 bytes).
+Output written on DQN-Event-Summarization.pdf (25 pages, 524067 bytes).
 PDF statistics:
  1059 PDF objects out of 1200 (max. 8388607)
  964 compressed objects within 10 object streams

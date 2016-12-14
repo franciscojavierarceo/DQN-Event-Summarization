@@ -21,8 +21,8 @@
 \headcommand {\beamer@subsectionentry {0}{2}{1}{9}{Review}}\headcommand {\beamer@subsectionpages {9}{8}}
 \headcommand {\slideentry {2}{1}{1}{9/9}{Review}{0}}
 \headcommand {\beamer@framepages {9}{9}}
-\headcommand {\beamer@subsectionentry {0}{2}{2}{10}{States}}\headcommand {\beamer@subsectionpages {9}{9}}
-\headcommand {\slideentry {2}{2}{1}{10/10}{States}{0}}
+\headcommand {\beamer@subsectionentry {0}{2}{2}{10}{DQN-LSTM}}\headcommand {\beamer@subsectionpages {9}{9}}
+\headcommand {\slideentry {2}{2}{1}{10/10}{DQN-LSTM}{0}}
 \headcommand {\beamer@framepages {10}{10}}
 \headcommand {\beamer@subsectionentry {0}{2}{3}{11}{Actions}}\headcommand {\beamer@subsectionpages {10}{10}}
 \headcommand {\slideentry {2}{3}{1}{11/11}{Actions}{0}}

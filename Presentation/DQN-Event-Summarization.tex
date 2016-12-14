@@ -91,12 +91,21 @@ This leads us to explore Deep Q-Networks (DQN) for 3 reasons:
 		\end{itemize}
 	\end{frame}
 	
-	\subsection{States}  
+	\subsection{DQN-LSTM}  
 	\begin{frame}
-		\frametitle{States}
+		\frametitle{State, Action, and Rewards}
 		\begin{itemize}
-	\item<1 ->  A state $s(x_{t},\tilde{y}_{t}, d)$ at time $t$ is a function of the stream $X_d$, $\forall d \in D$, which represents the candidate sentence, $x_t$ to include in the summary, the state of the current summary $\tilde{y}_t$, and the query $d$. 	
-	\item<1 -> For brevity we use $s_t$ where the dependence on $x_{t},\tilde{y}_{t},$ and $d$ is assumed.
+	\item<1 ->  The state $s(x_{t},\tilde{y}_{t}, d)$ at time $t$ is a function of the candidate sentence, $x_t$ to include in the summary, the state of the current summary $\tilde{y}_t$, and the query $d$. 	
+	\item<1 -> The set of actions as $\mathcal{A} := \{select, skip\}$, which corresponds to
+	\begin{equation}
+		\tilde{y}_{t + 1} =
+		\begin{cases}
+			\tilde{y}_{t} \cup \{ x_t \},	& \text{if } a_t = select  \\
+			\tilde{y}_{t}, 			& \text{if } a_t = skip.
+		\end{cases}
+	\end{equation}
+	\item<1 -> The reward $r$ for a given action $a$ at time $t$ is measured by the change in ROUGE-F1 score of the predicted summary $\tilde{y}_{t}$ measured against a gold standard summary $Y$. 
+	
 		\end{itemize}
 	\end{frame}
 

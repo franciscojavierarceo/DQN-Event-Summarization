@@ -3,7 +3,7 @@
 \beamer@subsectionintoc {1}{1}{Motivation}{3}{0}{1}
 \beamer@sectionintoc {2}{Deep Q-Networks}{9}{0}{2}
 \beamer@subsectionintoc {2}{1}{Review}{9}{0}{2}
-\beamer@subsectionintoc {2}{2}{States}{10}{0}{2}
+\beamer@subsectionintoc {2}{2}{DQN-LSTM}{10}{0}{2}
 \beamer@subsectionintoc {2}{3}{Actions}{11}{0}{2}
 \beamer@subsectionintoc {2}{4}{Rewards}{12}{0}{2}
 \beamer@subsectionintoc {2}{5}{Policy}{13}{0}{2}
