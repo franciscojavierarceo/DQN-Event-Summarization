@@ -166,7 +166,6 @@ function rougeScores(genSummary, refSummary)
     local genTotal = 0
     local refTotal = 0
     local intersection = 0
-
     -- Inserting the missing keys
     for k, genCount in pairs(genSummary) do
         if refSummary[k] == nil then
@@ -186,10 +185,10 @@ function rougeScores(genSummary, refSummary)
     recall = intersection / refTotal
     prec = intersection / genTotal
     -- tmp = {intersection, refTotal, genTotal}
-    if recall == 0 and prec == 0 then
-        f1 = 0
-    else 
+    if recall > 0 or prec > 0 then
         f1 = (2 * recall * prec) / (recall + prec)
+    else 
+        f1 = 0
     end
     return recall, prec, f1
 end
@@ -271,7 +270,7 @@ function stackMemory(newinput, memory_hist, memsize, use_cuda)
         actionMemory = torch.cat(newinput[3], memory_hist[3], 1)
     end
     --- specifying rows to index 
-    if sentMemory:size(1) < memsize then
+    if sentMemory:size(1) <= memsize then
         nend = sentMemory:size(1)
         nstart = 1
     else 
@@ -371,7 +370,7 @@ function intialize_variables(inputs, n_samples, input_path, K_tokens, maxSummary
         input_file = csvigo.load({path = input_path .. input_fn, mode = "large", verbose = false})
         nugget_file = csvigo.load({path = input_path .. nugget_fn, mode = "large", verbose = false})
         -- This is just for experimentation
-        input_file = geti_n(input_file, 2,  n_samples) 
+        input_file = geti_n(input_file, 2,  n_samples+1) 
         -- input_file = geti_n(input_file, 2, #input_file) 
         -- have to drop the header
         nugget_file = geti_n(nugget_file, 2, #nugget_file) 
@@ -385,7 +384,8 @@ function intialize_variables(inputs, n_samples, input_path, K_tokens, maxSummary
             ntdm = tableConcat(table.unpack(nuggets), ntdm)
         end
         -- Initializing the bookkeeping variables and storing them
-        local query = LongTensor{inputs[query_id]['query'] }
+        -- The empty row insertion is a little silly but works
+        local query = LongTensor{padZeros({inputs[query_id]['query'], {0} }, maxseqlenq)[1]}
         local sentenceStream = LongTensor(padZeros(xtdm, K_tokens))
         local streamSize = sentenceStream:size(1)
         local refSummary = Tensor{ntdm}
@@ -631,6 +631,7 @@ function trainCV(inputs, query_data, model, nepochs, nnmod, metric, thresh, gamm
         for epoch=0, nepochs do
             for query_id=1, #inputs do
                 -- Score the queries
+                -- print(query_data[query_id][3])
                 memory, rougeRecall, rougePrecision, rougeF1, qValues = forwardpass(
                                 query_data, query_id, model, epsilon, gamma, 
                                 metric, thresh, stopwordlist, use_cuda
@@ -667,7 +668,6 @@ function trainCV(inputs, query_data, model, nepochs, nnmod, metric, thresh, gamm
                     query_id, test_query, query_id==test_query
                 )
                 perf:write(perf_string)
-                print(perf_string)
             end
 
             if (epsilon - delta) <= base_explore_rate then
