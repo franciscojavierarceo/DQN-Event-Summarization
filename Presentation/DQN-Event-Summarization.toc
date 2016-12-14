@@ -4,10 +4,8 @@
 \beamer@sectionintoc {2}{Deep Q-Networks}{9}{0}{2}
 \beamer@subsectionintoc {2}{1}{Review}{9}{0}{2}
 \beamer@subsectionintoc {2}{2}{DQN-LSTM}{10}{0}{2}
-\beamer@subsectionintoc {2}{3}{Actions}{11}{0}{2}
-\beamer@subsectionintoc {2}{4}{Rewards}{12}{0}{2}
-\beamer@subsectionintoc {2}{5}{Policy}{13}{0}{2}
-\beamer@subsectionintoc {2}{6}{Algorithm}{15}{0}{2}
-\beamer@sectionintoc {3}{Experiments}{17}{0}{3}
-\beamer@subsectionintoc {3}{1}{Simulation}{17}{0}{3}
-\beamer@sectionintoc {4}{Resources}{22}{0}{4}
+\beamer@subsectionintoc {2}{3}{Policy}{11}{0}{2}
+\beamer@subsectionintoc {2}{4}{Algorithm}{13}{0}{2}
+\beamer@sectionintoc {3}{Experiments}{15}{0}{3}
+\beamer@subsectionintoc {3}{1}{Simulation}{15}{0}{3}
+\beamer@sectionintoc {4}{Resources}{20}{0}{4}

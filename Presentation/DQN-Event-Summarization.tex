@@ -95,8 +95,8 @@ This leads us to explore Deep Q-Networks (DQN) for 3 reasons:
 	\begin{frame}
 		\frametitle{State, Action, and Rewards}
 		\begin{itemize}
-	\item<1 ->  The state $s(x_{t},\tilde{y}_{t}, d)$ at time $t$ is a function of the candidate sentence, $x_t$ to include in the summary, the state of the current summary $\tilde{y}_t$, and the query $d$. 	
-	\item<1 -> The set of actions as $\mathcal{A} := \{select, skip\}$, which corresponds to
+	\item<1 ->  The \textbf{state} $s(x_{t},\tilde{y}_{t}, d)$ at time $t$ is a function of the candidate sentence, $x_t$ to include in the summary, the state of the current summary $\tilde{y}_t$, and the query $d$. 	
+	\item<1 -> The set of  \textbf{actions} $\mathcal{A} := \{select, skip\}$, correspond to
 	\begin{equation}
 		\tilde{y}_{t + 1} =
 		\begin{cases}
@@ -104,51 +104,12 @@ This leads us to explore Deep Q-Networks (DQN) for 3 reasons:
 			\tilde{y}_{t}, 			& \text{if } a_t = skip.
 		\end{cases}
 	\end{equation}
-	\item<1 -> The reward $r$ for a given action $a$ at time $t$ is measured by the change in ROUGE-F1 score of the predicted summary $\tilde{y}_{t}$ measured against a gold standard summary $Y$. 
-	
+	\item<1 -> The \textbf{reward} $r$ for a given action $a$ at time $t$ is measured by the change in ROUGE-F1 score of the predicted summary $\tilde{y}_{t}$ measured against a gold standard summary $Y$. 	
 		\end{itemize}
-	\end{frame}
-
-	\subsection{Actions}
-	\begin{frame}
-			\frametitle{Actions}
-			We define our set of actions as $\mathcal{A} := \{select, skip\}$ where $select$ corresponds to adding the current sentence $x_t$ to the predicted summary $\tilde{y}_t$ and incrementing the current system time, or $skip$ where only $t$ is incremented without changing the current summary. Simply, 
-			
-	\begin{equation}
-		\tilde{y}_{t + 1} =
-		\begin{cases}
-			\tilde{y}_{t} \cup \{ x_t \},	& \text{if } a_t = select  \\
-			\tilde{y}_{t}, 			& \text{if } a_t = skip.
-		\end{cases}
-	\end{equation}
-
-	\end{frame}
-
-	\subsection{Rewards}
-	\begin{frame}
-			\frametitle{Reward}
-				The reward $r$ for a given action $a$ at time $t$ is measured by the change in ROUGE-F1 score of the predicted summary $\tilde{y}_{t}$ measured against a gold standard summary $Y$. 
-	\begin{equation}
-		 \textrm{ROUGE-R}(\tilde{y}, Y) = 
-		    \frac{\sum_{g \in Y} 
-		    \min \left(\textrm{count}(g, \tilde{y}), \textrm{count}(g, Y)\right)}{
-		    \sum_{g \in Y} 
-		    \textrm{count}(g, Y)
-	    }
-	\end{equation}
-	\begin{equation}
-		 \textrm{ROUGE-P}(\tilde{y}, Y) = 
-		    \frac{\sum_{g \in \tilde{Y}} 
-		    \min \left(\textrm{count}(g, \tilde{y}), \textrm{count}(g, Y)\right)}{
-		    \sum_{g \in \tilde{Y}} 
-		    \textrm{count}(g, \tilde{Y})
-	    }
-	\end{equation}
 				\begin{equation}
 					r_t = \textrm{ROUGE-F1}(\tilde{y}_{t}, Y) -  \textrm{ROUGE-F1}(\tilde{y}_{t-1}, Y).
 				\end{equation}
 	\end{frame}
-
 	\subsection{Policy}
 	\begin{frame}
 			\frametitle{Policy}
@@ -158,86 +119,85 @@ This leads us to explore Deep Q-Networks (DQN) for 3 reasons:
 				\item<1-> We define an architecture similar to that of \cite{narasimhan2015language} and map our three inputs (query, sentence, and current predicted summary) into LSTM embeddings according to $\textbf{Figure 1}$
 			\end{itemize}
 	\end{frame}
+
 \begin{frame}
 \begin{center}
 	\frametitle{Architecture of the Q-Learner}
     \pgfdeclarelayer{background}
     \pgfdeclarelayer{foreground}
-    \pgfsetlayers{background,main,foreground}
-        % Define the layers to draw the diagram
-        \tikzstyle{sensor}=[draw, fill=blue!10, text width=5em,  text centered, minimum height=2.0em,drop shadow]
-        \tikzstyle{term}=[draw, fill=gray!10, text width=5em,  text centered, minimum height=2.0em,drop shadow]
-        \tikzstyle{wa} = [sensor, fill=gray!10, text width=5em,  minimum height=2em, rounded corners, drop shadow]
-        \tikzstyle{wa} = [sensor, fill=gray!10, text width=5em,  minimum height=2em, rounded corners, drop shadow]
-        \tikzstyle{wa2} = [sensor, fill=gray!10, text width=6em,  minimum height=12em, drop shadow]
-        \tikzstyle{om} = [draw, fill=green!05, text width=6em,  text centered, minimum height=2.0em,drop shadow]
+\pgfsetlayers{background,main,foreground}
+    % Define the layers to draw the diagram
+    \tikzstyle{sensor}=[draw, fill=blue!10, text width=5em,  text centered, minimum height=2.0em,drop shadow]
+    \tikzstyle{term}=[draw, fill=gray!10, text width=5em,  text centered, minimum height=2.0em,drop shadow]
+    \tikzstyle{wa} = [sensor, fill=gray!10, text width=5em,  minimum height=2em, rounded corners, drop shadow]
+    \tikzstyle{wa} = [sensor, fill=gray!10, text width=5em,  minimum height=2em, rounded corners, drop shadow]
+    \tikzstyle{wa2} = [sensor, fill=gray!10, text width=11em,  minimum height=12em, drop shadow, ]
+    \tikzstyle{om} = [draw, fill=green!05, text width=5em,  text centered, minimum height=2.0em,drop shadow]
 
-    \begin{tikzpicture}[scale=0.6, transform shape]
-            \node (wa) [wa2] {Joined \textbf{ReLU Layer}  \\ \scriptsize (3 x Embedding) };
-            \path (wa.west)+(-3.0 ,  2.0) node (asr1)[sensor] { $Query$ \textbf{LSTM}};
-            \path (wa.west)+(-3.0 ,  0.0) node (asr2)[sensor] {$Sentence_t$  \textbf{LSTM}};
-            \path (wa.west)+(-3.0 , -2.0) node (asr3)[sensor] {$Summary_t$  \textbf{LSTM}};
-            \path (wa.east)+(3.0,  1) node (vote) [term] {\textbf{Linear} \\ \scriptsize $\{Rouge, Select\}$ };
-            \path (wa.east)+(3.0, -1) node (vote2) [term] {\textbf{Linear} \\ \scriptsize $\{Rouge, Skip\}$ } ;
-            \path (wa.east)+(6.5,  0) node (output) [om] {\textbf{Linear} \\ \scriptsize E[Rouge ,$a_t$]} ;
+\begin{tikzpicture}[scale=0.6, transform shape]
+        \node (wa) [wa2] {$k$ Joined \textbf{ReLU} Layers  \\ \scriptsize (3 x Embedding) };
+        \path (wa.west)+(-4.1 ,  2.0) node (asr1)[sensor] {$Query$ \textbf{LSTM}};
+        \path (wa.west)+(-4.1 ,  0.0) node (asr2)[sensor] {$Sentence_t$  \textbf{LSTM}};
+        \path (wa.west)+(-4.1 , -2.0) node (asr3)[sensor] {$Summary_t$  \textbf{LSTM}};
+        \path (wa.east)+(3.9,  1) node (vote) [term] {\textbf{ReLU} \\ \scriptsize $\{Rouge | Select\}$ };
+        \path (wa.east)+(3.9, -1) node (vote2) [term] {\textbf{ReLU} \\ \scriptsize $\{Rouge | Skip\}$ } ;
 
-            \path [draw, ->] (asr1.east) -- node [above] {}     (wa.125);
-            \path [draw, ->] (asr2.east) -- node [above] {}     (wa.180);
-            \path [draw, ->] (asr3.east) -- node [above] {}     (wa.235);
-            \path [draw, ->] (wa.east) -- node [above] {}       (vote.west);
-            \path [draw, ->] (wa.east) -- node [above] {}       (vote2.west);
-            \path [draw, ->] (vote.east) -- node [above] {}     (output.175);
-            \path [draw, ->] (vote2.east) -- node [above] {}   (output.185);
+        \path [draw, ->] (asr1.east) -- node [above] {}     (wa.139);
+        \path [draw, ->] (asr2.east) -- node [above] {}     (wa.180);
+        \path [draw, ->] (asr3.east) -- node [above] {}     (wa.222);
+        \path [draw, ->] (wa.east) -- node [above] {}       (vote.west);
+        \path [draw, ->] (wa.east) -- node [above] {}       (vote2.west);
 
-         \begin{pgfonlayer}{background}[transparency group,opacity=.5]
-                \path (asr1.north  |- asr1.south)+(-2.0, 1.6) node (a) {};
-                \path (asr3.west  |- vote.east)+(+10.0, -3.5) node (b) {};
-                \path (asr3.west  |- vote.east)+(+10.0, -2.5) node (c) {};
-                \path (asr3.east  |- output.east)+(+13, -4.50) node (d) {};
-                \path[fill=white!20,rounded corners, draw=black!100, dashed]         (a) rectangle (d);
-            \end{pgfonlayer}
+     \begin{pgfonlayer}{background}[transparency group,opacity=.5]
+            \path (asr1.north  |- asr1.south)+(-2.0, 1.6) node (a) {};
+            \path (asr3.west  |- vote.east)+(+10.0, -3.5) node (b) {};
+            \path (asr3.west  |- vote.east)+(+10.0, -2.5) node (c) {};
+            \path (asr3.east  |- vote.east)+(+13, -5.50) node (d) {};
+            \path[fill=white!20,rounded corners, draw=black!100, dashed]         (a) rectangle (d);
+        \end{pgfonlayer}
 
-         \begin{pgfonlayer}{background}[transparency group,opacity=.5]
-                \path (asr1.north  |- asr1.south)+(-1.7, 1.3) node (a) {};
-                \path (asr3.west  |- asr3.east)+(+10.0, -3.5) node (b) {};
-                \path (asr3.west  |- asr3.east)+(+10.0, -2.5) node (c) {};
-                \path (asr3.west  |- asr3.east)+(+2.9, -1.50) node (d) {};
-                \path[fill=white!20,rounded corners, draw=blue!100, dashed]         (a) rectangle (d);
-            \end{pgfonlayer}
+     \begin{pgfonlayer}{background}[transparency group,opacity=.5]
+            \path (asr1.north  |- asr1.south)+(-1.7, 1.3) node (a) {};
+            \path (asr3.west  |- asr3.east)+(+10.0, -3.5) node (b) {};
+            \path (asr3.west  |- asr3.east)+(+10.0, -2.5) node (c) {};
+            \path (asr3.west  |- asr3.east)+(+2.9, -1.50) node (d) {};
+            \path[fill=white!20,rounded corners, draw=blue!100, dashed]         (a) rectangle (d);
+        \end{pgfonlayer}
 
-         \begin{pgfonlayer}{background}[transparency group,opacity=.5]
-                \path (asr1.north  |- asr1.south)+(2.7, 1.3) node (a) {};
-                \path (asr3.west  |- asr3.east)+(+10.0, -3.5) node (b) {};
-                \path (asr3.west  |- asr3.east)+(+10.0, -2.5) node (c) {};
-                \path (asr3.west  |- asr3.east)+(+11.5, -1.50) node (d) {};
-                \path[fill=white!20,rounded corners, draw=gray!100, dashed]         (a) rectangle (d);
-            \end{pgfonlayer}
+     \begin{pgfonlayer}{background}[transparency group,opacity=.5]
+            \path (asr1.north  |- asr1.south)+(2.7, 1.3) node (a) {};
+            \path (asr3.west  |- asr3.east)+(+10.0, -3.5) node (b) {};
+            \path (asr3.west  |- asr3.east)+(+10.0, -2.5) node (c) {};
+            \path (asr3.west  |- asr3.east)+(+11.5, -1.50) node (d) {};
+            \path[fill=white!20,rounded corners, draw=gray!100, dashed]         (a) rectangle (d);
+        \end{pgfonlayer}
 
-         \begin{pgfonlayer}{background}[transparency group,opacity=.5]
-                \path (asr1.north  |- asr1.south)+(7.4, 1.0) node (a) {};
-                \path (asr3.west  |- asr3.east)+(+10.0, -3.5) node (b) {};
-                \path (asr3.west  |- asr3.east)+(+10.0, -2.5) node (c) {};
-                \path (asr3.west  |- asr3.east)+(+11.3, -0.50) node (d) {};
-                \path[fill=red!05,rounded corners, draw=black!100, dashed]         (a) rectangle (d);
-            \end{pgfonlayer}
+     \begin{pgfonlayer}{background}[transparency group,opacity=.5]
+            \path (asr1.north  |- asr1.south)+(10.7, 1.3) node (a) {};
+            \path (asr3.west  |- asr3.east)+(+10.0, -3.5) node (b) {};
+            \path (asr3.west  |- asr3.east)+(+10.0, -2.5) node (c) {};
+            \path (asr3.west  |- asr3.east)+(+15.1, -1.50) node (d) {};
+            \path[fill=white!20,rounded corners, draw=green!100, dashed]         (a) rectangle (d);
+        \end{pgfonlayer}
 
-         \begin{pgfonlayer}{background}[transparency group,opacity=.5]
-                \path (asr1.north  |- asr1.south)+(10.7, 1.3) node (a) {};
-                \path (asr3.west  |- asr3.east)+(+10.0, -3.5) node (b) {};
-                \path (asr3.west  |- asr3.east)+(+10.0, -2.5) node (c) {};
-                \path (asr3.west  |- asr3.east)+(+15.1, -1.50) node (d) {};
-                \path[fill=white!20,rounded corners, draw=green!100, dashed]         (a) rectangle (d);
-            \end{pgfonlayer}
 
-            \path (wa.west) + (5.8,    2.25)  node (vote.east) {\scriptsize \textbf{Action} }; 
-%            \path (wa.west) + (5.8,    1.95)  node (vote.east) {\scriptsize $\{argmax(a_t)$\}}; 
-            \path (wa.west) + (-2.90, -3.2)  node (vote.east) {Input}; 
-            \path (wa.west) + (3.5,    -3.2)  node (vote.east) {State-Action Representation }; 
-            \path (wa.west) + (9.30,  -3.2)  node (vote.east) {Output};
-            \path (wa.east) + (0.5, -4.2)  node (vote.east) {\textbf{Figure 1: DQN-LSTM Architecture}};
-    \end{tikzpicture}
+     \begin{pgfonlayer}{background}[transparency group,opacity=.5]
+            \path (asr1.north  |- asr1.south)+(11.0, 1.0) node (a) {};
+            \path (asr3.west  |- asr3.east)+(+10.0, -3.5) node (b) {};
+            \path (asr3.west  |- asr3.east)+(+10.0, -2.5) node (c) {};
+            \path (asr3.west  |- asr3.east)+(+15.0, -0.50) node (d) {};
+            \path[fill=red!05,rounded corners, draw=black!100, dashed]         (a) rectangle (d);
+        \end{pgfonlayer}
+       
+        \path (wa.west) + (8.4,    2.25)  node (vote.east) {\scriptsize \textbf{Action} }; 
+        \path (wa.west) + (8.5,    1.95)  node (vote.east) {\scriptsize $\{argmax(a_t)$\}}; 
+        \path (wa.west) + (-3.90, -3.2)  node (vote.east) {Input}; 
+        \path (wa.west) + (2.5,    -3.2)  node (vote.east) {State Representation }; 
+        \path (wa.west) + (8.30,  -3.2)  node (vote.east) {Output};
+        \path (wa.west) + (2.8, -4.2)  node (vote.east) {\textbf{Figure 1: DQN-LSTM Architecture}};
+\end{tikzpicture}
     \end{center}
-    \vspace{-0.2cm} \tiny *ReLU(x) = max(0, x)
+    \vspace{-0.2cm} \tiny *\textbf{ReLU}: f(x) = max(0, x)
 \end{frame}
 
 
