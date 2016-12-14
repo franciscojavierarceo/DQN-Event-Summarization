@@ -29,6 +29,7 @@ cmd:option('--end_baserate', 5, 'Epoch number at which the base_rate ends')
 cmd:option('--K_tokens', 25, 'Maximum number of tokens for each sentence')
 cmd:option('--thresh', 0, 'Threshold operator')
 cmd:option('--adapt', false, 'Domain Adaptation Regularization')
+cmd:option('--datapath', 'data/0-output/', 'Path to input data')
 cmd:option('--n_backprops', 3, 'Number of times to backprop through the data')
 cmd:text()
 --- this retrieves the commands and stores them in opt.variable (e.g., opt.model)
@@ -37,10 +38,8 @@ local opt = cmd:parse(arg or {})
 dofile("Code/utils.lua")
 dofile("Code/utilsNN.lua")
 
-input_path = 'data/0-output/'
-
-inputs = loadMetadata(input_path .. "dqn_metadata.csv")
-stopfile = csvigo.load({path = input_path .. 'stopwordids.csv', mode = "large", verbose = false})
+inputs = loadMetadata(opt.datapath .. "dqn_metadata.csv")
+stopfile = csvigo.load({path = opt.datapath .. 'stopwordids.csv', mode = "large", verbose = false})
 stoplist = buildTermDocumentTable(stopfile, nil)
 
 stopwords = {}
@@ -66,7 +65,7 @@ local optimParams = { learningRate = opt.learning_rate }
 
 -- Initializing the model variables
 local vocabSize, query_data = intialize_variables(inputs, 
-                                            opt.n_samples, input_path, opt.K_tokens, 
+                                            opt.n_samples, opt.datapath, opt.K_tokens, 
                                             opt.maxSummarySize, stopwords, opt.thresh)
 local model = buildModel(opt.model, vocabSize, opt.embeddingSize, opt.metric, opt.adapt, opt.usecuda)
 

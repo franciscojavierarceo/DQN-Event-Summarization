@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015) (preloaded format=pdflatex 2015.5.24)  13 DEC 2016 23:05
+This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015) (preloaded format=pdflatex 2015.5.24)  14 DEC 2016 13:46
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -1119,15 +1119,48 @@ File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 
 ] [6
 
-] [7
+]
+
+LaTeX Warning: Citation `diazquery' on page 7 undefined on input line 70.
+
+
+LaTeX Warning: Citation `kedzie2015predicting' on page 7 undefined on input lin
+e 70.
+
+
+LaTeX Warning: Citation `garbacea2015university' on page 7 undefined on input l
+ine 70.
+
+
+LaTeX Warning: Citation `kedzieextractive' on page 7 undefined on input line 70
+.
+
+
+LaTeX Warning: Citation `kedzie2015predicting' on page 7 undefined on input lin
+e 70.
+
+
+LaTeX Warning: Citation `garbacea2015university' on page 7 undefined on input l
+ine 70.
+
+[7
 
 ] [8
 
-] [9
+]
+
+LaTeX Warning: Citation `MnihKSGAWR13' on page 9 undefined on input line 92.
+
+[9
 
 ] [10
 
-] [11
+]
+
+LaTeX Warning: Citation `narasimhan2015language' on page 11 undefined on input 
+line 121.
+
+[11
 
 ]
 \pgf@layerbox@background=\box82
@@ -1135,7 +1168,7 @@ File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 \pgf@layerbox@foreground=\box84
 \pgf@layerboxsaved@foreground=\box85
 
-Overfull \hbox (2.7534pt too wide) in paragraph at lines 201--201
+Overfull \hbox (2.7534pt too wide) in paragraph at lines 200--200
  []$\OMS/cmsy/m/n/8 f\OML/cmm/m/it/8 Rouge\OMS/cmsy/m/n/8 j\OML/cmm/m/it/8 Sele
 ct\OMS/cmsy/m/n/8 g$ 
  []
@@ -1290,54 +1323,52 @@ Missing character: There is no = in font nullfont!
 Missing character: There is no . in font nullfont!
 Missing character: There is no 5 in font nullfont!
 Missing character: There is no ] in font nullfont!
-LaTeX Font Info:    Try loading font information for OMS+cmr on input line 201.
+[12
 
-(/usr/local/texlive/2015/texmf-dist/tex/latex/base/omscmr.fd
-File: omscmr.fd 2014/09/29 v2.5h Standard LaTeX font definitions
-)
-LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <8> not available
-(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 201.
- [12
-
-]
-<DQN_LSTM_Algorithm.png, id=515, 561.7788pt x 332.442pt>
+] <DQN_LSTM_Algorithm.png, id=465, 561.7788pt x 332.442pt>
 File: DQN_LSTM_Algorithm.png Graphic file (type png)
 
 <use DQN_LSTM_Algorithm.png>
-Package pdftex.def Info: DQN_LSTM_Algorithm.png used on input line 211.
+Package pdftex.def Info: DQN_LSTM_Algorithm.png used on input line 210.
 (pdftex.def)             Requested size: 252.79811pt x 149.5975pt.
  [13
 
  <./DQN_LSTM_Algorithm.png>]
+LaTeX Font Info:    Try loading font information for OMS+cmr on input line 247.
+
+
+(/usr/local/texlive/2015/texmf-dist/tex/latex/base/omscmr.fd
+File: omscmr.fd 2014/09/29 v2.5h Standard LaTeX font definitions
+)
 LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <6> not available
-(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 248.
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 247.
  [14
 
 ] [15
 
 ]
-<DQN_LSTM_Precision.png, id=624, 954.56625pt x 538.01pt>
+<DQN_LSTM_Precision.png, id=578, 954.56625pt x 538.01pt>
 File: DQN_LSTM_Precision.png Graphic file (type png)
 
 <use DQN_LSTM_Precision.png>
-Package pdftex.def Info: DQN_LSTM_Precision.png used on input line 271.
+Package pdftex.def Info: DQN_LSTM_Precision.png used on input line 270.
 (pdftex.def)             Requested size: 289.0667pt x 144.5422pt.
  [16
 
  <./DQN_LSTM_Precision.png>]
-<DQN_LSTM_Recall.png, id=657, 954.56625pt x 538.01pt>
+<DQN_LSTM_Recall.png, id=612, 954.56625pt x 538.01pt>
 File: DQN_LSTM_Recall.png Graphic file (type png)
 
 <use DQN_LSTM_Recall.png>
-Package pdftex.def Info: DQN_LSTM_Recall.png used on input line 281.
+Package pdftex.def Info: DQN_LSTM_Recall.png used on input line 280.
 (pdftex.def)             Requested size: 289.0667pt x 144.5422pt.
  [17
 
  <./DQN_LSTM_Recall.png>]
-<DQN_LSTM_F1.png, id=690, 957.5775pt x 538.01pt>
+<DQN_LSTM_F1.png, id=645, 957.5775pt x 538.01pt>
 File: DQN_LSTM_F1.png Graphic file (type png)
  <use DQN_LSTM_F1.png>
-Package pdftex.def Info: DQN_LSTM_F1.png used on input line 291.
+Package pdftex.def Info: DQN_LSTM_F1.png used on input line 290.
 (pdftex.def)             Requested size: 289.07268pt x 144.5422pt.
  [18
 
@@ -1362,26 +1393,38 @@ Underfull \vbox (badness 10000) has occurred while \output is active []
 \tf@snm=\write8
 \openout8 = `DQN-Event-Summarization.snm'.
 
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 327.
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 327.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 326.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 326.
  (./DQN-Event-Summarization.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 327.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 327.
-Package rerunfilecheck Info: File `DQN-Event-Summarization.out' has not changed
-.
-(rerunfilecheck)             Checksum: ED416B8426C2B36698D963E4C5E95078;542.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 326.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 326.
 
+
+Package rerunfilecheck Warning: File `DQN-Event-Summarization.out' has changed.
+
+(rerunfilecheck)                Rerun to get outlines right
+(rerunfilecheck)                or use package `bookmark'.
+
+Package rerunfilecheck Info: Checksums for `DQN-Event-Summarization.out':
+(rerunfilecheck)             Before: D41D8CD98F00B204E9800998ECF8427E;0
+(rerunfilecheck)             After:  ED416B8426C2B36698D963E4C5E95078;542.
 
 LaTeX Font Warning: Size substitutions with differences
 (Font)              up to 1.0pt have occurred.
 
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 327.
+
+LaTeX Warning: There were undefined references.
+
+
+LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
+
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 326.
  ) 
 Here is how much of TeX's memory you used:
- 23645 strings out of 493089
- 490208 string characters out of 6134842
- 604594 words of memory out of 5000000
- 26514 multiletter control sequences out of 15000+600000
+ 23631 strings out of 493089
+ 490010 string characters out of 6134842
+ 603939 words of memory out of 5000000
+ 26500 multiletter control sequences out of 15000+600000
  13866 words of font info for 51 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  56i,20n,82p,432b,886s stack positions out of 5000i,500n,10000p,200000b,80000s
@@ -1405,10 +1448,10 @@ e/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/local/texlive/2
 exmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/local/texlive/2015/tex
 mf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb></usr/local/texlive/2015/texm
 f-dist/fonts/type1/public/amsfonts/symbols/msam10.pfb>
-Output written on DQN-Event-Summarization.pdf (22 pages, 515459 bytes).
+Output written on DQN-Event-Summarization.pdf (22 pages, 513553 bytes).
 PDF statistics:
- 932 PDF objects out of 1000 (max. 8388607)
- 841 compressed objects within 9 object streams
+ 893 PDF objects out of 1000 (max. 8388607)
+ 802 compressed objects within 9 object streams
  62 named destinations out of 1000 (max. 500000)
- 239 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 159 words of extra memory for PDF output out of 10000 (max. 10000000)
 

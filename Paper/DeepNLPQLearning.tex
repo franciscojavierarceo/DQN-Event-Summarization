@@ -220,8 +220,7 @@ that learns the parameters using stochastic gradient descent with RMSprop \cite{
             \path[fill=red!05,rounded corners, draw=black!100, dashed]         (a) rectangle (d);
         \end{pgfonlayer}
        
-        \path (wa.west) + (8.4,    2.25)  node (vote.east) {\scriptsize \textbf{Action} }; 
-        \path (wa.west) + (8.5,    1.95)  node (vote.east) {\scriptsize $\{argmax(a_t)$\}}; 
+        \path (wa.west) + (8.4,    1.95)  node (vote.east) {\scriptsize \textbf{Action} }; 
         \path (wa.west) + (-3.90, -3.2)  node (vote.east) {Input}; 
         \path (wa.west) + (2.5,    -3.2)  node (vote.east) {State Representation }; 
         \path (wa.west) + (8.30,  -3.2)  node (vote.east) {Output};
@@ -247,7 +246,7 @@ The weights of the Q-function and the action sequence are initialized at random 
 		\STATE $X_{d}, \tilde{Y}_{d}$ = \{Extract $t=1,...,T_d$ ($sentences_d$, $summary_d$)\}
 		\FOR{$x_t, \tilde{y}_t \in X_d, \tilde{Y}_d$ }
 			\STATE Set $s_t = s(x_t, \tilde{y}_t, d)$
-			\STATE $ \forall a_t \in \mathcal{A}(s_t)$ \textrm{compute} $\hat{Q}(s_t, a_t)$ and select $a^{*}_t =$ argmax$_{a_{t}}\hat{Q}(s_t, a_t)$
+			\STATE $ \forall a_t \in \mathcal{A}(s_t)$ \textrm{compute} $\hat{Q}(s_t, a_t)$ and select $a^{*}_t =$ and$_{a_{t}}\hat{Q}(s_t, a_t)$
 			\STATE  \textbf{if} $random() < \epsilon$ \textbf{then} select $a^{*}_t $ at random with $\Pr(a_t) =\frac{1}{| \mathcal{A} |} $
 			\STATE Update $\tilde{y}_{t+1}$ according to equation (1)
 			\STATE Execute action $a^{*}_t$ and observe reward $r_t$ and new state $s_{t+1}$

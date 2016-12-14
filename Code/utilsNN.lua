@@ -625,7 +625,8 @@ function trainCV(inputs, query_data, model, nepochs, nnmod, metric, thresh, gamm
 
     ranF1s = {}
     local params, gradParams = model:getParameters()
-    local perf = io.open(string.format("./Performance/CV/%s_%s_perf.txt", nnmod, metric), 'w')
+    print(nnmod, metric)
+    local perf = io.open(string.format("Code/Performance/CV/%s_%s_perf.txt", nnmod, metric), 'w')
     perf:write(string.format("epoch;epsilon;loss;randomF1;oracleF1;rougeF1;rougeRecall;rougePrecision;actual;pred;nselect;nskip;query;testQuery;Test\n"))
     for test_query=1, #inputs do
         for epoch=0, nepochs do
