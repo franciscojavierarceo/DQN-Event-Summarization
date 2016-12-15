@@ -536,7 +536,6 @@ function forwardpass(query_data, query_id, model, epsilon, gamma, metric, thresh
         local memory = {input, reward:cuda(), actions:cuda()}
     end
     --- Last ones are the total performance
-    -- return memory, recall, prec, f1, qValues, tmp
     return memory, recall, prec, f1, qValues
 end
 
