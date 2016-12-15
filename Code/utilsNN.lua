@@ -199,46 +199,6 @@ function rougeScores(genSummary, refSummary)
     end
     return recall, prec, f1
 end
-function rougeScores2(pred_summary, ref_summaries)
-    local rsd = ref_summaries
-    local psd = pred_summary
-    for k, v in pairs(rsd) do
-        if psd[k] == nil then
-            psd[k] = 0
-        end
-    end
-
-    for k, v in pairs(psd) do
-        if rsd[k] == nil then
-            rsd[k] = 0 
-        end
-    end
-    -- For Recall we normalize by the prediction dictionary
-    intersectionCount = 0.
-    predTotalCount = 0.
-    refTotalCount = 0.
-    -- It's okay to use this now because we inserted the keys in both
-    for k, v in pairs(rsd) do
-        intersectionCount = intersectionCount + math.min(rsd[k], psd[k])
-        predTotalCount = predTotalCount + rsd[k]
-        refTotalCount = refTotalCount + psd[k]
-    end
-
-    prec  = intersectionCount / predTotalCount
-    recall = intersectionCount / refTotalCount 
-    if predTotalCount == 0 then 
-        prec = 0
-    end
-    if refTotalCount == 0 then
-        recall = 0
-    end
-    f1 = (2 * recall * prec) / (recall + prec)
-    if (recall + prec) == 0 then 
-        f1 = 0
-    end
-    return prec, recall, f1
-end
-
 function sampleMemory(newinput, memory_hist, memsize, use_cuda)
     local sentMemory = torch.cat(newinput[1][1]:double(), memory_hist[1][1]:double(), 1)
     local queryMemory = torch.cat(newinput[1][2]:double(), memory_hist[1][2]:double(), 1)
@@ -377,7 +337,10 @@ function intialize_variables(inputs, n_samples, input_path, K_tokens, maxSummary
         input_file = csvigo.load({path = input_path .. input_fn, mode = "large", verbose = false})
         nugget_file = csvigo.load({path = input_path .. nugget_fn, mode = "large", verbose = false})
         -- This is just for experimentation
-        input_file = geti_n(input_file, 2,  n_samples+1) 
+        if n_samples > 0 then 
+            n_samples = n_samples + 1
+        end
+        input_file = geti_n(input_file, 2, n_samples) 
         -- input_file = geti_n(input_file, 2, #input_file) 
         -- have to drop the header
         nugget_file = geti_n(nugget_file, 2, #nugget_file) 
@@ -393,6 +356,7 @@ function intialize_variables(inputs, n_samples, input_path, K_tokens, maxSummary
         -- Initializing the bookkeeping variables and storing them
         -- The empty row insertion is a little silly but works
         local query = LongTensor{padZeros({inputs[query_id]['query'], {0} }, maxseqlenq)[1]}
+        print(#xtdm)
         local sentenceStream = LongTensor(padZeros(xtdm, K_tokens))
         local streamSize = sentenceStream:size(1)
         local refSummary = Tensor{ntdm}
