@@ -121,8 +121,7 @@ function buildFullSummary(actions, sentences, use_cuda)
         actions = actions:double()
         sentences = sentences:double()
     end
-
-    local selected = torch.ByteTensor(actions:narrow(2, SELECT, 1))
+    local selected = ByteTensor(actions:narrow(2, SELECT, 1)):double()
     local indxs = selected:eq(1):resize(selected:size(1)):nonzero()
     if #torch.totable(indxs) == 0 then
         return torch.zeros(1, 2)
@@ -184,6 +183,12 @@ function rougeScores(genSummary, refSummary)
 
     recall = intersection / refTotal
     prec = intersection / genTotal
+    if refTotal == 0 then
+        recall = 0
+    end 
+    if genTotal == 0 then
+        prec = 0
+    end
     -- tmp = {intersection, refTotal, genTotal}
     if recall > 0 or prec > 0 then
         f1 = (2 * recall * prec) / (recall + prec)
@@ -553,7 +558,7 @@ function train(inputs, query_data, model, nepochs, nnmod, metric, thresh, gamma,
 
     query_randomF1 = {}
     local params, gradParams = model:getParameters()
-    local perf = io.open(string.format("./Performance/Simulation/%s_%s_perf.txt", nnmod, metric), 'w')
+    local perf = io.open(string.format("Code/Performance/Simulation/%s_%s_perf.txt", nnmod, metric), 'w')
     perf:write(string.format("epoch;epsilon;loss;randomF1;oracleF1;rougeF1;rougeRecall;rougePrecision;actual;pred;nselect;nskip;query\n"))
     for epoch=0, nepochs do
         for query_id=1, #inputs do
@@ -587,7 +592,7 @@ function train(inputs, query_data, model, nepochs, nnmod, metric, thresh, gamma,
             )
             perf:write(perf_string)
 
-            local avpfile = io.open(string.format("./plotdata/%s/%i/%i_epoch.txt", nnmod, query_id, epoch), 'w')
+            local avpfile = io.open(string.format("Code/plotdata/%s/%i/%i_epoch.txt", nnmod, query_id, epoch), 'w')
             avpfile:write("predSkip;predSelect;actual;Skip;Select;query\n")
             for i=1, memory[1][1]:size(1) do
                 avp_string = string.format("%.6f;%.6f;%6f;%i;%i;%i\n", 
