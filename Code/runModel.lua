@@ -23,65 +23,31 @@ cmd:option('--model','bow','BOW/LSTM option')
 cmd:option('--embeddingSize', 64,'Embedding dimension')
 cmd:option('--usecuda', false, 'running on cuda')
 cmd:option('--metric', "f1", 'Metric to learn')
-cmd:option('--n_samples', 500, 'Number of samples to use')
+cmd:option('--n_samples', 20, 'Number of samples to use')
 cmd:option('--maxSummarySize', 300, 'Maximum summary size')
 cmd:option('--end_baserate', 5, 'Epoch number at which the base_rate ends')
 cmd:option('--K_tokens', 25, 'Maximum number of tokens for each sentence')
 cmd:option('--thresh', 0, 'Threshold operator')
 cmd:option('--adapt', false, 'Domain Adaptation Regularization')
+cmd:option('--datapath', 'DO_NOT_UPLOAD_THIS_DATA/0-output/', 'Path to input data')
 cmd:option('--n_backprops', 3, 'Number of times to backprop through the data')
 cmd:text()
 --- this retrieves the commands and stores them in opt.variable (e.g., opt.model)
 local opt = cmd:parse(arg or {})
 
-dofile("utils.lua")
-dofile("utilsNN.lua")
+dofile("Code/utils.lua")
+dofile("Code/utilsNN.lua")
+-- dofile("utils.lua")
+-- dofile("utilsNN.lua")
 
-input_path = '~/GitHub/DeepNLPQLearning/DO_NOT_UPLOAD_THIS_DATA/0-output/'
-
-query_fn = input_path .. 'queries_numtext.csv'
-query_file =  csvigo.load({path = query_fn, mode = "large", verbose = false})
-queries = padZeros(buildTermDocumentTable(query_file, nil), 5)
-
-stoplist = input_path .. 'stopwordids.csv'
-stopfile = csvigo.load({path = stoplist, mode = "large", verbose = false})
+inputs = loadMetadata(opt.datapath .. "dqn_metadata.csv")
+stopfile = csvigo.load({path = opt.datapath .. 'stopwordids.csv', mode = "large", verbose = false})
 stoplist = buildTermDocumentTable(stopfile, nil)
+
 stopwords = {}
 for k,v in pairs(stoplist) do 
     stopwords[k]  = v[1]
 end
-
-local pakistan = {
-        ['inputs'] = '2012_pakistan_garment_factory_fires_first_sentence_numtext2.csv',
-        ['nuggets'] ='pakistan_nuggets_numtext.csv',
-        ['query'] = queries[2],
-        ['query_name'] = 'pakistan'
-}
-local aurora = {
-        ['inputs'] = '2012_aurora_shooting_first_sentence_numtext2.csv', 
-        ['nuggets'] = 'aurora_nuggets_numtext.csv',
-        ['query'] = queries[3],
-        ['query_name'] = 'aurora'
-}
-local wisconsin = {
-        ['inputs'] = 'wisconsin_sikh_temple_shooting_first_sentence_numtext.csv',
-        ['nuggets'] ='wisconsin_nuggets_numtext.csv',
-        ['query'] = queries[4],
-        ['query_name'] = 'wisconsin'
-}
-local sandy = {
-        ['inputs'] = 'hurricane_sandy_first_sentence_numtext2.csv',
-        ['nuggets'] ='sandy_nuggets_numtext.csv',
-        ['query'] = queries[6],
-        ['query_name'] = 'sandy'
-}
-
-local inputs = {
-        aurora, 
-        pakistan,
-        -- sandy,
-        -- wisconsin
-}
 
 if opt.usecuda then
     Tensor = torch.CudaTensor
@@ -99,6 +65,7 @@ end
 local delta = opt.cuts/opt.nepochs
 local optimParams = { learningRate = opt.learning_rate }
 
+local inputs = inputs[1]
 -- Initializing the model variables
 local vocabSize, query_data = intialize_variables(query_file, inputs, 
                                             opt.n_samples, input_path, opt.K_tokens, 
