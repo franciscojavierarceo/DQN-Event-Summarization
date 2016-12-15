@@ -381,8 +381,11 @@ end
 function geti_n(x, i, n)
     --- This function returns the i^{th} - n^{th} (inclusive) elements from a table
     local out = {}
-    if i == nil or n == nil then
+    if i == nil then
         return x
+    end
+    if i ~= nil and n == nil then
+        n = #x
     end
     local c = 1
     for k,v in pairs(x) do
