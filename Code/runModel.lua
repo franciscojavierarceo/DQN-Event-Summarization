@@ -37,8 +37,6 @@ local opt = cmd:parse(arg or {})
 
 dofile("Code/utils.lua")
 dofile("Code/utilsNN.lua")
--- dofile("utils.lua")
--- dofile("utilsNN.lua")
 
 inputs = loadMetadata(opt.datapath .. "dqn_metadata.csv")
 stopfile = csvigo.load({path = opt.datapath .. 'stopwordids.csv', mode = "large", verbose = false})
