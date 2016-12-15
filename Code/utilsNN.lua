@@ -337,8 +337,11 @@ function intialize_variables(inputs, n_samples, input_path, K_tokens, maxSummary
         input_file = csvigo.load({path = input_path .. input_fn, mode = "large", verbose = false})
         nugget_file = csvigo.load({path = input_path .. nugget_fn, mode = "large", verbose = false})
         -- This is just for experimentation
+        
         if n_samples > 0 then 
             n_samples = n_samples + 1
+        else 
+            n_samples = nil
         end
         input_file = geti_n(input_file, 2, n_samples) 
         -- input_file = geti_n(input_file, 2, #input_file) 
