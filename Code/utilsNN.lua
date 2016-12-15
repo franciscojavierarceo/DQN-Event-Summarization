@@ -1,4 +1,4 @@
-function scoreOracle(sentenceStream, maxSummarySize, refCounts, stopwordlist, thresh)
+function scoreOracle(sentenceStream, maxSummarySize, refCounts, stopwordlist, thresh, use_cuda)
     local SKIP = 1
     local SELECT = 2
 
@@ -118,10 +118,12 @@ function buildFullSummary(actions, sentences, use_cuda)
     local SELECT = 2
 
     if use_cuda then 
-        actions = actions:double()
-        sentences = sentences:double()
+        actions = actions
+        sentences = sentences
+        selected = ByteTensor(actions:narrow(2, SELECT, 1)):double()
+    else
+        selected = ByteTensor(actions:narrow(2, SELECT, 1))
     end
-    local selected = ByteTensor(actions:narrow(2, SELECT, 1)):double()
     local indxs = selected:eq(1):resize(selected:size(1)):nonzero()
     if #torch.totable(indxs) == 0 then
         return torch.zeros(1, 2)
@@ -360,7 +362,7 @@ function backProp(input_memory, params, gradParams, optimParams, model, criterio
     end
     return lossv[1]
 end
-function intialize_variables(inputs, n_samples, input_path, K_tokens, maxSummarySize, stopwordlist, thresh)
+function intialize_variables(inputs, n_samples, input_path, K_tokens, maxSummarySize, stopwordlist, thresh, use_cuda)
     local vocabSize = 0
     local maxseqlen = 0
     local maxseqlenq = getMaxQuerylen(inputs)
@@ -404,7 +406,7 @@ function intialize_variables(inputs, n_samples, input_path, K_tokens, maxSummary
         local rouge = Tensor(streamSize + 1):zero()
         local rougeOpt = Tensor(streamSize + 1):zero()
         local summary = summaryBuffer:zero():narrow(1,1,1)
-        local oracleF1 = scoreOracle(sentenceStream, maxSummarySize, refCounts, stopwordlist, thresh)
+        local oracleF1 = scoreOracle(sentenceStream, maxSummarySize, refCounts, stopwordlist, thresh, use_cuda)
 
         query_data[query_id] = {
             sentenceStream,

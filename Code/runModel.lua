@@ -69,12 +69,10 @@ local inputs = {inputs[1]}
 -- Initializing the model variables
 local vocabSize, query_data = intialize_variables(inputs, 
                                             opt.n_samples, opt.datapath, opt.K_tokens, 
-                                            opt.maxSummarySize, stopwords, opt.thresh)
+                                            opt.maxSummarySize, stopwords, opt.thresh, opt.usecuda)
 local model = buildModel(opt.model, vocabSize, opt.embeddingSize, opt.metric, opt.adapt, opt.usecuda)
 
 -- Running the model
--- local query_data = {query_data[1]}
--- print(query_data)
 train(inputs, query_data, model, opt.nepochs, opt.model, opt.metric, opt.thresh, 
       opt.gamma, opt.epsilon, delta, opt.base_explore_rate, opt.end_baserate, 
       opt.mem_size, opt.batch_size, optimParams, opt.n_backprops, opt.adapt, 
