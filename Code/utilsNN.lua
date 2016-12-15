@@ -359,7 +359,6 @@ function intialize_variables(inputs, n_samples, input_path, K_tokens, maxSummary
         -- Initializing the bookkeeping variables and storing them
         -- The empty row insertion is a little silly but works
         local query = LongTensor{padZeros({inputs[query_id]['query'], {0} }, maxseqlenq)[1]}
-        print(#xtdm)
         local sentenceStream = LongTensor(padZeros(xtdm, K_tokens))
         local streamSize = sentenceStream:size(1)
         local refSummary = Tensor{ntdm}
