@@ -239,7 +239,6 @@ def main(inputdir):
     # Limiting the files
     input_files = [os.path.join(inputdir, 'corpus-data/', x) for x in os.listdir(os.path.join(inputdir, 'corpus-data/')) if 'tsv.gz' in x]
     infilelist = [x for x in infilelist if x in input_files]
-
     infilelist += qfilenames
     # Incorporating the streams
     outfilelist = [os.path.join(inputdir, '0-output/%s_tokenized' % x.split("/")[-1].split(".")[0]) for x in infilelist]
