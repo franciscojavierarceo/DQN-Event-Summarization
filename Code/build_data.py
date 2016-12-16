@@ -188,7 +188,22 @@ def TokenizeData(inputdir, infile_list, qfilenames, outfile_list, word2idx, top_
 
     print('...Exporting of tokenized data complete')
 
+def ExtractFirstSentence(infilelist):
+    for infile in infilelist:
+        tmpdf = pd.read_csv(infile, sep='\t')
+        tmpdf = tmpdf[tmpdf['sentence']==0]
+        newfilename = infile.replace(".tsv.gz", "_fs.tsv").replace("/archive", "")
+        tmpdf.to_csv(newfilename, index=False, sep='\t')
+        os.system("gzip %s" % newfilename)
+
 def main(inputdir):
+    if 'archive' not in os.listdir(os.path.join(inputdir, 'corpus-data')):
+        os.system("mkdir %s/corpus-data/archive" % inputdir)
+    os.system("mv %s/corpus-data/*.tsv.gz %s/corpus-data/archive/" % (inputdir, inputdir) )
+    infilelist = os.listdir(os.path.join(inputdir, 'corpus-data/archive'))
+    infilelist = [os.path.join(inputdir, 'corpus-data/archive/%s' % x) for x in infilelist if '.tsv.gz' in x]
+    # Exporting the first sentence of the articles
+    ExtractFirstSentence(infilelist)
     # Exporting nuggets
     nuggets = []
     nuggfiles = [os.path.join(inputdir, 'nuggets-data/nuggets_%i.tsv.gz') % x for x in range(2013, 2016)]
@@ -202,8 +217,8 @@ def main(inputdir):
 
     # First we have to segment the nuggets
     qfilenames = [os.path.join(inputdir, 'trec-data/trec%i-ts-topics-test.xml') % x for x in range(2013, 2014)]
-    qtuple = list(chain(*[read_queries(inputdir, xml_file) for xml_file in qfilenames ]))
-    infilelist = [os.path.join(inputdir, 'corpus-data/%s.tsv.gz' % t.replace(" ", "_").lower()) for (q, i, n, t)  in qtuple if i != 7]
+    qtuple = list(chain(*[read_queries(xml_file) for xml_file in qfilenames ]))
+    infilelist = [os.path.join(inputdir, 'corpus-data/%s_fs.tsv.gz' % t.replace(" ", "_").lower()) for (q, i, n, t)  in qtuple if i != 7]
     # Limiting the files
     input_files = [os.path.join(inputdir, 'corpus-data/', x) for x in os.listdir(os.path.join(inputdir, 'corpus-data/')) if 'tsv.gz' in x]
     infilelist = [x for x in infilelist if x in input_files]
@@ -237,7 +252,7 @@ def main(inputdir):
     # Exporting Metadata for loading into torch
     qdf = pd.DataFrame(qtuple, columns=['query', 'query_id', 'trec', 'title'])
     qdf['nugget_file'] = qdf['trec'] + "." + qdf['query_id'].astype(str) + "_nuggets_tokenized.csv"
-    qdf['stream_file'] = qdf['title'].str.replace(" ", "_").str.lower() + "_tokenized.csv"
+    qdf['stream_file'] = qdf['title'].str.replace(" ", "_").str.lower() + "fs_tokenized.csv"
     qdf = qdf[['query_id','query','trec','nugget_file','stream_file']]
     # Adding the tokens into the file -- need to convert this to a lambda at some point
     qtokens = []

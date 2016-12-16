@@ -12,7 +12,7 @@ dl = require 'dataload'
 cmd = torch.CmdLine()
 
 cmd:option('--nepochs', 5, 'running for 50 epochs')
-cmd:option('--learning_rate', 1e-5, 'using a learning rate of 1e-5')
+cmd:option('--learning_rate', 1e-4, 'using a learning rate of 1e-5')
 cmd:option('--gamma', 0., 'Discount rate parameter in backprop step')
 cmd:option('--epsilon', 1., 'Random search rate')
 cmd:option('--cuts', 4, 'Discount rate parameter in backprop step')
