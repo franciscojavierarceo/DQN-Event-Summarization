@@ -527,7 +527,11 @@ function train(inputs, query_data, model, nepochs, nnmod, metric, thresh, gamma,
     local params, gradParams = model:getParameters()
     local perf = io.open(string.format("Code/Performance/Simulation/%s_%s_perf.txt", nnmod, metric), 'w')
     perf:write(string.format("epoch;epsilon;loss;randomF1;oracleF1;rougeF1;rougeRecall;rougePrecision;actual;pred;nselect;nskip;query\n"))
+    print_mv = torch.floor(nepochs/10)
     for epoch=0, nepochs do
+        if (epoch % mv) == 0 then 
+            print("...executing epoch %i" % epoch)
+        end
         for query_id=1, #inputs do
             -- Score the queries
             memory, rougeRecall, rougePrecision, rougeF1, qValues = forwardpass(

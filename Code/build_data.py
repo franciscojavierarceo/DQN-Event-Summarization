@@ -3,6 +3,7 @@ import re
 import sys
 import pickle
 import csv
+import gzip
 import numpy as np
 from itertools import chain
 from bs4 import BeautifulSoup
@@ -22,6 +23,13 @@ def read_queries(fname):
                   fname.split("/")[-1].replace("-ts-topics-test.xml", "").replace("trec20","TS"),
                     i.findAll('title')[0].text))
     return qdata
+
+def gzipFile(f):
+    f_in = open(f, 'rb')
+    f_out = gzip.open(f + ".gz", 'wb')
+    f_out.writelines(f_in)
+    f_out.close()
+    f_in.close()    
 
 def loadQuery(qfilename):
     """
@@ -194,16 +202,25 @@ def ExtractFirstSentence(infilelist):
         tmpdf = tmpdf[tmpdf['sentence']==0]
         newfilename = infile.replace(".tsv.gz", "_fs.tsv").replace("/archive", "")
         tmpdf.to_csv(newfilename, index=False, sep='\t')
-        os.system("gzip %s" % newfilename)
 
 def main(inputdir):
     if 'archive' not in os.listdir(os.path.join(inputdir, 'corpus-data')):
         os.system("mkdir %s/corpus-data/archive" % inputdir)
-    os.system("mv %s/corpus-data/*.tsv.gz %s/corpus-data/archive/" % (inputdir, inputdir) )
-    infilelist = os.listdir(os.path.join(inputdir, 'corpus-data/archive'))
-    infilelist = [os.path.join(inputdir, 'corpus-data/archive/%s' % x) for x in infilelist if '.tsv.gz' in x]
-    # Exporting the first sentence of the articles
-    ExtractFirstSentence(infilelist)
+        os.system("mv %s/corpus-data/*.tsv.gz %s/corpus-data/archive/" % (inputdir, inputdir) )
+
+    if 'fs' not in os.listdir(os.path.join(inputdir, 'corpus-data')):
+        if len(os.listdir(os.path.join(inputdir, 'corpus-data/archive')))==0:
+            os.system("mv %s/corpus-data/*.tsv.gz %s/corpus-data/archive/" % (inputdir, inputdir) )
+
+        infilelist = os.listdir(os.path.join(inputdir, 'corpus-data/archive'))
+        infilelist = [os.path.join(inputdir, 'corpus-data/archive/%s' % x) for x in infilelist if '.tsv.gz' in x]
+        # Exporting the first sentence of the articles
+        ExtractFirstSentence(infilelist)
+        infilelist = [x for x in os.listdir(os.path.join(inputdir,'corpus-data')) if '.tsv' in x]
+        # Gziping the files
+        [gzipFile(os.path.join(inputdir, 'corpus-data', newfilename)) for newfilename in infilelist]
+        infilelist = [x + '.gz' for x in infilelist]
+
     # Exporting nuggets
     nuggets = []
     nuggfiles = [os.path.join(inputdir, 'nuggets-data/nuggets_%i.tsv.gz') % x for x in range(2013, 2016)]
