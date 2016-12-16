@@ -323,6 +323,12 @@ function backProp(input_memory, params, gradParams, optimParams, model, criterio
     return lossv[1]
 end
 function intialize_variables(inputs, n_samples, input_path, K_tokens, maxSummarySize, stopwordlist, thresh, use_cuda)
+    if n_samples > 0 then 
+        n_samples = n_samples + 1
+        print("Running on a subset of %i observations" % n_samples)
+    else 
+        n_samples = nil
+    end
     local vocabSize = 0
     local maxseqlen = 0
     local maxseqlenq = getMaxQuerylen(inputs)
@@ -337,13 +343,6 @@ function intialize_variables(inputs, n_samples, input_path, K_tokens, maxSummary
         input_file = csvigo.load({path = input_path .. input_fn, mode = "large", verbose = false})
         nugget_file = csvigo.load({path = input_path .. nugget_fn, mode = "large", verbose = false})
         -- This is just for experimentation
-        
-        if n_samples > 0 then 
-            n_samples = n_samples + 1
-            print("Running on a subset of %i observations" % n_samples)
-        else 
-            n_samples = nil
-        end
         input_file = geti_n(input_file, 2, n_samples) 
         -- input_file = geti_n(input_file, 2, #input_file) 
         -- have to drop the header
