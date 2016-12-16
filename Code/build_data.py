@@ -237,7 +237,7 @@ def main(inputdir):
     qtuple = list(chain(*[read_queries(xml_file) for xml_file in qfilenames ]))
     infilelist = [os.path.join(inputdir, 'corpus-data/%s_fs.tsv.gz' % t.replace(" ", "_").lower()) for (q, i, n, t)  in qtuple if i != 7]
     # Limiting the files
-    input_files = [os.path.join(inputdir, 'corpus-data/', x) for x in os.listdir(os.path.join(inputdir, 'corpus-data/')) if 'tsv.gz' in x]
+    input_files = [os.path.join(inputdir, 'corpus-data/', x) for x in os.listdir(os.path.join(inputdir, 'corpus-data/')) if 'tsv.gz' in x ]
     infilelist = [x for x in infilelist if x in input_files]
     infilelist += qfilenames
     # Incorporating the streams
@@ -270,6 +270,7 @@ def main(inputdir):
     qdf['nugget_file'] = qdf['trec'] + "." + qdf['query_id'].astype(str) + "_nuggets_tokenized.csv"
     qdf['stream_file'] = qdf['title'].str.replace(" ", "_").str.lower() + "_fs_tokenized.csv"
     qdf = qdf[['query_id','query','trec','nugget_file','stream_file']]
+    qdf = qdf[qdf['query_id'] != 7]
     # Adding the tokens into the file -- need to convert this to a lambda at some point
     qtokens = []
     for q in qdf["query"]:
