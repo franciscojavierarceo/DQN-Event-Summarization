@@ -324,8 +324,9 @@ function backProp(input_memory, params, gradParams, optimParams, model, criterio
 end
 function intialize_variables(inputs, n_samples, input_path, K_tokens, maxSummarySize, stopwordlist, thresh, use_cuda)
     if n_samples > 0 then 
-        n_samples = n_samples + 1
         print("Running on a subset of %i observations" % n_samples)
+        -- Have to add one because I'm removing the first row due to headers
+        n_samples = n_samples + 1
     else 
         n_samples = nil
     end
