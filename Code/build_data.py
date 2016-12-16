@@ -252,7 +252,7 @@ def main(inputdir):
     # Exporting Metadata for loading into torch
     qdf = pd.DataFrame(qtuple, columns=['query', 'query_id', 'trec', 'title'])
     qdf['nugget_file'] = qdf['trec'] + "." + qdf['query_id'].astype(str) + "_nuggets_tokenized.csv"
-    qdf['stream_file'] = qdf['title'].str.replace(" ", "_").str.lower() + "fs_tokenized.csv"
+    qdf['stream_file'] = qdf['title'].str.replace(" ", "_").str.lower() + "_fs_tokenized.csv"
     qdf = qdf[['query_id','query','trec','nugget_file','stream_file']]
     # Adding the tokens into the file -- need to convert this to a lambda at some point
     qtokens = []
