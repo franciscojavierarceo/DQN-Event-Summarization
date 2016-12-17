@@ -36,8 +36,6 @@
 	
 \end{frame}
 
-% Slide 1
-
 \section{Event Summarization}
 	\subsection{Motivation}
 \begin{frame}
@@ -63,7 +61,7 @@
 	\frametitle{Previous Work in Extractive Event Summarization} 
 	\begin{itemize}
 		\item<1-> Recent research in text retrieval  has focused on extractive algorithms to identify important sentences from a large set of documents for summarizing articles from different events in the news (e.g., \cite{diazquery}, \cite{kedzie2015predicting}, \cite{garbacea2015university}, and \cite{kedzieextractive}).
-		\item<1-> \cite{kedzie2015predicting}  has shown that it is possible to select relevant sentences from a massive number of documents on the web to create summaries with meaningful content by adapting classifiers to maximize search policies.
+		\item<1-> Kedzie, McKeown, and Diaz \cite{kedzie2015predicting} showed that it is possible to select relevant sentences from a massive number of documents on the web to create summaries with meaningful content by adapting classifiers to maximize search policies.
 		\item<1-> These systems have been shown to  fall short of simple heuristic algorithms \cite{garbacea2015university}, which may be due to the limited ability of traditional n-gram models to capture the rich and often idiosyncratic structure of language.
 	\end{itemize}
 
@@ -93,16 +91,13 @@ This leads us to explore Deep Q-Networks (DQN) for 3 reasons:
 	
 	\subsection{DQN-LSTM}  
 	\begin{frame}
-		\frametitle{State, Action, and Rewards}
-		We define:
+			\frametitle{Deep Q-Networks for Event Summarization}
+
 		\begin{itemize}
-	\item<1 -> \textbf{state} $s_t$ as $s(x_{t},\tilde{y}_{t}, d)$ 
-	\item<1 -> \textbf{actions} $\mathcal{A} := \{select, skip\}$
-	\item<1 -> \textbf{reward} $r_t$ for action $a$
+	\item<1 -> \textbf{state} $s_t$ := $s(x_{t},\tilde{y}_{t}, d)$ 
+	\item<2 -> \textbf{actions} $\mathcal{A} := \{select, skip\}$
+	\item<3 -> \textbf{reward} $r_t$ = $\Delta$ ROUGE-F1($\tilde{y}_{t}, Y$)
 		\end{itemize}
-				\begin{equation}
-					r_t = \textrm{ROUGE-F1}(\tilde{y}_{t}, Y) -  \textrm{ROUGE-F1}(\tilde{y}_{t-1}, Y)
-				\end{equation}
 	\end{frame}
 
 %	\begin{frame}
@@ -127,9 +122,9 @@ This leads us to explore Deep Q-Networks (DQN) for 3 reasons:
 	\begin{frame}
 			\frametitle{Policy}
 			\begin{itemize}
-				\item<1-> We define our Q-Learner as an RNN-LSTM that is trained by randomly exploring the state-space using an $\epsilon$-greedy search over actions and states. 
-				\item<1->We train our Q-Learner by iteratively updating the learned extraction policy through backpropagation of the observed reward for each action.
-				\item<1-> We define an architecture similar to that of \cite{narasimhan2015language} and map our three inputs (query, sentence, and current predicted summary) into LSTM embeddings according to $\textbf{Figure 1}$
+				\item<1-> We define our Q-Learner as an RNN-LSTM 
+				\item<1->We train our Q-Learner by iteratively updating the extraction policy through backpropagation
+				\item<1-> We map our three inputs into embeddings according to $\textbf{Figure 1}$
 			\end{itemize}
 	\end{frame}
 
@@ -215,7 +210,7 @@ This leads us to explore Deep Q-Networks (DQN) for 3 reasons:
 
 \subsection{Algorithm}
 	\begin{frame}
-			\frametitle{Overview of Algorithm}
+			\vspace{0.12cm}\frametitle{High-level overview of algorithm}
 			DQN-LSTM for Event Summarization Training Procedure
 			\begin{center}
 			  \includegraphics[scale=0.45]{DQN_LSTM_Algorithm}
@@ -223,6 +218,7 @@ This leads us to explore Deep Q-Networks (DQN) for 3 reasons:
 	\end{frame}
 
 \begin{frame}
+			\frametitle{Details of algorithm}
 \begin{algorithm}[H]
   \algsetup{linenosize=\tiny}
   \tiny
@@ -264,11 +260,11 @@ This leads us to explore Deep Q-Networks (DQN) for 3 reasons:
 	\subsection{Simulation}
 		\begin{frame}
 			\frametitle{Small Problems}
-		Before evaluating the model on test data, it is illuminating to understand the in-sample training behavior of the architecture on a small-sample problem. Small sample experimentation allows us to
+		Studying the in-sample training behavior on a small-sample problem allows us to
 		\begin{enumerate}
-		\item<1-> Verify that the model is able to solve our specified problem
-		\item<1-> Understand the number of iterations required to explore the state-space
-		\item<1-> Gain intuition about the impact of hyperparameters on the speed at which it takes to solve the problem
+		\item<1-> Verify the model performance
+		\item<1-> Understand training time required
+		\item<1-> Gain intuition about the impact of hyperparameters
 		\end{enumerate}
 		\end{frame}
 
@@ -304,25 +300,15 @@ This leads us to explore Deep Q-Networks (DQN) for 3 reasons:
 
 		\begin{frame}
 			\frametitle{What did we learn?}
-			The experiments are extremely useful in understanding the implications of the specification of the network. We found that 
+			The experiments are extremely useful in understanding the implications of the specification of the network.
 			\begin{center}
 				\begin{enumerate}
-					\item<1-> Maximizing Precision is easier than maximizing Recall.
-					\item<1-> Choosing either Precision or Recall yields obvious pathological results; i.e., selecting the single best sentence or selecting all sentences.
-					\item<1-> Optimizing F1 requires much longer training to choose the optimal strategy.
+					\item<2-> Maximizing Precision is easier than Recall.
+					\item<2-> Choosing Precision or Recall yields pathological results
+					\item<2-> Optimizing F1 requires much longer training to choose the optimal strategy.
 				\end{enumerate}
 			\end{center}
 		\end{frame}
-
-%	\subsection{Benchmarking}
-%		\begin{frame}
-%			\frametitle{Evaluation}
-%			\begin{itemize}
-%		\item<1-> We benchmark our model against (1) an Oracle that greedily chooses to include sentences if the increase in ROUGUE-F1 is positive,  (2) random selection of sentences,  and (3) a bag-of-words multilayer perceptron.
-%		\item<1-> We use n-fold cross validation and average the F1 across the held-out test queries.
-%		\end{itemize}
-%	\end{frame}
-
 
 
 \section{Resources}
@@ -331,6 +317,7 @@ This leads us to explore Deep Q-Networks (DQN) for 3 reasons:
 	Thank you
 	\begin{itemize}
 	\item<1-> \color{blue} \href{https://github.com/franciscojavierarceo/DQN-Event-Summarization}{GitHub Repository}
+	\item<1-> \color{blue} \href{https://github.com/franciscojavierarceo/DQN-Event-Summarization/blob/master/Paper/DeepNLPQLearning.pdf}{Working Paper}
 	\end{itemize}
 \end{frame}
 
