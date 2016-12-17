@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015) (preloaded format=pdflatex 2015.5.24)  17 DEC 2016 17:41
+This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015) (preloaded format=pdflatex 2015.5.24)  17 DEC 2016 18:36
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -955,20 +955,20 @@ File: pgflibraryfadings.code.tex 2008/02/07 v3.0.0 (rcs-revision 1.3)
 ))) (./DQN-Event-Summarization.aux)
 \openout1 = `DQN-Event-Summarization.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 17.
-LaTeX Font Info:    ... okay on input line 17.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 17.
-LaTeX Font Info:    ... okay on input line 17.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 17.
-LaTeX Font Info:    ... okay on input line 17.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 17.
-LaTeX Font Info:    ... okay on input line 17.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 17.
-LaTeX Font Info:    ... okay on input line 17.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 17.
-LaTeX Font Info:    ... okay on input line 17.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 17.
-LaTeX Font Info:    ... okay on input line 17.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 20.
+LaTeX Font Info:    ... okay on input line 20.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 20.
+LaTeX Font Info:    ... okay on input line 20.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 20.
+LaTeX Font Info:    ... okay on input line 20.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 20.
+LaTeX Font Info:    ... okay on input line 20.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 20.
+LaTeX Font Info:    ... okay on input line 20.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 20.
+LaTeX Font Info:    ... okay on input line 20.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 20.
+LaTeX Font Info:    ... okay on input line 20.
 
 *geometry* driver: auto-detecting
 *geometry* detected driver: pdftex
@@ -1034,7 +1034,7 @@ e
 ))
 ABD: EveryShipout initializing macros
 \AtBeginShipoutBox=\box81
-Package hyperref Info: Link coloring OFF on input line 17.
+Package hyperref Info: Link coloring OFF on input line 20.
 
 (/usr/local/texlive/2015/texmf-dist/tex/latex/hyperref/nameref.sty
 Package: nameref 2012/10/27 v2.43 Cross-referencing by name of section
@@ -1044,9 +1044,9 @@ Package: gettitlestring 2010/12/03 v1.4 Cleanup title references (HO)
 )
 \c@section@level=\count175
 )
-LaTeX Info: Redefining \ref on input line 17.
-LaTeX Info: Redefining \pageref on input line 17.
-LaTeX Info: Redefining \nameref on input line 17.
+LaTeX Info: Redefining \ref on input line 20.
+LaTeX Info: Redefining \pageref on input line 20.
+LaTeX Info: Redefining \nameref on input line 20.
 
 (./DQN-Event-Summarization.out) (./DQN-Event-Summarization.out)
 \@outlinefile=\write5
@@ -1077,7 +1077,7 @@ Dictionary: translator-numbers-dictionary, Language: English
 r-theorem-dictionary/translator-theorem-dictionary-English.dict
 Dictionary: translator-theorem-dictionary, Language: English 
 )
-LaTeX Info: Redefining \includegraphics on input line 17.
+LaTeX Info: Redefining \includegraphics on input line 20.
 Package caption Info: Begin \AtBeginDocument code.
 Package caption Info: float package is loaded.
 Package caption Info: End \AtBeginDocument code.
@@ -1085,15 +1085,15 @@ Package caption Info: End \AtBeginDocument code.
 (./DQN-Event-Summarization.nav)
 
 Package hyperref Warning: Option `pdfauthor' has already been used,
-(hyperref)                setting the option has no effect on input line 22.
+(hyperref)                setting the option has no effect on input line 25.
 
 
 LaTeX Font Warning: Font shape `OT1/cmr/bx/n' in size <4> not available
-(Font)              size <5> substituted on input line 31.
+(Font)              size <5> substituted on input line 34.
 
 
 LaTeX Font Warning: Font shape `OT1/cmr/m/n' in size <4> not available
-(Font)              size <5> substituted on input line 31.
+(Font)              size <5> substituted on input line 34.
 
 [1{/usr/local/texlive/2015/texmf-var/fonts/map/pdftex/updmap/pdftex.map}
 
@@ -1101,12 +1101,12 @@ LaTeX Font Warning: Font shape `OT1/cmr/m/n' in size <4> not available
 (./DQN-Event-Summarization.toc) [2
 
 ]
-LaTeX Font Info:    Try loading font information for U+msa on input line 49.
+LaTeX Font Info:    Try loading font information for U+msa on input line 53.
 
 (/usr/local/texlive/2015/texmf-dist/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 )
-LaTeX Font Info:    Try loading font information for U+msb on input line 49.
+LaTeX Font Info:    Try loading font information for U+msb on input line 53.
 
 (/usr/local/texlive/2015/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
@@ -1139,7 +1139,7 @@ File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 \pgf@layerbox@foreground=\box84
 \pgf@layerboxsaved@foreground=\box85
 
-Overfull \hbox (2.7534pt too wide) in paragraph at lines 208--208
+Overfull \hbox (2.7534pt too wide) in paragraph at lines 214--214
  []$\OMS/cmsy/m/n/8 f\OML/cmm/m/it/8 Rouge\OMS/cmsy/m/n/8 j\OML/cmm/m/it/8 Sele
 ct\OMS/cmsy/m/n/8 g$ 
  []
@@ -1300,21 +1300,21 @@ Missing character: There is no ] in font nullfont!
 File: DQN_LSTM_Algorithm.png Graphic file (type png)
 
 <use DQN_LSTM_Algorithm.png>
-Package pdftex.def Info: DQN_LSTM_Algorithm.png used on input line 218.
+Package pdftex.def Info: DQN_LSTM_Algorithm.png used on input line 224.
 (pdftex.def)             Requested size: 252.79811pt x 149.5975pt.
  [15
 
  <./DQN_LSTM_Algorithm.png>]
-LaTeX Font Info:    Try loading font information for OMS+cmr on input line 256.
+LaTeX Font Info:    Try loading font information for OMS+cmr on input line 262.
 
 
 (/usr/local/texlive/2015/texmf-dist/tex/latex/base/omscmr.fd
 File: omscmr.fd 2014/09/29 v2.5h Standard LaTeX font definitions
 )
 LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <6> not available
-(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 256.
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 262.
 
-Overfull \vbox (2.11595pt too high) detected at line 256
+Overfull \vbox (2.11595pt too high) detected at line 262
  []
 
 [16
@@ -1325,7 +1325,7 @@ Overfull \vbox (2.11595pt too high) detected at line 256
 File: DQN_LSTM_Precision.png Graphic file (type png)
 
 <use DQN_LSTM_Precision.png>
-Package pdftex.def Info: DQN_LSTM_Precision.png used on input line 279.
+Package pdftex.def Info: DQN_LSTM_Precision.png used on input line 285.
 (pdftex.def)             Requested size: 289.0667pt x 144.5422pt.
  [18
 
@@ -1334,7 +1334,7 @@ Package pdftex.def Info: DQN_LSTM_Precision.png used on input line 279.
 File: DQN_LSTM_Recall.png Graphic file (type png)
 
 <use DQN_LSTM_Recall.png>
-Package pdftex.def Info: DQN_LSTM_Recall.png used on input line 289.
+Package pdftex.def Info: DQN_LSTM_Recall.png used on input line 295.
 (pdftex.def)             Requested size: 289.0667pt x 144.5422pt.
  [19
 
@@ -1342,7 +1342,7 @@ Package pdftex.def Info: DQN_LSTM_Recall.png used on input line 289.
 <DQN_LSTM_F1.png, id=757, 957.5775pt x 538.01pt>
 File: DQN_LSTM_F1.png Graphic file (type png)
  <use DQN_LSTM_F1.png>
-Package pdftex.def Info: DQN_LSTM_F1.png used on input line 299.
+Package pdftex.def Info: DQN_LSTM_F1.png used on input line 305.
 (pdftex.def)             Requested size: 289.07268pt x 144.5422pt.
  [20
 
@@ -1369,11 +1369,11 @@ Underfull \vbox (badness 10000) has occurred while \output is active []
 \tf@snm=\write8
 \openout8 = `DQN-Event-Summarization.snm'.
 
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 326.
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 326.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 332.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 332.
  (./DQN-Event-Summarization.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 326.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 326.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 332.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 332.
 Package rerunfilecheck Info: File `DQN-Event-Summarization.out' has not changed
 .
 (rerunfilecheck)             Checksum: C9F845214B6654D2F794CAF0CAFDBEBD;542.
@@ -1382,13 +1382,13 @@ Package rerunfilecheck Info: File `DQN-Event-Summarization.out' has not changed
 LaTeX Font Warning: Size substitutions with differences
 (Font)              up to 1.0pt have occurred.
 
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 326.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 332.
  ) 
 Here is how much of TeX's memory you used:
- 23648 strings out of 493089
- 490219 string characters out of 6134842
- 603893 words of memory out of 5000000
- 26511 multiletter control sequences out of 15000+600000
+ 23649 strings out of 493089
+ 490237 string characters out of 6134842
+ 603900 words of memory out of 5000000
+ 26512 multiletter control sequences out of 15000+600000
  13866 words of font info for 51 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  56i,20n,82p,432b,886s stack positions out of 5000i,500n,10000p,200000b,80000s
@@ -1411,7 +1411,7 @@ ve/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/local/texlive/
 texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/local/texlive/2015/te
 xmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb></usr/local/texlive/2015/tex
 mf-dist/fonts/type1/public/amsfonts/symbols/msam10.pfb>
-Output written on DQN-Event-Summarization.pdf (25 pages, 511851 bytes).
+Output written on DQN-Event-Summarization.pdf (25 pages, 512081 bytes).
 PDF statistics:
  1030 PDF objects out of 1200 (max. 8388607)
  936 compressed objects within 10 object streams
