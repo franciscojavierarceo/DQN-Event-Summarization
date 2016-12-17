@@ -94,22 +94,35 @@ This leads us to explore Deep Q-Networks (DQN) for 3 reasons:
 	\subsection{DQN-LSTM}  
 	\begin{frame}
 		\frametitle{State, Action, and Rewards}
+		We define:
 		\begin{itemize}
-	\item<1 ->  The \textbf{state} $s(x_{t},\tilde{y}_{t}, d)$ at time $t$ is a function of the candidate sentence, $x_t$ to include in the summary, the state of the current summary $\tilde{y}_t$, and the query $d$. 	
-	\item<1 -> The set of  \textbf{actions} $\mathcal{A} := \{select, skip\}$, correspond to
-	\begin{equation}
-		\tilde{y}_{t + 1} =
-		\begin{cases}
-			\tilde{y}_{t} \cup \{ x_t \},	& \text{if } a_t = select  \\
-			\tilde{y}_{t}, 			& \text{if } a_t = skip.
-		\end{cases}
-	\end{equation}
-	\item<1 -> The \textbf{reward} $r$ for a given action $a$ at time $t$ is measured by the change in ROUGE-F1 score of the predicted summary $\tilde{y}_{t}$ measured against a gold standard summary $Y$. 	
+	\item<1 -> \textbf{state} $s_t$ as $s(x_{t},\tilde{y}_{t}, d)$ 
+	\item<1 -> \textbf{actions} $\mathcal{A} := \{select, skip\}$
+	\item<1 -> \textbf{reward} $r_t$ for action $a$
 		\end{itemize}
 				\begin{equation}
-					r_t = \textrm{ROUGE-F1}(\tilde{y}_{t}, Y) -  \textrm{ROUGE-F1}(\tilde{y}_{t-1}, Y).
+					r_t = \textrm{ROUGE-F1}(\tilde{y}_{t}, Y) -  \textrm{ROUGE-F1}(\tilde{y}_{t-1}, Y)
 				\end{equation}
 	\end{frame}
+
+%	\begin{frame}
+%		\frametitle{State, Action, and Rewards}
+%		\begin{itemize}
+%	\item<1 ->  The \textbf{state} $s(x_{t},\tilde{y}_{t}, d)$ at time $t$ is a function of the candidate sentence, $x_t$ to include in the summary, the state of the current summary $\tilde{y}_t$, and the query $d$. 	
+%	\item<1 -> The set of  \textbf{actions} $\mathcal{A} := \{select, skip\}$, correspond to
+%	\begin{equation}
+%		\tilde{y}_{t + 1} =
+%		\begin{cases}
+%			\tilde{y}_{t} \cup \{ x_t \},	& \text{if } a_t = select  \\
+%			\tilde{y}_{t}, 			& \text{if } a_t = skip.
+%		\end{cases}
+%%	\item<1 -> The \textbf{reward} $r$ for a given action $a$ at time $t$ is measured by the change in ROUGE-F1 score of the predicted summary $\tilde{y}_{t}$ measured against a gold standard summary $Y$. 	
+%		\end{itemize}
+%				\begin{equation}
+%					r_t = \textrm{ROUGE-F1}(\tilde{y}_{t}, Y) -  \textrm{ROUGE-F1}(\tilde{y}_{t-1}, Y).
+%				\end{equation}
+%	\end{frame}
+
 	\subsection{Policy}
 	\begin{frame}
 			\frametitle{Policy}

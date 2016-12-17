@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015) (preloaded format=pdflatex 2015.5.24)  15 DEC 2016 08:12
+This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015) (preloaded format=pdflatex 2015.5.24)  17 DEC 2016 14:08
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -1135,7 +1135,7 @@ File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 \pgf@layerbox@foreground=\box84
 \pgf@layerboxsaved@foreground=\box85
 
-Overfull \hbox (2.7534pt too wide) in paragraph at lines 200--200
+Overfull \hbox (2.7534pt too wide) in paragraph at lines 213--213
  []$\OMS/cmsy/m/n/8 f\OML/cmm/m/it/8 Rouge\OMS/cmsy/m/n/8 j\OML/cmm/m/it/8 Sele
 ct\OMS/cmsy/m/n/8 g$ 
  []
@@ -1292,50 +1292,50 @@ Missing character: There is no 5 in font nullfont!
 Missing character: There is no ] in font nullfont!
 [12
 
-] <DQN_LSTM_Algorithm.png, id=514, 561.7788pt x 332.442pt>
+] <DQN_LSTM_Algorithm.png, id=513, 561.7788pt x 332.442pt>
 File: DQN_LSTM_Algorithm.png Graphic file (type png)
 
 <use DQN_LSTM_Algorithm.png>
-Package pdftex.def Info: DQN_LSTM_Algorithm.png used on input line 210.
+Package pdftex.def Info: DQN_LSTM_Algorithm.png used on input line 223.
 (pdftex.def)             Requested size: 252.79811pt x 149.5975pt.
  [13
 
  <./DQN_LSTM_Algorithm.png>]
-LaTeX Font Info:    Try loading font information for OMS+cmr on input line 247.
+LaTeX Font Info:    Try loading font information for OMS+cmr on input line 260.
 
 
 (/usr/local/texlive/2015/texmf-dist/tex/latex/base/omscmr.fd
 File: omscmr.fd 2014/09/29 v2.5h Standard LaTeX font definitions
 )
 LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <6> not available
-(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 247.
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 260.
  [14
 
 ] [15
 
 ]
-<DQN_LSTM_Precision.png, id=624, 954.56625pt x 538.01pt>
+<DQN_LSTM_Precision.png, id=623, 954.56625pt x 538.01pt>
 File: DQN_LSTM_Precision.png Graphic file (type png)
 
 <use DQN_LSTM_Precision.png>
-Package pdftex.def Info: DQN_LSTM_Precision.png used on input line 270.
+Package pdftex.def Info: DQN_LSTM_Precision.png used on input line 283.
 (pdftex.def)             Requested size: 289.0667pt x 144.5422pt.
  [16
 
  <./DQN_LSTM_Precision.png>]
-<DQN_LSTM_Recall.png, id=657, 954.56625pt x 538.01pt>
+<DQN_LSTM_Recall.png, id=656, 954.56625pt x 538.01pt>
 File: DQN_LSTM_Recall.png Graphic file (type png)
 
 <use DQN_LSTM_Recall.png>
-Package pdftex.def Info: DQN_LSTM_Recall.png used on input line 280.
+Package pdftex.def Info: DQN_LSTM_Recall.png used on input line 293.
 (pdftex.def)             Requested size: 289.0667pt x 144.5422pt.
  [17
 
  <./DQN_LSTM_Recall.png>]
-<DQN_LSTM_F1.png, id=690, 957.5775pt x 538.01pt>
+<DQN_LSTM_F1.png, id=689, 957.5775pt x 538.01pt>
 File: DQN_LSTM_F1.png Graphic file (type png)
  <use DQN_LSTM_F1.png>
-Package pdftex.def Info: DQN_LSTM_F1.png used on input line 290.
+Package pdftex.def Info: DQN_LSTM_F1.png used on input line 303.
 (pdftex.def)             Requested size: 289.07268pt x 144.5422pt.
  [18
 
@@ -1360,11 +1360,11 @@ Underfull \vbox (badness 10000) has occurred while \output is active []
 \tf@snm=\write8
 \openout8 = `DQN-Event-Summarization.snm'.
 
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 326.
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 326.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 339.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 339.
  (./DQN-Event-Summarization.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 326.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 326.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 339.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 339.
 Package rerunfilecheck Info: File `DQN-Event-Summarization.out' has not changed
 .
 (rerunfilecheck)             Checksum: ED416B8426C2B36698D963E4C5E95078;542.
@@ -1373,12 +1373,12 @@ Package rerunfilecheck Info: File `DQN-Event-Summarization.out' has not changed
 LaTeX Font Warning: Size substitutions with differences
 (Font)              up to 1.0pt have occurred.
 
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 326.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 339.
  ) 
 Here is how much of TeX's memory you used:
  23642 strings out of 493089
  490162 string characters out of 6134842
- 604171 words of memory out of 5000000
+ 604172 words of memory out of 5000000
  26511 multiletter control sequences out of 15000+600000
  13866 words of font info for 51 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
@@ -1386,27 +1386,26 @@ Here is how much of TeX's memory you used:
 </usr/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb
 ></usr/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx6.pfb><
 /usr/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx8.pfb></u
-sr/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></us
-r/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cmextra/cmex7.pfb><
-/usr/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></
-usr/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi5.pfb></us
-r/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi6.pfb></usr/
-local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb></usr/lo
-cal/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/loca
-l/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></usr/local/
-texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmr5.pfb></usr/local/tex
-live/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmr6.pfb></usr/local/texliv
-e/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/local/texlive/2
-015/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/local/texlive/20
-15/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy5.pfb></usr/local/texlive/2015
-/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy6.pfb></usr/local/texlive/2015/t
-exmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/local/texlive/2015/tex
-mf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb></usr/local/texlive/2015/texm
-f-dist/fonts/type1/public/amsfonts/symbols/msam10.pfb>
-Output written on DQN-Event-Summarization.pdf (22 pages, 514375 bytes).
+sr/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cmextra/cmex7.pfb>
+</usr/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb><
+/usr/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi5.pfb></u
+sr/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi6.pfb></usr
+/local/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb></usr/l
+ocal/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/loc
+al/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></usr/local
+/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmr5.pfb></usr/local/te
+xlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmr6.pfb></usr/local/texli
+ve/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/local/texlive/
+2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/local/texlive/2
+015/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy5.pfb></usr/local/texlive/201
+5/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy6.pfb></usr/local/texlive/2015/
+texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/local/texlive/2015/te
+xmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb></usr/local/texlive/2015/tex
+mf-dist/fonts/type1/public/amsfonts/symbols/msam10.pfb>
+Output written on DQN-Event-Summarization.pdf (22 pages, 506133 bytes).
 PDF statistics:
- 932 PDF objects out of 1000 (max. 8388607)
- 841 compressed objects within 9 object streams
+ 928 PDF objects out of 1000 (max. 8388607)
+ 838 compressed objects within 9 object streams
  62 named destinations out of 1000 (max. 500000)
  239 words of extra memory for PDF output out of 10000 (max. 10000000)
 
