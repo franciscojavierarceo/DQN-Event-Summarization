@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015) (preloaded format=pdflatex 2015.5.24)  17 DEC 2016 18:45
+This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015) (preloaded format=pdflatex 2015.5.24)  18 DEC 2016 11:28
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -1352,14 +1352,16 @@ Package pdftex.def Info: DQN_LSTM_F1.png used on input line 305.
 
 ] [23
 
+] [24
+
 ] (./DQN-Event-Summarization.bbl
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
- [24
+ [25
 
  </usr/local/texlive/2015/texmf-dist/tex/latex/beamer/art/beamericonarticle.pdf
 >])
-[25]
+[26]
 \tf@nav=\write6
 \openout6 = `DQN-Event-Summarization.nav'.
 
@@ -1369,11 +1371,11 @@ Underfull \vbox (badness 10000) has occurred while \output is active []
 \tf@snm=\write8
 \openout8 = `DQN-Event-Summarization.snm'.
 
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 332.
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 332.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 342.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 342.
  (./DQN-Event-Summarization.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 332.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 332.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 342.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 342.
 Package rerunfilecheck Info: File `DQN-Event-Summarization.out' has not changed
 .
 (rerunfilecheck)             Checksum: C9F845214B6654D2F794CAF0CAFDBEBD;542.
@@ -1382,13 +1384,13 @@ Package rerunfilecheck Info: File `DQN-Event-Summarization.out' has not changed
 LaTeX Font Warning: Size substitutions with differences
 (Font)              up to 1.0pt have occurred.
 
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 332.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 342.
  ) 
 Here is how much of TeX's memory you used:
- 23649 strings out of 493089
- 490237 string characters out of 6134842
- 603900 words of memory out of 5000000
- 26512 multiletter control sequences out of 15000+600000
+ 23653 strings out of 493089
+ 490272 string characters out of 6134842
+ 603945 words of memory out of 5000000
+ 26514 multiletter control sequences out of 15000+600000
  13866 words of font info for 51 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  56i,20n,82p,432b,886s stack positions out of 5000i,500n,10000p,200000b,80000s
@@ -1411,10 +1413,10 @@ ve/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/local/texlive/
 texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/local/texlive/2015/te
 xmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb></usr/local/texlive/2015/tex
 mf-dist/fonts/type1/public/amsfonts/symbols/msam10.pfb>
-Output written on DQN-Event-Summarization.pdf (25 pages, 512071 bytes).
+Output written on DQN-Event-Summarization.pdf (26 pages, 514417 bytes).
 PDF statistics:
- 1030 PDF objects out of 1200 (max. 8388607)
- 936 compressed objects within 10 object streams
- 68 named destinations out of 1000 (max. 500000)
+ 1061 PDF objects out of 1200 (max. 8388607)
+ 966 compressed objects within 10 object streams
+ 70 named destinations out of 1000 (max. 500000)
  239 words of extra memory for PDF output out of 10000 (max. 10000000)
 

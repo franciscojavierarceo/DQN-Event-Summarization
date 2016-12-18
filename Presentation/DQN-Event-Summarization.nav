@@ -48,13 +48,15 @@
 \headcommand {\beamer@framepages {20}{20}}
 \headcommand {\slideentry {3}{1}{5}{21/22}{Simulation}{0}}
 \headcommand {\beamer@framepages {21}{22}}
-\headcommand {\sectionentry {4}{Resources}{23}{Resources}{0}}
-\headcommand {\beamer@sectionpages {17}{22}}
-\headcommand {\beamer@subsectionpages {17}{22}}
-\headcommand {\slideentry {4}{0}{1}{23/23}{}{0}}
+\headcommand {\slideentry {3}{1}{6}{23/23}{Simulation}{0}}
 \headcommand {\beamer@framepages {23}{23}}
-\headcommand {\beamer@partpages {1}{25}}
-\headcommand {\beamer@subsectionpages {23}{25}}
-\headcommand {\beamer@sectionpages {23}{25}}
-\headcommand {\beamer@documentpages {25}}
-\headcommand {\def \inserttotalframenumber {18}}
+\headcommand {\sectionentry {4}{Resources}{24}{Resources}{0}}
+\headcommand {\beamer@sectionpages {17}{23}}
+\headcommand {\beamer@subsectionpages {17}{23}}
+\headcommand {\slideentry {4}{0}{1}{24/24}{}{0}}
+\headcommand {\beamer@framepages {24}{24}}
+\headcommand {\beamer@partpages {1}{26}}
+\headcommand {\beamer@subsectionpages {24}{26}}
+\headcommand {\beamer@sectionpages {24}{26}}
+\headcommand {\beamer@documentpages {26}}
+\headcommand {\def \inserttotalframenumber {19}}
