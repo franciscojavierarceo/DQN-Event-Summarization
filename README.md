@@ -17,7 +17,7 @@ To run the code simply enter in the command line:
 
 The relevant code files in the **/Code** folder are
 
-1. build_data.py
+1. Utils/build_data.py
 2. utils.lua
 3. utilsNN.lua
 4. runModelProd.lua
