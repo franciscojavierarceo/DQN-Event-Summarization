@@ -5,7 +5,7 @@ require 'optim'
 cmd = torch.CmdLine()
 
 cmd:option('--nepochs', 5, 'running for 50 epochs')
-cmd:option('--learning_rate', 1e-5, 'using a learning rate of 1e-5')
+cmd:option('--learning_rate', 1e-4, 'using a learning rate of 1e-5')
 cmd:option('--gamma', 0., 'Discount rate parameter in backprop step')
 cmd:option('--cuts', 4, 'Discount rate parameter in backprop step')
 cmd:option('--base_explore_rate', 0.0, 'Base rate')
@@ -14,6 +14,7 @@ cmd:option('--mem_size', 50, 'Memory size')
 cmd:option('--batch_size', 10,'Batch Size')
 cmd:option('--nnmod','bow','BOW/LSTM option')
 cmd:option('--edim', 64,'Embedding dimension')
+cmd:option('--metric', "f1", 'Metric to learn')
 cmd:text()
 --- this retrieves the commands and stores them in opt.variable (e.g., opt.model)
 local opt = cmd:parse(arg or {})
@@ -27,10 +28,10 @@ mem_size = opt.mem_size
 batch_size = opt.batch_size
 nnmod = opt.nnmod
 embeddingSize = opt.edim
+metric = opt.metric
 
 SKIP = 1
 SELECT = 2
-bow = false
 local vocabSize = 16
 
 local optimParams = {
@@ -253,8 +254,15 @@ for epoch=1,nepochs do
 
         local generatedCounts = buildTokenCounts(summary) 
         local recall, prec, f1 = rougeScores(generatedCounts, refCounts)
-        -- rouge[i + 1] = f1
-        rouge[i + 1] = recall
+
+        if metric == "f1" then
+            rouge[i + 1] = f1
+        elseif metric == "recall" then
+            rouge[i + 1] = recall
+        elseif metric == "precision" then
+            rouge[i + 1] = prec
+        end
+
         if i==streamSize then
             rougeRecall = recall
             rougePrecision = prec
@@ -276,7 +284,6 @@ for epoch=1,nepochs do
     local queryBatch = query:view(1, querySize):expand(streamSize, querySize) 
 
     local input = {sentenceStream, queryBatch, summaryBatch}
-    print(summaryBatch:size())
     --- Storing the data
     memory = {input, reward, actions}
 
