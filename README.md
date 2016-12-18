@@ -9,7 +9,7 @@ Repo currently has 3 folders
     Presentation
 
 This is the repo for our {Francisco Javier Arceo, Chris Kedzie} implementation 
-of a DQN-LSTM for Event Summarization. 
+of our DQN-LSTM for Event Summarization. 
 
 To run the code simply enter in the command line:
 
