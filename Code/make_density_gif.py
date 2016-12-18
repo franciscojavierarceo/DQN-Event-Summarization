@@ -37,14 +37,14 @@ def main(nepochs, model, metric):
     if type(nepochs) == str:
         nepochs = int(nepochs)
     
-    pdf = pd.read_csv('./Performance/Simulation/%s_%s_perf.txt' % (model, metric) , sep=';')
+    pdf = pd.read_csv('./Code/Performance/Simulation/%s_%s_perf.txt' % (model, metric) , sep=';')
     md = {"f1": "rougeF1", "recall": "rougeRecall", "precision": "rougePrecision"}
     emetric = md[metric]
     c = mcolors.ColorConverter().to_rgb
     grn = 'limegreen'
     rvb = make_colormap([c(grn), c('white'), 0.1, c(grn), c('white'), 0.9, c('white')])
     # Pulling in the images that were exported
-    ofile_names = [('./plotdata/%s/%i_epoch.txt' % (model, x) ) for x in range(nepochs) ] 
+    ofile_names = [('./Code/plotdata/%s/%i_epoch.txt' % (model, x) ) for x in range(nepochs) ] 
     for (ofile, epoch) in zip(ofile_names, range(nepochs)):
         # Loading data sets and concatenating them
         odf = pd.read_csv(ofile, sep=';')
@@ -80,10 +80,10 @@ def main(nepochs, model, metric):
         axarr[1].grid()
         axarr[1].set_title('%s %s model performance at epoch %i = %.3f' % (metric, model, epoch, rouge))
         f.tight_layout()
-        f.savefig('./plotdata/%s/plotfiles/perfplot_%i.png' % (model, epoch) )
+        f.savefig('./Code/plotdata/%s/plotfiles/perfplot_%i.png' % (model, epoch) )
 
     # Exporting the images to a gif
-    file_names = [ ('./plotdata/%s/plotfiles/perfplot_%i.png' % (model, epoch)) for epoch in range(nepochs)]
+    file_names = [ ('./Code/plotdata/%s/plotfiles/perfplot_%i.png' % (model, epoch)) for epoch in range(nepochs)]
     images = []
     for filename in file_names:
         images.append(imageio.imread(filename))
