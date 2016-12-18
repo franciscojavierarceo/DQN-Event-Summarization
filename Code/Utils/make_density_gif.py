@@ -44,7 +44,7 @@ def main(nepochs, model, metric):
     grn = 'limegreen'
     rvb = make_colormap([c(grn), c('white'), 0.1, c(grn), c('white'), 0.9, c('white')])
     # Pulling in the images that were exported
-    ofile_names = [('./Code/plotdata/%s/%i_epoch.txt' % (model, x) ) for x in range(nepochs) ] 
+    ofile_names = [('./Code/plotdata/%s/1/%i_epoch.txt' % (model, x) ) for x in range(nepochs) ] 
     for (ofile, epoch) in zip(ofile_names, range(nepochs)):
         # Loading data sets and concatenating them
         odf = pd.read_csv(ofile, sep=';')
