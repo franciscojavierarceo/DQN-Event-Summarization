@@ -46,7 +46,7 @@
 	The primary goal of Event Summarization is to summarize an event over time.
 	\begin{itemize}
 	\item<2-> 	As crises unfold and many articles are generated about a given event, it is beneficial to have a meaningful summary about the incident. 
-	\item<2-> Given the seemingly countless number of news and media outlets, reading and summarizing all of this content is impractical. 
+	\item<2-> Given the seemingly countless number of news and media outlets, manually reading and summarizing all of this content is impossible. 
 	\item<2-> 	Instead, it is useful to have a system that evaluates these articles automatically and returns the most valuable information.
 	\end{itemize}
 \note{TESTING SOMETHING}
@@ -218,7 +218,7 @@ This leads us to explore Deep Q-Networks (DQN) for 3 reasons:
 	\begin{frame}
 			\vspace{0.12cm}\frametitle{High-level overview of algorithm}
 			DQN-LSTM for Event Summarization Training Procedure
-			\begin{center}
+			\begin{center}\hspace{-1cm}
 			  \includegraphics[scale=0.45]{DQN_LSTM_Algorithm}
 			\end{center}
 	\end{frame}
@@ -260,13 +260,12 @@ This leads us to explore Deep Q-Networks (DQN) for 3 reasons:
 \label{alg:seq}
 \end{algorithm}
 \end{frame}
-
 	
 \section{Experiments}
 	\subsection{Simulation}
 		\begin{frame}
 			\frametitle{Small Problems}
-		Studying in-sample behavior on a small-sample problem allows us to
+		Studying in-sample behavior on a small problem allows us to
 		\begin{enumerate}
 		\item<1-> Verify the model performance
 		\item<1-> Understand training time required
@@ -308,21 +307,21 @@ This leads us to explore Deep Q-Networks (DQN) for 3 reasons:
 			\frametitle{What did we learn?}
 			The experiments are extremely useful in understanding the implications of the specification of the network.
 			\begin{center}
-				\begin{enumerate}
-					\item<2-> Maximizing Precision is easier than Recall.
+				\begin{itemize}
+					\item<2-> Maximizing Precision is easier than Recall
 					\item<2-> Choosing Precision or Recall yields pathological results
-					\item<2-> Optimizing F1 requires much longer training to choose the optimal strategy.
-				\end{enumerate}
+					\item<2-> Optimizing F1 requires longer training
+				\end{itemize}
 			\end{center}
 		\end{frame}
 
 		\begin{frame}
 			\frametitle{Next Steps}
-			Currently running full model on 44 queries each with ~15,000 sentences
+			Currently running on 44 queries each with $\sim$15,000 sentences
 			\begin{center}
 				\begin{itemize}
 					\item<1-> Challenges arise in slow compute time because of the forward step has to sequentially update the current summary
-					\item<1-> Long training time required in short simulation showed that to learn effective policy we have to explore a large state-space and 
+					\item<1-> Long training time required in short simulation showed that to learn effective policy we have to explore a large state-space
 				\end{itemize}
 			\end{center}
 		\end{frame}
