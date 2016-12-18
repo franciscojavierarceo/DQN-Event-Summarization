@@ -1,6 +1,6 @@
 # Deep Q-Learning for Event Summarization
 
-## THIS REPO IS A WORK IN PROGRESS
+## THIS REPOSITORY IS A WORK IN PROGRESS
 
 Repo currently has 3 folders
 
