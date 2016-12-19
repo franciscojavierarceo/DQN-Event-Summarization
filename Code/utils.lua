@@ -75,6 +75,16 @@ function loadMetadata(inputfile)
     return inputs
 end
 
+function loadStopdata(inputfile)
+    local stopfile = csvigo.load({path = inputfile, mode = "large", verbose = false})
+    local stoplist = buildTermDocumentTable(stopfile, nil)
+    stopwords = {}
+    for k,v in pairs(stoplist) do 
+        stopwords[k]  = v[1]
+    end
+    return stopwords
+end
+
 function buildTermDocumentTable(x, K)
     --- This builds the data into tables after reading in from a csv
     --- If K == nil then getFirstKtokens() returns x

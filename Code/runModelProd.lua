@@ -39,13 +39,7 @@ dofile("Code/utils.lua")
 dofile("Code/utilsNN.lua")
 
 inputs = loadMetadata(opt.datapath .. "dqn_metadata.csv")
-stopfile = csvigo.load({path = opt.datapath .. 'stopwordids.csv', mode = "large", verbose = false})
-stoplist = buildTermDocumentTable(stopfile, nil)
-
-stopwords = {}
-for k,v in pairs(stoplist) do 
-    stopwords[k]  = v[1]
-end
+stoplist = loadStopdata(opt.datapath .. 'stopwordids.csv')
 
 if opt.usecuda then
     Tensor = torch.CudaTensor
