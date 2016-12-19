@@ -327,8 +327,9 @@ Future research could consider modifying the extractive policy into one that gen
 
 \section{Software}
 
-We have open sourced our work on \href{https://github.com/franciscojavierarceo/DQN-Event-Summarization}{Github}. The repository contains 3 main folders: (1) Paper, (2) Presentation, and (3) Code. The Code folder contains 3 subfolders which consist of (1) Performance, (2) Simulations, and (3) Utils. Additionally, the three main files required to run n-fold cross validation on the 
+We have open sourced our work on \href{https://github.com/franciscojavierarceo/DQN-Event-Summarization}{Github}. The repository contains 3 main folders: (1) Paper, (2) Presentation, and (3) Code. The Code folder contains 3 subfolders which consist of (1) Performance, (2) Simulations, and (3) Utils. The Performance folder contains files with performance statistics for both the models executed using cross-validation and the simulations. 
 
+Additionally, the three main files required to run n-fold cross validation on the queries are \textbf{runModelProd.lua}, \textbf{utils.lua}, and \textbf{utilsNN.lua}. The two utility files contain various functions necessary to build the data into tensors, create the neural network, and train the model. The repository has a \textbf{README.md} file in every subfolder to elaborate in further detail about its contents.
 
 \bibliography{DeepNLPQLearning}
 
