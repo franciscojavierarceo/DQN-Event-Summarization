@@ -230,7 +230,7 @@ that learns the parameters using stochastic gradient descent with RMSprop \cite{
 
 \section{Learning an Extraction Policy}
 \subsection{Settings}
-Since the state of our current summary at time $t$ depends on the state at time $t - 1$, we have to execute our Q-function in the feedforward stage using a single batch to properly update the predicted summary with optimal expected action. During the backpropagation phase we sample random mini-batches from the stored transitions.  We set our embedding dimension to 100, the future discount rate $\gamma$ to 0.50, and the maximum summary length to 300 tokens.
+Since the state of our current summary at time $t$ depends on the state at time $t - 1$, we have to execute our Q-function in the feedforward stage using a single batch to properly update the predicted summary with optimal expected action. During the backpropagation phase we sample random mini-batches from the stored transitions.  We set our embedding dimension to 50 and the maximum summary length to 300 tokens.
 
 The weights of the Q-function and the action sequence are initialized at random and we randomly explore the state-space for 200 of the 1000 epochs by employing an $\epsilon$-greedy search strategy that decays linearly to a base exploration rate of 0.01 during our action selection. We describe in full detail the training of our DQN-LSTM in $\textbf{Algorithm 1}$.
 
@@ -277,48 +277,21 @@ In \textbf{Figure 2a} we see the convergence of our model when trained on F1, wh
   \centering
   \begin{minipage}[b]{0.4\textwidth}
     \captionsetup{labelformat=empty}
-    \includegraphics[width=\textwidth]{dqn_with_base}
+    \includegraphics[width=\textwidth]{DQN_LSTM_Precision}
     \caption{ \scriptsize (a): DQN with base exploration rate}
   \end{minipage}
   \hfill
   \begin{minipage}[b]{0.4\textwidth}
     \captionsetup{labelformat=empty}
-    \includegraphics[width=\textwidth]{dqn_no_base}
+    \includegraphics[width=\textwidth]{DQN_LSTM_Recall}
     \caption{\scriptsize (b): DQN without base exploration rate}
   \end{minipage}
     \captionsetup{labelformat=empty}
     \caption{\textbf{Figure 2: DQN-LSTM Hyperparameter Experiments}}
 \end{figure}
 
-\subsection{Hyperparameters}
-Different experiments were done to study the effect of each hyperparameter on the model.  Specifically, we evaluate (1) the settings of $K$ to assess the impact on the final predicted summary, (2) values of $\gamma$ to understand the effects on the parameter updates, (3) the memory size, $ | \Gamma |$ on the speed of convergence, and (4) the base exploration rate on the states explored. We present several figures visualizing the impact using different settings of the hyperparameters in our model in \textbf{Figure 3} on a smaller subset of the data; specifically, we use the first sentence from the first 100 articles for all but three of the queries, which are left as test data. 
-
-\begin{figure}[h]
-    \centering
-    \fbox{\includegraphics[scale=0.35]{perf}}
-    \captionsetup{labelformat=empty}
-    \caption{\textbf{Figure 3: DQN-LSTM Hyperparameter Experiments}}
-\end{figure}
-
 \section{Results}
 We evaluate our learned extracted summaries on ROUGE-N F1, Recall, and Precision on the full set of nuggets averaged across all of the queries on the full predicted summary $\tilde{Y}_d$, $\forall d \in \mathcal{D}$. The hyperparameters for the three neural networks were set using cross-validation as described in the previous section. We present the performance of our DQN-LSTM against random action, bag-of-words and bag-of-bigrams multi-layered perceptrons in \textbf{Table 1}. 
-
-\begin{center}
-\begin{tabular}{  l | c | c | c  }
-	\multicolumn{4}{c}{\textbf{Table 1}: Rouge Evaluation} \\
-	\hline
-	Model  & F1 & Recall & Precision  \\ \hline \hline
-	Random  & \color{ red} - - & \color{ red} - -  & \color{ red} - -\\ 
-	DQN-BOW  & \color{ red} - - & \color{ red} - -  & \color{ red} - -\\
-	DQN-BiBOW  & \color{ red} - - & \color{ red} - -  & \color{ red} - -\\
-	DQN-LSTM  & \color{ red}  - - & \color{ red} - -  & \color{ red} - -\\ \hline
-	\hline
-	\multicolumn{4}{l}{\footnotesize Average Rouge of the extracted summaries against} \\
-	\multicolumn{4}{l}{\footnotesize the gold standard summaries for 3 of the 25 queries} \\
-	\multicolumn{4}{l}{\footnotesize  on the first 10,000 articles of each query.} \\
-	\hline
-\end{tabular}
-\end{center}
 
 \section{Conclusion}
 We have presented an end-to-end deep reinforcement learning architecture to learn an extraction policy for multi-document summarization. By treating the incoming sentence streams from different documents as inputs into a recurrent neural network and by backpropagating the action selected, we are able to learn both a richer embedding representation of the three input components and a robust extraction policy. 

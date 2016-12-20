@@ -13,8 +13,10 @@
 \usepackage[noend]{algorithmic}
 \usepackage{tikz}
 \usetikzlibrary{shapes,arrows,shadows}
+
 %\usepackage{pgfpages}
 %\setbeameroption{show notes}
+%\setbeameroption{show notes on second screen=left}
 %\setbeameroption{show notes on second screen=right}
 
 \begin{document}
@@ -42,33 +44,33 @@
 \section{Event Summarization}
 	\subsection{Motivation}
 \begin{frame}
-	\frametitle{Event Summarization} 
+	\frametitle{What is Event Summarization?} 
 	The primary goal of Event Summarization is to summarize an event over time.
 	\begin{itemize}
 	\item<2-> 	As crises unfold and many articles are generated about a given event, it is beneficial to have a meaningful summary about the incident. 
-	\item<2-> Given the seemingly countless number of news and media outlets, manually reading and summarizing all of this content is impossible. 
-	\item<2-> 	Instead, it is useful to have a system that evaluates these articles automatically and returns the most valuable information.
+	\item<3-> Given the seemingly countless number of news and media outlets, manually reading and summarizing all of this content is impossible. 
+	\item<4-> 	Instead, it is useful to have a system that evaluates these articles automatically and returns the most valuable information.
 	\end{itemize}
-\note{TESTING SOMETHING}
 \end{frame}
 
+%\note{TESTING SOMETHING}
 
 \begin{frame}
-	\frametitle{Extractive Event Summarization} 
+	\frametitle{What is Extractive Event Summarization?} 
 	We can structure this problem analytically and find methods to solve Event Summarization (or at least try to). 
 	\begin{itemize}
 	\item<2-> 	Extractive streaming summarization takes as input a short text description of a topic or an event known as a query, a document stream, and a time ordered set of sentences relevant to the query. 
-	\item<2-> The algorithm sequentially examines each sentence from the document stream and includes the candidate sentence into the summary when novel and important information is detected. 
+	\item<3-> The algorithm sequentially examines each sentence from the document stream and includes the candidate sentence into the summary when novel and important information is detected. 
 	\end{itemize}
 \end{frame}
 
 
 \begin{frame}
-	\frametitle{Previous Work in Extractive Event Summarization} 
+	\frametitle{Brief Review of Recent Literature} 
 	\begin{itemize}
 		\item<1-> Recent research in text retrieval  has focused on extractive algorithms to identify important sentences from a large set of documents for summarizing articles from different events in the news (e.g., \cite{diazquery}, \cite{kedzie2015predicting}, \cite{garbacea2015university}, and \cite{kedzieextractive}).
-		\item<1-> Kedzie, McKeown, and Diaz \cite{kedzie2015predicting} showed that it is possible to select relevant sentences from a massive number of documents on the web to create summaries with meaningful content by adapting classifiers to maximize search policies.
-		\item<1-> These systems have been shown to  fall short of simple heuristic algorithms \cite{garbacea2015university}, which may be due to the limited ability of traditional n-gram models to capture the rich and often idiosyncratic structure of language.
+		\item<2-> Kedzie, McKeown, and Diaz \cite{kedzie2015predicting} showed that it is possible to select relevant sentences from a massive number of documents on the web to create summaries with meaningful content by adapting classifiers to maximize search policies.
+		\item<3-> These systems have been shown to  fall short of simple heuristic algorithms \cite{garbacea2015university}, which may be due to the limited ability of traditional n-gram models to capture the rich and often idiosyncratic structure of language.
 	\end{itemize}
 
 \end{frame}
@@ -78,8 +80,8 @@
 This leads us to explore Deep Q-Networks (DQN) for 3 reasons: 
 	 \vspace{-0.2cm} \begin{enumerate}
 	\item <1-> We can define an architecture that propagates information end-to-end about the inputs, actions, and rewards 
-	\item <1-> The representation and interaction between the stream, summary, and query can be learned jointly
-	\item <1 -> RNN-LSTM embeddings can learn a more robust semantic representation than classical n-gram models
+	\item <2-> The representation and interaction between the stream, summary, and query can be learned jointly
+	\item <3 -> RNN-LSTM embeddings can learn a more robust semantic representation than classical n-gram models
 	\end{enumerate}
 \end{frame}
 
@@ -90,19 +92,25 @@ This leads us to explore Deep Q-Networks (DQN) for 3 reasons:
 			\frametitle{Deep Q-Networks: A Brief Introduction}
 		\begin{itemize}
 		\item <1 -> Q-Learning is a Reinforcement Learning framework that finds an optimal policy by taking an input state, set of possible actions available,  and returning the action with the highest reward.
-		\item <1 -> When the state-action space becomes intractable, deterministic algorithms are no longer feasible for an optimal policy and researchers instead train a model to learn the policy. 
-		\item <1 -> Deep Q-Networks \cite{MnihKSGAWR13} are an increasingly popular framework for learning these policies from end-to-end.
+		\item <2 -> When the state-action space becomes intractable, deterministic algorithms are no longer feasible for an optimal policy and researchers instead train a model to learn the policy. 
+		\item <3 -> Deep Q-Networks \cite{MnihKSGAWR13} are an increasingly popular framework for learning these policies from end-to-end.
 		\end{itemize}
 	\end{frame}
 	
-	\subsection{DQN-LSTM}  
+	\subsection{DQN-LSTM} 
 	\begin{frame}
+	For our DQN, we specify
 			\frametitle{Deep Q-Networks for Event Summarization}
-
 		\begin{itemize}
 	\item<1 -> \textbf{state} $s_t$ := $s(x_{t},\tilde{y}_{t}, d)$ 
+			\begin{itemize}
+				\item<1 -> $x_t$ := Candidate sentence at time $t$
+				\item<1 -> $\tilde{y}_{t}$ := Predicted summary at time $t$
+				\item<1 -> $d$ \hspace{.01cm} := Query
+			\end{itemize}
+				
 	\item<2 -> \textbf{actions} $\mathcal{A} := \{select, skip\}$
-	\item<3 -> \textbf{reward} $r_t$ = $\Delta^1$ROUGE-F1($\tilde{y}_{t}, Y$)
+	\item<3 -> \textbf{reward} $r_t$ := $\Delta^1$ROUGE-F1($\tilde{y}_{t}, Y$)
 		\end{itemize}
 	\end{frame}
 
@@ -309,14 +317,14 @@ This leads us to explore Deep Q-Networks (DQN) for 3 reasons:
 			\begin{center}
 				\begin{itemize}
 					\item<2-> Maximizing Precision is easier than Recall
-					\item<2-> Choosing Precision or Recall yields pathological results
-					\item<2-> Optimizing F1 requires longer training
+					\item<3-> Choosing Precision or Recall yields pathological results
+					\item<4-> Optimizing F1 requires longer training
 				\end{itemize}
 			\end{center}
 		\end{frame}
 
 		\begin{frame}
-			\frametitle{Next Steps}
+			\frametitle{Where are we now?}
 			Currently running on 44 queries each with $\sim$15,000 sentences
 			\begin{center}
 				\begin{itemize}
@@ -328,8 +336,8 @@ This leads us to explore Deep Q-Networks (DQN) for 3 reasons:
 
 \section{Resources}
 \begin{frame}
-	\frametitle{References and Links}
-	Thank you
+	\frametitle{Thank you}
+	Any questions?
 	\begin{itemize}
 	\item<1-> \color{blue} \href{https://github.com/franciscojavierarceo/DQN-Event-Summarization}{GitHub Repository}
 	\item<1-> \color{blue} \href{https://github.com/franciscojavierarceo/DQN-Event-Summarization/blob/master/Paper/DeepNLPQLearning.pdf}{Working Paper}

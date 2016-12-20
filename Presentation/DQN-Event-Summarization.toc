@@ -1,11 +1,11 @@
 \beamer@endinputifotherversion {3.36pt}
 \beamer@sectionintoc {1}{Event Summarization}{3}{0}{1}
 \beamer@subsectionintoc {1}{1}{Motivation}{3}{0}{1}
-\beamer@sectionintoc {2}{Deep Q-Networks}{9}{0}{2}
-\beamer@subsectionintoc {2}{1}{Review}{9}{0}{2}
-\beamer@subsectionintoc {2}{2}{DQN-LSTM}{10}{0}{2}
-\beamer@subsectionintoc {2}{3}{Policy}{13}{0}{2}
-\beamer@subsectionintoc {2}{4}{Algorithm}{15}{0}{2}
-\beamer@sectionintoc {3}{Experiments}{17}{0}{3}
-\beamer@subsectionintoc {3}{1}{Simulation}{17}{0}{3}
-\beamer@sectionintoc {4}{Resources}{24}{0}{4}
+\beamer@sectionintoc {2}{Deep Q-Networks}{16}{0}{2}
+\beamer@subsectionintoc {2}{1}{Review}{16}{0}{2}
+\beamer@subsectionintoc {2}{2}{DQN-LSTM}{19}{0}{2}
+\beamer@subsectionintoc {2}{3}{Policy}{22}{0}{2}
+\beamer@subsectionintoc {2}{4}{Algorithm}{24}{0}{2}
+\beamer@sectionintoc {3}{Experiments}{26}{0}{3}
+\beamer@subsectionintoc {3}{1}{Simulation}{26}{0}{3}
+\beamer@sectionintoc {4}{Resources}{35}{0}{4}
