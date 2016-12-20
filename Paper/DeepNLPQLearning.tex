@@ -38,7 +38,7 @@
 \maketitle
 
 \begin{abstract}
-We present a streaming extraction policy for multi-document summarization learned using a deep reinforcement learning recurrent neural network architecture. The rewards of our network are evaluated through manually reviewed summaries, which allow us to specify an end-to-end framework to optimize our extraction policy.  By using raw text from our articles and mapping words into a higher embedding dimension through our recurrent neural network, we are able to learn a more robust representation than traditional n-gram models. We benchmark our model against random actions, a bag-of-words model, and a bag-of-bigrams model.\footnote{ \url{https://github.com/franciscojavierarceo/DQN-Event-Summarization} }
+We present a streaming extraction policy for multi-document summarization learned using a deep reinforcement learning recurrent neural network architecture. The rewards of our network are evaluated through manually reviewed summaries, which allow us to specify an end-to-end framework to optimize our extraction policy.  By using raw text from our articles and mapping words into a higher embedding dimension through our recurrent neural network, we are able to learn a more robust representation than traditional n-gram models. We evaluate our model on a small simulation and provide clear direction for future research.\footnote{ \url{https://github.com/franciscojavierarceo/DQN-Event-Summarization} }
 \end{abstract}
 
 \bibliographystyle{plain}
@@ -51,7 +51,7 @@ Unfortunately, many of these systems have still been shown to fall short of algo
 
 In recent years, recurrent neural networks have been used to map textual language to a higher order dimension to represent more powerful features for a variety of different language modeling tasks \cite{mikolov2010recurrent}. These vector representations, also known as embeddings, have proven incredibly powerful on a variety of different natural language processing tasks (e.g., \cite{bengio2003neural}, \cite{sundermeyer2012lstm}, \cite{kim2016character}). For query based retrievals, \cite{diazquery} has shown success in using these embeddings for \emph{ad hoc} information retrieval.
 
-In this paper we show that a deep recurrent neural network with a long short term memory (LSTM) \cite{hochreiter1997long} is able to successfully learn an extractive summary policy by encoding the action, state, and reward into a Q-Learning model, similar to that of  \cite{hausknecht2015deep}. We show the performance of our model on a variety of different metrics and benchmark them against random actions, a bag-of-words multilayered perceptron, and bag-of-bigrams multilayered perceptron.
+In this paper we show that a deep recurrent neural network with a long short term memory (LSTM) \cite{hochreiter1997long} is able to successfully learn an extractive summary policy by encoding the action, state, and reward into a Q-Learning model, similar to that of  \cite{hausknecht2015deep}. We show the performance of our model on a variety of different metrics and benchmark them against an Oracle that greedily adds sentences to the summary when it observes a positive gain in ROUGE-F1.
 
 % Section 3
 \section{Extractive Streaming Summarization}
@@ -267,31 +267,37 @@ The weights of the Q-function and the action sequence are initialized at random 
     \caption{DQN-LSTM for Event Summarization Training Procedure}
 \end{algorithm}
 
-
-\subsection{Simulations}
-To understand the behavior of our architecture, we produce a number of experiments on the first sentence of the first 100 articles for a single query. By restricting our study to such small in-sample data we are able to better monitor the system and influence of hyperparameters. We study the choice of hyperparemters on a small set of test data in the next section.
-
-In \textbf{Figure 2a} we see the convergence of our model when trained on F1, which suggests that our Q-function learns a policy that tries to vary the Precision while maintaining a fixed Recall. When we specify the model to learn Recall or Precision obvious pathological policies are learned, i.e., our model decides to select all of the sentences or select the fewest sentences with the greatest intersection with golden summaries. In  \textbf{Figure 2b} we present the model without a base exploration rate, which suggests that adding a small amount of randomness pushes the model from converging to poor local optimums.  
-
-\begin{figure}[!tbp]
+\begin{figure}
   \centering
-  \begin{minipage}[b]{0.4\textwidth}
+  \begin{minipage}[b]{0.6\textwidth}
     \captionsetup{labelformat=empty}
     \includegraphics[width=\textwidth]{DQN_LSTM_Precision}
-    \caption{ \scriptsize (a): DQN with base exploration rate}
+    \caption{ \scriptsize (a): DQN optimizing Precision}
   \end{minipage}
-  \hfill
-  \begin{minipage}[b]{0.4\textwidth}
+\end{figure}
+\begin{figure}
+  \centering
+  \begin{minipage}[b]{0.6\textwidth}
     \captionsetup{labelformat=empty}
     \includegraphics[width=\textwidth]{DQN_LSTM_Recall}
-    \caption{\scriptsize (b): DQN without base exploration rate}
+    \caption{\scriptsize (b): DQN optimizing Recall}
   \end{minipage}
     \captionsetup{labelformat=empty}
-    \caption{\textbf{Figure 2: DQN-LSTM Hyperparameter Experiments}}
+\end{figure}
+\begin{figure}
+  \centering
+  \begin{minipage}[b]{0.6\textwidth}
+    \captionsetup{labelformat=empty}
+    \includegraphics[width=\textwidth]{DQN_LSTM_F1}
+    \caption{ \scriptsize (c): DQN optimizing F1}
+  \end{minipage}
+    \caption*{\textbf{Figure 2: DQN-LSTM Optimizing for Different Metrics}}
 \end{figure}
 
-\section{Results}
-We evaluate our learned extracted summaries on ROUGE-N F1, Recall, and Precision on the full set of nuggets averaged across all of the queries on the full predicted summary $\tilde{Y}_d$, $\forall d \in \mathcal{D}$. The hyperparameters for the three neural networks were set using cross-validation as described in the previous section. We present the performance of our DQN-LSTM against random action, bag-of-words and bag-of-bigrams multi-layered perceptrons in \textbf{Table 1}. 
+\subsection{Simulations}
+To understand the behavior of our architecture, we produce a number of experiments on the first sentence of the first 20 articles for a single query. By restricting our study to such small in-sample data we are able to better monitor the system.
+
+In \textbf{Figure 2a} we see the convergence of our model when trained on Precision. Notice the convergence of the model after 150 epochs. Similarly, we see convergence of Recall after roughly 100 epochs with small perturbations that would decline if further epochs were allotted. Lastly, We see that the F1 also converges. We validate our model against an Oracle that sequentially selects the candidate sentence if and only if the change in ROUGE-F1 is positive. We see that our model learns a policy on par with the Oracle after sufficient training time.
 
 \section{Conclusion}
 We have presented an end-to-end deep reinforcement learning architecture to learn an extraction policy for multi-document summarization. By treating the incoming sentence streams from different documents as inputs into a recurrent neural network and by backpropagating the action selected, we are able to learn both a richer embedding representation of the three input components and a robust extraction policy. 
