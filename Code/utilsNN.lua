@@ -307,6 +307,9 @@ function backProp(input_memory, params, gradParams, optimParams, model, criterio
             maskLayer = nn.MaskedSelect():cuda()
             actions_in = torch.CudaByteTensor(#actions_in):copy(actions_in)
         end
+        if regmodel then
+            
+        end
         local function feval(params)
             gradParams:zero()
             local predQ = model:forward(xinput)
