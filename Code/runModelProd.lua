@@ -59,7 +59,7 @@ local optimParams = { learningRate = opt.learning_rate }
 
 
 -- Initializing the model variables
-local vocabSize, query_data = intialize_variables(inputs, 
+local vocabSize, query_data = initialize_variables(inputs, 
                                             opt.n_samples, opt.datapath, opt.K_tokens, 
                                             opt.maxSummarySize, stopwords, opt.thresh, opt.usecuda)
 print("...queries loaded")

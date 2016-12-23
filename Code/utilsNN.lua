@@ -39,7 +39,7 @@ function buildModel(model, vocabSize, embeddingSize, metric, adapt, use_cuda)
                     :add(nn.SplitTable(2))
                     :add(nn.Sequencer(nn.LSTM(embeddingSize, embeddingSize)))
                     :add(nn.SelectTable(-1))            -- selects last state of the LSTM
-                    -- :add(nn.Linear(embeddingSize, embeddingSize))
+                    :add(nn.Linear(embeddingSize, embeddingSize))
                     :add(nn.ReLU())
     end
     local queryLookup = sentenceLookup:clone("weight", "gradWeight") 
@@ -66,15 +66,22 @@ function buildModel(model, vocabSize, embeddingSize, metric, adapt, use_cuda)
     if adapt then 
         print("Using adaptive regularization")
         local regmodel = nn.Sequential()
-            :add(nn.Linear(embeddingSize, 1))
+            :add(pmodule)
+            :add(nn.JoinTable(2))
+            :add(nn.Linear(embeddingSize * 3, 1))
             :add(nn.LogSigmoid())
             :add(nn.SoftMax())
 
-        local jointregmodel = nn.ParallelTable()
+        local jointregmodel = nn.Concat(2)
             :add(nnmodel)
             :add(regmodel)
-        
+
+        -- local final = nn.Sequential()
+        --     :add(jointregmodel)
+        --     :add(nn.SplitTable(2))
+
         nnmodel = jointregmodel
+        -- nnmodel = final
     end
 
     if use_cuda then
@@ -327,7 +334,7 @@ function backProp(input_memory, params, gradParams, optimParams, model, criterio
     end
     return lossv[1]
 end
-function intialize_variables(inputs, n_samples, input_path, K_tokens, maxSummarySize, stopwordlist, thresh, use_cuda)
+function initialize_variables(inputs, n_samples, input_path, K_tokens, maxSummarySize, stopwordlist, thresh, use_cuda)
     if n_samples > 0 then 
         print("Running on a subset of %i observations" % n_samples)
         -- Have to add one because I'm removing the first row due to headers

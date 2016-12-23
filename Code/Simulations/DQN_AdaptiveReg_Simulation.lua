@@ -2,16 +2,20 @@ require 'nn'
 math.randomseed(3)
 torch.manualSeed(3)
 -- Building data
-x = torch.rand(10):resize(10, 1)
-xhat = x + 0.01 * torch.rand(10)
-target = torch.round(x)
+x = torch.rand(20):resize(10, 2)
+xhat = x + 0.01 * torch.rand(20):resize(10, 2)
+b = torch.rand(2, 1)
+print(x, b)
+-- np.dot()
+target = torch.round(torch.mm(x, b))
+print(target)
 
 model1 = nn.Sequential()
-model1:add(nn.Linear(1, 1))
+model1:add(nn.Linear(2, 1))
 model1:add(nn.LogSoftMax())
 
 model2 = nn.Sequential()
-model2:add(nn.Linear(1, 1))
+model2:add(nn.Linear(2, 2))
 
 --- Concat Table
 model3 = nn.Concat(2)
