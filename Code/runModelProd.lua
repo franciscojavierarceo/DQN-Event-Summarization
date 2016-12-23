@@ -57,6 +57,7 @@ end
 local delta = opt.cuts/opt.nepochs
 local optimParams = { learningRate = opt.learning_rate }
 
+
 -- Initializing the model variables
 local vocabSize, query_data = intialize_variables(inputs, 
                                             opt.n_samples, opt.datapath, opt.K_tokens, 

@@ -300,15 +300,17 @@ function backProp(input_memory, params, gradParams, optimParams, model, criterio
     local inputs = {input_memory[1], input_memory[3]}
     local rewards = input_memory[2]
     local dataloader = dl.TensorLoader(inputs, rewards)
+    if regmodel then
+        print('pass')
+        print(#rewards)
+        rewards = {rewards, torch.ones(rewards:size(1))}
+    end
     for k, xin, reward in dataloader:sampleiter(batch_size, memsize) do
         xinput = xin[1]
         actions_in = xin[2]
         if use_cuda then
             maskLayer = nn.MaskedSelect():cuda()
             actions_in = torch.CudaByteTensor(#actions_in):copy(actions_in)
-        end
-        if regmodel then
-            
         end
         local function feval(params)
             gradParams:zero()
