@@ -5,10 +5,8 @@ torch.manualSeed(3)
 x = torch.rand(20):resize(10, 2)
 xhat = x + 0.01 * torch.rand(20):resize(10, 2)
 b = torch.rand(2, 1)
-print(x, b)
 -- np.dot()
 target = torch.round(torch.mm(x, b))
-print(target)
 
 model1 = nn.Sequential()
 model1:add(nn.Linear(2, 1))
@@ -49,6 +47,7 @@ pc = nn.ParallelCriterion():add(nll):add(mse)
 -- pc = nn.ParallelCriterion():add(nll, 0.5):add(mse)
 
 print("NLL loss:")
+print(pred_log, target)
 nll_loss = nll:forward(pred_log, target)
 print(nll_loss)
 
