@@ -528,6 +528,7 @@ function train(inputs, query_data, model, nepochs, nnmod, metric, thresh, gamma,
                         :add(nn.MSECriterion(), 0.5)
                         :add(nn.ClassNLLCriterion())
     end
+    
     local SKIP = 1
     local SELECT = 2
 
