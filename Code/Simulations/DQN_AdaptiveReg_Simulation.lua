@@ -45,7 +45,7 @@ nll = nn.BCECriterion()
 -- nll = nn.ClassNLLCriterion()
 -- nll = nn.CrossEntropyCriterion()
 mse = nn.MSECriterion()
-pc = nn.ParallelCriterion():add(nll):add(mse)
+pc = nn.ParallelCriterion():add(mse):add(nll)
 -- Can put in scalar if you want
 -- pc = nn.ParallelCriterion():add(nll, 0.5):add(mse)
 
@@ -58,7 +58,7 @@ mse_loss = mse:forward(pred_reg, xhat)
 print(nll_loss)
 
 print("Parallel NLL-MSE loss:")
-prl_loss = pc:forward( {pred_log, pred_reg} , {target, xhat} )
+prl_loss = pc:forward( {pred_reg, pred_log}, {xhat, target} )
 print(prl_loss)
 
 print("Parallel Full NLL-MSE loss:")
