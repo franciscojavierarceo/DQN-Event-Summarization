@@ -16,7 +16,8 @@ model2 = nn.Sequential()
 model2:add(nn.Linear(2, 2))
 
 --- Concat Table
-model3 = nn.Concat(2)
+model3 = nn.Parallel(2,2)
+-- model3 = nn.Concat(2)
 model3:add(model1)
 model3:add(model2)
 
