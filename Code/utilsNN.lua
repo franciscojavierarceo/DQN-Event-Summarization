@@ -72,16 +72,11 @@ function buildModel(model, vocabSize, embeddingSize, metric, adapt, use_cuda)
             :add(nn.LogSigmoid())
             :add(nn.SoftMax())
 
-        local jointregmodel = nn.Concat(2)
+        local final = nn.ConcatTable()
             :add(nnmodel)
             :add(regmodel)
 
-        -- local final = nn.Sequential()
-        --     :add(jointregmodel)
-        --     :add(nn.SplitTable(2))
-
-        nnmodel = jointregmodel
-        -- nnmodel = final
+        nnmodel = final
     end
 
     if use_cuda then
@@ -232,11 +227,15 @@ function sampleMemory(newinput, memory_hist, memsize, use_cuda)
     return {inputMemory, rewardMemory, actionMemory}
 end
 
-function stackMemory(newinput, memory_hist, memsize, use_cuda)
+function stackMemory(newinput, memory_hist, memsize, adapt, use_cuda)
     local sentMemory = torch.cat(newinput[1][1]:double(), memory_hist[1][1]:double(), 1)
     local queryMemory = torch.cat(newinput[1][2]:double(), memory_hist[1][2]:double(), 1)
     local sumryMemory = torch.cat(newinput[1][3]:double(), memory_hist[1][3]:double(), 1)
-    local rewardMemory = torch.cat(newinput[2]:double(), memory_hist[2]:double(), 1)
+    if adapt then
+        local rewardMemory = torch.cat(newinput[2]:double(), memory_hist[2]:double(), 1)
+    else
+        local rewardMemory = torch.cat(newinput[2]:double(), memory_hist[2]:double(), 1)
+    end
 
     if use_cuda then 
         actionMemory = torch.cat(newinput[3]:double(), memory_hist[3]:double(), 1)
@@ -321,11 +320,20 @@ function backProp(input_memory, params, gradParams, optimParams, model, criterio
         end
         local function feval(params)
             gradParams:zero()
-            local predQ = model:forward(xinput)
+            if adapt then 
+                local predTotal = model:forward(xinput)                
+                local predQ, predReg = predTotal
+            else 
+                local predQ = model:forward(xinput)
+            end
             local predQOnActions = maskLayer:forward({predQ, actions_in}) 
             local lossf = criterion:forward(predQOnActions, reward)
             local gradOutput = criterion:backward(predQOnActions, reward)
-            local gradMaskLayer = maskLayer:backward({predQ, actions_in}, gradOutput)
+            if adapt then
+                local gradMaskLayer = maskLayer:backward({predQ, predReg, actions_in}, gradOutput)
+            else 
+                local gradMaskLayer = maskLayer:backward({predQ, actions_in}, gradOutput)
+            end 
             model:backward(xinput, gradMaskLayer[1])
             return lossf, gradParams
         end
@@ -386,6 +394,7 @@ function initialize_variables(inputs, n_samples, input_path, K_tokens, maxSummar
         local rougeOpt = Tensor(streamSize + 1):zero()
         local summary = summaryBuffer:zero():narrow(1,1,1)
         local oracleF1 = scoreOracle(sentenceStream, maxSummarySize, refCounts, stopwordlist, thresh, use_cuda)
+        local regValues = Tensor(streamSize, 1):zero()
 
         query_data[query_id] = {
             sentenceStream,
@@ -401,13 +410,14 @@ function initialize_variables(inputs, n_samples, input_path, K_tokens, maxSummar
             refSummary,
             refCounts,
             buffer,
-            oracleF1
+            oracleF1,
+            regValues
         }
     end
     return vocabSize, query_data
 end
 
-function forwardpass(query_data, query_id, model, epsilon, gamma, metric, thresh, stopwordlist, use_cuda)
+function forwardpass(query_data, query_id, model, epsilon, gamma, metric, thresh, stopwordlist, adapt, use_cuda)
     local SKIP = 1
     local SELECT = 2
     -- math.randomseed(420)
@@ -427,6 +437,7 @@ function forwardpass(query_data, query_id, model, epsilon, gamma, metric, thresh
     local refSummary = query_data[query_id][11]
     local refCounts = query_data[query_id][12]
     local buffer = query_data[query_id][13]
+    local regValues = query_data[query_id][14]
     
     -- Have to set clear the inputs at the beginning of each scoring round
     actions:fill(0)
@@ -439,10 +450,17 @@ function forwardpass(query_data, query_id, model, epsilon, gamma, metric, thresh
     exploreDraws:fill(0)
     exploreDraws:uniform(0, 1)
     summary = summaryBuffer:zero():narrow(1,1,1) -- summary starts empty
+    regValues:fill(0)
 
     for i=1, streamSize do     -- Iterating through individual sentences
         local sentence = sentenceStream:narrow(1, i, 1)
-        qValues[i]:copy(model:forward({sentence, query, summary}))
+        pred = model:forward({sentence, query, summary})
+        if adapt then 
+            qValues[i]:copy(pred[1])
+            regValues[i]:copy(pred[2])
+        else 
+            qValues[i]:copy(pred)
+        end
 
         -- epsilon greedy strategy
         if exploreDraws[i]  <=  epsilon then
@@ -509,7 +527,11 @@ function forwardpass(query_data, query_id, model, epsilon, gamma, metric, thresh
     local summaryBatch = summaryBuffer:narrow(1, 1, streamSize)
     local queryBatch = query:view(1, querySize):expand(streamSize, querySize) 
     local input = {sentenceStream, queryBatch, summaryBatch}
-    local memory = {input, reward, actions}
+    if adapt then
+        local memory = {input, reward, actions}
+    else 
+        local memory = {input, reward, actions, }
+    end
     if use_cuda then
         local input = {sentenceStream:cuda(), queryBatch:cuda(), summaryBatch:cuda()}
         local memory = {input, reward:cuda(), actions:cuda()}
@@ -528,7 +550,7 @@ function train(inputs, query_data, model, nepochs, nnmod, metric, thresh, gamma,
                         :add(nn.MSECriterion(), 0.5)
                         :add(nn.ClassNLLCriterion())
     end
-    
+
     local SKIP = 1
     local SELECT = 2
 

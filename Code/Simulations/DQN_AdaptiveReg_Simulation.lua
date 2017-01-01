@@ -41,9 +41,9 @@ print(pred_final)
 -- pred_final = model4:forward(x)
 -- print(pred_final)
 
-nll = nn.BCECriterion()
 -- nll = nn.ClassNLLCriterion()
 -- nll = nn.CrossEntropyCriterion()
+nll = nn.BCECriterion()
 mse = nn.MSECriterion()
 pc = nn.ParallelCriterion():add(mse):add(nll)
 -- Can put in scalar if you want

@@ -25,24 +25,16 @@ edim = 10
 metric = 'f1'
 inputs = loadMetadata(datapath .. "dqn_metadata.csv")                                               
 stoplist = loadStopdata(datapath .. 'stopwordids.csv')
+adapt = true
 
 vocabSize, query_data = initialize_variables(inputs, 20, datapath, 5, 30, stoplist, thresh, use_cuda)
 
 model = buildModel('bow', vocabSize, edim, metric, true, use_cuda)
 
-if regmodel then 
-    criterion = nn.ParallelCriterion()
-                    :add(nn.MSECriterion(), 0.5)
-                    :add(nn.ClassNLLCriterion())
-end
+criterion = nn.ParallelCriterion():add(nn.MSECriterion()):add(nn.BCECriterion())
 
 local SKIP = 1
 local SELECT = 2
-
-if use_cuda then
-    criterion = criterion:cuda()
-    model = model:cuda()
-end
 
 query_randomF1 = {}
 local params, gradParams = model:getParameters()
@@ -77,13 +69,47 @@ exploreDraws:uniform(0, 1)
 summary = summaryBuffer:zero():narrow(1, 1, 1) -- summary starts empty
 
 i = 1
+
 local sentence = sentenceStream:narrow(1, i, 1)
 
-print(model:forward({sentence, query, summary}))
+predTotal = model:forward({sentence, query, summary})
+predQ = predTotal[1]
+predReg = predTotal[2]
+actions = ByteTensor(1, 2):fill(0)
+
+maskLayer = nn.MaskedSelect()
+
+if qValues[i][SKIP] > qValues[i][SELECT] then
+    actions[i][SKIP] = 1
+else
+    actions[i][SELECT] = 1
+end
+
+local predQOnActions = maskLayer:forward({predQ[i], actions[i]}) 
+
+print('predQ', predQ)
+print('predReg', predReg)
+print('actions', actions)
+print('predQonActions', predQOnActions)
+
+reward = Tensor():fill(0.23):resize(1,1)
+class = Tensor():fill(1):resize(1,1)
+
+nll = nn.BCECriterion()
+mse = nn.MSECriterion()
+pc = nn.ParallelCriterion():add(mse):add(nll)
+
+lossf = mse:forward(predQOnActions, reward)
+print('rmse', lossf)
+
+lossf = criterion:forward({predQOnActions, predReg}, {reward, class})
+local gradOutput = criterion:backward({predQOnActions, predReg}, {reward, class})
+local gradMaskLayer = maskLayer:backward({predQ[i], actions[i]}, gradOutput)
+
+model:backward({sentence, query, summary}, gradMaskLayer[1])
+print('success')
 
 -- memory, rougeRecall, rougePrecision, rougeF1, qValues = forwardpass(
 --                 query_data, query_id, model, 1, 0., 
 --                 metric, thresh, stoplist, use_cuda
 -- )
-
-
