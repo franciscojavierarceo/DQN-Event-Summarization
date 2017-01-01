@@ -231,6 +231,7 @@ function stackMemory(newinput, memory_hist, memsize, adapt, use_cuda)
     local sentMemory = torch.cat(newinput[1][1]:double(), memory_hist[1][1]:double(), 1)
     local queryMemory = torch.cat(newinput[1][2]:double(), memory_hist[1][2]:double(), 1)
     local sumryMemory = torch.cat(newinput[1][3]:double(), memory_hist[1][3]:double(), 1)
+
     if adapt then
         local rewardMemory = torch.cat(newinput[2]:double(), memory_hist[2]:double(), 1)
     else
