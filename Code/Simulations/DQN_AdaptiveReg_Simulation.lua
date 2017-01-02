@@ -1,6 +1,7 @@
 require 'nn'
 math.randomseed(3)
 torch.manualSeed(3)
+
 -- Building data
 x = torch.randn(20):resize(10, 2)
 xhat = x + 0.01 * torch.rand(20):resize(10, 2)
@@ -9,21 +10,17 @@ yhat = torch.mm(x, b)  + torch.randn(10)  -- np.dot()
 n = yhat:size(1)
 onex = torch.ones(n):resize(n, 1)
 target = torch.round(nn.Sigmoid():forward(yhat))
+
 print(target)
+
 -- This is the Logistic
 LogisticModel = nn.Sequential():add(nn.Linear(2, 1)):add(nn.LogSoftMax())
 
 -- This is the linear regression
 LinearModel = nn.Sequential():add(nn.Linear(2, 2))
 
---- Concat Table
--- model3 = nn.Parallel(2,2):add(model1):add(model2)
+--- Stacking the models together
 FullModel = nn.ConcatTable():add(LinearModel):add(LogisticModel)
--- model3 = nn.Concat(2):add(model1):add(model2)
-
--- model4 = nn.Sequential()
--- model4:add(model3)
--- model4:add(nn.SplitTable(2))
 
 print("Logistic Pred:")
 pred_log = LogisticModel:forward(x)
@@ -37,17 +34,9 @@ print("Logistic and Linear Pred:")
 pred_final = FullModel:forward(x)
 print(pred_final)
 
--- print("Joined and separated")
--- pred_final = model4:forward(x)
--- print(pred_final)
-
--- nll = nn.ClassNLLCriterion()
--- nll = nn.CrossEntropyCriterion()
 nll = nn.BCECriterion()
 mse = nn.MSECriterion()
 pc = nn.ParallelCriterion():add(mse):add(nll)
--- Can put in scalar if you want
--- pc = nn.ParallelCriterion():add(nll, 0.5):add(mse)
 
 print("NLL loss:")
 nll_loss = nll:forward(pred_log, target)
@@ -64,3 +53,34 @@ print(prl_loss)
 print("Parallel Full NLL-MSE loss:")
 prl_final = pc:forward(pred_final, {xhat, target})
 print(prl_final)
+
+actions = torch.ByteTensor(10, 2):fill(0)
+maskLayer = nn.MaskedSelect()
+
+qTotal  = FullModel:forward(x)
+qValues = qTotal[1]
+regValues = qTotal[2]
+
+maskLayer = nn.MaskedSelect()
+
+SKIP = 1
+SELECT = 2
+
+for i=1, qValues:size(1) do
+    if qValues[i][SKIP] > qValues[i][SELECT] then
+        actions[i][SKIP] = 1
+    else
+        actions[i][SELECT] = 1
+    end
+end
+
+predQOnActions = maskLayer:forward({qValues, actions})
+
+reward = torch.rand(10):resize(10, 1)
+class = torch.ones(10):resize(10, 1)
+
+gradOutput = pc:backward({predQOnActions, regValues}, {reward, class})
+gradMaskLayer = maskLayer:backward({qValues, actions}, gradOutput[1])
+
+FullModel:backward({x}, gradMaskLayer[1])
+print('success')

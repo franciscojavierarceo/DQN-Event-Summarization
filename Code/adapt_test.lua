@@ -77,8 +77,6 @@ predQ = predTotal[1]
 predReg = predTotal[2]
 actions = ByteTensor(1, 2):fill(0)
 
-maskLayer = nn.MaskedSelect()
-
 if qValues[i][SKIP] > qValues[i][SELECT] then
     actions[i][SKIP] = 1
 else
@@ -103,6 +101,8 @@ lossf = mse:forward(predQOnActions, reward)
 print('rmse', lossf)
 
 lossf = criterion:forward({predQOnActions, predReg}, {reward, class})
+
+maskLayer = nn.MaskedSelect()
 local gradOutput = criterion:backward({predQOnActions, predReg}, {reward, class})
 local gradMaskLayer = maskLayer:backward({predQ[i], actions[i]}, gradOutput)
 
