@@ -231,12 +231,7 @@ function stackMemory(newinput, memory_hist, memsize, adapt, use_cuda)
     local sentMemory = torch.cat(newinput[1][1]:double(), memory_hist[1][1]:double(), 1)
     local queryMemory = torch.cat(newinput[1][2]:double(), memory_hist[1][2]:double(), 1)
     local sumryMemory = torch.cat(newinput[1][3]:double(), memory_hist[1][3]:double(), 1)
-
-    if adapt then
-        local rewardMemory = torch.cat(newinput[2]:double(), memory_hist[2]:double(), 1)
-    else
-        local rewardMemory = torch.cat(newinput[2]:double(), memory_hist[2]:double(), 1)
-    end
+    local rewardMemory = torch.cat(newinput[2]:double(), memory_hist[2]:double(), 1)
 
     if use_cuda then 
         actionMemory = torch.cat(newinput[3]:double(), memory_hist[3]:double(), 1)
@@ -267,6 +262,55 @@ function stackMemory(newinput, memory_hist, memsize, adapt, use_cuda)
     end
     return {inputMemory, rewardMemory, actionMemory}
 end
+
+-- input  = {sentenceStream, queryBatch, summaryBatch}
+-- memory = {input, reward, actions, regValues}
+-- memory = { {sentenceStream, queryBatch, summaryBatch}, 
+            -- reward, actions, regValues}
+
+function stackMemory(newinput, memory_hist, memsize, adapt, use_cuda)
+    local sentMemory = torch.cat(newinput[1][1]:double(), memory_hist[1][1]:double(), 1)
+    local queryMemory = torch.cat(newinput[1][2]:double(), memory_hist[1][2]:double(), 1)
+    local sumryMemory = torch.cat(newinput[1][3]:double(), memory_hist[1][3]:double(), 1)
+    local rewardMemory = torch.cat(newinput[2]:double(), memory_hist[2]:double(), 1)
+
+    if adapt then
+        regMemory = torch.cat(newinput[4]:double(), memory_hist[4]:double(), 1)
+    end 
+
+    if use_cuda then 
+        actionMemory = torch.cat(newinput[3]:double(), memory_hist[3]:double(), 1)
+    else 
+        actionMemory = torch.cat(newinput[3], memory_hist[3], 1)
+    end
+    --- specifying rows to index 
+    if sentMemory:size(1) <= memsize then
+        nend = sentMemory:size(1)
+        nstart = 1
+    else 
+        nstart = math.max(memsize - sentMemory:size(1), 1)
+        nend = memsize + nstart
+    end
+    --- Selecting n last data points
+    sentMemory = sentMemory[{{nstart, nend}}]
+    queryMemory = queryMemory[{{nstart, nend}}]
+    sumryMemory = sumryMemory[{{nstart, nend}}]
+    rewardMemory = rewardMemory[{{nstart, nend}}]
+    actionMemory = actionMemory[{{nstart, nend}}]
+
+    if use_cuda then
+        inputMemory = {sentMemory:cuda(), queryMemory:cuda(), sumryMemory:cuda()}
+        rewardMemory = rewardMemory:cuda()
+        actionMemory = torch.ByteTensor(#actionMemory):copy(actionMemory):cuda()
+    end
+
+    inputMemory = {sentMemory, queryMemory, sumryMemory}
+    if adapt then
+        regMemory = regMemory[{{nstart, nend}}]
+        return {inputMemory, rewardMemory, actionMemory, regMemory}
+    end 
+    return {inputMemory, rewardMemory, actionMemory}
+end    
 
 function backPropSampled(input_memory, params, gradParams, optimParams, model, criterion, batch_size, n_backprops, use_cuda)
     local n = input_memory[1][1]:size(1)
@@ -302,40 +346,42 @@ function backPropSampled(input_memory, params, gradParams, optimParams, model, c
     return loss/n_backprops
 end
 
-function backProp(input_memory, params, gradParams, optimParams, model, criterion, batch_size, memsize, regmodel, use_cuda)
+function backProp(input_memory, params, gradParams, optimParams, model, criterion, batch_size, memsize, adapt, use_cuda)
     maskLayer = nn.MaskedSelect()
+    -- input and Actions
     local inputs = {input_memory[1], input_memory[3]}
     local rewards = input_memory[2]
     local dataloader = dl.TensorLoader(inputs, rewards)
-    if regmodel then
-        print('pass')
-        print(#rewards)
-        rewards = {rewards, torch.ones(rewards:size(1))}
-    end
+
     for k, xin, reward in dataloader:sampleiter(batch_size, memsize) do
         xinput = xin[1]
         actions_in = xin[2]
+
         if use_cuda then
             maskLayer = nn.MaskedSelect():cuda()
             actions_in = torch.CudaByteTensor(#actions_in):copy(actions_in)
         end
+
         local function feval(params)
             gradParams:zero()
-            if adapt then 
+            if adapt then
                 local predTotal = model:forward(xinput)                
-                local predQ, predReg = predTotal
+                local predQ = predTotal[1]
+                local predReg = predTotal[2]
+                local predQOnActions = maskLayer:forward({predQ, actions_in}) 
+                local ones = torch.ones(reward:size(1)):resize(reward:size(1), 1)
+                lossf = criterion:forward({predQOnActions, predReg}, {reward, ones})
+                local gradOutput = criterion:backward({predQOnActions, predReg}, {reward, ones})
+                local gradMaskLayer = maskLayer:backward({predQ, actions_in}, gradOutput[1])
+                model:backward(xinput, {gradMaskLayer[1], gradOutput[1]})
             else 
                 local predQ = model:forward(xinput)
-            end
-            local predQOnActions = maskLayer:forward({predQ, actions_in}) 
-            local lossf = criterion:forward(predQOnActions, reward)
-            local gradOutput = criterion:backward(predQOnActions, reward)
-            if adapt then
-                local gradMaskLayer = maskLayer:backward({predQ, predReg, actions_in}, gradOutput)
-            else 
+                local predQOnActions = maskLayer:forward({predQ, actions_in}) 
+                lossf = criterion:forward(predQOnActions, reward)
+                local gradOutput = criterion:backward(predQOnActions, reward)
                 local gradMaskLayer = maskLayer:backward({predQ, actions_in}, gradOutput)
+                model:backward(xinput, gradMaskLayer[1])
             end 
-            model:backward(xinput, gradMaskLayer[1])
             return lossf, gradParams
         end
      --- optim.rmsprop returns \theta, f(\theta):= loss function
@@ -438,7 +484,7 @@ function forwardpass(query_data, query_id, model, epsilon, gamma, metric, thresh
     local refSummary = query_data[query_id][11]
     local refCounts = query_data[query_id][12]
     local buffer = query_data[query_id][13]
-    local regValues = query_data[query_id][14]
+    local regValues = query_data[query_id][15]
     
     -- Have to set clear the inputs at the beginning of each scoring round
     actions:fill(0)
@@ -456,6 +502,7 @@ function forwardpass(query_data, query_id, model, epsilon, gamma, metric, thresh
     for i=1, streamSize do     -- Iterating through individual sentences
         local sentence = sentenceStream:narrow(1, i, 1)
         pred = model:forward({sentence, query, summary})
+
         if adapt then 
             qValues[i]:copy(pred[1])
             regValues[i]:copy(pred[2])
@@ -517,8 +564,8 @@ function forwardpass(query_data, query_id, model, epsilon, gamma, metric, thresh
             rouge[i + 1] = threshold(prec, thresh)
             rougeOpt[i]  = threshold(pOpt, thresh)
         end
-
     end
+
     local max, argmax = torch.max(qValues, 2)
     local reward0 = rouge:narrow(1,2, streamSize) - rouge:narrow(1,1, streamSize)
     local reward_tm1 =  rougeOpt:narrow(1,2, streamSize) - rougeOpt:narrow(1,1, streamSize)
@@ -528,28 +575,36 @@ function forwardpass(query_data, query_id, model, epsilon, gamma, metric, thresh
     local summaryBatch = summaryBuffer:narrow(1, 1, streamSize)
     local queryBatch = query:view(1, querySize):expand(streamSize, querySize) 
     local input = {sentenceStream, queryBatch, summaryBatch}
-    if adapt then
-        local memory = {input, reward, actions}
-    else 
-        local memory = {input, reward, actions, }
-    end
+
     if use_cuda then
-        local input = {sentenceStream:cuda(), queryBatch:cuda(), summaryBatch:cuda()}
-        local memory = {input, reward:cuda(), actions:cuda()}
+        if adapt then
+            local input = { 
+                            sentenceStream:cuda(), queryBatch:cuda(), 
+                            summaryBatch:cuda()
+                        }
+            memory = {input, reward:cuda(), actions:cuda(), regValues:cuda()}
+        else 
+            local input = {sentenceStream:cuda(), queryBatch:cuda(), summaryBatch:cuda()}
+            memory = {input, reward:cuda(), actions:cuda()}
+        end
+    else     
+        if adapt then
+            memory = {input, reward, actions, regValues}
+        else 
+            memory = {input, reward, actions}
+        end
     end
     --- Last ones are the total performance
     return memory, recall, prec, f1, qValues
 end
 
-function train(inputs, query_data, model, nepochs, nnmod, metric, thresh, gamma, epsilon, delta, base_explore_rate, end_baserate, mem_size, batch_size, optimParams, n_backprops, regmodel, stopwordlist, use_cuda)
+function train(inputs, query_data, model, nepochs, nnmod, metric, thresh, gamma, epsilon, delta, base_explore_rate, end_baserate, mem_size, batch_size, optimParams, n_backprops, stopwordlist, adapt, use_cuda)
     math.randomseed(420)
     torch.manualSeed(420)
     criterion = nn.MSECriterion()
 
-    if regmodel then 
-        criterion = nn.ParallelCriterion()
-                        :add(nn.MSECriterion(), 0.5)
-                        :add(nn.ClassNLLCriterion())
+    if adapt then 
+        criterion = nn.ParallelCriterion():add(nn.MSECriterion()):add(nn.BCECriterion())
     end
 
     local SKIP = 1
@@ -573,7 +628,7 @@ function train(inputs, query_data, model, nepochs, nnmod, metric, thresh, gamma,
             -- Score the queries
             memory, rougeRecall, rougePrecision, rougeF1, qValues = forwardpass(
                             query_data, query_id, model, epsilon, gamma, 
-                            metric, thresh, stopwordlist, use_cuda
+                            metric, thresh, stopwordlist, adapt, use_cuda
             )
             -- Build the memory
             if epoch == 0 then
@@ -583,10 +638,11 @@ function train(inputs, query_data, model, nepochs, nnmod, metric, thresh, gamma,
                 end
             else
                 -- fullmemory = sampleMemory(memory, fullmemory, mem_size, use_cuda)
-                fullmemory = stackMemory(memory, fullmemory, mem_size, use_cuda)
+                fullmemory = stackMemory(memory, fullmemory, mem_size, adapt, use_cuda)
             end
+            print(fullmemory)
             --- Running backprop
-            loss = backProp(fullmemory, params, gradParams, optimParams, model, criterion, batch_size, mem_size, regmodel, use_cuda)
+            loss = backProp(fullmemory, params, gradParams, optimParams, model, criterion, batch_size, mem_size, adapt, use_cuda)
             -- loss = backPropSampled(fullmemory, params, gradParams, optimParams, model, criterion, batch_size, n_backprops, use_cuda)
 
             nactions = torch.totable(memory[3]:sum(1))[1]
@@ -657,7 +713,7 @@ function trainCV(inputs, query_data, model, nepochs, nnmod, metric, thresh, gamm
                 else
                     --- By not storing the memory of the test query we won't back prop on it
                     if query_id ~= test_query then 
-                        fullmemory = stackMemory(memory, fullmemory, mem_size, use_cuda)
+                        fullmemory = stackMemory(memory, fullmemory, mem_size, adapt, use_cuda)
                         -- fullmemory = sampleMemory(memory, fullmemory, mem_size,  use_cuda)
                     end
                 end
