@@ -82,5 +82,6 @@ class = torch.ones(10):resize(10, 1)
 gradOutput = pc:backward({predQOnActions, regValues}, {reward, class})
 gradMaskLayer = maskLayer:backward({qValues, actions}, gradOutput[1])
 
-FullModel:backward({x}, gradMaskLayer[1])
-print('success')
+out = FullModel:backward(x, {gradMaskLayer[1], gradOutput[2]})
+
+print('success', out)

@@ -68,6 +68,8 @@ exploreDraws:fill(0)
 exploreDraws:uniform(0, 1)
 summary = summaryBuffer:zero():narrow(1, 1, 1) -- summary starts empty
 
+maskLayer = nn.MaskedSelect()
+
 i = 1
 
 local sentence = sentenceStream:narrow(1, i, 1)
@@ -85,28 +87,19 @@ end
 
 local predQOnActions = maskLayer:forward({predQ[i], actions[i]}) 
 
-print('predQ', predQ)
-print('predReg', predReg)
-print('actions', actions)
-print('predQonActions', predQOnActions)
-
-reward = Tensor():fill(0.23):resize(1,1)
-class = Tensor():fill(1):resize(1,1)
+reward = torch.zeros(1):fill(0.23):resize(1,1)
+class = torch.ones(1):resize(1,1)
 
 nll = nn.BCECriterion()
 mse = nn.MSECriterion()
 pc = nn.ParallelCriterion():add(mse):add(nll)
 
-lossf = mse:forward(predQOnActions, reward)
-print('rmse', lossf)
-
 lossf = criterion:forward({predQOnActions, predReg}, {reward, class})
 
-maskLayer = nn.MaskedSelect()
-local gradOutput = criterion:backward({predQOnActions, predReg}, {reward, class})
-local gradMaskLayer = maskLayer:backward({predQ[i], actions[i]}, gradOutput)
+gradOutput = criterion:backward({predQOnActions, predReg}, {reward, class})
+gradMaskLayer = maskLayer:backward({predQ, actions}, gradOutput[1])
 
-model:backward({sentence, query, summary}, gradMaskLayer[1])
+print(model:backward({sentence, query, summary}, {gradMaskLayer[1], gradOutput[1]}) )
 print('success')
 
 -- memory, rougeRecall, rougePrecision, rougeF1, qValues = forwardpass(
