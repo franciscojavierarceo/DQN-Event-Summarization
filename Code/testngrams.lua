@@ -8,7 +8,7 @@ refSummary = {2, 2, 3, 3, 1}
 -- print(genSummary, refSummary)
 recall, prec, f1 = rougeScores(genSummary, refSummary)
 
-function ngrams(dic)
+function bigrams(dic)
     local out = {}
     for i=1, #dic do 
         for j=1, #dic do

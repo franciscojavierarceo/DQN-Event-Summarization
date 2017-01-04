@@ -177,7 +177,6 @@ function backProp(input_memory, params, model, criterion, batch_size, memsize)
             local predQ = model:forward(xinput)
             local maskLayer = nn.MaskedSelect()
             local predQOnActions = maskLayer:forward({predQ, actions_in})
-
             local lossf = criterion:forward(predQOnActions, reward)
             local gradOutput = criterion:backward(predQOnActions, reward)
             local gradMaskLayer = maskLayer:backward({predQ, actions_in}, gradOutput)
