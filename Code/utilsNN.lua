@@ -369,10 +369,11 @@ function backProp(input_memory, params, gradParams, optimParams, model, criterio
                 local predQ = predTotal[1]
                 local predReg = predTotal[2]
                 local predQOnActions = maskLayer:forward({predQ, actions_in}) 
-                local ones = torch.ones(reward:size(1)):resize(reward:size(1), 1)
+                local ones = torch.ones(reward:size(1)):resize(reward:size(1))
                 lossf = criterion:forward({predQOnActions, predReg}, {reward, ones})
                 local gradOutput = criterion:backward({predQOnActions, predReg}, {reward, ones})
                 local gradMaskLayer = maskLayer:backward({predQ, actions_in}, gradOutput[1])
+                print(#gradMaskLayer[2], #gradOutput[1])
                 model:backward(xinput, {gradMaskLayer[1], gradOutput[1]})
             else 
                 local predQ = model:forward(xinput)
@@ -380,6 +381,7 @@ function backProp(input_memory, params, gradParams, optimParams, model, criterio
                 lossf = criterion:forward(predQOnActions, reward)
                 local gradOutput = criterion:backward(predQOnActions, reward)
                 local gradMaskLayer = maskLayer:backward({predQ, actions_in}, gradOutput)
+                print(#gradOutput)
                 model:backward(xinput, gradMaskLayer[1])
             end 
             return lossf, gradParams
@@ -640,7 +642,6 @@ function train(inputs, query_data, model, nepochs, nnmod, metric, thresh, gamma,
                 -- fullmemory = sampleMemory(memory, fullmemory, mem_size, use_cuda)
                 fullmemory = stackMemory(memory, fullmemory, mem_size, adapt, use_cuda)
             end
-            print(fullmemory)
             --- Running backprop
             loss = backProp(fullmemory, params, gradParams, optimParams, model, criterion, batch_size, mem_size, adapt, use_cuda)
             -- loss = backPropSampled(fullmemory, params, gradParams, optimParams, model, criterion, batch_size, n_backprops, use_cuda)
