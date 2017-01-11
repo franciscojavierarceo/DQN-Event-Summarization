@@ -369,12 +369,12 @@ function backProp(input_memory, params, gradParams, optimParams, model, criterio
                 local predQ = predTotal[1]
                 local predReg = predTotal[2]
                 local predQOnActions = maskLayer:forward({predQ, actions_in}) 
-                local ones = torch.ones(reward:size(1)):resize(reward:size(1))
+                local ones = torch.ones(predQ:size(1)):resize(predQ:size(1))
                 lossf = criterion:forward({predQOnActions, predReg}, {reward, ones})
                 local gradOutput = criterion:backward({predQOnActions, predReg}, {reward, ones})
                 local gradMaskLayer = maskLayer:backward({predQ, actions_in}, gradOutput[1])
                 print(#gradMaskLayer[2], #gradOutput[1])
-                model:backward(xinput, {gradMaskLayer[1], gradOutput[1]})
+                model:backward(xinput, {gradMaskLayer[1], gradOutput[2]})
             else 
                 local predQ = model:forward(xinput)
                 local predQOnActions = maskLayer:forward({predQ, actions_in}) 

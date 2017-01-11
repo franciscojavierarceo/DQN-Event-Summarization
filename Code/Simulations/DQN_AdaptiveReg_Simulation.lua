@@ -57,31 +57,39 @@ print(prl_final)
 actions = torch.ByteTensor(10, 2):fill(0)
 maskLayer = nn.MaskedSelect()
 
-qTotal  = FullModel:forward(x)
-qValues = qTotal[1]
-regValues = qTotal[2]
-
-maskLayer = nn.MaskedSelect()
-
-SKIP = 1
-SELECT = 2
-
-for i=1, qValues:size(1) do
-    if qValues[i][SKIP] > qValues[i][SELECT] then
-        actions[i][SKIP] = 1
-    else
-        actions[i][SELECT] = 1
-    end
-end
-
-predQOnActions = maskLayer:forward({qValues, actions})
-
 reward = torch.rand(10):resize(10, 1)
 class = torch.ones(10):resize(10, 1)
 
-gradOutput = pc:backward({predQOnActions, regValues}, {reward, class})
-gradMaskLayer = maskLayer:backward({qValues, actions}, gradOutput[1])
+params, gradParams = FullModel:getParameters()
 
-out = FullModel:backward(x, {gradMaskLayer[1], gradOutput[1]})
+for i=1, 10 do
+    predTotal  = FullModel:forward(x)
+    predQ = predTotal[1]
+    predReg = predTotal[2]
 
-print('success', out)
+    maskLayer = nn.MaskedSelect()
+
+    SKIP = 1
+    SELECT = 2
+
+    for i=1, predQ:size(1) do
+        if predQ[i][SKIP] > predQ[i][SELECT] then
+            actions[i][SKIP] = 1
+        else
+            actions[i][SELECT] = 1
+        end
+    end
+    gradParams:zero()
+    predQOnActions = maskLayer:forward({predQ, actions})
+
+    lossf = pc:forward({predQOnActions, predReg}, {reward, class})
+    gradOutput = pc:backward({predQOnActions, predReg}, {reward, class})
+    gradMaskLayer = maskLayer:backward({predQ, actions}, gradOutput[1])
+    FullModel:backward(x, {gradMaskLayer[1], gradOutput[1]})
+    FullModel:updateParameters(0.01)
+    print(i, lossf)
+end
+
+print({x, gradMaskLayer, gradOutput})
+print('success') 
+print(FullModel:backward(x, {gradMaskLayer[1], gradOutput[1]}))
