@@ -50,14 +50,12 @@ function buildModel(model, vocabSize, embeddingSize, metric, adapt, use_cuda)
                 :add(summaryLookup)
 
     if model == 'bow' then
-        nnmodel = nn.Sequential()
-                :add(pmodule)
+        predict = nn.Sequential()
                 :add(nn.JoinTable(2))
                 :add(nn.Tanh())
                 :add(nn.Linear(embeddingSize * 3, 2))
     else
-        nnmodel = nn.Sequential()
-                :add(pmodule)
+        predict = nn.Sequential()
                 :add(nn.JoinTable(2))
                 :add(nn.ReLU())
                 :add(nn.Linear(embeddingSize * 3, 2))
@@ -65,18 +63,26 @@ function buildModel(model, vocabSize, embeddingSize, metric, adapt, use_cuda)
 
     if adapt then 
         print("Using adaptive regularization")
+        local predictmodule = nn.Sequential()
+                    :add(pmodule)
+
         local regmodel = nn.Sequential()
-            :add(pmodule)
             :add(nn.JoinTable(2))
             :add(nn.Linear(embeddingSize * 3, 1))
             :add(nn.LogSigmoid())
             :add(nn.SoftMax())
 
+        local qmodel = nn.Sequential()
+            :add(nn.JoinTable(2))
+            :add(nn.Linear(embeddingSize * 3, 2))
+
         local final = nn.ConcatTable()
-            :add(nnmodel)
             :add(regmodel)
+            :add(qmodel)
 
         nnmodel = final
+        else
+            pmodule:add(predict)
     end
 
     if use_cuda then
