@@ -50,12 +50,12 @@ function buildModel(model, vocabSize, embeddingSize, metric, adapt, use_cuda)
                 :add(summaryLookup)
 
     if model == 'bow' then
-        predict = nn.Sequential()
+        nnmodel = nn.Sequential()
                 :add(nn.JoinTable(2))
                 :add(nn.Tanh())
                 :add(nn.Linear(embeddingSize * 3, 2))
     else
-        predict = nn.Sequential()
+        nnmodel = nn.Sequential()
                 :add(nn.JoinTable(2))
                 :add(nn.ReLU())
                 :add(nn.Linear(embeddingSize * 3, 2))

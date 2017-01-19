@@ -85,11 +85,11 @@ for i=1, 10 do
     lossf = pc:forward({predQOnActions, predReg}, {reward, class})
     gradOutput = pc:backward({predQOnActions, predReg}, {reward, class})
     gradMaskLayer = maskLayer:backward({predQ, actions}, gradOutput[1])
-    FullModel:backward(x, {gradMaskLayer[1], gradOutput[1]})
+    FullModel:backward(x, {gradMaskLayer[1], gradOutput[2]})
     FullModel:updateParameters(0.01)
     print(i, lossf)
 end
 
 print({x, gradMaskLayer, gradOutput})
 print('success') 
-print(FullModel:backward(x, {gradMaskLayer[1], gradOutput[1]}))
+print(FullModel:backward(x, {gradMaskLayer[1], gradOutput[2]}))
