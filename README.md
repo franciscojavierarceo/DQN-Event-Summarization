@@ -13,7 +13,7 @@ of our DQN-LSTM for Event Summarization.
 
 To run the code simply enter in the command line:
 
-    th Code/runModelProd.lua
+    th Code/runModelProd.lua --model lstm
 
 The relevant code files in the **/Code** folder are
 
