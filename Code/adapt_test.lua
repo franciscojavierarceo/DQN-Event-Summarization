@@ -4,9 +4,9 @@ require 'torch'
 require 'nn'
 require 'rnn'
 require 'csvigo'
-require 'cutorch'
-require 'cunn'
-require 'cunnx'
+-- require 'cutorch'
+-- require 'cunn'
+-- require 'cunnx'
 
 dl = require 'dataload'
 cmd = torch.CmdLine()
