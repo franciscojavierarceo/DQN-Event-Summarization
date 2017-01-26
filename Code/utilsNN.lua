@@ -379,7 +379,6 @@ function backProp(input_memory, params, gradParams, optimParams, model, criterio
                 lossf = criterion:forward({predQOnActions, predReg}, {reward, ones})
                 local gradOutput = criterion:backward({predQOnActions, predReg}, {reward, ones})
                 local gradMaskLayer = maskLayer:backward({predQ, actions_in}, gradOutput[1])
-                print(#gradMaskLayer[2], #gradOutput[1])
                 model:backward(xinput, {gradMaskLayer[1], gradOutput[2]})
             else 
                 local predQ = model:forward(xinput)
@@ -387,7 +386,6 @@ function backProp(input_memory, params, gradParams, optimParams, model, criterio
                 lossf = criterion:forward(predQOnActions, reward)
                 local gradOutput = criterion:backward(predQOnActions, reward)
                 local gradMaskLayer = maskLayer:backward({predQ, actions_in}, gradOutput)
-                print(#gradOutput)
                 model:backward(xinput, gradMaskLayer[1])
             end 
             return lossf, gradParams
