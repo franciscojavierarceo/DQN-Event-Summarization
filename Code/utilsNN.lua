@@ -64,16 +64,23 @@ function buildModel(model, vocabSize, embeddingSize, metric, adapt, use_cuda)
     end
 
     if adapt then 
-        local regmodel = nn.Sequential()
-            :add(pmodule)
-            :add(nn.JoinTable(2))
+        print("Adaptive regularization")
+        local logmod = nn.Sequential()
             :add(nn.Linear(embeddingSize * 3, 1))
             :add(nn.LogSigmoid())
             :add(nn.SoftMax())
 
-        local final = nn.ConcatTable()
-            :add(regmodel)
-            :add(nnmodel)
+        local regmod = nn.Sequential()
+            :add(nn.Linear(embeddingSize * 3, 2))
+
+        local fullmod = nn.ConcatTable()
+            :add(regmod)
+            :add(logmod)
+
+        local final = nn.Sequential()
+            :add(pmodule)
+            :add(nn.JoinTable(2))
+            :add(fullmod)
 
         nnmodel = final
     end

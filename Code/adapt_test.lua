@@ -98,4 +98,4 @@ gradMaskLayer = maskLayer:backward({predQ, actions_in}, gradOutput[1] )
 
 print({xinput, gradMaskLayer, gradOutput})
 
-print(model:backward(xinput, {gradMaskLayer[1], gradOutput[1]} ))
+print(model:backward(xinput, {gradMaskLayer[1], gradOutput[2]} ))
