@@ -95,8 +95,8 @@ end
 
 
 function runSimulation(n, n_s, q, k, a, b, embDim)
-    local SELECT = 2
     local SKIP = 1
+    local SELECT = 2
     -- Simulating streams and queries
     queries = genNbyK(n, q, a, b)
     -- Note that the sentences are batched by sentence index so sentences[1] is the first sentence of each article
@@ -116,7 +116,8 @@ function runSimulation(n, n_s, q, k, a, b, embDim)
     end
     model = buildModel('bow', b, embDim, 'f1', false, false)
     preds = model:forward({sentences[1], queries, torch.zeros(n, q)})
-    print("predictions = ", preds)
+    print("predictions = ")
+    print(preds)
     -- Pulling the best actions
     qMax, qindx = torch.max(preds, 2)
     -- Here's the fast way to select the optimal action for each query
@@ -127,6 +128,7 @@ function runSimulation(n, n_s, q, k, a, b, embDim)
         -- it'd be great if we could skip the loop...maybe with a matrix multiplication to 
         -- wipe out all of the non-zero elements...
     predsummary = buildPredsummary(predsummary, actions, sentences[1], SELECT)
+    print("predicted summary = ")
     print(predsummary)
 end
 
