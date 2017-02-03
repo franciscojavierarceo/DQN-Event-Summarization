@@ -139,18 +139,23 @@ function runSimulation(n, n_s, q, k, a, b, embDim, npreds)
         -- it'd be great if we could skip the loop...maybe with a matrix multiplication to 
         -- wipe out all of the non-zero elements...
     nClock = os.clock()
-    for i = 1, npreds do
-        -- predsummary = buildPredsummaryFast(predsummary, actions, sentences[1], SELECT)
-        predsummary = buildPredsummary(predsummary, actions, sentences[1], SELECT)
+    totalpredsummary = {}
+    for i = 1, #sentences do
+        -- This one saves quite a bit of time...from ~0.16 seconds vs 3.34 seconds...21x faster
+        predsummary = buildPredsummaryFast(predsummary, actions, sentences[i], SELECT)
+        totalpredsummary[i] = predsummary
+         -- totalpredsummary[i] = buildPredsummary(totalpredsummary[i], actions, sentences[1], SELECT)
     end
-    print("Elapsed time: " , (os.clock()-nClock) )
+    print(string.format("Elapsed time: %.5f" % (os.clock()-nClock) ))
+
     -- print("predicted summary = ")
     -- print(predsummary)
 
 end
 
 -- Setting parameters
-local n = 100000
+-- local n = 100000 -- this one is to reproduce the speed numbers
+local n = 100
 local n_s = 5
 local k = 7
 local q = 5
@@ -158,4 +163,5 @@ local a = 1
 local b = 100
 local embDim = 50
 local npreds = 10
+
 runSimulation(n, n_s, q, k, a, b, embDim, npreds)
