@@ -1,3 +1,4 @@
+require 'os'
 require 'nn'
 require 'rnn'
 
@@ -93,8 +94,18 @@ function buildPredsummary(summary, chosenactions, inputsentences, select_index)
     return summary
 end
 
+function buildPredsummaryFast(summary, chosenactions, inputsentences, select_index)
+    n = inputsentences:size(1)
+    k = inputsentences:size(2)
+    if summary == nil then
+        summary = torch.zeros(inputsentences:size())
+    end
+    actionmatrix = chosenactions:select(2, select_index):clone():resize(n, 1):view(n, 1):expand(n, k):clone()
+--     actionmatrix = chosenactions:select(2, select_index):resize(1, n):view(n, 1):expand(n, k):clone()
+    return actionmatrix:cmul(inputsentences:double())
+end
 
-function runSimulation(n, n_s, q, k, a, b, embDim)
+function runSimulation(n, n_s, q, k, a, b, embDim, npreds)
     local SKIP = 1
     local SELECT = 2
     -- Simulating streams and queries
@@ -116,8 +127,8 @@ function runSimulation(n, n_s, q, k, a, b, embDim)
     end
     model = buildModel('bow', b, embDim, 'f1', false, false)
     preds = model:forward({sentences[1], queries, torch.zeros(n, q)})
-    print("predictions = ")
-    print(preds)
+    -- print("predictions = ")
+    -- print(preds)
     -- Pulling the best actions
     qMax, qindx = torch.max(preds, 2)
     -- Here's the fast way to select the optimal action for each query
@@ -127,20 +138,24 @@ function runSimulation(n, n_s, q, k, a, b, embDim)
         -- This is what I'd like to optimize further, right now it's a for loop
         -- it'd be great if we could skip the loop...maybe with a matrix multiplication to 
         -- wipe out all of the non-zero elements...
-    predsummary = buildPredsummary(predsummary, actions, sentences[1], SELECT)
-    print("predicted summary = ")
-    print(predsummary)
+    nClock = os.clock()
+    for i = 1, npreds do
+        -- predsummary = buildPredsummaryFast(predsummary, actions, sentences[1], SELECT)
+        predsummary = buildPredsummary(predsummary, actions, sentences[1], SELECT)
+    end
+    print("Elapsed time: " , (os.clock()-nClock) )
+
+    -- print("predicted summary = ")
+    -- print(predsummary)
 end
 
 -- Setting parameters
-local n = 10
+local n = 100000
 local n_s = 5
 local k = 7
 local q = 5
 local a = 1
 local b = 100
 local embDim = 50
-
-runSimulation(n, n_s, q, k, a, b, embDim)
-
-
+local npreds = 10
+runSimulation(n, n_s, q, k, a, b, embDim, npreds)
