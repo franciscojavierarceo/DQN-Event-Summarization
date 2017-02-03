@@ -144,9 +144,9 @@ function runSimulation(n, n_s, q, k, a, b, embDim, npreds)
         predsummary = buildPredsummary(predsummary, actions, sentences[1], SELECT)
     end
     print("Elapsed time: " , (os.clock()-nClock) )
-
     -- print("predicted summary = ")
     -- print(predsummary)
+
 end
 
 -- Setting parameters
