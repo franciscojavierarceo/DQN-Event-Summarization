@@ -105,7 +105,7 @@ function buildPredsummaryFast(summary, chosenactions, inputsentences, select_ind
     return actionmatrix:cmul(inputsentences:double())
 end
 
-function runSimulation(n, n_s, q, k, a, b, embDim, npreds)
+function runSimulation(n, n_s, q, k, a, b, embDim, fast)
     local SKIP = 1
     local SELECT = 2
     -- Simulating streams and queries
@@ -134,34 +134,35 @@ function runSimulation(n, n_s, q, k, a, b, embDim, npreds)
     -- Here's the fast way to select the optimal action for each query
     actions = torch.zeros(n, 2):scatter(2, qindx, torch.ones(preds:size()))
     
-    -- Here's the slow way to build the predicted summary...
-        -- This is what I'd like to optimize further, right now it's a for loop
-        -- it'd be great if we could skip the loop...maybe with a matrix multiplication to 
-        -- wipe out all of the non-zero elements...
     nClock = os.clock()
     totalpredsummary = {}
     for i = 1, #sentences do
         -- This one saves quite a bit of time...from ~0.16 seconds vs 3.34 seconds...21x faster
-        predsummary = buildPredsummaryFast(predsummary, actions, sentences[i], SELECT)
+        if fast then 
+            predsummary = buildPredsummaryFast(predsummary, actions, sentences[i], SELECT)
+        else 
+            predsummary = buildPredsummary(predsummary, actions, sentences[i], SELECT)
+        end
         totalpredsummary[i] = predsummary
-         -- totalpredsummary[i] = buildPredsummary(totalpredsummary[i], actions, sentences[1], SELECT)
     end
     print(string.format("Elapsed time: %.5f" % (os.clock()-nClock) ))
 
-    -- print("predicted summary = ")
-    -- print(predsummary)
-
 end
 
--- Setting parameters
--- local n = 100000 -- this one is to reproduce the speed numbers
-local n = 100
-local n_s = 5
-local k = 7
-local q = 5
-local a = 1
-local b = 100
-local embDim = 50
-local npreds = 10
+cmd = torch.CmdLine()
 
-runSimulation(n, n_s, q, k, a, b, embDim, npreds)
+cmd:option('--fast', false, 'parameter to evaluate speed')
+cmd:option('--n_samples', 100, 'Number of queries')
+-- n_samples = 100000 will reproduce the speed numbers
+cmd:option('--n_s', 5, 'Number of sentences')
+cmd:option('--q_l', 5, 'Query length')
+cmd:option('--k', 7, 'Number of sampels to iterate over')
+cmd:option('--a', 1, 'Number of sampels to iterate over')
+cmd:option('--b', 100, 'Number of sampels to iterate over')
+cmd:option('--embDim', 100, 'Number of sampels to iterate over')
+cmd:text()
+local opt = cmd:parse(arg or {})       --- stores the commands in opt.variable (e.g., opt.model)
+
+-- Running the script
+runSimulation(opt.n_samples, opt.n_s, opt.q_l, opt.k, opt.a, opt.b, opt.embDim, opt.fast)
+
