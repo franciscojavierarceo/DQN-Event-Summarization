@@ -149,8 +149,8 @@ function runSimulation(n, n_s, q, k, a, b, embDim, fast)
 
 end
 
-cmd = torch.CmdLine()
 
+cmd = torch.CmdLine()
 cmd:option('--fast', false, 'parameter to evaluate speed')
 cmd:option('--n_samples', 100, 'Number of queries')
 -- n_samples = 100000 will reproduce the speed numbers
