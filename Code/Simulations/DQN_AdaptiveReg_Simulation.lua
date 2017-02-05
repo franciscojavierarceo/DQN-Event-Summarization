@@ -67,8 +67,6 @@ for i=1, 10 do
     predQ = predTotal[1]
     predReg = predTotal[2]
 
-    maskLayer = nn.MaskedSelect()
-
     SKIP = 1
     SELECT = 2
 
