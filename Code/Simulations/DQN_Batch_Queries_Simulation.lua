@@ -105,6 +105,20 @@ function buildPredsummaryFast(summary, chosenactions, inputsentences, select_ind
     return actionmatrix:cmul(inputsentences:double())
 end
 
+function buildTotalSummary(predsummary1, totalPredsummary)
+    nps = predsummary1:size(1)
+    n_l = totalPredsummary:size(2)
+    indices = torch.linspace(1, n_l, n_l):long() 
+    for i=1, predsummary1:size(1) do
+        if predsummary1[i]:sum() > 0 then 
+            -- Finding the largest index with a zero
+            maxindex = torch.max(indices[torch.eq(totalPredsummary[i], 0)])
+            lenx = predsummary1[i]:size(1)
+            totalPredsummary[i][{{maxindex - lenx + 1, maxindex}}]:copy(predsummary1[i])
+        end
+    end
+end
+
 function runSimulation(n, n_s, q, k, a, b, embDim, fast)
     local SKIP = 1
     local SELECT = 2
