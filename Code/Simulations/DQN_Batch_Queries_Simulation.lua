@@ -119,6 +119,37 @@ function buildTotalSummary(predsummary1, totalPredsummary)
     end
 end
 
+function buildTotalSummary(predsummary, totalPredsummary)
+    nps = predsummary:size(1)
+    n_l = totalPredsummary:size(2)
+    indices = torch.linspace(1, n_l, n_l):long() 
+    for i=1, predsummary:size(1) do
+        if predsummary[i]:sum() > 0 then 
+            maxindex = 0
+            for j = 1, totalPredsummary[i]:size(1) do 
+                if totalPredsummary[i][j] == 0 then
+                    maxindex = maxindex + 1
+                end
+            end
+            lenx = predsummary[i]:size(1)
+            totalPredsummary[i][{{maxindex - lenx + 1, maxindex}}]:copy(predsummary[i])
+        end
+    end
+end
+function buildTotalSummaryFast(predsummary, totalPredsummary)
+    nps = predsummary:size(1)
+    n_l = totalPredsummary:size(2)
+    indices = torch.linspace(1, n_l, n_l):long() 
+    for i=1, predsummary:size(1) do
+        if predsummary[i]:sum() > 0 then 
+            -- Finding the largest index with a zero
+            maxindex = torch.max(indices[torch.eq(totalPredsummary[i], 0)])
+            lenx = predsummary[i]:size(1)
+            totalPredsummary[i][{{maxindex - lenx + 1, maxindex}}]:copy(predsummary[i])
+        end
+    end
+end
+
 function runSimulation(n, n_s, q, k, a, b, embDim, fast)
     local SKIP = 1
     local SELECT = 2
@@ -150,7 +181,7 @@ function runSimulation(n, n_s, q, k, a, b, embDim, fast)
     
     nClock = os.clock()
     totalpredsummary = {}
-    for i = 1, #sentences do
+    for i = 1, n_s do
         -- This one saves quite a bit of time...from ~0.16 seconds vs 3.34 seconds...21x faster
         if fast then 
             predsummary = buildPredsummaryFast(predsummary, actions, sentences[i], SELECT)
@@ -161,6 +192,20 @@ function runSimulation(n, n_s, q, k, a, b, embDim, fast)
     end
     print(string.format("Elapsed time: %.5f" % (os.clock()-nClock) ))
 
+    nClock = os.clock()
+    totalPredsummary = torch.zeros(n, n_s * k)
+    for i=1, n_s do 
+        preds = model:forward({sentences[i], queries, torch.zeros(n, q)})
+        -- Pulling the best actions
+        qMax, qindx = torch.max(preds, 2)
+
+        -- Here's the fast way to select the optimal action for each query
+        actions = torch.zeros(n, 2):scatter(2, qindx, torch.ones(preds:size()))
+        predsummary = buildPredsummaryFast(predsummary, actions, sentences[i], SELECT)
+        buildTotalSummaryFast(predsummary, totalPredsummary)
+        -- buildTotalSummary(predsummary, totalPredsummary)
+    end
+    print(string.format("Elapsed time: %.5f" % (os.clock()-nClock) ))
 end
 
 
