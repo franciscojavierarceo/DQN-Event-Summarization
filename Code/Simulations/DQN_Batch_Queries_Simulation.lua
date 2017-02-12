@@ -241,6 +241,7 @@ function runSimulation(n, n_s, q, k, a, b, embDim, fast, nepochs, epsilon)
     lossfull = {}
     rouguef1 = {}
 
+    nClock = os.clock()
     for epoch=1, nepochs do
         for i = 1, n_s do
             --- Initializing things
@@ -319,67 +320,8 @@ function runSimulation(n, n_s, q, k, a, b, embDim, fast, nepochs, epsilon)
         epsilon = epsilon / 2.
         print( 'loss = %.6f' % lossfull[epoch] )
     end
-end
-
-
-function runSimulationOld(n, n_s, q, k, a, b, embDim, fast)
-    local SKIP = 1
-    local SELECT = 2
-    -- Simulating streams and queries
-    queries = genNbyK(n, q, a, b)
-    -- Note that the sentences are batched by sentence index so sentences[1] is the first sentence of each article
-    sentences = {}
-    for i=1, n_s do
-        sentences[i] = genNbyK(n, k, a, b)
-    end
-    -- Using this to generate the optimal actions
-    true_actions = {}
-    for i=1, n_s do 
-        ---- Simulating the data
-        trueqValues = torch.rand(n, 2)                   
-         ---- Generating the max values and getting the indices
-        qMaxtrue, qindxtrue = torch.max(trueqValues, 2) 
-        --- I want to select the qindx elements for each row
-        true_actions[i] = torch.zeros(n, 2):scatter(2, qindxtrue, torch.ones(trueqValues:size()))
-    end
-    model = buildModel('bow', b, embDim, 'f1', false, false)
-    preds = model:forward({sentences[1], queries, torch.zeros(n, q)})
-    -- print("predictions = ")
-    -- print(preds)
-    -- Pulling the best actions
-    qMax, qindx = torch.max(preds, 2)
-    -- Here's the fast way to select the optimal action for each query
-    actions = torch.zeros(n, 2):scatter(2, qindx, torch.ones(preds:size()))
-    
-    nClock = os.clock()
-    totalpredsummary = {}
-    for i = 1, n_s do
-        -- This one saves quite a bit of time...from ~0.16 seconds vs 3.34 seconds...21x faster
-        if fast then 
-            predsummary = buildPredsummaryFast(predsummary, actions, sentences[i], SELECT)
-        else 
-            predsummary = buildPredsummary(predsummary, actions, sentences[i], SELECT)
-        end
-        totalpredsummary[i] = predsummary
-    end
-    print(string.format("Elapsed time: %.5f" % (os.clock()-nClock) ))
-
-    nClock = os.clock()
-    totalPredsummary = torch.zeros(n, n_s * k)
-    for i=1, n_s do 
-        preds = model:forward({sentences[i], queries, torch.zeros(n, q)})
-        -- Pulling the best actions
-        qMax, qindx = torch.max(preds, 2)
-
-        -- Here's the fast way to select the optimal action for each query
-        actions = torch.zeros(n, 2):scatter(2, qindx, torch.ones(preds:size()))
-        predsummary = buildPredsummaryFast(predsummary, actions, sentences[i], SELECT)
-        buildTotalSummaryFast(predsummary, totalPredsummary)
-        -- buildTotalSummary(predsummary, totalPredsummary)
-    end
     print(string.format("Elapsed time: %.5f" % (os.clock()-nClock) ))
 end
-
 
 cmd = torch.CmdLine()
 cmd:option('--fast', false, 'parameter to evaluate speed')
