@@ -1,6 +1,7 @@
 require 'os'
 require 'nn'
 require 'rnn'
+require 'optim'
 
 -- Some useful functions
 function genNbyK(n, k, a, b)
@@ -81,6 +82,57 @@ function buildModel(model, vocabSize, embeddingSize, metric, adapt, use_cuda)
     return nnmodel
 end
 
+function Tokenize(inputdic)
+    --- This function tokenizes the words into a unigram dictionary
+    local out = {}
+
+    for k, v in pairs(inputdic) do
+        if out[v] == nil then
+            out[v] = 1
+        else 
+            out[v] = 1 + out[v]
+        end
+    end
+    return out
+end
+
+function rougeScores(genSummary, refSummary)
+    local genTotal = 0
+    local refTotal = 0
+    local intersection = 0
+    -- Inserting the missing keys
+    for k, genCount in pairs(genSummary) do
+        if refSummary[k] == nil then
+            refSummary[k] = 0
+        end
+    end
+    for k, refCount in pairs(refSummary) do
+        local genCount = genSummary[k]
+        if genCount == nil then 
+            genCount = 0 
+        end
+        intersection = intersection + math.min(refCount, genCount)
+        refTotal = refTotal + refCount
+        genTotal = genTotal + genCount
+    end
+
+    recall = intersection / refTotal
+    prec = intersection / genTotal
+    if refTotal == 0 then
+        recall = 0
+    end 
+    if genTotal == 0 then
+        prec = 0
+    end
+    -- tmp = {intersection, refTotal, genTotal}
+    if recall > 0 or prec > 0 then
+        f1 = (2 * recall * prec) / (recall + prec)
+    else 
+        f1 = 0
+    end
+    return recall, prec, f1
+end
+
 function buildPredsummary(summary, chosenactions, inputsentences, select_index)
     if summary == nil then
         summary = torch.zeros(inputsentences:size())
@@ -101,22 +153,9 @@ function buildPredsummaryFast(summary, chosenactions, inputsentences, select_ind
         summary = torch.zeros(inputsentences:size())
     end
     actionmatrix = chosenactions:select(2, select_index):clone():resize(n, 1):view(n, 1):expand(n, k):clone()
---     actionmatrix = chosenactions:select(2, select_index):resize(1, n):view(n, 1):expand(n, k):clone()
+    --     This line didn't work for whatever reason...gives weird indexing...
+    --     actionmatrix = chosenactions:select(2, select_index):resize(1, n):view(n, 1):expand(n, k):clone()
     return actionmatrix:cmul(inputsentences:double())
-end
-
-function buildTotalSummary(predsummary1, totalPredsummary)
-    nps = predsummary1:size(1)
-    n_l = totalPredsummary:size(2)
-    indices = torch.linspace(1, n_l, n_l):long() 
-    for i=1, predsummary1:size(1) do
-        if predsummary1[i]:sum() > 0 then 
-            -- Finding the largest index with a zero
-            maxindex = torch.max(indices[torch.eq(totalPredsummary[i], 0)])
-            lenx = predsummary1[i]:size(1)
-            totalPredsummary[i][{{maxindex - lenx + 1, maxindex}}]:copy(predsummary1[i])
-        end
-    end
 end
 
 function buildTotalSummary(predsummary, totalPredsummary)
@@ -136,6 +175,7 @@ function buildTotalSummary(predsummary, totalPredsummary)
         end
     end
 end
+
 function buildTotalSummaryFast(predsummary, totalPredsummary)
     nps = predsummary:size(1)
     n_l = totalPredsummary:size(2)
@@ -150,7 +190,139 @@ function buildTotalSummaryFast(predsummary, totalPredsummary)
     end
 end
 
-function runSimulation(n, n_s, q, k, a, b, embDim, fast)
+function runSimulation(n, n_s, q, k, a, b, embDim, fast, nepochs, epsilon)
+    local SKIP = 1
+    local SELECT = 2
+    
+    maskLayer = nn.MaskedSelect()
+    optimParams = { learningRate = 0.1 }
+
+    -- Simulating streams and queries
+    queries = genNbyK(n, q, a, b)
+
+    -- Note that the sentences are batched by sentence index so sentences[1] is the first sentence of each article
+    sentences = {}
+    for i=1, n_s do
+        sentences[i] = genNbyK(n, k, a, b)
+    end
+
+    -- Optimal predicted summary
+    trueSummary = torch.zeros(n, k * n_s)
+    -- Using this to generate the optimal actions
+    true_actions = {}
+    for i=1, n_s do 
+        ---- Simulating the data
+        trueqValues = torch.rand(n, 2)
+        
+         ---- Generating the max values and getting the indices
+        qMaxtrue, qindxtrue = torch.max(trueqValues, 2)
+        
+        --- I want to select the qindx elements for each row
+        true_actions[i] = torch.zeros(n, 2):scatter(2, qindxtrue, torch.ones(trueqValues:size()))
+        best_sentences = buildPredsummaryFast(best_sentences, true_actions[i], sentences[i], SELECT)
+        buildTotalSummaryFast(best_sentences, trueSummary)
+    end
+
+    qTokens = {}
+    for i=1, n do
+        qTokens[i] = Tokenize(trueSummary[i]:totable())
+    end
+
+    -- Building the model
+    model = buildModel('bow', b, embDim, 'f1', false, false)
+    params, gradParams = model:getParameters()
+    criterion = nn.MSECriterion()
+
+    totalPredsummary = {}
+    qValues = {}
+    qActions = {}
+    qPreds = {}
+    rewards = {}
+    lossfull = {}
+    rouguef1 = {}
+
+    for epoch=1, nepochs do
+        for i = 1, n_s do
+            --- Initializing things
+            if epoch == 1 then 
+                qPreds[i] = torch.zeros(n, 2)
+                qValues[i] = torch.zeros(n, 1) 
+                qActions[i] = torch.zeros(n, 1)
+                rewards[i] = torch.zeros(n, 1)
+                totalPredsummary[i] = torch.LongTensor(n, n_s * k):fill(0)
+            else
+                --- Reset things
+                qPreds[i]:fill(0)
+                qValues[i]:fill(0)
+                qActions[i]:fill(0)
+                rewards[i]:fill(0)
+                totalPredsummary[i]:fill(0)
+            end 
+        end
+        for i=1, n_s do
+            if torch.uniform(0, 1) <= epsilon then 
+                qPreds[i]:copy(torch.rand(n, 2))
+                -- Need to run a forward pass for the backward to work...wonky
+                ignore = model:forward({sentences[i], queries, totalPredsummary[i]})
+            else 
+                qPreds[i]:copy(model:forward({sentences[i], queries, totalPredsummary[i]}) )
+            end 
+            if fast then 
+                qMax, qindx = torch.max(qPreds[i], 2)  -- Pulling the best actions
+                -- Here's the fast way to select the optimal action for each query
+                qActions[i] = torch.zeros(n, 2):scatter(2, qindx, torch.ones(qPreds[i]:size())):clone()
+                qValues[i]:copy(qMax)
+                predsummary = buildPredsummaryFast(predsummary, qActions[i], sentences[i], SELECT)
+                buildTotalSummaryFast(predsummary, totalPredsummary[i])
+            else 
+                actions = torch.zeros(n, 2)            
+                for j=1, n do
+                    if qPreds[i][j][SELECT] > qPreds[i][j][SKIP] then
+                        qActions[i][j] = 1
+                        actions[j][SELECT] = 1
+                    else
+                        qActions[i][j] = 0
+                        actions[j][SKIP] = 1
+                    end
+                end
+                predsummary = buildPredsummary(predsummary, actions, sentences[i], SELECT)
+                buildTotalSummary(predsummary, totalPredsummary[i])       
+            end
+            for j = 1, n do
+                recall, prec, f1 = rougeScores( Tokenize(trueSummary[j]:totable()), 
+                                                Tokenize(totalPredsummary[i][j]:totable()) )
+                rewards[i][j]:fill(f1)
+            end
+            if i > 1 then
+                -- Calculating change in rougue f1
+                rewards[i]:copy(rewards[i] - rewards[i-1])
+            end
+        end
+        -- Adding back the delta for the last one
+        rouguef1[epoch] = (rewards[n_s] + rewards[ n_s - 1]):mean()
+
+        lossv = {}
+        --- This backprops through the sentences sequentially...which is fine for now
+        for i=1, n_s do
+            function feval(params)
+                gradParams:zero()
+                lossf = criterion:forward(qValues[i], rewards[i])
+                local gradOutput = criterion:backward(qValues[i], rewards[i])
+                local gradMaskLayer = maskLayer:backward({qPreds[i], qActions[i]:byte()}, gradOutput:resize(rewards[i]:size(1)))
+                model:backward({sentences[i], queries, totalPredsummary[i]}, gradMaskLayer[1] )
+                return lossf, gradParams
+            end
+            _, lossf = optim.rmsprop(feval, params, optimParams)
+            lossv[i] = lossf[1]
+        end
+        lossfull[epoch] = torch.Tensor(lossv):sum() / #lossv
+        epsilon = epsilon / 2.
+        print( 'loss = %.6f' % lossfull[epoch] )
+    end
+end
+
+
+function runSimulationOld(n, n_s, q, k, a, b, embDim, fast)
     local SKIP = 1
     local SELECT = 2
     -- Simulating streams and queries
@@ -218,10 +390,12 @@ cmd:option('--q_l', 5, 'Query length')
 cmd:option('--k', 7, 'Number of sampels to iterate over')
 cmd:option('--a', 1, 'Number of sampels to iterate over')
 cmd:option('--b', 100, 'Number of sampels to iterate over')
-cmd:option('--embDim', 100, 'Number of sampels to iterate over')
+cmd:option('--embDim', 100, 'Number of samples to iterate over')
+cmd:option('--nepochs', 100, 'Number of epochs')
+cmd:option('--epsilon', 1, 'Random sampling rate')
 cmd:text()
 local opt = cmd:parse(arg or {})       --- stores the commands in opt.variable (e.g., opt.model)
 
 -- Running the script
-runSimulation(opt.n_samples, opt.n_s, opt.q_l, opt.k, opt.a, opt.b, opt.embDim, opt.fast)
-
+runSimulation(opt.n_samples, opt.n_s, opt.q_l, opt.k, opt.a, opt.b,
+              opt.embDim, opt.fast, opt.nepochs, opt.epsilon)
