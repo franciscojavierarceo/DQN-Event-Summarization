@@ -190,7 +190,7 @@ function buildTotalSummaryFast(predsummary, totalPredsummary)
     end
 end
 
-function runSimulation(n, n_s, q, k, a, b, embDim, fast, nepochs, epsilon)
+function runSimulation(n, n_s, q, k, a, b, embDim, fast, nepochs, epsilon, print_perf)
     local SKIP = 1
     local SELECT = 2
     
@@ -248,7 +248,7 @@ function runSimulation(n, n_s, q, k, a, b, embDim, fast, nepochs, epsilon)
             if epoch == 1 then 
                 qPreds[i] = torch.zeros(n, 2)
                 qValues[i] = torch.zeros(n, 1) 
-                qActions[i] = torch.zeros(n, 1)
+                qActions[i] = torch.zeros(n, 2)
                 rewards[i] = torch.zeros(n, 1)
                 totalPredsummary[i] = torch.LongTensor(n, n_s * k):fill(0)
             else
@@ -276,18 +276,17 @@ function runSimulation(n, n_s, q, k, a, b, embDim, fast, nepochs, epsilon)
                 predsummary = buildPredsummaryFast(predsummary, qActions[i], sentences[i], SELECT)
                 buildTotalSummaryFast(predsummary, totalPredsummary[i])
             else 
-                actions = torch.zeros(n, 2)            
                 for j=1, n do
                     if qPreds[i][j][SELECT] > qPreds[i][j][SKIP] then
-                        qActions[i][j] = 1
-                        actions[j][SELECT] = 1
+                        qActions[i][j][SELECT] = 1
+                        qValues[i][j]:fill(qPreds[i][j][SELECT])
                     else
-                        qActions[i][j] = 0
-                        actions[j][SKIP] = 1
+                        qActions[i][j][SKIP] = 1
+                        qValues[i][j]:fill(qPreds[i][j][SKIP])
                     end
                 end
-                predsummary = buildPredsummary(predsummary, actions, sentences[i], SELECT)
-                buildTotalSummary(predsummary, totalPredsummary[i])       
+                predsummary = buildPredsummary(predsummary, qActions[i], sentences[i], SELECT)
+                buildTotalSummary(predsummary, totalPredsummary[i])
             end
             for j = 1, n do
                 recall, prec, f1 = rougeScores( Tokenize(trueSummary[j]:totable()), 
@@ -318,7 +317,9 @@ function runSimulation(n, n_s, q, k, a, b, embDim, fast, nepochs, epsilon)
         end
         lossfull[epoch] = torch.Tensor(lossv):sum() / #lossv
         epsilon = epsilon / 2.
-        print( 'loss = %.6f' % lossfull[epoch] )
+        if print_perf then
+            print( 'loss = %.6f' % lossfull[epoch] )
+        end
     end
     print(string.format("Elapsed time: %.5f" % (os.clock()-nClock) ))
 end
@@ -335,9 +336,10 @@ cmd:option('--b', 100, 'Number of sampels to iterate over')
 cmd:option('--embDim', 100, 'Number of samples to iterate over')
 cmd:option('--nepochs', 100, 'Number of epochs')
 cmd:option('--epsilon', 1, 'Random sampling rate')
+cmd:option('--print', false, 'print performance')
 cmd:text()
 local opt = cmd:parse(arg or {})       --- stores the commands in opt.variable (e.g., opt.model)
 
 -- Running the script
 runSimulation(opt.n_samples, opt.n_s, opt.q_l, opt.k, opt.a, opt.b,
-              opt.embDim, opt.fast, opt.nepochs, opt.epsilon)
+              opt.embDim, opt.fast, opt.nepochs, opt.epsilon, opt.print)
