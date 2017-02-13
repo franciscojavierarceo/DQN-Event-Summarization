@@ -289,7 +289,7 @@ function runSimulation(n, n_s, q, k, a, b, embDim, fast, nepochs, epsilon, print
                 buildTotalSummary(predsummary, totalPredsummary[i])
             end
             for j = 1, n do
-                recall, prec, f1 = rougeScores( Tokenize(trueSummary[j]:totable()), 
+                recall, prec, f1 = rougeScores( qTokens[j], 
                                                 Tokenize(totalPredsummary[i][j]:totable()) )
                 rewards[i][j]:fill(f1)
             end
@@ -330,9 +330,9 @@ cmd:option('--n_samples', 100, 'Number of queries')
 -- n_samples = 100000 will reproduce the speed numbers
 cmd:option('--n_s', 5, 'Number of sentences')
 cmd:option('--q_l', 5, 'Query length')
-cmd:option('--k', 7, 'Number of sampels to iterate over')
-cmd:option('--a', 1, 'Number of sampels to iterate over')
-cmd:option('--b', 100, 'Number of sampels to iterate over')
+cmd:option('--k', 7, 'Number of samples to iterate over')
+cmd:option('--a', 1, 'Number of samples to iterate over')
+cmd:option('--b', 100, 'Number of samples to iterate over')
 cmd:option('--embDim', 100, 'Number of samples to iterate over')
 cmd:option('--nepochs', 100, 'Number of epochs')
 cmd:option('--epsilon', 1, 'Random sampling rate')
