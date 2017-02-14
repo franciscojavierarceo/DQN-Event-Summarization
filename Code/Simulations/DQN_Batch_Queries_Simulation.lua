@@ -2,6 +2,7 @@ require 'os'
 require 'nn'
 require 'rnn'
 require 'optim'
+require 'parallel'
 
 -- Some useful functions
 function genNbyK(n, k, a, b)
