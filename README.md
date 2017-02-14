@@ -25,7 +25,6 @@ The relevant code files in the **/Code** folder are
 
 The files in the **/Paper** folder are related to the TeX document to create the paper.
 
-
 # License
 
 MIT
