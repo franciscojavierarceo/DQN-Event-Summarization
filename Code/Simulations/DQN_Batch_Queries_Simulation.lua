@@ -289,7 +289,7 @@ function runSimulation(n, n_s, q, k, a, b, embDim, fast, nepochs, epsilon, print
                 buildTotalSummary(predsummary, totalPredsummary[i])
             end
             for j = 1, n do
-                recall, prec, f1 = rougeScores( qTokens[j], 
+                recall, prec, f1 = rougeScores( qTokens[j],
                                                 Tokenize(totalPredsummary[i][j]:totable()) )
                 rewards[i][j]:fill(f1)
             end
@@ -343,3 +343,7 @@ local opt = cmd:parse(arg or {})       --- stores the commands in opt.variable (
 -- Running the script
 runSimulation(opt.n_samples, opt.n_s, opt.q_l, opt.k, opt.a, opt.b,
               opt.embDim, opt.fast, opt.nepochs, opt.epsilon, opt.print)
+
+
+-- Notes
+-- fix actions in 274 to not create new one each time
