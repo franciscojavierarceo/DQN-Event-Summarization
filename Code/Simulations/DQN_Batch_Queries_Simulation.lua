@@ -347,6 +347,7 @@ runSimulation(opt.n_samples, opt.n_s, opt.q_l, opt.k, opt.a, opt.b,
 
 
 -- Notes
--- fix actions in 274 to not create new one each time
--- Still have to try to optimize with a maskLay
--- 
+-- 1. fix actions in 274 to not create new one each time
+-- 2. Optimize using masklayer 
+-- 3. Parallelize rougue
+-- 4. Test on the GPU
