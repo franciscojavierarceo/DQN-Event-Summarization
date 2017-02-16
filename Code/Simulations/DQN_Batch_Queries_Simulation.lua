@@ -348,3 +348,5 @@ runSimulation(opt.n_samples, opt.n_s, opt.q_l, opt.k, opt.a, opt.b,
 
 -- Notes
 -- fix actions in 274 to not create new one each time
+-- Still have to try to optimize with a maskLay
+-- 
