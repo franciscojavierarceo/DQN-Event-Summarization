@@ -352,3 +352,4 @@ runSimulation(opt.n_samples, opt.n_s, opt.q_l, opt.k, opt.a, opt.b,
 -- 3. Parallelize rougue
 -- 4. Parallelize tokenization 
 -- 5. Test on the GPU
+
