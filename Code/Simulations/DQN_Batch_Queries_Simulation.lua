@@ -272,7 +272,8 @@ function runSimulation(n, n_s, q, k, a, b, embDim, fast, nepochs, epsilon, print
             if fast then 
                 qMax, qindx = torch.max(qPreds[i], 2)  -- Pulling the best actions
                 -- Here's the fast way to select the optimal action for each query
-                qActions[i] = torch.zeros(n, 2):scatter(2, qindx, torch.ones(qPreds[i]:size())):clone()
+                -- qActions[i] = torch.zeros(n, 2):scatter(2, qindx, torch.ones(qPreds[i]:size())):clone()
+                qActions[i]:copy(qActions[i]:scatter(2, qindx, torch.ones(qPreds[i]:size())):clone())
                 qValues[i]:copy(qMax)
                 predsummary = buildPredsummaryFast(predsummary, qActions[i], sentences[i], SELECT)
                 buildTotalSummaryFast(predsummary, totalPredsummary[i])
@@ -291,7 +292,7 @@ function runSimulation(n, n_s, q, k, a, b, embDim, fast, nepochs, epsilon, print
             end
             for j = 1, n do
                 recall, prec, f1 = rougeScores( qTokens[j],
-                                                Tokenize(totalPredsummary[i][j]:totable()) )
+                                                Tokenize(totalPredsummary[i][j]:totable()))
                 rewards[i][j]:fill(f1)
             end
             if i > 1 then
@@ -345,11 +346,9 @@ local opt = cmd:parse(arg or {})       --- stores the commands in opt.variable (
 runSimulation(opt.n_samples, opt.n_s, opt.q_l, opt.k, opt.a, opt.b,
               opt.embDim, opt.fast, opt.nepochs, opt.epsilon, opt.print)
 
-
 -- Notes
 -- 1. fix actions in 274 to not create new one each time
 -- 2. Optimize using masklayer 
 -- 3. Parallelize rougue
 -- 4. Parallelize tokenization 
 -- 5. Test on the GPU
-

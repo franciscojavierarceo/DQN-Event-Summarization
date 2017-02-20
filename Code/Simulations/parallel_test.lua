@@ -1,5 +1,4 @@
 require 'parallel'
-require 'torch'
 
 -- define code for workers:
 function worker()
@@ -15,7 +14,9 @@ function worker()
    while true do
       -- yield = allow parent to terminate me
       m = parallel.yield()
-      if m == 'break' then break end
+      if m == 'break' then 
+         break 
+      end
 
       -- receive data
       local t = parallel.parent:receive()
@@ -32,17 +33,18 @@ function parent()
    parallel.print('Im the parent, my ID is: ' .. parallel.id)
 
    -- fork N processes
-   parallel.nfork(4)
+   parallel.nfork(16)
 
    -- exec worker code in each process
    parallel.children:exec(worker)
 
    -- create a complex object to send to workers
-   t = {name='my variable', data=torch.randn(100,100)}
+   t = {name='my variable', data=torch.randn(100, 100)}
 
    -- transmit object to each worker
    parallel.print('transmitting object with norm: ', t.data:norm())
-   for i = 1,1000 do
+   
+   for i = 1, 2 do
       parallel.children:join()
       parallel.children:send(t)
       replies = parallel.children:receive()
