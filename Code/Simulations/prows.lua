@@ -122,7 +122,6 @@ function worker()
         if genTotal == 0 then
             prec = 0
         end
-        -- tmp = {intersection, refTotal, genTotal}
         if recall > 0 or prec > 0 then
             f1 = (2 * recall * prec) / (recall + prec)
         else 
@@ -131,27 +130,28 @@ function worker()
         return recall, prec, f1
     end
 
-    nforks = 10 
-
     while true do
         m = parallel.yield() -- yield = allow parent to terminate me
         if m == 'break' then 
             break 
         end
         input = parallel.parent:receive()  -- receive data
-        -- nforks = input.data[3]
+        nforks = input.data[3]
         chunksize = math.floor(input.data[1]:size(1) / nforks)
-        start_index = chunksize * (parallel.id-1) + 1
+        start_index = chunksize * (parallel.id - 1) + 1
         end_index = chunksize * parallel.id
         -- Prints the indices and shows that it's working
-        -- print(parallel.id, start_index, end_index, t.data[{{start_index, end_index}}]:size(1))
-        data_ss = input.data[1][{{start_index, end_index}}]
-        true_ss = input.data[2][{{start_index, end_index}}]
+        data_ss = input.data[1][parallel.id]
+        true_ss = input.data[2][parallel.id]
+        -- print(parallel.id, start_index, end_index, nforks)
+        -- data_ss = input.data[1][{{start_index, end_index}}]
+        -- true_ss = input.data[2][{{start_index, end_index}}]
 
         perf = rougeScores(
                     buildTokenCounts(data_ss), 
                     buildTokenCounts(true_ss)
                 )
+        -- parallel.parent:send(data_ss:size(1))
         parallel.parent:send(perf)
     end
 end
@@ -168,18 +168,20 @@ function parent(input)
     -- Returns the data in order of the index
     -- print(replies)
     -- print(torch.Tensor(replies))
+    return replies
 end
 
-n = 10
+n = 150
 k = 5
-a = 0
-b = 100
+a = 1
+b = 20
 
 xs = genNbyK(n, k, a, b)
 truexs = genNbyK(n, k, a, b)
 
 nClock = os.clock()
-ok, err = pcall(parent, {xs, truexs, n})
+ok, scores_p = pcall(parent, {xs, truexs, n})
+-- print(scores_p)
 print(string.format("Parallel Elapsed time: %.5f" % (os.clock()-nClock) ))
 
 if not ok then 
@@ -189,13 +191,14 @@ end
 parallel.close()
 
 nClock = os.clock()
-scores = torch.zeros(n)
+scores_l = torch.zeros(n)
 for i=1, n do
     perf = rougeScores(
                 buildTokenCounts(xs[i]), 
                 buildTokenCounts(truexs[i])
             )
-    scores[i] = perf
+    scores_l[i] = perf
 end
--- print(scores)
+print( (torch.Tensor(scores_p) - torch.Tensor(scores_l) ):sum() )
+-- print(scores:totable())
 print(string.format("Linear Elapsed time: %.5f" % (os.clock()-nClock) ))
