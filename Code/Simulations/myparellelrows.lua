@@ -13,9 +13,12 @@ function worker()
             break 
         end
         local t = parallel.parent:receive()  -- receive data
-        parallel.parent:send(t.data[parallel.id]:norm())
+        print(parallel.id)
+        parallel.parent:send(t.data)
+
     end
 end
+
 
 function parent(input)
     parallel.nfork(10)
