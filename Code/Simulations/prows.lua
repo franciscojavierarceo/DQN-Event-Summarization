@@ -81,15 +81,19 @@ function worker()
         if m == 'break' then 
             break 
         end
-        t = parallel.parent:receive()  -- receive data
-        chunksize = math.floor(t.data:size(1) / nforks)
+        input = parallel.parent:receive()  -- receive data
+        chunksize = math.floor(input.data[1]:size(1) / nforks)
         start_index = chunksize * (parallel.id-1) + 1
         end_index = chunksize * parallel.id
         -- Prints the indices and shows that it's working
         -- print(parallel.id, start_index, end_index, t.data[{{start_index, end_index}}]:size(1))
-        data_ss = t.data[{{start_index, end_index}}]
+        data_ss = input.data[1][{{start_index, end_index}}]
+        true_ss = input.data[2][{{start_index, end_index}}]
 
-        perf = rougeScores(buildTokenCounts(data_ss), )
+        perf = rougeScores(
+                    buildTokenCounts(data_ss), 
+                    buildTokenCounts(true_ss)
+                )
         parallel.parent:send(perf)
     end
 end
@@ -111,7 +115,7 @@ xs = genNbyK(10, 5, 0, 5)
 truexs = genNbyK(10, 5, 0, 5)
 
 -- protected execution
-ok, err = pcall(parent, xs)
+ok, err = pcall(parent, {xs, truexs})
 if not ok then 
     print(err) 
 end

@@ -10,10 +10,12 @@ function worker()
     while true do
         m = parallel.yield() -- yield = allow parent to terminate me
         if m == 'break' then 
-            break 
+            break
         end
         local t = parallel.parent:receive()  -- receive data
-        parallel.parent:send(t.data[parallel.id]:norm())
+        print(parallel.id, #t.data)
+        parallel.parent:send('success')
+        -- parallel.parent:send(t.data[parallel.id]:norm())
     end
 end
 
@@ -33,7 +35,9 @@ end
 xs = torch.randn(100, 10)
 xs2 = torch.randn(100, 10)
 -- protected execution
-ok, err = pcall(parent, xs)
+ok, err = pcall(parent, {xs, xs2})
+
+-- ok, err = pcall(parent, {xs, xs2})
 if not ok then 
     print(err) 
 end
