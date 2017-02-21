@@ -1,4 +1,5 @@
 require 'parallel'
+require 'torch'
 
 -- define code for workers:
 function worker()
@@ -43,7 +44,7 @@ function parent()
 
    -- transmit object to each worker
    parallel.print('transmitting object with norm: ', t.data:norm())
-   
+
    for i = 1, 2 do
       parallel.children:join()
       parallel.children:send(t)
