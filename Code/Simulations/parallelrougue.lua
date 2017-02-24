@@ -141,15 +141,15 @@ function worker()
         start_index = chunksize * (parallel.id - 1) + 1
         end_index = chunksize * parallel.id
         -- Prints the indices and shows that it's working
-        -- data_ss = input.data[1][parallel.id]
-        -- true_ss = input.data[2][parallel.id]
+        data_ss = input.data[1][parallel.id]
+        true_ss = input.data[2][parallel.id]
         -- print(parallel.id, start_index, end_index, nforks)
-        data_ss = input.data[1][{{start_index, end_index}}]
-        true_ss = input.data[2][{{start_index, end_index}}]
+        -- data_ss = input.data[1][{{start_index, end_index}}]
+        -- true_ss = input.data[2][{{start_index, end_index}}]
 
         nd = data_ss:size(1)
         perf = torch.zeros(nd)
-        print(start_index, chunksize)
+        -- print(start_index, chunksize)
         for i=start_index, chunksize do
             perftmp = rougeScores(
                         buildTokenCounts(data_ss[i]), 
@@ -178,7 +178,7 @@ function parent(input)
     return replies
 end
 
-n = 50
+n = 16
 nforks = 16
 k = 5
 a = 1
