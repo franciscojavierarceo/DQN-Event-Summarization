@@ -13,7 +13,7 @@ function worker()
             break
         end
         local t = parallel.parent:receive()  -- receive data
-        print(parallel.id, #t.data)
+        print(parallel.id, #t.data, t.data[1])
         parallel.parent:send('success')
         -- parallel.parent:send(t.data[parallel.id]:norm())
     end
