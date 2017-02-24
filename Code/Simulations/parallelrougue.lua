@@ -171,7 +171,7 @@ function parent(input)
     return replies
 end
 
-n = 150
+n = 50
 k = 5
 a = 1
 b = 20
@@ -182,7 +182,7 @@ truexs = genNbyK(n, k, a, b)
 nClock = os.clock()
 ok, scores_p = pcall(parent, {xs, truexs, n})
 -- print(scores_p)
-print(string.format("Parallel Elapsed time: %.5f" % (os.clock()-nClock) ))
+ptime = os.clock()-nClock
 
 if not ok then 
     print(err) 
@@ -199,6 +199,13 @@ for i=1, n do
             )
     scores_l[i] = perf
 end
-print( (torch.Tensor(scores_p) - torch.Tensor(scores_l) ):sum() )
--- print(scores:totable())
-print(string.format("Linear Elapsed time: %.5f" % (os.clock()-nClock) ))
+
+-- print(scores_p)
+-- print(scores_l:totable())
+
+out = (torch.Tensor(scores_p) - torch.Tensor(scores_l) ):sum() 
+ltime = os.clock()-nClock
+
+print(string.format("Delta = %5.f" %  out ))
+print(string.format("Parallel Elapsed time: %.5f" %  ptime) )
+print(string.format("Linear Elapsed time: %.5f" % ltime ))
