@@ -141,16 +141,23 @@ function worker()
         start_index = chunksize * (parallel.id - 1) + 1
         end_index = chunksize * parallel.id
         -- Prints the indices and shows that it's working
-        data_ss = input.data[1][parallel.id]
-        true_ss = input.data[2][parallel.id]
+        -- data_ss = input.data[1][parallel.id]
+        -- true_ss = input.data[2][parallel.id]
         -- print(parallel.id, start_index, end_index, nforks)
-        -- data_ss = input.data[1][{{start_index, end_index}}]
-        -- true_ss = input.data[2][{{start_index, end_index}}]
+        data_ss = input.data[1][{{start_index, end_index}}]
+        true_ss = input.data[2][{{start_index, end_index}}]
 
-        perf = rougeScores(
-                    buildTokenCounts(data_ss), 
-                    buildTokenCounts(true_ss)
-                )
+        nd = data_ss:size(1)
+        perf = torch.zeros(nd)
+        print(start_index, chunksize)
+        for i=start_index, chunksize do
+            perftmp = rougeScores(
+                        buildTokenCounts(data_ss[i]), 
+                        buildTokenCounts(true_ss[i])
+                    )
+            perf[i] = perftmp
+        end
+
         -- parallel.parent:send(data_ss:size(1))
         parallel.parent:send(perf)
     end
@@ -172,6 +179,7 @@ function parent(input)
 end
 
 n = 50
+nforks = 16
 k = 5
 a = 1
 b = 20
@@ -180,7 +188,7 @@ xs = genNbyK(n, k, a, b)
 truexs = genNbyK(n, k, a, b)
 
 nClock = os.clock()
-ok, scores_p = pcall(parent, {xs, truexs, n})
+ok, scores_p = pcall(parent, {xs, truexs, nforks})
 -- print(scores_p)
 ptime = os.clock()-nClock
 
@@ -209,3 +217,5 @@ ltime = os.clock()-nClock
 print(string.format("Delta = %5.f" %  out ))
 print(string.format("Parallel Elapsed time: %.5f" %  ptime) )
 print(string.format("Linear Elapsed time: %.5f" % ltime ))
+print(string.format("Parallel/Linear Elapsed time: %.5f" % (ptime/ltime) ))
+
