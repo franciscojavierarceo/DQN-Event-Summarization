@@ -172,6 +172,7 @@ function buildTotalSummary(predsummary, totalPredsummary)
                 end
             end
             lenx = predsummary[i]:size(1)
+            -- totalPredsummary[i][{{maxindex - lenx + 1, maxindex}}]:copy(predsummary[i])
             totalPredsummary[i][{{maxindex - lenx + 1, maxindex}}]:copy(predsummary[i])
         end
     end
