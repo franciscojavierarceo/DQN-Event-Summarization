@@ -207,9 +207,10 @@ end
 function runSimulation(n, n_s, q, k, a, b, embDim, fast, nepochs, epsilon, print_perf)
     local SKIP = 1
     local SELECT = 2
-    
+    batch_size = 10
+    gamma = 0
     maskLayer = nn.MaskedSelect()
-    optimParams = { learningRate = 0.00001 }
+    optimParams = { learningRate = 0.0001 }
 
     -- Simulating streams and queries
     queries = genNbyK(n, q, a, b)
@@ -327,17 +328,21 @@ function runSimulation(n, n_s, q, k, a, b, embDim, fast, nepochs, epsilon, print
             sentenceMemory[{{n * (i-1) + 1, n * i}}]:copy(sentences[i])
             qPredsMemory[{{n * (i-1) + 1, n * i}}]:copy(qPreds[i])
             qValuesMemory[{{n * (i-1) + 1, n * i}}]:copy(qValues[i])
-            rewardMemory[{{n * (i-1) + 1, n * i}}]:copy(rewards[i])
             queryMemory[{{n * (i-1) + 1, n * i}}]:copy(queries)
+            if i  < n_s then
+                rewardMemory[{{n * (i-1) + 1, n * i}}]:copy(rewards[i] + gamma * rewards[i + 1] )
+            else
+                rewardMemory[{{n * (i-1) + 1, n * i}}]:copy(rewards[i] )
+            end
         end
         -- Adding back the delta for the last one
-        -- rouguef1[epoch] = (rewards[n_s] + rewards[ n_s - 1] ):mean()
-        rouguef1[epoch] = rewards[n_s]:mean()
+        rouguef1[epoch] = (rewards[n_s] + rewards[ n_s - 1] ):mean()
+        -- rouguef1[epoch] = rewards[n_s]:mean()
 
         loss = {}
         local dataloader = dl.TensorLoader({queryMemory, sentenceMemory, predSummaryMemory, qPredsMemory, qActionMemory, qValuesMemory}, rewardMemory)
         c = 1
-        for k, xin, reward in dataloader:sampleiter(10, 50) do
+        for k, xin, reward in dataloader:sampleiter(batch_size, memsize) do
             local function feval(params)
                 gradParams:zero()
                 if adapt then
@@ -367,8 +372,8 @@ function runSimulation(n, n_s, q, k, a, b, embDim, fast, nepochs, epsilon, print
         lossfull[epoch] = torch.Tensor(loss):sum() / #lossv
         if print_perf then
             print(
-                string.format('epoch = %i; rougue = %.6f; epsilon = %.6f' , 
-                    epoch, rouguef1[epoch], epsilon) 
+                string.format('epoch = %i; rougue = %.6f; epsilon = %.6f; loss = %.6f' , 
+                    epoch, rouguef1[epoch], epsilon, lossfull[epoch]) 
                 )
         end
         epsilon = epsilon - (1/10.)
