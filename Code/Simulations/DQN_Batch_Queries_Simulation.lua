@@ -185,9 +185,13 @@ function buildTotalSummaryFast(predsummary, totalPredsummary)
     for i=1, predsummary:size(1) do
         if predsummary[i]:sum() > 0 then 
             -- Finding the largest index with a zero
-            maxindex = torch.max(indices[torch.eq(totalPredsummary[i], 0)])
+            -- maxindex = torch.max(indices[torch.eq(totalPredsummary[i], 0)])
+            -- lenx = predsummary[i]:size(1)
+            -- totalPredsummary[i][{{maxindex - lenx + 1, maxindex}}]:copy(predsummary[i])
+            -- Finding the smallest index with a zero
+            minindex = torch.min(indices[torch.eq(totalPredsummary[i], 0)])
             lenx = predsummary[i]:size(1)
-            totalPredsummary[i][{{maxindex - lenx + 1, maxindex}}]:copy(predsummary[i])
+            totalPredsummary[i][{{minindex, minindex + lenx - 1}}]:copy(predsummary[i])
         end
     end
 end
