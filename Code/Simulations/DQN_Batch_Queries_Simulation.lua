@@ -207,10 +207,10 @@ end
 function runSimulation(n, n_s, q, k, a, b, embDim, fast, nepochs, epsilon, print_perf)
     local SKIP = 1
     local SELECT = 2
-    batch_size = 10
-    gamma = 0
+    batch_size = 25
+    gamma = 0.3
     maskLayer = nn.MaskedSelect()
-    optimParams = { learningRate = 0.0001 }
+    optimParams = { learningRate = 0.00001 }
 
     -- Simulating streams and queries
     queries = genNbyK(n, q, a, b)
