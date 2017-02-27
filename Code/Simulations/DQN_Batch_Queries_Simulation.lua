@@ -3,6 +3,7 @@ require 'nn'
 require 'rnn'
 require 'optim'
 require 'parallel'
+dl = require 'dataload'
 
 -- Some useful functions
 function genNbyK(n, k, a, b)
@@ -86,7 +87,6 @@ end
 function Tokenize(inputdic)
     --- This function tokenizes the words into a unigram dictionary
     local out = {}
-
     for k, v in pairs(inputdic) do
         if out[v] == nil then
             out[v] = 1
@@ -196,7 +196,7 @@ function runSimulation(n, n_s, q, k, a, b, embDim, fast, nepochs, epsilon, print
     local SELECT = 2
     
     maskLayer = nn.MaskedSelect()
-    optimParams = { learningRate = 0.1 }
+    optimParams = { learningRate = 0.01 }
 
     -- Simulating streams and queries
     queries = genNbyK(n, q, a, b)
@@ -241,6 +241,15 @@ function runSimulation(n, n_s, q, k, a, b, embDim, fast, nepochs, epsilon, print
     rewards = {}
     lossfull = {}
     rouguef1 = {}
+
+    memsize = n * n_s
+    queryMemory = torch.zeros(memsize, q)
+    qActionMemory = torch.zeros(memsize, 2)
+    predSummaryMemory = torch.zeros(memsize, n_s * k)
+    sentenceMemory = torch.zeros(memsize, k)
+    qPredsMemory = torch.zeros(memsize, 2)
+    qValuesMemory = torch.zeros(memsize, 1)
+    rewardMemory = torch.zeros(memsize, 1)
 
     nClock = os.clock()
     for epoch=1, nepochs do
@@ -299,9 +308,18 @@ function runSimulation(n, n_s, q, k, a, b, embDim, fast, nepochs, epsilon, print
                 -- Calculating change in rougue f1
                 rewards[i]:copy(rewards[i] - rewards[i-1])
             end
+            -- Update memory sequentially until it's full 
+            qActionMemory[{{n * (i-1) + 1, n * i}}]:copy(qActions[i])
+            predSummaryMemory[{{n * (i-1) + 1, n * i}}]:copy(totalPredsummary[i])
+            sentenceMemory[{{n * (i-1) + 1, n * i}}]:copy(sentences[i])
+            qPredsMemory[{{n * (i-1) + 1, n * i}}]:copy(qPreds[i])
+            qValuesMemory[{{n * (i-1) + 1, n * i}}]:copy(qValues[i])
+            rewardMemory[{{n * (i-1) + 1, n * i}}]:copy(rewards[i])
+            queryMemory[{{n * (i-1) + 1, n * i}}]:copy(queries)
         end
         -- Adding back the delta for the last one
-        rouguef1[epoch] = (rewards[n_s] + rewards[ n_s - 1]):mean()
+        -- rouguef1[epoch] = (rewards[n_s] + rewards[ n_s - 1] ):mean()
+        rouguef1[epoch] = rewards[n_s]:mean()
 
         loss = {}
         local dataloader = dl.TensorLoader({queryMemory, sentenceMemory, predSummaryMemory, qPredsMemory, qActionMemory, qValuesMemory}, rewardMemory)
@@ -334,12 +352,22 @@ function runSimulation(n, n_s, q, k, a, b, embDim, fast, nepochs, epsilon, print
         end
 
         lossfull[epoch] = torch.Tensor(loss):sum() / #lossv
-        epsilon = epsilon / 2.
         if print_perf then
-            print( 'loss = %.6f' % lossfull[epoch] )
+            print(
+                string.format('epoch = %i; rougue = %.6f; epsilon = %.6f' , 
+                    epoch, rouguef1[epoch], epsilon) 
+                )
+        end
+        epsilon = epsilon - (1/10.)
+        if epsilon < 0 then
+            epsilon = 0
         end
     end
     print(string.format("Elapsed time: %.5f" % (os.clock()-nClock) ))
+    print(
+        string.format('First rougue = %.6f; Last rougue = %.6f' , 
+            rouguef1[1], rouguef1[nepochs]) 
+        )
 end
 
 cmd = torch.CmdLine()
