@@ -303,21 +303,37 @@ function runSimulation(n, n_s, q, k, a, b, embDim, fast, nepochs, epsilon, print
         -- Adding back the delta for the last one
         rouguef1[epoch] = (rewards[n_s] + rewards[ n_s - 1]):mean()
 
-        lossv = {}
-        --- This backprops through the sentences sequentially...which is fine for now
-        for i=1, n_s do
-            function feval(params)
+        loss = {}
+        local dataloader = dl.TensorLoader({queryMemory, sentenceMemory, predSummaryMemory, qPredsMemory, qActionMemory, qValuesMemory}, rewardMemory)
+        c = 1
+        for k, xin, reward in dataloader:sampleiter(10, 50) do
+            local function feval(params)
                 gradParams:zero()
-                lossf = criterion:forward(qValues[i], rewards[i])
-                local gradOutput = criterion:backward(qValues[i], rewards[i])
-                local gradMaskLayer = maskLayer:backward({qPreds[i], qActions[i]:byte()}, gradOutput:resize(rewards[i]:size(1)))
-                model:backward({sentences[i], queries, totalPredsummary[i]}, gradMaskLayer[1] )
+                if adapt then
+                    local ignore = model:forward({queryMemory, sentenceMemory, predSummaryMemory})                
+                    local predQOnActions = maskLayer:forward({qPredsMemory, actions_in}) 
+                    local ones = torch.ones(predQ:size(1)):resize(predQ:size(1))
+                    lossf = criterion:forward({qValuesMemory, predReg}, {reward, ones})
+                    local gradOutput = criterion:backward({qActionMemory, predReg}, {reward, ones})
+                    local gradMaskLayer = maskLayer:backward({qPredsMemory, qActionMemory}, gradOutput[1])
+                    model:backward({queryMemory, sentenceMemory, predSummaryMemory}, {gradMaskLayer[1], gradOutput[2]})
+                else 
+                    local ignore = model:forward({xin[1], xin[2], xin[3]})
+                    local predQOnActions = maskLayer:forward({xin[4], xin[5]:byte()}) 
+                    lossf = criterion:forward(predQOnActions, reward)
+                    local gradOutput = criterion:backward(predQOnActions, reward)
+                    local gradMaskLayer = maskLayer:backward({xin[4], xin[5]:byte()}, gradOutput)
+                    model:backward({xin[1], xin[2], xin[3]}, gradMaskLayer[1])
+                end 
                 return lossf, gradParams
             end
-            _, lossf = optim.rmsprop(feval, params, optimParams)
-            lossv[i] = lossf[1]
+            --- optim.rmsprop returns \theta, f(\theta):= loss function
+             _, lossv  = optim.rmsprop(feval, params, optimParams)
+            loss[c] = lossv[1]
+            c = c + 1
         end
-        lossfull[epoch] = torch.Tensor(lossv):sum() / #lossv
+
+        lossfull[epoch] = torch.Tensor(loss):sum() / #lossv
         epsilon = epsilon / 2.
         if print_perf then
             print( 'loss = %.6f' % lossfull[epoch] )
@@ -353,3 +369,4 @@ runSimulation(opt.n_samples, opt.n_s, opt.q_l, opt.k, opt.a, opt.b,
 -- 4. Parallelize tokenization 
 -- 5. Test on the GPU
 -- 6. flip indices of summary
+-- 7. Deploy the model in chunks?
