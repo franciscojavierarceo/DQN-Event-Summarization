@@ -209,7 +209,7 @@ function runSimulation(n, n_s, q, k, a, b, embDim, fast, nepochs, epsilon, print
     local SELECT = 2
     
     maskLayer = nn.MaskedSelect()
-    optimParams = { learningRate = 0.01 }
+    optimParams = { learningRate = 0.00001 }
 
     -- Simulating streams and queries
     queries = genNbyK(n, q, a, b)
@@ -341,7 +341,7 @@ function runSimulation(n, n_s, q, k, a, b, embDim, fast, nepochs, epsilon, print
             local function feval(params)
                 gradParams:zero()
                 if adapt then
-                    local ignore = model:forward({queryMemory, sentenceMemory, predSummaryMemory})                
+                    local ignore = model:forward({xin[1], xin[2], xin[3]})
                     local predQOnActions = maskLayer:forward({qPredsMemory, actions_in}) 
                     local ones = torch.ones(predQ:size(1)):resize(predQ:size(1))
                     lossf = criterion:forward({qValuesMemory, predReg}, {reward, ones})
@@ -404,10 +404,6 @@ runSimulation(opt.n_samples, opt.n_s, opt.q_l, opt.k, opt.a, opt.b,
               opt.embDim, opt.fast, opt.nepochs, opt.epsilon, opt.print)
 
 -- Notes
--- 1. fix actions in 274 to not create new one each time
 -- 2. Optimize using masklayer
--- 3. Parallelize rougue
--- 4. Parallelize tokenization 
 -- 5. Test on the GPU
--- 6. flip indices of summary
 -- 7. Deploy the model in chunks?
