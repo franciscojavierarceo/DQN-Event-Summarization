@@ -88,10 +88,12 @@ function Tokenize(inputdic)
     --- This function tokenizes the words into a unigram dictionary
     local out = {}
     for k, v in pairs(inputdic) do
-        if out[v] == nil then
-            out[v] = 1
-        else 
-            out[v] = 1 + out[v]
+        if v > 0 then
+            if out[v] == nil then
+                out[v] = 1
+            else 
+                out[v] = 1 + out[v]
+            end
         end
     end
     return out
