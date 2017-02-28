@@ -88,7 +88,7 @@ function Tokenize(inputdic)
     --- This function tokenizes the words into a unigram dictionary
     local out = {}
     for k, v in pairs(inputdic) do
-        if v > 0 then
+        if v ~= 0 then
             if out[v] == nil then
                 out[v] = 1
             else 
@@ -212,7 +212,7 @@ function runSimulation(n, n_s, q, k, a, b, embDim, fast, nepochs, epsilon, print
     batch_size = 25
     gamma = 0.3
     maskLayer = nn.MaskedSelect()
-    optimParams = { learningRate = 0.00001 }
+    optimParams = { learningRate = 0.0001 }
 
     -- Simulating streams and queries
     queries = genNbyK(n, q, a, b)
@@ -297,7 +297,6 @@ function runSimulation(n, n_s, q, k, a, b, embDim, fast, nepochs, epsilon, print
             if fast then 
                 qMax, qindx = torch.max(qPreds[i], 2)  -- Pulling the best actions
                 -- Here's the fast way to select the optimal action for each query
-                -- qActions[i] = torch.zeros(n, 2):scatter(2, qindx, torch.ones(qPreds[i]:size())):clone()
                 qActions[i]:copy(qActions[i]:scatter(2, qindx, torch.ones(qPreds[i]:size())):clone())
                 qValues[i]:copy(qMax)
                 predsummary = buildPredsummaryFast(predsummary, qActions[i], sentences[i], SELECT)
@@ -375,7 +374,7 @@ function runSimulation(n, n_s, q, k, a, b, embDim, fast, nepochs, epsilon, print
         if print_perf then
             print(
                 string.format('epoch = %i; rougue = %.6f; epsilon = %.6f; loss = %.6f' , 
-                    epoch, rouguef1[epoch], epsilon, lossfull[epoch]) 
+                    epoch, rouguef1[epoch], epsilon, lossfull[epoch])
                 )
         end
         epsilon = epsilon - (1/10.)
