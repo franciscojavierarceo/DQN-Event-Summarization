@@ -88,7 +88,7 @@ function Tokenize(inputdic)
     --- This function tokenizes the words into a unigram dictionary
     local out = {}
     for k, v in pairs(inputdic) do
-        if v ~= 0 then
+        if v ~= 0 then 
             if out[v] == nil then
                 out[v] = 1
             else 
@@ -149,18 +149,15 @@ function buildPredsummary(summary, chosenactions, inputsentences, select_index)
     return summary
 end
 
-function buildPredsummaryFast(summary, chosenactions, inputsentences, select_index)
-    n = inputsentences:size(1)
-    k = inputsentences:size(2)
-    if summary == nil then
-        summary = torch.zeros(inputsentences:size())
-    end
+function buildPredsummaryFast(chosenactions, inputsentences, select_index)
+    local n = inputsentences:size(1)
+    local k = inputsentences:size(2)
+    local summary = torch.zeros(inputsentences:size())
     actionmatrix = chosenactions:select(2, select_index):clone():resize(n, 1):view(n, 1):expand(n, k):clone()
     --     This line didn't work for whatever reason...gives weird indexing...
     --     actionmatrix = chosenactions:select(2, select_index):resize(1, n):view(n, 1):expand(n, k):clone()
     return actionmatrix:cmul(inputsentences:double())
 end
-
 function buildTotalSummary(predsummary, totalPredsummary)
     nps = predsummary:size(1)
     n_l = totalPredsummary:size(2)
@@ -189,9 +186,10 @@ function buildTotalSummary(predsummary, totalPredsummary)
     end
 end
 
-function buildTotalSummaryFast(predsummary, totalPredsummary)
+function buildTotalSummaryFast(predsummary, inputTotalSummary)
+    tmpSummary = inputTotalSummary:clone()
     nps = predsummary:size(1)
-    n_l = totalPredsummary:size(2)
+    n_l = inputTotalSummary:size(2)
     indices = torch.linspace(1, n_l, n_l):long() 
     for i=1, predsummary:size(1) do
         if predsummary[i]:sum() > 0 then 
@@ -199,20 +197,21 @@ function buildTotalSummaryFast(predsummary, totalPredsummary)
             -- maxindex = torch.max(indices[torch.eq(totalPredsummary[i], 0)])
             -- totalPredsummary[i][{{maxindex - lenx + 1, maxindex}}]:copy(predsummary[i])
             -- Finding the smallest index with a zero
-            minindex = torch.min(indices[torch.eq(totalPredsummary[i], 0)])
+            minindex = torch.min(indices[torch.eq(tmpSummary[i], 0)])
             lenx = predsummary[i]:size(1)
-            totalPredsummary[i][{{minindex, minindex + lenx - 1}}]:copy(predsummary[i])
+            tmpSummary[i][{{minindex, minindex + lenx - 1}}]:copy(predsummary[i])
         end
     end
+    return tmpSummary
 end
 
 function runSimulation(n, n_s, q, k, a, b, embDim, fast, nepochs, epsilon, print_perf)
     local SKIP = 1
     local SELECT = 2
     batch_size = 25
-    gamma = 0.3
+    gamma = 0.0
     maskLayer = nn.MaskedSelect()
-    optimParams = { learningRate = 0.0001 }
+    optimParams = { learningRate = 0.00001 }
 
     -- Simulating streams and queries
     queries = genNbyK(n, q, a, b)
@@ -236,8 +235,8 @@ function runSimulation(n, n_s, q, k, a, b, embDim, fast, nepochs, epsilon, print
         
         --- I want to select the qindx elements for each row
         true_actions[i] = torch.zeros(n, 2):scatter(2, qindxtrue, torch.ones(trueqValues:size()))
-        best_sentences = buildPredsummaryFast(best_sentences, true_actions[i], sentences[i], SELECT)
-        buildTotalSummaryFast(best_sentences, trueSummary)
+        best_sentences = buildPredsummaryFast(true_actions[i], sentences[i], SELECT)
+        trueSummary = buildTotalSummaryFast(best_sentences, trueSummary)
     end
 
     qTokens = {}
@@ -258,6 +257,8 @@ function runSimulation(n, n_s, q, k, a, b, embDim, fast, nepochs, epsilon, print
     lossfull = {}
     rouguef1 = {}
 
+    totalPredsummary = torch.LongTensor(n, n_s * k):fill(0)
+
     memsize = n * n_s
     queryMemory = torch.zeros(memsize, q)
     qActionMemory = torch.zeros(memsize, 2)
@@ -267,40 +268,42 @@ function runSimulation(n, n_s, q, k, a, b, embDim, fast, nepochs, epsilon, print
     qValuesMemory = torch.zeros(memsize, 1)
     rewardMemory = torch.zeros(memsize, 1)
 
+    --- Initializing thingss
+
+    for i = 1, n_s do
+        qPreds[i] = torch.zeros(n, 2)
+        qValues[i] = torch.zeros(n, 1) 
+        qActions[i] = torch.zeros(n, 2)
+        rewards[i] = torch.zeros(n, 1)
+    end 
+
+
     nClock = os.clock()
     for epoch=1, nepochs do
-        for i = 1, n_s do
-            --- Initializing things
-            if epoch == 1 then 
-                qPreds[i] = torch.zeros(n, 2)
-                qValues[i] = torch.zeros(n, 1) 
-                qActions[i] = torch.zeros(n, 2)
-                rewards[i] = torch.zeros(n, 1)
-                totalPredsummary[i] = torch.LongTensor(n, n_s * k):fill(0)
-            else
-                --- Reset things
-                qPreds[i]:fill(0)
-                qValues[i]:fill(0)
-                qActions[i]:fill(0)
-                rewards[i]:fill(0)
-                totalPredsummary[i]:fill(0)
-            end 
+        --- Reset things at the start of each epoch
+        for i=1, n_s do
+            qPreds[i]:fill(0)
+            qValues[i]:fill(0)
+            qActions[i]:fill(0)
+            rewards[i]:fill(0)
+            totalPredsummary:fill(0)
         end
+
         for i=1, n_s do
             if torch.uniform(0, 1) <= epsilon then 
                 qPreds[i]:copy(torch.rand(n, 2))
                 -- Need to run a forward pass for the backward to work...wonky
-                ignore = model:forward({sentences[i], queries, totalPredsummary[i]})
+                ignore = model:forward({sentences[i], queries, totalPredsummary})
             else 
-                qPreds[i]:copy(model:forward({sentences[i], queries, totalPredsummary[i]}) )
+                qPreds[i]:copy(model:forward({sentences[i], queries, totalPredsummary}) )
             end 
             if fast then 
                 qMax, qindx = torch.max(qPreds[i], 2)  -- Pulling the best actions
                 -- Here's the fast way to select the optimal action for each query
                 qActions[i]:copy(qActions[i]:scatter(2, qindx, torch.ones(qPreds[i]:size())):clone())
                 qValues[i]:copy(qMax)
-                predsummary = buildPredsummaryFast(predsummary, qActions[i], sentences[i], SELECT)
-                buildTotalSummaryFast(predsummary, totalPredsummary[i])
+                predsummary = buildPredsummaryFast(qActions[i], sentences[i], SELECT)
+                totalPredsummary = buildTotalSummaryFast(predsummary, totalPredsummary)
             else 
                 for j=1, n do
                     if qPreds[i][j][SELECT] > qPreds[i][j][SKIP] then
@@ -312,11 +315,11 @@ function runSimulation(n, n_s, q, k, a, b, embDim, fast, nepochs, epsilon, print
                     end
                 end
                 predsummary = buildPredsummary(predsummary, qActions[i], sentences[i], SELECT)
-                buildTotalSummary(predsummary, totalPredsummary[i])
+                buildTotalSummary(predsummary, totalPredsummary)
             end
             for j = 1, n do
                 recall, prec, f1 = rougeScores( qTokens[j],
-                                                Tokenize(totalPredsummary[i][j]:totable()))
+                                                Tokenize(totalPredsummary[j]:totable()))
                 rewards[i][j]:fill(f1)
             end
             if i > 1 then
@@ -325,7 +328,7 @@ function runSimulation(n, n_s, q, k, a, b, embDim, fast, nepochs, epsilon, print
             end
             -- Update memory sequentially until it's full 
             qActionMemory[{{n * (i-1) + 1, n * i}}]:copy(qActions[i])
-            predSummaryMemory[{{n * (i-1) + 1, n * i}}]:copy(totalPredsummary[i])
+            predSummaryMemory[{{n * (i-1) + 1, n * i}}]:copy(totalPredsummary)
             sentenceMemory[{{n * (i-1) + 1, n * i}}]:copy(sentences[i])
             qPredsMemory[{{n * (i-1) + 1, n * i}}]:copy(qPreds[i])
             qValuesMemory[{{n * (i-1) + 1, n * i}}]:copy(qValues[i])
