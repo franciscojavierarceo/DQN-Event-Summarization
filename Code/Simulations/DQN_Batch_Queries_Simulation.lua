@@ -245,7 +245,7 @@ function runSimulation(n, n_s, q, k, a, b, embDim, fast, nepochs, epsilon, print
     end
 
     -- Building the model
-    model = buildModel('bow', b, embDim, 'f1', false, false)
+    model = buildModel('lstm', b, embDim, 'f1', false, false)
     params, gradParams = model:getParameters()
     criterion = nn.MSECriterion()
 
