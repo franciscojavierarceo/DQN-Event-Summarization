@@ -205,11 +205,11 @@ function buildTotalSummaryFast(predsummary, inputTotalSummary)
     return tmpSummary
 end
 
-function runSimulation(n, n_s, q, k, a, b, embDim, fast, nepochs, epsilon, print_perf)
+function runSimulation(n, n_s, q, k, a, b, embDim, fast, nepochs, epsilon, print_perf, usecuda)
     local SKIP = 1
     local SELECT = 2
     batch_size = 25
-    gamma = 0.0
+    gamma = 0.3
     maskLayer = nn.MaskedSelect()
     optimParams = { learningRate = 0.00001 }
 
@@ -277,6 +277,26 @@ function runSimulation(n, n_s, q, k, a, b, embDim, fast, nepochs, epsilon, print
         rewards[i] = torch.zeros(n, 1)
     end 
 
+    if usecuda then
+        for i = 1, n_s do
+            qPreds[i] = qPreds[i]:cuda()
+            qValues[i] = qValues[i]:cuda()
+            qActions[i] = qActions[i]:cuda()
+            rewards[i] = rewards[i]:cuda()
+        end 
+        LongTensor = torch.CudaLongTensor
+        ByteTensor = torch.CudaByteTensor
+        criterion = criterion:cuda()
+        model = model:cuda()
+        Tensor = torch.CudaTensor
+        print("...running on GPU")
+    else
+        torch.setnumthreads(8)
+        Tensor = torch.Tensor
+        LongTensor = torch.LongTensor
+        ByteTensor = torch.ByteTensor
+        print("...running on CPU")
+    end
 
     nClock = os.clock()
     for epoch=1, nepochs do
@@ -373,7 +393,7 @@ function runSimulation(n, n_s, q, k, a, b, embDim, fast, nepochs, epsilon, print
             c = c + 1
         end
 
-        lossfull[epoch] = torch.Tensor(loss):sum() / #lossv
+        lossfull[epoch] = Tensor(loss):sum() / #lossv
         if print_perf then
             print(
                 string.format('epoch = %i; rougue = %.6f; epsilon = %.6f; loss = %.6f' , 
@@ -387,7 +407,7 @@ function runSimulation(n, n_s, q, k, a, b, embDim, fast, nepochs, epsilon, print
     end
     print(string.format("Elapsed time: %.5f" % (os.clock()-nClock) ))
     print(
-        string.format('First rougue = %.6f; Last rougue = %.6f' , 
+        string.format('First rougue = %.6f; Last rougue = %.6f',
             rouguef1[1], rouguef1[nepochs]) 
         )
 end
@@ -405,12 +425,13 @@ cmd:option('--embDim', 100, 'Number of samples to iterate over')
 cmd:option('--nepochs', 100, 'Number of epochs')
 cmd:option('--epsilon', 1, 'Random sampling rate')
 cmd:option('--print', false, 'print performance')
+cmd:option('--usecuda', false, 'cuda option')
 cmd:text()
 local opt = cmd:parse(arg or {})       --- stores the commands in opt.variable (e.g., opt.model)
 
 -- Running the script
 runSimulation(opt.n_samples, opt.n_s, opt.q_l, opt.k, opt.a, opt.b,
-              opt.embDim, opt.fast, opt.nepochs, opt.epsilon, opt.print)
+              opt.embDim, opt.fast, opt.nepochs, opt.epsilon, opt.print, opt.usecuda)
 
 -- Notes
 -- 2. Optimize using masklayer
