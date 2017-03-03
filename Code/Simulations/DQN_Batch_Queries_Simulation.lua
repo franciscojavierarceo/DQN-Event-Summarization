@@ -1,8 +1,12 @@
 require 'os'
 require 'nn'
 require 'rnn'
+require 'cunn'
+require 'cunnx'
 require 'optim'
+require 'cutorch'
 require 'parallel'
+
 dl = require 'dataload'
 
 -- Some useful functions
@@ -158,6 +162,7 @@ function buildPredsummaryFast(chosenactions, inputsentences, select_index)
     --     actionmatrix = chosenactions:select(2, select_index):resize(1, n):view(n, 1):expand(n, k):clone()
     return actionmatrix:cmul(inputsentences:double())
 end
+
 function buildTotalSummary(predsummary, totalPredsummary)
     nps = predsummary:size(1)
     n_l = totalPredsummary:size(2)
@@ -190,9 +195,9 @@ function buildTotalSummaryFast(predsummary, inputTotalSummary)
     tmpSummary = inputTotalSummary:clone()
     nps = predsummary:size(1)
     n_l = inputTotalSummary:size(2)
-    indices = torch.linspace(1, n_l, n_l):long() 
+    indices = torch.linspace(1, n_l, n_l):long()
     for i=1, predsummary:size(1) do
-        if predsummary[i]:sum() > 0 then 
+        if predsummary[i]:sum() > 0 then
             -- Finding the largest index with a zero
             -- maxindex = torch.max(indices[torch.eq(totalPredsummary[i], 0)])
             -- totalPredsummary[i][{{maxindex - lenx + 1, maxindex}}]:copy(predsummary[i])
@@ -207,7 +212,7 @@ end
 
 function runSimulation(n, n_s, q, k, a, b, embDim, fast, nepochs, epsilon, print_perf, usecuda)
     if usecuda then
-        LongTensor = torch.CudaLongTensor
+        LongTensor = torch.CudaLongTensor   
         ByteTensor = torch.CudaByteTensor
         print("...running on GPU")
     else
@@ -217,8 +222,10 @@ function runSimulation(n, n_s, q, k, a, b, embDim, fast, nepochs, epsilon, print
         ByteTensor = torch.ByteTensor
         print("...running on CPU")
     end
+
     local SKIP = 1
     local SELECT = 2
+
     batch_size = 25
     gamma = 0.0
     maskLayer = nn.MaskedSelect()
@@ -273,12 +280,12 @@ function runSimulation(n, n_s, q, k, a, b, embDim, fast, nepochs, epsilon, print
     memsize = n * n_s
 
     queryMemory = Tensor(memsize, q):fill(0)
-    qActionMemory = torch.zeros(memsize, 2)
-    predSummaryMemory = torch.zeros(memsize, n_s * k)
-    sentenceMemory = torch.zeros(memsize, k)
-    qPredsMemory = torch.zeros(memsize, 2)
-    qValuesMemory = torch.zeros(memsize, 1)
-    rewardMemory = torch.zeros(memsize, 1)
+    qActionMemory = Tensor(memsize, 2):fill(0)
+    predSummaryMemory = Tensor(memsize, n_s * k):fill(0)
+    sentenceMemory = Tensor(memsize, k):fill(0)
+    qPredsMemory = Tensor(memsize, 2):fill(0)
+    qValuesMemory = Tensor(memsize, 1):fill(0)
+    rewardMemory = Tensor(memsize, 1):fill(0)
 
     --- Initializing thingss
     for i = 1, n_s do
@@ -289,12 +296,6 @@ function runSimulation(n, n_s, q, k, a, b, embDim, fast, nepochs, epsilon, print
     end 
 
     if usecuda then
-        for i = 1, n_s do
-            qPreds[i] = qPreds[i]:cuda()
-            qValues[i] = qValues[i]:cuda()
-            qActions[i] = qActions[i]:cuda()
-            rewards[i] = rewards[i]:cuda()
-        end 
         criterion = criterion:cuda()
         model = model:cuda()
     end
@@ -434,7 +435,8 @@ local opt = cmd:parse(arg or {})       --- stores the commands in opt.variable (
 
 -- Running the script
 runSimulation(opt.n_samples, opt.n_s, opt.q_l, opt.k, opt.a, opt.b,
-              opt.embDim, opt.fast, opt.nepochs, opt.epsilon, opt.print, opt.usecuda)
+              opt.embDim, opt.fast, opt.nepochs, opt.epsilon, opt.print, 
+              opt.usecuda)
 
 -- Notes
 -- 2. Optimize using masklayer
