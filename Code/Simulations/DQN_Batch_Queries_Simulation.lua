@@ -206,12 +206,23 @@ function buildTotalSummaryFast(predsummary, inputTotalSummary)
 end
 
 function runSimulation(n, n_s, q, k, a, b, embDim, fast, nepochs, epsilon, print_perf, usecuda)
+    if usecuda then
+        LongTensor = torch.CudaLongTensor
+        ByteTensor = torch.CudaByteTensor
+        print("...running on GPU")
+    else
+        torch.setnumthreads(8)
+        Tensor = torch.Tensor
+        LongTensor = torch.LongTensor
+        ByteTensor = torch.ByteTensor
+        print("...running on CPU")
+    end
     local SKIP = 1
     local SELECT = 2
     batch_size = 25
-    gamma = 0.3
+    gamma = 0.0
     maskLayer = nn.MaskedSelect()
-    optimParams = { learningRate = 0.00001 }
+    optimParams = { learningRate = 0.0001 }
 
     -- Simulating streams and queries
     queries = genNbyK(n, q, a, b)
@@ -223,7 +234,7 @@ function runSimulation(n, n_s, q, k, a, b, embDim, fast, nepochs, epsilon, print
     end
 
     -- Optimal predicted summary
-    trueSummary = torch.zeros(n, k * n_s)
+    trueSummary = LongTensor(n, k * n_s):fill(0)
     -- Using this to generate the optimal actions
     true_actions = {}
     for i=1, n_s do 
@@ -245,7 +256,7 @@ function runSimulation(n, n_s, q, k, a, b, embDim, fast, nepochs, epsilon, print
     end
 
     -- Building the model
-    model = buildModel('lstm', b, embDim, 'recall', false, false)
+    model = buildModel('lstm', b, embDim, 'f1', false, usecuda)
     params, gradParams = model:getParameters()
     criterion = nn.MSECriterion()
 
@@ -257,10 +268,11 @@ function runSimulation(n, n_s, q, k, a, b, embDim, fast, nepochs, epsilon, print
     lossfull = {}
     rouguef1 = {}
 
-    totalPredsummary = torch.LongTensor(n, n_s * k):fill(0)
+    totalPredsummary = LongTensor(n, n_s * k):fill(0)
 
     memsize = n * n_s
-    queryMemory = torch.zeros(memsize, q)
+
+    queryMemory = Tensor(memsize, q):fill(0)
     qActionMemory = torch.zeros(memsize, 2)
     predSummaryMemory = torch.zeros(memsize, n_s * k)
     sentenceMemory = torch.zeros(memsize, k)
@@ -269,7 +281,6 @@ function runSimulation(n, n_s, q, k, a, b, embDim, fast, nepochs, epsilon, print
     rewardMemory = torch.zeros(memsize, 1)
 
     --- Initializing thingss
-
     for i = 1, n_s do
         qPreds[i] = torch.zeros(n, 2)
         qValues[i] = torch.zeros(n, 1) 
@@ -284,18 +295,8 @@ function runSimulation(n, n_s, q, k, a, b, embDim, fast, nepochs, epsilon, print
             qActions[i] = qActions[i]:cuda()
             rewards[i] = rewards[i]:cuda()
         end 
-        LongTensor = torch.CudaLongTensor
-        ByteTensor = torch.CudaByteTensor
         criterion = criterion:cuda()
         model = model:cuda()
-        Tensor = torch.CudaTensor
-        print("...running on GPU")
-    else
-        torch.setnumthreads(8)
-        Tensor = torch.Tensor
-        LongTensor = torch.LongTensor
-        ByteTensor = torch.ByteTensor
-        print("...running on CPU")
     end
 
     nClock = os.clock()
@@ -353,11 +354,13 @@ function runSimulation(n, n_s, q, k, a, b, embDim, fast, nepochs, epsilon, print
             qPredsMemory[{{n * (i-1) + 1, n * i}}]:copy(qPreds[i])
             qValuesMemory[{{n * (i-1) + 1, n * i}}]:copy(qValues[i])
             queryMemory[{{n * (i-1) + 1, n * i}}]:copy(queries)
+
             if i  < n_s then
                 rewardMemory[{{n * (i-1) + 1, n * i}}]:copy(rewards[i] + gamma * rewards[i + 1] )
             else
                 rewardMemory[{{n * (i-1) + 1, n * i}}]:copy(rewards[i] )
             end
+
         end
         -- Adding back the delta for the last one
         rouguef1[epoch] = (rewards[n_s] + rewards[ n_s - 1] ):mean()
