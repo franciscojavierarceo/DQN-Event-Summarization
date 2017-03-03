@@ -191,11 +191,14 @@ function buildTotalSummary(predsummary, totalPredsummary)
     end
 end
 
-function buildTotalSummaryFast(predsummary, inputTotalSummary)
+function buildTotalSummaryFast(predsummary, inputTotalSummary, usecuda)
     tmpSummary = inputTotalSummary:clone()
     nps = predsummary:size(1)
-    n_l = inputTotalSummary:size(2)
+    n_l = inputTotalSummary:size(2)    
     indices = torch.linspace(1, n_l, n_l):long()
+    if usecuda then
+        indices = indices:cuda()
+    end
     for i=1, predsummary:size(1) do
         if predsummary[i]:sum() > 0 then
             -- Finding the largest index with a zero
@@ -212,10 +215,13 @@ end
 
 function runSimulation(n, n_s, q, k, a, b, embDim, fast, nepochs, epsilon, print_perf, usecuda)
     if usecuda then
+        Tensor = torch.CudaTensor
         LongTensor = torch.CudaLongTensor   
         ByteTensor = torch.CudaByteTensor
+        maskLayer = nn.MaskedSelect():cuda()
         print("...running on GPU")
     else
+        maskLayer = nn.MaskedSelect()
         torch.setnumthreads(8)
         Tensor = torch.Tensor
         LongTensor = torch.LongTensor
@@ -228,7 +234,6 @@ function runSimulation(n, n_s, q, k, a, b, embDim, fast, nepochs, epsilon, print
 
     batch_size = 25
     gamma = 0.0
-    maskLayer = nn.MaskedSelect()
     optimParams = { learningRate = 0.0001 }
 
     -- Simulating streams and queries
@@ -242,6 +247,7 @@ function runSimulation(n, n_s, q, k, a, b, embDim, fast, nepochs, epsilon, print
 
     -- Optimal predicted summary
     trueSummary = LongTensor(n, k * n_s):fill(0)
+
     -- Using this to generate the optimal actions
     true_actions = {}
     for i=1, n_s do 
@@ -254,7 +260,7 @@ function runSimulation(n, n_s, q, k, a, b, embDim, fast, nepochs, epsilon, print
         --- I want to select the qindx elements for each row
         true_actions[i] = torch.zeros(n, 2):scatter(2, qindxtrue, torch.ones(trueqValues:size()))
         best_sentences = buildPredsummaryFast(true_actions[i], sentences[i], SELECT)
-        trueSummary = buildTotalSummaryFast(best_sentences, trueSummary)
+        trueSummary = buildTotalSummaryFast(best_sentences, trueSummary, usecuda)
     end
 
     qTokens = {}
@@ -325,7 +331,7 @@ function runSimulation(n, n_s, q, k, a, b, embDim, fast, nepochs, epsilon, print
                 qActions[i]:copy(qActions[i]:scatter(2, qindx, torch.ones(qPreds[i]:size())):clone())
                 qValues[i]:copy(qMax)
                 predsummary = buildPredsummaryFast(qActions[i], sentences[i], SELECT)
-                totalPredsummary = buildTotalSummaryFast(predsummary, totalPredsummary)
+                totalPredsummary = buildTotalSummaryFast(predsummary, totalPredsummary, usecuda)
             else 
                 for j=1, n do
                     if qPreds[i][j][SELECT] > qPreds[i][j][SKIP] then
@@ -383,10 +389,10 @@ function runSimulation(n, n_s, q, k, a, b, embDim, fast, nepochs, epsilon, print
                     model:backward({queryMemory, sentenceMemory, predSummaryMemory}, {gradMaskLayer[1], gradOutput[2]})
                 else 
                     local ignore = model:forward({xin[1], xin[2], xin[3]})
-                    local predQOnActions = maskLayer:forward({xin[4], xin[5]:byte()}) 
+                    local predQOnActions = maskLayer:forward({xin[4]:double(), xin[5]:byte()}) 
                     lossf = criterion:forward(predQOnActions, reward)
                     local gradOutput = criterion:backward(predQOnActions, reward)
-                    local gradMaskLayer = maskLayer:backward({xin[4], xin[5]:byte()}, gradOutput)
+                    local gradMaskLayer = maskLayer:backward({xin[4]:double(), xin[5]:byte()}, gradOutput:double())
                     model:backward({xin[1], xin[2], xin[3]}, gradMaskLayer[1])
                 end 
                 return lossf, gradParams
