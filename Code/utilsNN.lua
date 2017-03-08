@@ -647,7 +647,7 @@ function train(inputs, query_data, model, nepochs, nnmod, metric, thresh, gamma,
                 fullmemory = stackMemory(memory, fullmemory, mem_size, adapt, use_cuda)
             end
             --- Running backprop
-            loss = backProp(fullmemory, params, gradParams, optimParams, model, criterion, batch_size, mem_size, adapt, use_cuda)
+                loss = backProp(fullmemory, params, gradParams, optimParams, model, criterion, batch_size, mem_size, adapt, use_cuda)
             -- loss = backPropSampled(fullmemory, params, gradParams, optimParams, model, criterion, batch_size, n_backprops, use_cuda)
 
             nactions = torch.totable(memory[3]:sum(1))[1]

@@ -361,13 +361,13 @@ function runSimulation(n, n_s, q, k, a, b, embDim, fast, nepochs, epsilon, print
             qPredsMemory[{{n * (i-1) + 1, n * i}}]:copy(qPreds[i])
             qValuesMemory[{{n * (i-1) + 1, n * i}}]:copy(qValues[i])
             queryMemory[{{n * (i-1) + 1, n * i}}]:copy(queries)
-
+        end
+        for i=1, n_s do
             if i  < n_s then
                 rewardMemory[{{n * (i-1) + 1, n * i}}]:copy(rewards[i] + gamma * rewards[i + 1] )
             else
                 rewardMemory[{{n * (i-1) + 1, n * i}}]:copy(rewards[i] )
             end
-
         end
         -- Adding back the delta for the last one
         rouguef1[epoch] = (rewards[n_s] + rewards[ n_s - 1] ):mean()
