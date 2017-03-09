@@ -448,3 +448,4 @@ runSimulation(opt.n_samples, opt.n_s, opt.q_l, opt.k, opt.a, opt.b,
 -- 2. Optimize using masklayer
 -- 5. Test on the GPU
 -- 7. Deploy the model in chunks?
+-- 8. need to fix the inserting of the memory
