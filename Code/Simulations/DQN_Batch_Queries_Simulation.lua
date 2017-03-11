@@ -381,17 +381,29 @@ function runSimulation(n, n_s, q, k, a, b, learning_rate, embDim, gamma, batch_s
         else 
             memrows = curr_memsize
         end
-        local dataloader = dl.TensorLoader({
-                    queryMemory[{{1, memrows}}], 
-                    sentenceMemory[{{1, memrows}}], 
-                    predSummaryMemory[{{1, memrows}}], 
-                    qPredsMemory[{{1, memrows}}], 
-                    qActionMemory[{{1, memrows}}], 
-                    qValuesMemory[{{1, memrows}}]
-                    }, 
-                rewardMemory[{{1, memrows}}]
-            )
-
+        if usecuda then 
+            local dataloader = dl.TensorLoader({
+                            queryMemory[{{1, memrows}}]:cuda(), 
+                            sentenceMemory[{{1, memrows}}]:cuda(), 
+                            predSummaryMemory[{{1, memrows}}]:cuda(),
+                            qPredsMemory[{{1, memrows}}]:cuda(), 
+                            qActionMemory[{{1, memrows}}]:cuda(), 
+                            qValuesMemory[{{1, memrows}}]:cuda()
+                            }, 
+                        rewardMemory[{{1, memrows}}]:cuda()
+                    )
+        else 
+            local dataloader = dl.TensorLoader({
+                        queryMemory[{{1, memrows}}], 
+                        sentenceMemory[{{1, memrows}}], 
+                        predSummaryMemory[{{1, memrows}}], 
+                        qPredsMemory[{{1, memrows}}], 
+                        qActionMemory[{{1, memrows}}], 
+                        qValuesMemory[{{1, memrows}}]
+                        }, 
+                    rewardMemory[{{1, memrows}}]
+                )
+        end
         loss = {}
         c = 1
         for k, xin, reward in dataloader:sampleiter(batch_size, memsize) do
