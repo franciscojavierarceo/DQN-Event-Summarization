@@ -490,5 +490,4 @@ runSimulation(opt.n_samples, opt.n_s, opt.q_l, opt.k, opt.a, opt.b, opt.lr,
 
 -- Notes
 -- 2. Optimize using masklayer
--- 5. Test on the GPU
 -- 7. Deploy the model in chunks?
