@@ -384,7 +384,6 @@ function runSimulation(n, n_s, q, k, a, b, learning_rate, embDim, gamma, batch_s
         end
         -- Adding back the delta for the last one
         rouguef1[epoch] = (rewards[n_s] + rewards[ n_s - 1] ):mean()
-        
 
         loss = {}
         if memfull then 
