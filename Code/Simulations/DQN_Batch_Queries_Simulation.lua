@@ -213,7 +213,7 @@ function buildTotalSummaryFast(predsummary, inputTotalSummary, usecuda)
     return tmpSummary
 end
 
-function runSimulation(n, n_s, q, k, a, b, embDim, fast, nepochs, epsilon, print_perf, usecuda)
+function runSimulation(n, n_s, q, k, a, b, embDim, fast, nepochs, epsilon, print_perf, mem_multiplier, usecuda)
     if usecuda then
         Tensor = torch.CudaTensor
         LongTensor = torch.CudaLongTensor   
@@ -283,7 +283,7 @@ function runSimulation(n, n_s, q, k, a, b, embDim, fast, nepochs, epsilon, print
 
     totalPredsummary = LongTensor(n, n_s * k):fill(0)
 
-    memsize = n * n_s
+    memsize = n * n_s * mem_multiplier
 
     queryMemory = Tensor(memsize, q):fill(0)
     qActionMemory = Tensor(memsize, 2):fill(0)
@@ -355,12 +355,19 @@ function runSimulation(n, n_s, q, k, a, b, embDim, fast, nepochs, epsilon, print
                 rewards[i]:copy(rewards[i] - rewards[i-1])
             end
             -- Update memory sequentially until it's full 
-            qActionMemory[{{n * (i-1) + 1, n * i}}]:copy(qActions[i])
-            predSummaryMemory[{{n * (i-1) + 1, n * i}}]:copy(totalPredsummary)
-            sentenceMemory[{{n * (i-1) + 1, n * i}}]:copy(sentences[i])
-            qPredsMemory[{{n * (i-1) + 1, n * i}}]:copy(qPreds[i])
-            qValuesMemory[{{n * (i-1) + 1, n * i}}]:copy(qValues[i])
-            queryMemory[{{n * (i-1) + 1, n * i}}]:copy(queries)
+                -- so we can index it x[{{1, n}}]
+                -- then we 
+            if (epoch * i * n) <= memsize then
+                start_row = ( n * (i-1) + 1 ) * epoch
+                end_row =  n * i * epoch
+                print(start_row, end_row, memsize)
+                qActionMemory[{{start_row, end_row}}]:copy(qActions[i])
+                predSummaryMemory[{{start_row, end_row}}]:copy(totalPredsummary)
+                sentenceMemory[{{start_row, end_row}}]:copy(sentences[i])
+                qPredsMemory[{{start_row, end_row}}]:copy(qPreds[i])
+                qValuesMemory[{{start_row, end_row}}]:copy(qValues[i])
+                queryMemory[{{start_row, end_row}}]:copy(queries)
+            end
         end
         for i=1, n_s do
             if i  < n_s then
@@ -371,10 +378,18 @@ function runSimulation(n, n_s, q, k, a, b, embDim, fast, nepochs, epsilon, print
         end
         -- Adding back the delta for the last one
         rouguef1[epoch] = (rewards[n_s] + rewards[ n_s - 1] ):mean()
-        -- rouguef1[epoch] = rewards[n_s]:mean()
+        
 
         loss = {}
-        local dataloader = dl.TensorLoader({queryMemory, sentenceMemory, predSummaryMemory, qPredsMemory, qActionMemory, qValuesMemory}, rewardMemory)
+        local dataloader = dl.TensorLoader({
+                            queryMemory[{{1, end_row}}], 
+                            sentenceMemory[{{1, end_row}}], 
+                            predSummaryMemory[{{1, end_row}}], 
+                            qPredsMemory[{{1, end_row}}], 
+                            qActionMemory[{{1, end_row}}], 
+                            qValuesMemory[{{1, end_row}}]
+                            }, 
+                            rewardMemory[{{1, end_row}}])
         c = 1
         for k, xin, reward in dataloader:sampleiter(batch_size, memsize) do
             local function feval(params)
@@ -390,6 +405,7 @@ function runSimulation(n, n_s, q, k, a, b, embDim, fast, nepochs, epsilon, print
                 else 
                     local ignore = model:forward({xin[1], xin[2], xin[3]})
                     local predQOnActions = maskLayer:forward({xin[4]:double(), xin[5]:byte()}) 
+                    print(predQOnActions)
                     lossf = criterion:forward(predQOnActions, reward)
                     local gradOutput = criterion:backward(predQOnActions, reward)
                     local gradMaskLayer = maskLayer:backward({xin[4]:double(), xin[5]:byte()}, gradOutput:double())
@@ -432,17 +448,19 @@ cmd:option('--k', 7, 'Number of samples to iterate over')
 cmd:option('--a', 1, 'Number of samples to iterate over')
 cmd:option('--b', 100, 'Number of samples to iterate over')
 cmd:option('--embDim', 100, 'Number of samples to iterate over')
+cmd:option('--memory_multiplier', 1, 'Multiplier defining size of memory')
 cmd:option('--nepochs', 100, 'Number of epochs')
 cmd:option('--epsilon', 1, 'Random sampling rate')
 cmd:option('--print', false, 'print performance')
 cmd:option('--usecuda', false, 'cuda option')
+
 cmd:text()
 local opt = cmd:parse(arg or {})       --- stores the commands in opt.variable (e.g., opt.model)
 
 -- Running the script
 runSimulation(opt.n_samples, opt.n_s, opt.q_l, opt.k, opt.a, opt.b,
               opt.embDim, opt.fast, opt.nepochs, opt.epsilon, opt.print, 
-              opt.usecuda)
+              opt.memory_multiplier, opt.usecuda)
 
 -- Notes
 -- 2. Optimize using masklayer
