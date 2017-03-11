@@ -395,7 +395,7 @@ function runSimulation(n, n_s, q, k, a, b, learning_rate, embDim, gamma, batch_s
         local dataloader = dl.TensorLoader({
                     queryMemory[{{1, memrows}}], 
                     sentenceMemory[{{1, memrows}}], 
-                    predSummaryMemory[{{1, end_row}}], 
+                    predSummaryMemory[{{1, memrows}}], 
                     qPredsMemory[{{1, memrows}}], 
                     qActionMemory[{{1, memrows}}], 
                     qValuesMemory[{{1, memrows}}]
