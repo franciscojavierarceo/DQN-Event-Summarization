@@ -169,15 +169,6 @@ function buildTotalSummary(predsummary, totalPredsummary)
     indices = torch.linspace(1, n_l, n_l):long() 
     for i=1, predsummary:size(1) do
         if predsummary[i]:sum() > 0 then 
-            -- maxindex = 0
-            -- for j = 1, totalPredsummary[i]:size(1) do 
-            --     if totalPredsummary[i][j] == 0 then
-            --         maxindex = maxindex + 1
-            --     end
-            -- end
-            -- lenx = predsummary[i]:size(1)
-            -- totalPredsummary[i][{{maxindex - lenx + 1, maxindex}}]:copy(predsummary[i])
-
             minindex = 1
             for j = 1, totalPredsummary[i]:size(1) do 
                 if totalPredsummary[i][j] > 0 then
