@@ -213,7 +213,7 @@ function buildTotalSummaryFast(predsummary, inputTotalSummary, usecuda)
     return tmpSummary
 end
 
-function runSimulation(n, n_s, q, k, a, b, embDim, fast, nepochs, epsilon, print_perf, mem_multiplier, usecuda)
+function runSimulation(n, n_s, q, k, a, b, learning_rate, embDim, gamma, batch_size, fast, nepochs, epsilon, print_perf, mem_multiplier, cuts, base_explore_rate, endexplorerate, usecuda)
     if usecuda then
         Tensor = torch.CudaTensor
         LongTensor = torch.CudaLongTensor   
@@ -232,9 +232,9 @@ function runSimulation(n, n_s, q, k, a, b, embDim, fast, nepochs, epsilon, print
     local SKIP = 1
     local SELECT = 2
 
-    batch_size = 25
-    gamma = 0.0
-    optimParams = { learningRate = 0.0001 }
+    optimParams = { learningRate = learning_rate }
+    delta = cuts / nepochs
+    end_baserate = torch.round(nepochs * endexplorerate )
 
     -- Simulating streams and queries
     queries = genNbyK(n, q, a, b)
@@ -283,8 +283,9 @@ function runSimulation(n, n_s, q, k, a, b, embDim, fast, nepochs, epsilon, print
 
     totalPredsummary = LongTensor(n, n_s * k):fill(0)
 
-    memsize = n * n_s * mem_multiplier
+    memfull = false
     curr_memsize = 0
+    memsize = n * n_s * mem_multiplier
     queryMemory = Tensor(memsize, q):fill(0)
     qActionMemory = Tensor(memsize, 2):fill(0)
     predSummaryMemory = Tensor(memsize, n_s * k):fill(0)
@@ -359,6 +360,7 @@ function runSimulation(n, n_s, q, k, a, b, embDim, fast, nepochs, epsilon, print
             if memsize < (start_row + n) then 
                 start_row = memsize - n + 1
                 end_row = start_row + n - 1
+                memfull = true
                 curr_memsize = 0
             else 
                 end_row = start_row + n - 1
@@ -385,15 +387,22 @@ function runSimulation(n, n_s, q, k, a, b, embDim, fast, nepochs, epsilon, print
         
 
         loss = {}
+        if memfull then 
+            memrows = memsize
+        else 
+            memrows = curr_memsize
+        end
         local dataloader = dl.TensorLoader({
-                            queryMemory[{{1, end_row}}], 
-                            sentenceMemory[{{1, end_row}}], 
-                            predSummaryMemory[{{1, end_row}}], 
-                            qPredsMemory[{{1, end_row}}], 
-                            qActionMemory[{{1, end_row}}], 
-                            qValuesMemory[{{1, end_row}}]
-                            }, 
-                            rewardMemory[{{1, end_row}}])
+                    queryMemory[{{1, memrows}}], 
+                    sentenceMemory[{{1, memrows}}], 
+                    predSummaryMemory[{{1, end_row}}], 
+                    qPredsMemory[{{1, memrows}}], 
+                    qActionMemory[{{1, memrows}}], 
+                    qValuesMemory[{{1, memrows}}]
+                    }, 
+                rewardMemory[{{1, memrows}}]
+            )
+
         c = 1
         for k, xin, reward in dataloader:sampleiter(batch_size, memsize) do
             local function feval(params)
@@ -430,10 +439,16 @@ function runSimulation(n, n_s, q, k, a, b, embDim, fast, nepochs, epsilon, print
                     epoch, rouguef1[epoch], epsilon, lossfull[epoch])
                 )
         end
-        epsilon = epsilon - (1/10.)
-        if epsilon < 0 then
-            epsilon = 0
+
+        if (epsilon - delta) <= base_explore_rate then
+            epsilon = base_explore_rate
+            if epoch > end_baserate then 
+                base_explore_rate = 0.
+            end
+        else 
+            epsilon = epsilon - delta
         end
+
     end
     print(string.format("Elapsed time: %.5f" % (os.clock()-nClock) ))
     print(
@@ -451,23 +466,27 @@ cmd:option('--q_l', 5, 'Query length')
 cmd:option('--k', 7, 'Number of samples to iterate over')
 cmd:option('--a', 1, 'Number of samples to iterate over')
 cmd:option('--b', 100, 'Number of samples to iterate over')
+cmd:option('--lr', 0.000001, 'Learning rate')
 cmd:option('--embDim', 100, 'Number of samples to iterate over')
+cmd:option('--gamma', 0., 'Weight of future prediction')
+cmd:option('--batch_size', 25, 'Batch size')
 cmd:option('--memory_multiplier', 1, 'Multiplier defining size of memory')
+cmd:option('--cuts', 4, 'How long we want to decay search over')
+cmd:option('--endexplorerate', 0.8, 'When to end the exploration as a percent of trainings epochs)')
+cmd:option('--base_explore_rate', 0.1, 'Base exploration rate after 1/cuts until endexplorerate')
 cmd:option('--nepochs', 100, 'Number of epochs')
 cmd:option('--epsilon', 1, 'Random sampling rate')
 cmd:option('--print', false, 'print performance')
 cmd:option('--usecuda', false, 'cuda option')
-
 cmd:text()
 local opt = cmd:parse(arg or {})       --- stores the commands in opt.variable (e.g., opt.model)
 
 -- Running the script
-runSimulation(opt.n_samples, opt.n_s, opt.q_l, opt.k, opt.a, opt.b,
-              opt.embDim, opt.fast, opt.nepochs, opt.epsilon, opt.print, 
-              opt.memory_multiplier, opt.usecuda)
+runSimulation(opt.n_samples, opt.n_s, opt.q_l, opt.k, opt.a, opt.b, opt.lr,
+              opt.embDim, opt.gamma, opt.batch_size, opt.fast, opt.nepochs, opt.epsilon, opt.print, 
+              opt.memory_multiplier, opt.cuts, opt.base_explore_rate, opt.endexplorerate, opt.usecuda)
 
 -- Notes
 -- 2. Optimize using masklayer
 -- 5. Test on the GPU
 -- 7. Deploy the model in chunks?
--- 8. need to fix the inserting of the memory
