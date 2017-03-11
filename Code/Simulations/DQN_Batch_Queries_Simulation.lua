@@ -284,7 +284,7 @@ function runSimulation(n, n_s, q, k, a, b, embDim, fast, nepochs, epsilon, print
     totalPredsummary = LongTensor(n, n_s * k):fill(0)
 
     memsize = n * n_s * mem_multiplier
-
+    curr_memsize = 0
     queryMemory = Tensor(memsize, q):fill(0)
     qActionMemory = Tensor(memsize, 2):fill(0)
     predSummaryMemory = Tensor(memsize, n_s * k):fill(0)
@@ -354,20 +354,24 @@ function runSimulation(n, n_s, q, k, a, b, embDim, fast, nepochs, epsilon, print
                 -- Calculating change in rougue f1
                 rewards[i]:copy(rewards[i] - rewards[i-1])
             end
-            -- Update memory sequentially until it's full 
-                -- so we can index it x[{{1, n}}]
-                -- then we 
-            if (epoch * i * n) <= memsize then
-                start_row = ( n * (i-1) + 1 ) * epoch
-                end_row =  n * i * epoch
-                print(start_row, end_row, memsize)
-                qActionMemory[{{start_row, end_row}}]:copy(qActions[i])
-                predSummaryMemory[{{start_row, end_row}}]:copy(totalPredsummary)
-                sentenceMemory[{{start_row, end_row}}]:copy(sentences[i])
-                qPredsMemory[{{start_row, end_row}}]:copy(qPreds[i])
-                qValuesMemory[{{start_row, end_row}}]:copy(qValues[i])
-                queryMemory[{{start_row, end_row}}]:copy(queries)
-            end
+            -- here's the row indexing
+            start_row = curr_memsize + 1
+            if memsize < (start_row + n) then 
+                start_row = memsize - n + 1
+                end_row = start_row + n - 1
+                curr_memsize = 0
+            else 
+                end_row = start_row + n - 1
+                curr_memsize = end_row
+            end            
+            -- Update memory sequentially until it's full then restart updating it
+            qActionMemory[{{start_row, end_row}}]:copy(qActions[i])
+            predSummaryMemory[{{start_row, end_row}}]:copy(totalPredsummary)
+            sentenceMemory[{{start_row, end_row}}]:copy(sentences[i])
+            qPredsMemory[{{start_row, end_row}}]:copy(qPreds[i])
+            qValuesMemory[{{start_row, end_row}}]:copy(qValues[i])
+            queryMemory[{{start_row, end_row}}]:copy(queries)
+
         end
         for i=1, n_s do
             if i  < n_s then
@@ -405,7 +409,7 @@ function runSimulation(n, n_s, q, k, a, b, embDim, fast, nepochs, epsilon, print
                 else 
                     local ignore = model:forward({xin[1], xin[2], xin[3]})
                     local predQOnActions = maskLayer:forward({xin[4]:double(), xin[5]:byte()}) 
-                    print(predQOnActions)
+                    -- print(predQOnActions)
                     lossf = criterion:forward(predQOnActions, reward)
                     local gradOutput = criterion:backward(predQOnActions, reward)
                     local gradMaskLayer = maskLayer:backward({xin[4]:double(), xin[5]:byte()}, gradOutput:double())
