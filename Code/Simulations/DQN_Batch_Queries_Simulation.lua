@@ -382,23 +382,23 @@ function runSimulation(n, n_s, q, k, a, b, learning_rate, embDim, gamma, batch_s
             memrows = curr_memsize
         end
         if usecuda then 
-            local dataloader = dl.TensorLoader({
+            dataloader = dl.TensorLoader({
                             queryMemory[{{1, memrows}}]:cuda(), 
                             sentenceMemory[{{1, memrows}}]:cuda(), 
                             predSummaryMemory[{{1, memrows}}]:cuda(),
                             qPredsMemory[{{1, memrows}}]:cuda(), 
-                            qActionMemory[{{1, memrows}}]:cuda(), 
+                            ByteTensor(memrows, 2):copy(qActionMemory[{{1, memrows}}]), 
                             qValuesMemory[{{1, memrows}}]:cuda()
                             }, 
                         rewardMemory[{{1, memrows}}]:cuda()
                     )
         else 
-            local dataloader = dl.TensorLoader({
+            dataloader = dl.TensorLoader({
                         queryMemory[{{1, memrows}}], 
                         sentenceMemory[{{1, memrows}}], 
                         predSummaryMemory[{{1, memrows}}], 
                         qPredsMemory[{{1, memrows}}], 
-                        qActionMemory[{{1, memrows}}], 
+                        ByteTensor(memrows, 2):copy(qActionMemory[{{1, memrows}}]), 
                         qValuesMemory[{{1, memrows}}]
                         }, 
                     rewardMemory[{{1, memrows}}]
@@ -419,11 +419,11 @@ function runSimulation(n, n_s, q, k, a, b, learning_rate, embDim, gamma, batch_s
                     model:backward({queryMemory, sentenceMemory, predSummaryMemory}, {gradMaskLayer[1], gradOutput[2]})
                 else 
                     local ignore = model:forward({xin[1], xin[2], xin[3]})
-                    local predQOnActions = maskLayer:forward({xin[4]:double(), xin[5]:byte()}) 
+                    local predQOnActions = maskLayer:forward({xin[4], xin[5]}) 
                     -- print(predQOnActions)
                     lossf = criterion:forward(predQOnActions, reward)
                     local gradOutput = criterion:backward(predQOnActions, reward)
-                    local gradMaskLayer = maskLayer:backward({xin[4]:double(), xin[5]:byte()}, gradOutput:double())
+                    local gradMaskLayer = maskLayer:backward({xin[4], xin[5]}, gradOutput)
                     model:backward({xin[1], xin[2], xin[3]}, gradMaskLayer[1])
                 end 
                 return lossf, gradParams
