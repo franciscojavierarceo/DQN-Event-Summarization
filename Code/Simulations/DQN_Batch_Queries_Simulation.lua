@@ -11,6 +11,7 @@ dl = require 'dataload'
 
 -- Some useful functions
 function genNbyK(n, k, a, b)
+    torch.manualSeed(420)
     out = torch.LongTensor(n, k)
     for i=1, n do
         for j = 1, k do
