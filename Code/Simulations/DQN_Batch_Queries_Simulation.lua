@@ -205,7 +205,7 @@ function buildTotalSummaryFast(predsummary, inputTotalSummary, usecuda)
     return tmpSummary
 end
 
-function runSimulation(n, n_s, q, k, a, b, learning_rate, embDim, gamma, batch_size, fast, nepochs, epsilon, print_perf, mem_multiplier, cuts, base_explore_rate, endexplorerate, usecuda)
+function runSimulation(n, n_s, q, k, a, b, learning_rate, embDim, gamma, batch_size, fast, nepochs, epsilon, print_perf, mem_multiplier, cuts, base_explore_rate, endexplorerate, adapt, usecuda)
     if usecuda then
         Tensor = torch.CudaTensor
         LongTensor = torch.CudaLongTensor   
@@ -263,7 +263,11 @@ function runSimulation(n, n_s, q, k, a, b, learning_rate, embDim, gamma, batch_s
     -- Building the model
     model = buildModel('lstm', b, embDim, 'f1', false, usecuda)
     params, gradParams = model:getParameters()
-    criterion = nn.MSECriterion()
+    if adapt then 
+        criterion = nn.ParallelCriterion():add(nn.MSECriterion()):add(nn.BCECriterion())
+    else 
+        criterion = nn.MSECriterion()
+    end 
 
     totalPredsummary = {}
     qValues = {}
@@ -286,12 +290,19 @@ function runSimulation(n, n_s, q, k, a, b, learning_rate, embDim, gamma, batch_s
     qValuesMemory = Tensor(memsize, 1):fill(0)
     rewardMemory = Tensor(memsize, 1):fill(0)
 
+    if adapt then
+        regPreds = {}
+        regMemory = Tensor(memsize, 1):fill(0) 
+    end
     --- Initializing thingss
     for i = 1, n_s do
         qPreds[i] = torch.zeros(n, 2)
         qValues[i] = torch.zeros(n, 1) 
         qActions[i] = torch.zeros(n, 2)
         rewards[i] = torch.zeros(n, 1)
+        if adapt then
+            regPreds[i] = torch.zeros(n, 1)
+        end        
     end 
 
     if usecuda then
@@ -316,8 +327,15 @@ function runSimulation(n, n_s, q, k, a, b, learning_rate, embDim, gamma, batch_s
                 -- Need to run a forward pass for the backward to work...wonky
                 ignore = model:forward({sentences[i], queries, totalPredsummary})
             else 
-                qPreds[i]:copy(model:forward({sentences[i], queries, totalPredsummary}) )
+                totalPreds = model:forward({sentences[i], queries, totalPredsummary})
+                if adapt then 
+                    qPreds[i]:copy(totalPreds[1])
+                    regPreds[i]:copy(totalPreds[2])
+                else
+                    qPreds[i]:copy(totalPreds)
+                end
             end 
+
             if fast then 
                 qMax, qindx = torch.max(qPreds[i], 2)  -- Pulling the best actions
                 -- Here's the fast way to select the optimal action for each query
@@ -365,7 +383,9 @@ function runSimulation(n, n_s, q, k, a, b, learning_rate, embDim, gamma, batch_s
             qPredsMemory[{{start_row, end_row}}]:copy(qPreds[i])
             qValuesMemory[{{start_row, end_row}}]:copy(qValues[i])
             queryMemory[{{start_row, end_row}}]:copy(queries)
-
+            if adapt then
+                regMemory[{{start_row, end_row}}]:copy(regPreds[i])
+            end        
         end
         for i=1, n_s do
             if i  < n_s then
@@ -393,6 +413,9 @@ function runSimulation(n, n_s, q, k, a, b, learning_rate, embDim, gamma, batch_s
                             }, 
                         rewardMemory[{{1, memrows}}]:cuda()
                     )
+            if adapt then            
+                table.insert(dataloader['inputs'], regMemory[{{1, memrows}}]:cuda() )
+            end
         else 
             dataloader = dl.TensorLoader({
                         queryMemory[{{1, memrows}}], 
@@ -404,6 +427,9 @@ function runSimulation(n, n_s, q, k, a, b, learning_rate, embDim, gamma, batch_s
                         }, 
                     rewardMemory[{{1, memrows}}]
                 )
+            if adapt then
+                table.insert(dataloader['inputs'], regMemory[{{1, memrows}}] )
+            end
         end
         loss = {}
         c = 1
@@ -412,12 +438,22 @@ function runSimulation(n, n_s, q, k, a, b, learning_rate, embDim, gamma, batch_s
                 gradParams:zero()
                 if adapt then
                     local ignore = model:forward({xin[1], xin[2], xin[3]})
-                    local predQOnActions = maskLayer:forward({qPredsMemory, actions_in}) 
-                    local ones = torch.ones(predQ:size(1)):resize(predQ:size(1))
-                    lossf = criterion:forward({qValuesMemory, predReg}, {reward, ones})
-                    local gradOutput = criterion:backward({qActionMemory, predReg}, {reward, ones})
-                    local gradMaskLayer = maskLayer:backward({qPredsMemory, qActionMemory}, gradOutput[1])
-                    model:backward({queryMemory, sentenceMemory, predSummaryMemory}, {gradMaskLayer[1], gradOutput[2]})
+                    local predQOnActions = maskLayer:forward({xin[4], xin[5]}) 
+                    ones = torch.ones(xin[6]:size(1)):resize(xin[6]:size(1))
+                    if usecuda then
+                        ones = ones:cuda()
+                    end
+                    lossf = criterion:forward({predQOnActions, xin[7]}, {reward, ones})
+                    local gradOutput = criterion:backward({predQOnActions, xin[6]}, {reward, ones})
+                    local gradMaskLayer = maskLayer:backward({xin[4], xin[5]}, gradOutput[1])
+                    model:backward({xin[1], xin[2], xin[3]}, {gradMaskLayer[1], gradOutput[2]})
+                    -- local ignore = model:forward({xin[1], xin[2], xin[3]})
+                    -- local predQOnActions = maskLayer:forward({qPredsMemory, actions_in}) 
+                    -- local ones = torch.ones(predQ:size(1)):resize(predQ:size(1))
+                    -- lossf = criterion:forward({qValuesMemory, predReg}, {reward, ones})
+                    -- local gradOutput = criterion:backward({qActionMemory, predReg}, {reward, ones})
+                    -- local gradMaskLayer = maskLayer:backward({qPredsMemory, qActionMemory}, gradOutput[1])
+                    -- model:backward({queryMemory, sentenceMemory, predSummaryMemory}, {gradMaskLayer[1], gradOutput[2]})
                 else 
                     local ignore = model:forward({xin[1], xin[2], xin[3]})
                     local predQOnActions = maskLayer:forward({xin[4], xin[5]}) 
@@ -479,6 +515,7 @@ cmd:option('--base_explore_rate', 0.1, 'Base exploration rate after 1/cuts until
 cmd:option('--nepochs', 100, 'Number of epochs')
 cmd:option('--epsilon', 1, 'Random sampling rate')
 cmd:option('--print', false, 'print performance')
+cmd:option('--adapt', false, 'Use adaptive regularization')
 cmd:option('--usecuda', false, 'cuda option')
 cmd:text()
 local opt = cmd:parse(arg or {})       --- stores the commands in opt.variable (e.g., opt.model)
@@ -486,7 +523,8 @@ local opt = cmd:parse(arg or {})       --- stores the commands in opt.variable (
 -- Running the script
 runSimulation(opt.n_samples, opt.n_s, opt.q_l, opt.k, opt.a, opt.b, opt.lr,
               opt.embDim, opt.gamma, opt.batch_size, opt.fast, opt.nepochs, opt.epsilon, opt.print, 
-              opt.memory_multiplier, opt.cuts, opt.base_explore_rate, opt.endexplorerate, opt.usecuda)
+              opt.memory_multiplier, opt.cuts, opt.base_explore_rate, opt.endexplorerate, 
+              opt.adapt, opt.usecuda)
 
 -- Notes
 -- 2. Optimize using masklayer
