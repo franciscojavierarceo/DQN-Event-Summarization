@@ -261,7 +261,7 @@ function runSimulation(n, n_s, q, k, a, b, learning_rate, embDim, gamma, batch_s
     end
 
     -- Building the model
-    model = buildModel('lstm', b, embDim, 'recall', adapt, usecuda)
+    model = buildModel('lstm', b, embDim, 'f1', adapt, usecuda)
     params, gradParams = model:getParameters()
     if adapt then 
         criterion = nn.ParallelCriterion():add(nn.MSECriterion()):add(nn.BCECriterion())
@@ -365,6 +365,11 @@ function runSimulation(n, n_s, q, k, a, b, learning_rate, embDim, gamma, batch_s
                                                 Tokenize(totalPredsummary[j]:totable()))
                 rewards[i][j]:fill(f1)
             end
+
+            if i == n_s then 
+                rouguef1[epoch] = rewards[i]:mean()
+            end 
+
             if i > 1 then
                 -- Calculating change in rougue f1
                 rewards[i]:copy(rewards[i] - rewards[i-1])
@@ -374,8 +379,10 @@ function runSimulation(n, n_s, q, k, a, b, learning_rate, embDim, gamma, batch_s
             if memsize < (start_row + n) then 
                 start_row = memsize - n + 1
                 end_row = start_row + n - 1
-                memfull = true
                 curr_memsize = 0
+                if (end_row + n) >= memsize then 
+                    memfull = true
+                end 
             else 
                 end_row = start_row + n - 1
                 curr_memsize = end_row
@@ -393,13 +400,15 @@ function runSimulation(n, n_s, q, k, a, b, learning_rate, embDim, gamma, batch_s
         end
         for i=1, n_s do
             if i  < n_s then
-                rewardMemory[{{n * (i-1) + 1, n * i}}]:copy(rewards[i] + gamma * rewards[i + 1] )
+                rewardMemory[{{n * (i-1) + 1, n * i}}]:copy(
+                        rewards[i] + gamma * rewards[i + 1] 
+                    )
             else
-                rewardMemory[{{n * (i-1) + 1, n * i}}]:copy(rewards[i] )
+                rewardMemory[{{n * (i-1) + 1, n * i}}]:copy(
+                    rewards[i] 
+                    )
             end
         end
-        -- Adding back the delta for the last one
-        rouguef1[epoch] = (rewards[n_s] + rewards[ n_s - 1] ):mean()
 
         if memfull then 
             memrows = memsize
