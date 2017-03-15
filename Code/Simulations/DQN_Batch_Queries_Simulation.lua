@@ -399,13 +399,15 @@ function runSimulation(n, n_s, q, k, a, b, learning_rate, embDim, gamma, batch_s
             end        
         end
         for i=1, n_s do
+            -- this is how we incorporate the discount paremeter on future predictions
             if i  < n_s then
                 rewardMemory[{{n * (i-1) + 1, n * i}}]:copy(
-                        rewards[i] + gamma * rewards[i + 1] 
+                        rewards[i] + (gamma * rewards[i + 1])
                     )
             else
+                -- for terminal predictions we just take the final reward
                 rewardMemory[{{n * (i-1) + 1, n * i}}]:copy(
-                    rewards[i] 
+                        rewards[i] 
                     )
             end
         end
