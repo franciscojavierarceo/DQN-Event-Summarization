@@ -261,7 +261,7 @@ function runSimulation(n, n_s, q, k, a, b, learning_rate, embDim, gamma, batch_s
     end
 
     -- Building the model
-    model = buildModel('lstm', b, embDim, 'f1', false, usecuda)
+    model = buildModel('lstm', b, embDim, 'f1', adapt, usecuda)
     params, gradParams = model:getParameters()
     if adapt then 
         criterion = nn.ParallelCriterion():add(nn.MSECriterion()):add(nn.BCECriterion())
@@ -449,7 +449,6 @@ function runSimulation(n, n_s, q, k, a, b, learning_rate, embDim, gamma, batch_s
                     lossf = criterion:forward({predQOnActions, xin[7]}, {reward, ones})
                     local gradOutput = criterion:backward({predQOnActions, xin[6]}, {reward, ones})
                     local gradMaskLayer = maskLayer:backward({xin[4], xin[5]}, gradOutput[1])
-                    -- print({xin[1], xin[2], xin[3], gradMaskLayer[1], gradOutput[2]})
                     model:backward({xin[1], xin[2], xin[3]}, {gradMaskLayer[1], gradOutput[2]})
                 else 
                     local ignore = model:forward({xin[1], xin[2], xin[3]})
