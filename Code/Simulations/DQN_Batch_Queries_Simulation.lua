@@ -205,7 +205,7 @@ function buildTotalSummaryFast(predsummary, inputTotalSummary, usecuda)
     return tmpSummary
 end
 
-function runSimulation(n, n_s, q, k, a, b, learning_rate, embDim, gamma, batch_size, fast, nepochs, epsilon, print_perf, mem_multiplier, cuts, base_explore_rate, endexplorerate, adapt, usecuda)
+function runSimulation(n, n_s, q, k, a, b, learning_rate, embDim, gamma, batch_size, fast, nepochs, epsilon, print_perf, mem_multiplier, cuts, base_explore_rate, endexplorerate, adapt, adapt_lambda, usecuda)
     -- torch.setnumthreads(16)
     if usecuda then
         Tensor = torch.CudaTensor
@@ -261,10 +261,11 @@ function runSimulation(n, n_s, q, k, a, b, learning_rate, embDim, gamma, batch_s
     end
 
     -- Building the model
-    model = buildModel('lstm', b, embDim, 'f1', adapt, usecuda)
+    model = buildModel('lstm', b, embDim, 'recall', adapt, usecuda)
     params, gradParams = model:getParameters()
     if adapt then 
         criterion = nn.ParallelCriterion():add(nn.MSECriterion()):add(nn.BCECriterion())
+        criterion["weights"] = {1, adapt_lambda}
     else 
         criterion = nn.MSECriterion()
     end 
@@ -512,6 +513,7 @@ cmd:option('--nepochs', 100, 'Number of epochs')
 cmd:option('--epsilon', 1, 'Random sampling rate')
 cmd:option('--print', false, 'print performance')
 cmd:option('--adapt', false, 'Use adaptive regularization')
+cmd:option('--adapt_lambda', 0.25, 'Amount of adaptive regularization')
 cmd:option('--usecuda', false, 'cuda option')
 cmd:text()
 local opt = cmd:parse(arg or {})       --- stores the commands in opt.variable (e.g., opt.model)
@@ -520,7 +522,7 @@ local opt = cmd:parse(arg or {})       --- stores the commands in opt.variable (
 runSimulation(opt.n_samples, opt.n_s, opt.q_l, opt.k, opt.a, opt.b, opt.lr,
               opt.embDim, opt.gamma, opt.batch_size, opt.fast, opt.nepochs, opt.epsilon, opt.print, 
               opt.memory_multiplier, opt.cuts, opt.base_explore_rate, opt.endexplorerate, 
-              opt.adapt, opt.usecuda)
+              opt.adapt, opt.adapt_lambda, opt.usecuda)
 
 -- Notes
 -- 2. Optimize using masklayer
