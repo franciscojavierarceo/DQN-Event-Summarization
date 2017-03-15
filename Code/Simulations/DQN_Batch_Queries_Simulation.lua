@@ -160,7 +160,6 @@ function buildPredsummaryFast(chosenactions, inputsentences, select_index)
     local summary = torch.zeros(inputsentences:size())
     actionmatrix = chosenactions:select(2, select_index):clone():resize(n, 1):view(n, 1):expand(n, k):clone()
     --     This line didn't work for whatever reason...gives weird indexing...
-    --     actionmatrix = chosenactions:select(2, select_index):resize(1, n):view(n, 1):expand(n, k):clone()
     return actionmatrix:cmul(inputsentences:double())
 end
 
@@ -194,8 +193,9 @@ function buildTotalSummaryFast(predsummary, inputTotalSummary, usecuda)
     for i=1, predsummary:size(1) do
         if predsummary[i]:sum() > 0 then
             -- Finding the largest index with a zero
-            -- maxindex = torch.max(indices[torch.eq(totalPredsummary[i], 0)])
-            -- totalPredsummary[i][{{maxindex - lenx + 1, maxindex}}]:copy(predsummary[i])
+            -- maxindex = torch.max(indices[torch.eq(tmpSummary[i], 0)])
+            -- lenx = predsummary[i]:size(1)
+            -- tmpSummary[i][{{maxindex - lenx + 1, maxindex}}]:copy(predsummary[i])
             -- Finding the smallest index with a zero
             minindex = torch.min(indices[torch.eq(tmpSummary[i], 0)])
             lenx = predsummary[i]:size(1)
@@ -261,7 +261,7 @@ function runSimulation(n, n_s, q, k, a, b, learning_rate, embDim, gamma, batch_s
     end
 
     -- Building the model
-    model = buildModel('lstm', b, embDim, 'f1', adapt, usecuda)
+    model = buildModel('bow', b, embDim, 'f1', adapt, usecuda)
     params, gradParams = model:getParameters()
     if adapt then 
         criterion = nn.ParallelCriterion():add(nn.MSECriterion()):add(nn.BCECriterion())
@@ -363,7 +363,8 @@ function runSimulation(n, n_s, q, k, a, b, learning_rate, embDim, gamma, batch_s
             for j = 1, n do
                 recall, prec, f1 = rougeScores( qTokens[j],
                                                 Tokenize(totalPredsummary[j]:totable()))
-                rewards[i][j]:fill(f1)
+                rewards[i][j]:fill(recall)
+                -- rewards[i][j]:fill(f1)
             end
 
             if i == n_s then 
@@ -509,11 +510,11 @@ cmd:option('--n_samples', 100, 'Number of queries')
 -- n_samples = 100000 will reproduce the speed numbers
 cmd:option('--n_s', 5, 'Number of sentences')
 cmd:option('--q_l', 5, 'Query length')
-cmd:option('--k', 7, 'Number of samples to iterate over')
+cmd:option('--k', 15, 'Number of samples to iterate over')
 cmd:option('--a', 1, 'Number of samples to iterate over')
 cmd:option('--b', 100, 'Number of samples to iterate over')
 cmd:option('--lr', 0.000001, 'Learning rate')
-cmd:option('--embDim', 100, 'Number of samples to iterate over')
+cmd:option('--embDim', 50, 'Number of samples to iterate over')
 cmd:option('--gamma', 0., 'Weight of future prediction')
 cmd:option('--batch_size', 25, 'Batch size')
 cmd:option('--memory_multiplier', 1, 'Multiplier defining size of memory')
