@@ -206,6 +206,7 @@ function buildTotalSummaryFast(predsummary, inputTotalSummary, usecuda)
 end
 
 function runSimulation(n, n_s, q, k, a, b, learning_rate, embDim, gamma, batch_size, fast, nepochs, epsilon, print_perf, mem_multiplier, cuts, base_explore_rate, endexplorerate, adapt, usecuda)
+    -- torch.setnumthreads(16)
     if usecuda then
         Tensor = torch.CudaTensor
         LongTensor = torch.CudaLongTensor   
@@ -213,11 +214,10 @@ function runSimulation(n, n_s, q, k, a, b, learning_rate, embDim, gamma, batch_s
         maskLayer = nn.MaskedSelect():cuda()
         print("...running on GPU")
     else
-        maskLayer = nn.MaskedSelect()
-        torch.setnumthreads(8)
         Tensor = torch.Tensor
         LongTensor = torch.LongTensor
         ByteTensor = torch.ByteTensor
+        maskLayer = nn.MaskedSelect()
         print("...running on CPU")
     end
 
@@ -296,12 +296,12 @@ function runSimulation(n, n_s, q, k, a, b, learning_rate, embDim, gamma, batch_s
     end
     --- Initializing thingss
     for i = 1, n_s do
-        qPreds[i] = torch.zeros(n, 2)
-        qValues[i] = torch.zeros(n, 1) 
-        qActions[i] = torch.zeros(n, 2)
-        rewards[i] = torch.zeros(n, 1)
+        qPreds[i] = Tensor(n, 2):fill(0) 
+        qValues[i] = Tensor(n, 1):fill(0)
+        qActions[i] = Tensor(n, 2):fill(0)
+        rewards[i] = Tensor(n, 1):fill(0)
         if adapt then
-            regPreds[i] = torch.zeros(n, 1)
+            regPreds[i] = Tensor(n, 1):fill(0)
         end        
     end 
 
@@ -319,6 +319,9 @@ function runSimulation(n, n_s, q, k, a, b, learning_rate, embDim, gamma, batch_s
             qActions[i]:fill(0)
             rewards[i]:fill(0)
             totalPredsummary:fill(0)
+            if adapt then
+                regMemory[i]:fill(0)
+            end        
         end
 
         for i=1, n_s do
@@ -439,21 +442,15 @@ function runSimulation(n, n_s, q, k, a, b, learning_rate, embDim, gamma, batch_s
                 if adapt then
                     local ignore = model:forward({xin[1], xin[2], xin[3]})
                     local predQOnActions = maskLayer:forward({xin[4], xin[5]}) 
-                    ones = torch.ones(xin[6]:size(1)):resize(xin[6]:size(1))
+                    local ones = torch.ones(reward:size(1)):resize(reward:size(1))
                     if usecuda then
                         ones = ones:cuda()
                     end
                     lossf = criterion:forward({predQOnActions, xin[7]}, {reward, ones})
                     local gradOutput = criterion:backward({predQOnActions, xin[6]}, {reward, ones})
                     local gradMaskLayer = maskLayer:backward({xin[4], xin[5]}, gradOutput[1])
+                    -- print({xin[1], xin[2], xin[3], gradMaskLayer[1], gradOutput[2]})
                     model:backward({xin[1], xin[2], xin[3]}, {gradMaskLayer[1], gradOutput[2]})
-                    -- local ignore = model:forward({xin[1], xin[2], xin[3]})
-                    -- local predQOnActions = maskLayer:forward({qPredsMemory, actions_in}) 
-                    -- local ones = torch.ones(predQ:size(1)):resize(predQ:size(1))
-                    -- lossf = criterion:forward({qValuesMemory, predReg}, {reward, ones})
-                    -- local gradOutput = criterion:backward({qActionMemory, predReg}, {reward, ones})
-                    -- local gradMaskLayer = maskLayer:backward({qPredsMemory, qActionMemory}, gradOutput[1])
-                    -- model:backward({queryMemory, sentenceMemory, predSummaryMemory}, {gradMaskLayer[1], gradOutput[2]})
                 else 
                     local ignore = model:forward({xin[1], xin[2], xin[3]})
                     local predQOnActions = maskLayer:forward({xin[4], xin[5]}) 
