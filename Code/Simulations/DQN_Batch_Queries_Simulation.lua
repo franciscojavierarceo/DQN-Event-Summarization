@@ -11,7 +11,6 @@ dl = require 'dataload'
 
 -- Some useful functions
 function genNbyK(n, k, a, b)
-    torch.manualSeed(420)
     out = torch.LongTensor(n, k)
     for i=1, n do
         for j = 1, k do
@@ -207,6 +206,7 @@ end
 
 function runSimulation(n, n_s, q, k, a, b, learning_rate, embDim, gamma, batch_size, fast, nepochs, epsilon, print_perf, mem_multiplier, cuts, base_explore_rate, endexplorerate, adapt, adapt_lambda, usecuda)
     -- torch.setnumthreads(16)
+    torch.manualSeed(420)
     if usecuda then
         Tensor = torch.CudaTensor
         LongTensor = torch.CudaLongTensor   
@@ -254,6 +254,10 @@ function runSimulation(n, n_s, q, k, a, b, learning_rate, embDim, gamma, batch_s
         best_sentences = buildPredsummaryFast(true_actions[i], sentences[i], SELECT)
         trueSummary = buildTotalSummaryFast(best_sentences, trueSummary, usecuda)
     end
+
+    print('sentences = ', table.unpack(sentences))
+    print('actions = ', table.unpack(true_actions))
+    print('true summary = ', trueSummary)
 
     qTokens = {}
     for i=1, n do
