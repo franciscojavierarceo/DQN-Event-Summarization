@@ -245,7 +245,6 @@ function runSimulation(n, n_s, q, k, a, b, learning_rate, embDim, gamma, batch_s
     for i=1, n_s do 
         ---- Simulating the data
         trueqValues = torch.rand(n, 2)
-        
          ---- Generating the max values and getting the indices
         qMaxtrue, qindxtrue = torch.max(trueqValues, 2)
         
@@ -255,9 +254,9 @@ function runSimulation(n, n_s, q, k, a, b, learning_rate, embDim, gamma, batch_s
         trueSummary = buildTotalSummaryFast(best_sentences, trueSummary, usecuda)
     end
 
-    print('sentences = ', table.unpack(sentences))
-    print('actions = ', table.unpack(true_actions))
-    print('true summary = ', trueSummary)
+    -- print('sentences = ', table.unpack(sentences))
+    -- print('actions = ', table.unpack(true_actions))
+    -- print('true summary = ', trueSummary)
 
     qTokens = {}
     for i=1, n do
@@ -265,7 +264,7 @@ function runSimulation(n, n_s, q, k, a, b, learning_rate, embDim, gamma, batch_s
     end
 
     -- Building the model
-    model = buildModel('bow', b, embDim, 'f1', adapt, usecuda)
+    model = buildModel('lstm', b, embDim, 'f1', adapt, usecuda)
     params, gradParams = model:getParameters()
     if adapt then 
         criterion = nn.ParallelCriterion():add(nn.MSECriterion()):add(nn.BCECriterion())
@@ -330,45 +329,37 @@ function runSimulation(n, n_s, q, k, a, b, learning_rate, embDim, gamma, batch_s
         end
 
         for i=1, n_s do
-            if torch.uniform(0, 1) <= epsilon then 
-                qPreds[i]:copy(torch.rand(n, 2))
-                -- Need to run a forward pass for the backward to work...wonky
-                ignore = model:forward({sentences[i], queries, totalPredsummary})
-            else 
-                totalPreds = model:forward({sentences[i], queries, totalPredsummary})
-                if adapt then 
-                    qPreds[i]:copy(totalPreds[1])
-                    regPreds[i]:copy(totalPreds[2])
-                else
-                    qPreds[i]:copy(totalPreds)
-                end
-            end 
+            totalPreds = model:forward({sentences[i], queries, totalPredsummary})
 
-            if fast then 
+            if adapt then 
+                qPreds[i]:copy(totalPreds[1])
+                regPreds[i]:copy(totalPreds[2])
+            else
+                qPreds[i]:copy(totalPreds)
+            end
+
+            if torch.uniform(0, 1) <= epsilon then
+                -- randomly choosing actions
+                xrand = torch.rand(qPreds[i]:size())
+                qActions[i]:select(2, SELECT):copy(torch.ge(xrand:select(2, SELECT), xrand:select(2, SKIP)))
+                qActions[i]:select(2, SKIP):copy(torch.ge(xrand:select(2, SKIP), xrand:select(2, SELECT)))
+                qValues[i]:copy( maskLayer:forward({totalPreds, qActions[i]:byte()}) )
+            else 
                 qMax, qindx = torch.max(qPreds[i], 2)  -- Pulling the best actions
                 -- Here's the fast way to select the optimal action for each query
                 qActions[i]:copy(qActions[i]:scatter(2, qindx, torch.ones(qPreds[i]:size())):clone())
                 qValues[i]:copy(qMax)
-                predsummary = buildPredsummaryFast(qActions[i], sentences[i], SELECT)
-                totalPredsummary = buildTotalSummaryFast(predsummary, totalPredsummary, usecuda)
-            else 
-                for j=1, n do
-                    if qPreds[i][j][SELECT] > qPreds[i][j][SKIP] then
-                        qActions[i][j][SELECT] = 1
-                        qValues[i][j]:fill(qPreds[i][j][SELECT])
-                    else
-                        qActions[i][j][SKIP] = 1
-                        qValues[i][j]:fill(qPreds[i][j][SKIP])
-                    end
-                end
-                predsummary = buildPredsummary(predsummary, qActions[i], sentences[i], SELECT)
-                buildTotalSummary(predsummary, totalPredsummary)
+
             end
+
+            predsummary = buildPredsummaryFast(qActions[i], sentences[i], SELECT)
+            totalPredsummary = buildTotalSummaryFast(predsummary, totalPredsummary, usecuda)
+
             for j = 1, n do
                 recall, prec, f1 = rougeScores( qTokens[j],
                                                 Tokenize(totalPredsummary[j]:totable()))
-                rewards[i][j]:fill(recall)
-                -- rewards[i][j]:fill(f1)
+                -- rewards[i][j]:fill(recall)
+                rewards[i][j]:fill(f1)
             end
 
             if i == n_s then 
@@ -410,7 +401,7 @@ function runSimulation(n, n_s, q, k, a, b, learning_rate, embDim, gamma, batch_s
                         rewards[i] + (gamma * rewards[i + 1])
                     )
             else
-                -- for terminal predictions we just take the final reward
+                -- for terminal predictions we use the final reward
                 rewardMemory[{{n * (i-1) + 1, n * i}}]:copy(
                         rewards[i] 
                     )
@@ -422,6 +413,7 @@ function runSimulation(n, n_s, q, k, a, b, learning_rate, embDim, gamma, batch_s
         else 
             memrows = curr_memsize
         end
+
         if usecuda then 
             dataloader = dl.TensorLoader({
                             queryMemory[{{1, memrows}}]:cuda(), 
@@ -517,7 +509,7 @@ cmd:option('--q_l', 5, 'Query length')
 cmd:option('--k', 15, 'Number of samples to iterate over')
 cmd:option('--a', 1, 'Number of samples to iterate over')
 cmd:option('--b', 100, 'Number of samples to iterate over')
-cmd:option('--lr', 0.000001, 'Learning rate')
+cmd:option('--lr', 1e-5, 'Learning rate')
 cmd:option('--embDim', 50, 'Number of samples to iterate over')
 cmd:option('--gamma', 0., 'Weight of future prediction')
 cmd:option('--batch_size', 25, 'Batch size')
