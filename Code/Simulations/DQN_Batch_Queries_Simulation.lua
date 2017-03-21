@@ -358,8 +358,8 @@ function runSimulation(n, n_s, q, k, a, b, learning_rate, embDim, gamma, batch_s
             for j = 1, n do
                 recall, prec, f1 = rougeScores( qTokens[j],
                                                 Tokenize(totalPredsummary[j]:totable()))
-                -- rewards[i][j]:fill(recall)
-                rewards[i][j]:fill(f1)
+                rewards[i][j]:fill(recall)
+                -- rewards[i][j]:fill(f1)
             end
 
             if i == n_s then 
@@ -390,9 +390,11 @@ function runSimulation(n, n_s, q, k, a, b, learning_rate, embDim, gamma, batch_s
             qPredsMemory[{{start_row, end_row}}]:copy(qPreds[i])
             qValuesMemory[{{start_row, end_row}}]:copy(qValues[i])
             queryMemory[{{start_row, end_row}}]:copy(queries)
+
             if adapt then
                 regMemory[{{start_row, end_row}}]:copy(regPreds[i])
-            end        
+            end
+
         end
         for i=1, n_s do
             -- this is how we incorporate the discount paremeter on future predictions
