@@ -254,9 +254,9 @@ function runSimulation(n, n_s, q, k, a, b, learning_rate, embDim, gamma, batch_s
         trueSummary = buildTotalSummaryFast(best_sentences, trueSummary, usecuda)
     end
 
-    -- print('sentences = ', table.unpack(sentences))
-    -- print('actions = ', table.unpack(true_actions))
-    -- print('true summary = ', trueSummary)
+    print('sentences = ', table.unpack(sentences))
+    print('actions = ', table.unpack(true_actions))
+    print('true summary = ', trueSummary)
 
     qTokens = {}
     for i=1, n do
@@ -382,7 +382,7 @@ function runSimulation(n, n_s, q, k, a, b, learning_rate, embDim, gamma, batch_s
                 end_row = start_row + n - 1
                 curr_memsize = end_row
             end
-            
+
             -- Update memory sequentially until it's full then restart updating it
             qActionMemory[{{start_row, end_row}}]:copy(qActions[i])
             predSummaryMemory[{{start_row, end_row}}]:copy(totalPredsummary)
@@ -396,6 +396,11 @@ function runSimulation(n, n_s, q, k, a, b, learning_rate, embDim, gamma, batch_s
             end
 
         end
+        tmp = Tensor(n_s * n, 2)
+        for i = 1, n_s do 
+            tmp[i]:copy(qActions[i])
+        end
+        print(tmp)
         for i=1, n_s do
             -- this is how we incorporate the discount paremeter on future predictions
             if i  < n_s then
