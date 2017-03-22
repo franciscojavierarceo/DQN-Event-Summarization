@@ -176,7 +176,6 @@ function buildTotalSummary(predsummary, totalPredsummary)
             end
             lenx = predsummary[i]:size(1)
             totalPredsummary[i][{{minindex, minindex + lenx - 1}}]:copy(predsummary[i])
-
         end
     end
 end
@@ -254,9 +253,14 @@ function runSimulation(n, n_s, q, k, a, b, learning_rate, embDim, gamma, batch_s
         trueSummary = buildTotalSummaryFast(best_sentences, trueSummary, usecuda)
     end
 
-    print('sentences = ', table.unpack(sentences))
-    print('actions = ', table.unpack(true_actions))
-    print('true summary = ', trueSummary)
+    tmptrueactions = Tensor(n_s * n, 2)
+    for i = 1, n_s do 
+        tmptrueactions[i]:copy(true_actions[i])
+    end
+    print('true actions =')
+    print(tmptrueactions)
+    print('true summary =')
+    print(trueSummary)
 
     qTokens = {}
     for i=1, n do
@@ -266,6 +270,7 @@ function runSimulation(n, n_s, q, k, a, b, learning_rate, embDim, gamma, batch_s
     -- Building the model
     model = buildModel('lstm', b, embDim, 'f1', adapt, usecuda)
     params, gradParams = model:getParameters()
+
     if adapt then 
         criterion = nn.ParallelCriterion():add(nn.MSECriterion()):add(nn.BCECriterion())
         criterion["weights"] = {1, adapt_lambda}
@@ -351,6 +356,33 @@ function runSimulation(n, n_s, q, k, a, b, learning_rate, embDim, gamma, batch_s
                 qValues[i]:copy(qMax)
             end
 
+            -- This is where we begin to store the data in our memory 
+                -- notice that we store the reward after this part
+            start_row = curr_memsize + 1
+            if memsize < (start_row + n) then 
+                start_row = memsize - n + 1
+                end_row = start_row + n - 1
+                curr_memsize = 0
+                if (end_row + n) >= memsize then 
+                    memfull = true
+                end 
+            else 
+                end_row = start_row + n - 1
+                curr_memsize = end_row
+            end
+            -- Update memory sequentially until it's full then restart updating it
+            qActionMemory[{{start_row, end_row}}]:copy(qActions[i])
+            predSummaryMemory[{{start_row, end_row}}]:copy(totalPredsummary)
+            sentenceMemory[{{start_row, end_row}}]:copy(sentences[i])
+            qPredsMemory[{{start_row, end_row}}]:copy(qPreds[i])
+            qValuesMemory[{{start_row, end_row}}]:copy(qValues[i])
+            queryMemory[{{start_row, end_row}}]:copy(queries)
+
+            if adapt then
+                regMemory[{{start_row, end_row}}]:copy(regPreds[i])
+            end
+
+            -- Now that we've stored our memory, we can build the summary to evaluate our action
             predsummary = buildPredsummaryFast(qActions[i], sentences[i], SELECT)
             totalPredsummary = buildTotalSummaryFast(predsummary, totalPredsummary, usecuda)
 
@@ -369,43 +401,19 @@ function runSimulation(n, n_s, q, k, a, b, learning_rate, embDim, gamma, batch_s
                 -- Calculating change in rougue f1
                 rewards[i]:copy(rewards[i] - rewards[i-1])
             end
-            -- here's the row indexing
-            start_row = curr_memsize + 1
-            if memsize < (start_row + n) then 
-                start_row = memsize - n + 1
-                end_row = start_row + n - 1
-                curr_memsize = 0
-                if (end_row + n) >= memsize then 
-                    memfull = true
-                end 
-            else 
-                end_row = start_row + n - 1
-                curr_memsize = end_row
-            end
-
-            -- Update memory sequentially until it's full then restart updating it
-            qActionMemory[{{start_row, end_row}}]:copy(qActions[i])
-            predSummaryMemory[{{start_row, end_row}}]:copy(totalPredsummary)
-            sentenceMemory[{{start_row, end_row}}]:copy(sentences[i])
-            qPredsMemory[{{start_row, end_row}}]:copy(qPreds[i])
-            qValuesMemory[{{start_row, end_row}}]:copy(qValues[i])
-            queryMemory[{{start_row, end_row}}]:copy(queries)
-
-            if adapt then
-                regMemory[{{start_row, end_row}}]:copy(regPreds[i])
-            end
-
         end
         tmp = Tensor(n_s * n, 2)
         for i = 1, n_s do 
             tmp[i]:copy(qActions[i])
         end
         print(tmp)
+        print(totalPredsummary)
+
         for i=1, n_s do
             -- this is how we incorporate the discount paremeter on future predictions
             if i  < n_s then
                 rewardMemory[{{n * (i-1) + 1, n * i}}]:copy(
-                        rewards[i] + (gamma * rewards[i + 1])
+                        rewards[i] + (gamma * qValues[i + 1])
                     )
             else
                 -- for terminal predictions we use the final reward
