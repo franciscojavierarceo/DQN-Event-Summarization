@@ -349,7 +349,6 @@ function runSimulation(n, n_s, q, k, a, b, learning_rate, embDim, gamma, batch_s
                 -- Here's the fast way to select the optimal action for each query
                 qActions[i]:copy(qActions[i]:scatter(2, qindx, torch.ones(qPreds[i]:size())):clone())
                 qValues[i]:copy(qMax)
-
             end
 
             predsummary = buildPredsummaryFast(qActions[i], sentences[i], SELECT)
@@ -382,7 +381,8 @@ function runSimulation(n, n_s, q, k, a, b, learning_rate, embDim, gamma, batch_s
             else 
                 end_row = start_row + n - 1
                 curr_memsize = end_row
-            end            
+            end
+            
             -- Update memory sequentially until it's full then restart updating it
             qActionMemory[{{start_row, end_row}}]:copy(qActions[i])
             predSummaryMemory[{{start_row, end_row}}]:copy(totalPredsummary)
@@ -400,7 +400,7 @@ function runSimulation(n, n_s, q, k, a, b, learning_rate, embDim, gamma, batch_s
             -- this is how we incorporate the discount paremeter on future predictions
             if i  < n_s then
                 rewardMemory[{{n * (i-1) + 1, n * i}}]:copy(
-                        rewards[i] + (gamma * rewards[i + 1])
+                        rewards[i] + (gamma * qPreds[i + 1])
                     )
             else
                 -- for terminal predictions we use the final reward
@@ -535,5 +535,4 @@ runSimulation(opt.n_samples, opt.n_s, opt.q_l, opt.k, opt.a, opt.b, opt.lr,
               opt.adapt, opt.adapt_lambda, opt.usecuda)
 
 -- Notes
--- 2. Optimize using masklayer
--- 7. Deploy the model in chunks?
+-- 1. Store state of summary at {t+1}
