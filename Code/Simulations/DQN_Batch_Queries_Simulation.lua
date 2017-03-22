@@ -387,9 +387,12 @@ function runSimulation(n, n_s, q, k, a, b, learning_rate, embDim, gamma, batch_s
             totalPredsummary = buildTotalSummaryFast(predsummary, totalPredsummary, usecuda)
 
             for j = 1, n do
-                recall, prec, f1 = rougeScores( qTokens[j],
-                                                Tokenize(totalPredsummary[j]:totable()))
-                -- rewards[i][j]:fill(recall)
+                recall, prec, f1 = rougeScores( Tokenize(totalPredsummary[j]:totable()),
+                                                qTokens[j]
+                    )
+                -- recall, prec, f1 = rougeScores( qTokens[j],
+                --                                 Tokenize(totalPredsummary[j]:totable())
+                --                             )
                 rewards[i][j]:fill(f1)
             end
 
