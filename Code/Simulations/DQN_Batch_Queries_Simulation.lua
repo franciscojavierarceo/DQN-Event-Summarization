@@ -521,7 +521,7 @@ cmd:option('--n_samples', 100, 'Number of queries')
 -- n_samples = 100000 will reproduce the speed numbers
 cmd:option('--n_s', 5, 'Number of sentences')
 cmd:option('--q_l', 5, 'Query length')
-cmd:option('--k', 15, 'Number of samples to iterate over')
+cmd:option('--k', 15, 'Length of sentences')
 cmd:option('--a', 1, 'Number of samples to iterate over')
 cmd:option('--b', 100, 'Number of samples to iterate over')
 cmd:option('--lr', 1e-5, 'Learning rate')
