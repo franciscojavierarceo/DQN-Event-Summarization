@@ -390,9 +390,6 @@ function runSimulation(n, n_s, q, k, a, b, learning_rate, embDim, gamma, batch_s
                 recall, prec, f1 = rougeScores( Tokenize(totalPredsummary[j]:totable()),
                                                 qTokens[j]
                     )
-                -- recall, prec, f1 = rougeScores( qTokens[j],
-                --                                 Tokenize(totalPredsummary[j]:totable())
-                --                             )
                 rewards[i][j]:fill(f1)
             end
 
@@ -545,10 +542,10 @@ cmd:text()
 local opt = cmd:parse(arg or {})       --- stores the commands in opt.variable (e.g., opt.model)
 
 -- Running the script
-runSimulation(opt.n_samples, opt.n_s, opt.q_l, opt.k, opt.a, opt.b, opt.lr,
-              opt.embDim, opt.gamma, opt.batch_size, opt.fast, opt.nepochs, opt.epsilon, opt.print, 
-              opt.memory_multiplier, opt.cuts, opt.base_explore_rate, opt.endexplorerate, 
-              opt.adapt, opt.adapt_lambda, opt.usecuda)
+-- runSimulation(opt.n_samples, opt.n_s, opt.q_l, opt.k, opt.a, opt.b, opt.lr,
+--               opt.embDim, opt.gamma, opt.batch_size, opt.fast, opt.nepochs, opt.epsilon, opt.print, 
+--               opt.memory_multiplier, opt.cuts, opt.base_explore_rate, opt.endexplorerate, 
+--               opt.adapt, opt.adapt_lambda, opt.usecuda)
 
 -- Notes
 -- 1. Store state of summary at {t+1}
