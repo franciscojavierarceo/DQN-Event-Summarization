@@ -409,8 +409,8 @@ function runSimulation(n, n_s, q, k, a, b, learning_rate, embDim, gamma, batch_s
         for i = 1, n_s do 
             tmp[i]:copy(qActions[i])
         end
-        print(tmp)
-        print(totalPredsummary)
+        print(tmp:select(2, SELECT):clone():resize(1, 5))
+        -- print(totalPredsummary)
 
         for i=1, n_s do
             -- this is how we incorporate the discount paremeter on future predictions
