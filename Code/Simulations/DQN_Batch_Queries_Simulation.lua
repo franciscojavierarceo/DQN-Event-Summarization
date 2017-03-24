@@ -42,8 +42,8 @@ function buildModel(model, vocabSize, embeddingSize, metric, adapt, use_cuda)
     local queryLookup = sentenceLookup:clone("weight", "gradWeight") 
     local summaryLookup = sentenceLookup:clone("weight", "gradWeight")
     local pmodule = nn.ParallelTable()
-                :add(sentenceLookup)
                 :add(queryLookup)
+                :add(sentenceLookup)
                 :add(summaryLookup)
 
     if model == 'bow' then
