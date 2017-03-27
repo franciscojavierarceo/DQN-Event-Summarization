@@ -253,14 +253,14 @@ function runSimulation(n, n_s, q, k, a, b, learning_rate, embDim, gamma, batch_s
         trueSummary = buildTotalSummaryFast(best_sentences, trueSummary, usecuda)
     end
 
-    tmptrueactions = Tensor(n_s * n, 2)
-    for i = 1, n_s do 
-        tmptrueactions[i]:copy(true_actions[i])
-    end
-    print('true actions =')
-    print(tmptrueactions)
-    print('true summary =')
-    print(trueSummary)
+    -- tmptrueactions = Tensor(n_s * n, 2)
+    -- for i = 1, n_s do 
+    --     tmptrueactions[i]:copy(true_actions[i])
+    -- end
+    -- print('true actions =')
+    -- print(tmptrueactions)
+    -- print('true summary =')
+    -- print(trueSummary)
 
     qTokens = {}
     for i=1, n do
@@ -284,6 +284,7 @@ function runSimulation(n, n_s, q, k, a, b, learning_rate, embDim, gamma, batch_s
     rewards = {}
     lossfull = {}
     rouguef1 = {}
+    rougue_scores = {}
 
     totalPredsummary = LongTensor(n, n_s * k):fill(0)
 
@@ -337,7 +338,7 @@ function runSimulation(n, n_s, q, k, a, b, learning_rate, embDim, gamma, batch_s
         end
 
         for i=1, n_s do
-            totalPreds = model:forward({sentences[i], queries, totalPredsummary})
+            totalPreds = model:forward({queries, sentences[i], totalPredsummary})
 
             if adapt then 
                 qPreds[i]:copy(totalPreds[1])
@@ -413,6 +414,13 @@ function runSimulation(n, n_s, q, k, a, b, learning_rate, embDim, gamma, batch_s
             if i == n_s then 
                 rouguef1[epoch] = rougue_scores[i]:mean()
             end 
+
+            if i == 1 then
+                -- Calculating change in rougue f1
+                rewards[i]:copy(rougue_scores[i])
+            else 
+                rewards[i]:copy(rougue_scores[i] - rougue_scores[i-1])
+            end
         end
 
         -- tmp = Tensor(n_s * n, 2)
@@ -423,17 +431,9 @@ function runSimulation(n, n_s, q, k, a, b, learning_rate, embDim, gamma, batch_s
         -- print(totalPredsummary)
 
         for i=1, n_s do
-            -- this is how we incorporate the discount paremeter on future predictions
-            if i  == 1 then
-                rewardMemory[{{n * (i-1) + 1, n * i}}]:copy(
-                        rewards[i]
-                    )
-            else
-                -- for terminal predictions we use the final reward
-                rewardMemory[{{n * (i-1) + 1, n * i}}]:copy(
-                        rewards[i] - rewards[i - 1]
-                    )
-            end
+            rewardMemory[{{n * (i-1) + 1, n * i}}]:copy(
+                    rewards[i]
+                )
         end
 
         if memfull then 
@@ -561,10 +561,9 @@ cmd:text()
 local opt = cmd:parse(arg or {})       --- stores the commands in opt.variable (e.g., opt.model)
 
 -- Running the script
--- runSimulation(opt.n_samples, opt.n_s, opt.q_l, opt.k, opt.a, opt.b, opt.lr,
---               opt.embDim, opt.gamma, opt.batch_size, opt.fast, opt.nepochs, opt.epsilon, opt.print, 
---               opt.memory_multiplier, opt.cuts, opt.base_explore_rate, opt.endexplorerate, 
---               opt.adapt, opt.adapt_lambda, opt.usecuda)
+runSimulation(opt.n_samples, opt.n_s, opt.q_l, opt.k, opt.a, opt.b, opt.lr,
+              opt.embDim, opt.gamma, opt.batch_size, opt.fast, opt.nepochs, opt.epsilon, opt.print, 
+              opt.memory_multiplier, opt.cuts, opt.base_explore_rate, opt.endexplorerate, 
+              opt.adapt, opt.adapt_lambda, opt.usecuda)
 
--- Notes
--- 1. Store state of summary at {t+1}
+-- th Code/Simulations/DQN_Batch_Queries_Simulation.lua --n_samples 1 --lr 1e-6 --n_s 5 --k 3 --q_l 4 --a 1 --b 10 --gamma 0.3 --print --base_explore_rate 0.1 --endexplorerate 0.5 --fast --nepochs 400 --cuts 4 --memory_multiplier 3 --batch_size 25 --embDim 50
