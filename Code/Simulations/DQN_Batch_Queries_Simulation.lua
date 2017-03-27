@@ -278,7 +278,6 @@ function runSimulation(n, n_s, q, k, a, b, learning_rate, embDim, gamma, batch_s
         criterion = nn.MSECriterion()
     end 
 
-    totalPredsummary = {}
     qValues = {}
     qActions = {}
     qPreds = {}
@@ -295,6 +294,8 @@ function runSimulation(n, n_s, q, k, a, b, learning_rate, embDim, gamma, batch_s
     qActionMemory = Tensor(memsize, 2):fill(0)
     predSummaryMemory = Tensor(memsize, n_s * k):fill(0)
     sentenceMemory = Tensor(memsize, k):fill(0)
+    sentencetp1Memory  = Tensor(memsize, k):fill(0)
+    predSummarytp1Memory = Tensor(memsize, n_s * k):fill(0)
     qPredsMemory = Tensor(memsize, 2):fill(0)
     qValuesMemory = Tensor(memsize, 1):fill(0)
     rewardMemory = Tensor(memsize, 1):fill(0)
@@ -309,6 +310,7 @@ function runSimulation(n, n_s, q, k, a, b, learning_rate, embDim, gamma, batch_s
         qValues[i] = Tensor(n, 1):fill(0)
         qActions[i] = Tensor(n, 2):fill(0)
         rewards[i] = Tensor(n, 1):fill(0)
+        rougue_scores[i] = Tensor(n, 1):fill(0)
         if adapt then
             regPreds[i] = Tensor(n, 1):fill(0)
         end        
@@ -327,6 +329,7 @@ function runSimulation(n, n_s, q, k, a, b, learning_rate, embDim, gamma, batch_s
             qValues[i]:fill(0)
             qActions[i]:fill(0)
             rewards[i]:fill(0)
+            rougue_scores[i]:fill(0)
             totalPredsummary:fill(0)
             if adapt then
                 regMemory[i]:fill(0)
@@ -352,8 +355,12 @@ function runSimulation(n, n_s, q, k, a, b, learning_rate, embDim, gamma, batch_s
             else 
                 qMax, qindx = torch.max(qPreds[i], 2)  -- Pulling the best actions
                 -- Here's the fast way to select the optimal action for each query
-                qActions[i]:copy(qActions[i]:scatter(2, qindx, torch.ones(qPreds[i]:size())):clone())
-                qValues[i]:copy(qMax)
+                qActions[i]:copy(
+                    qActions[i]:scatter(2, qindx, torch.ones(qPreds[i]:size())):clone()
+                )
+                qValues[i]:copy(
+                    qMax
+                )
             end
 
             -- This is where we begin to store the data in our memory 
@@ -370,55 +377,61 @@ function runSimulation(n, n_s, q, k, a, b, learning_rate, embDim, gamma, batch_s
                 end_row = start_row + n - 1
                 curr_memsize = end_row
             end
+
             -- Update memory sequentially until it's full then restart updating it
-            qActionMemory[{{start_row, end_row}}]:copy(qActions[i])
-            predSummaryMemory[{{start_row, end_row}}]:copy(totalPredsummary)
+            queryMemory[{{start_row, end_row}}]:copy(queries)
             sentenceMemory[{{start_row, end_row}}]:copy(sentences[i])
+            predSummaryMemory[{{start_row, end_row}}]:copy(totalPredsummary)
+            
+            -- Now that we've stored our memory, we can build the summary to evaluate our action
+            predsummary = buildPredsummaryFast(qActions[i], sentences[i], SELECT)
+            totalPredsummary = buildTotalSummaryFast(predsummary, totalPredsummary, usecuda)
+            
+            if i < n_s then
+                sentencetp1Memory[{{start_row, end_row}}]:copy(sentences[i + 1])
+                predSummarytp1Memory[{{start_row, end_row}}]:copy(totalPredsummary)
+            else 
+                sentencetp1Memory[{{start_row, end_row}}]:copy(Tensor(sentences[i]:size()):fill(0) )
+                predSummarytp1Memory[{{start_row, end_row}}]:copy(Tensor(totalPredsummary:size()):fill(0) )
+            end 
+            
+            qActionMemory[{{start_row, end_row}}]:copy(qActions[i])
             qPredsMemory[{{start_row, end_row}}]:copy(qPreds[i])
             qValuesMemory[{{start_row, end_row}}]:copy(qValues[i])
-            queryMemory[{{start_row, end_row}}]:copy(queries)
 
             if adapt then
                 regMemory[{{start_row, end_row}}]:copy(regPreds[i])
             end
 
-            -- Now that we've stored our memory, we can build the summary to evaluate our action
-            predsummary = buildPredsummaryFast(qActions[i], sentences[i], SELECT)
-            totalPredsummary = buildTotalSummaryFast(predsummary, totalPredsummary, usecuda)
-
             for j = 1, n do
                 recall, prec, f1 = rougeScores( Tokenize(totalPredsummary[j]:totable()),
                                                 qTokens[j]
                     )
-                rewards[i][j]:fill(f1)
+                rougue_scores[i][j]:fill(f1)
             end
 
             if i == n_s then 
-                rouguef1[epoch] = rewards[i]:mean()
+                rouguef1[epoch] = rougue_scores[i]:mean()
             end 
+        end
 
-            if i > 1 then
-                -- Calculating change in rougue f1
-                rewards[i]:copy(rewards[i] - rewards[i-1])
-            end
-        end
-        tmp = Tensor(n_s * n, 2)
-        for i = 1, n_s do 
-            tmp[i]:copy(qActions[i])
-        end
-        print(tmp:select(2, SELECT):clone():resize(1, 5))
+        -- tmp = Tensor(n_s * n, 2)
+        -- for i = 1, n_s do 
+        --     tmp[i]:copy(qActions[i])
+        -- end
+        -- print(tmp:select(2, SELECT):clone():resize(1, 5))
         -- print(totalPredsummary)
 
         for i=1, n_s do
             -- this is how we incorporate the discount paremeter on future predictions
-            if i  < n_s then
+            if i  == 1 then
                 rewardMemory[{{n * (i-1) + 1, n * i}}]:copy(
-                        rewards[i] + (gamma * qValues[i + 1])
+                        rewards[i]
                     )
             else
                 -- for terminal predictions we use the final reward
                 rewardMemory[{{n * (i-1) + 1, n * i}}]:copy(
-                        rewards[i] 
+                        rewards[i] - rewards[i - 1]
                     )
             end
         end
@@ -436,8 +449,10 @@ function runSimulation(n, n_s, q, k, a, b, learning_rate, embDim, gamma, batch_s
                             predSummaryMemory[{{1, memrows}}]:cuda(),
                             qPredsMemory[{{1, memrows}}]:cuda(), 
                             ByteTensor(memrows, 2):copy(qActionMemory[{{1, memrows}}]), 
-                            qValuesMemory[{{1, memrows}}]:cuda()
-                            }, 
+                            qValuesMemory[{{1, memrows}}]:cuda(),
+                            sentencetp1Memory[{{1, memrows}}]:cuda(),
+                            predSummarytp1Memory[{{1, memrows}}]:cuda()               
+                                }, 
                         rewardMemory[{{1, memrows}}]:cuda()
                     )
             if adapt then            
@@ -450,7 +465,9 @@ function runSimulation(n, n_s, q, k, a, b, learning_rate, embDim, gamma, batch_s
                         predSummaryMemory[{{1, memrows}}], 
                         qPredsMemory[{{1, memrows}}], 
                         ByteTensor(memrows, 2):copy(qActionMemory[{{1, memrows}}]), 
-                        qValuesMemory[{{1, memrows}}]
+                        qValuesMemory[{{1, memrows}}],
+                        sentencetp1Memory[{{1, memrows}}],
+                        predSummarytp1Memory[{{1, memrows}}]                    
                         }, 
                     rewardMemory[{{1, memrows}}]
                 )
