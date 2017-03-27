@@ -253,15 +253,6 @@ function runSimulation(n, n_s, q, k, a, b, learning_rate, embDim, gamma, batch_s
         trueSummary = buildTotalSummaryFast(best_sentences, trueSummary, usecuda)
     end
 
-    -- tmptrueactions = Tensor(n_s * n, 2)
-    -- for i = 1, n_s do 
-    --     tmptrueactions[i]:copy(true_actions[i])
-    -- end
-    -- print('true actions =')
-    -- print(tmptrueactions)
-    -- print('true summary =')
-    -- print(trueSummary)
-
     qTokens = {}
     for i=1, n do
         qTokens[i] = Tokenize(trueSummary[i]:totable())
