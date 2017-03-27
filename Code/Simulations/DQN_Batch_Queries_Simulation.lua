@@ -412,6 +412,7 @@ function runSimulation(n, n_s, q, k, a, b, learning_rate, embDim, gamma, batch_s
             else 
                 rewards[i]:copy(rougue_scores[i] - rougue_scores[i-1])
             end
+            rewardMemory[{{start_row, end_row}}]:copy(rewards[i])
         end
 
         -- tmp = Tensor(n_s * n, 2)
@@ -420,12 +421,6 @@ function runSimulation(n, n_s, q, k, a, b, learning_rate, embDim, gamma, batch_s
         -- end
         -- print(tmp:select(2, SELECT):clone():resize(1, 5))
         -- print(totalPredsummary)
-
-        for i=1, n_s do
-            rewardMemory[{{n * (i-1) + 1, n * i}}]:copy(
-                    rewards[i]
-                )
-        end
 
         if memfull then 
             memrows = memsize
