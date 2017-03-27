@@ -481,7 +481,7 @@ function runSimulation(n, n_s, q, k, a, b, learning_rate, embDim, gamma, batch_s
             local function feval(params)
                 gradParams:zero()
                 if adapt then
-                    local ignore = model:forward({xin[1], xin[2], xin[3]})
+                    local predtp1 = model:forward({xin[1], xin[7], xin[8]})
                     local predQOnActions = maskLayer:forward({xin[4], xin[5]}) 
                     local ones = torch.ones(reward:size(1)):resize(reward:size(1))
                     if usecuda then
@@ -491,11 +491,13 @@ function runSimulation(n, n_s, q, k, a, b, learning_rate, embDim, gamma, batch_s
                     local gradOutput = criterion:backward({predQOnActions, xin[6]}, {reward, ones})
                     local gradMaskLayer = maskLayer:backward({xin[4], xin[5]}, gradOutput[1])
                     model:backward({xin[1], xin[2], xin[3]}, {gradMaskLayer[1], gradOutput[2]})
-                else 
-                    local ignore = model:forward({xin[1], xin[2], xin[3]})
+                else
+                    local predtp1 = model:forward({xin[1], xin[7], xin[8]})
+                    local predQOnActionstp1 = maskLayer:forward({xin[4], xin[5]}) 
+                    local y_j = reward + (gamma * predQOnActionstp1) 
                     local predQOnActions = maskLayer:forward({xin[4], xin[5]}) 
-                    lossf = criterion:forward(predQOnActions, reward)
-                    local gradOutput = criterion:backward(predQOnActions, reward)
+                    lossf = criterion:forward(predQOnActions, y_j )
+                    local gradOutput = criterion:backward(predQOnActions, y_j)
                     local gradMaskLayer = maskLayer:backward({xin[4], xin[5]}, gradOutput)
                     model:backward({xin[1], xin[2], xin[3]}, gradMaskLayer[1])
                 end 
