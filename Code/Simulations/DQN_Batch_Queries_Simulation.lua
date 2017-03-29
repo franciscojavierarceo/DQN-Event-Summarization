@@ -27,15 +27,17 @@ function buildModel(model, vocabSize, embeddingSize, metric, adapt, use_cuda)
         print(string.format("Running bag-of-words model to learn %s", metric))
         sentenceLookup = nn.Sequential()
                     :add(nn.LookupTableMaskZero(vocabSize, embeddingSize))
-                    :add(nn.Sum(2, 3, true)) -- Not averaging blows up model so keep this true
+                    :add(nn.Sum(2, 3, true)) 
+                    -- Not averaging blows up model so keep this true
                     :add(nn.Tanh())
     else
+    -- This needs to have a transpose in the model
         print(string.format("Running LSTM model to learn %s", metric))
         sentenceLookup = nn.Sequential()
                     :add(nn.LookupTableMaskZero(vocabSize, embeddingSize))
-                    :add(nn.SplitTable(2))
+                    -- :add(nn.SplitTable(2))
                     :add(nn.Sequencer(nn.LSTM(embeddingSize, embeddingSize)))
-                    :add(nn.SelectTable(-1))            -- selects last state of the LSTM
+                    -- :add(nn.SelectTable(-1))            -- selects last state of the LSTM
                     :add(nn.Linear(embeddingSize, embeddingSize))
                     :add(nn.ReLU())
     end
@@ -203,9 +205,9 @@ function buildTotalSummaryFast(predsummary, inputTotalSummary, usecuda)
     return tmpSummary
 end
 
-function runSimulation(n, n_s, q, k, a, b, learning_rate, embDim, gamma, batch_size, fast, nepochs, epsilon, print_perf, mem_multiplier, cuts, base_explore_rate, endexplorerate, adapt, adapt_lambda, usecuda)
+function runSimulation(n, n_s, q, k, a, b, learning_rate, embDim, gamma, batch_size, fast, nepochs, epsilon, print_perf, mem_multiplier, cuts, base_explore_rate, endexplorerate, adapt, adapt_lambda, usecuda, seedval)
     -- torch.setnumthreads(16)
-    torch.manualSeed(420)
+    torch.manualSeed(seedval)
     if usecuda then
         Tensor = torch.CudaTensor
         LongTensor = torch.CudaLongTensor   
@@ -259,7 +261,7 @@ function runSimulation(n, n_s, q, k, a, b, learning_rate, embDim, gamma, batch_s
     end
 
     -- Building the model
-    model = buildModel('lstm', b, embDim, 'f1', adapt, usecuda)
+    model = buildModel('bow', b, embDim, 'f1', adapt, usecuda)
     params, gradParams = model:getParameters()
 
     if adapt then 
@@ -415,13 +417,6 @@ function runSimulation(n, n_s, q, k, a, b, learning_rate, embDim, gamma, batch_s
             rewardMemory[{{start_row, end_row}}]:copy(rewards[i])
         end
 
-        -- tmp = Tensor(n_s * n, 2)
-        -- for i = 1, n_s do 
-        --     tmp[i]:copy(qActions[i])
-        -- end
-        -- print(tmp:select(2, SELECT):clone():resize(1, 5))
-        -- print(totalPredsummary)
-
         if memfull then 
             memrows = memsize
         else 
@@ -547,6 +542,7 @@ cmd:option('--print', false, 'print performance')
 cmd:option('--adapt', false, 'Use adaptive regularization')
 cmd:option('--adapt_lambda', 0.25, 'Amount of adaptive regularization')
 cmd:option('--usecuda', false, 'cuda option')
+cmd:option('--seedval', 420, 'seedvalue')
 cmd:text()
 local opt = cmd:parse(arg or {})       --- stores the commands in opt.variable (e.g., opt.model)
 
@@ -554,6 +550,6 @@ local opt = cmd:parse(arg or {})       --- stores the commands in opt.variable (
 runSimulation(opt.n_samples, opt.n_s, opt.q_l, opt.k, opt.a, opt.b, opt.lr,
               opt.embDim, opt.gamma, opt.batch_size, opt.fast, opt.nepochs, opt.epsilon, opt.print, 
               opt.memory_multiplier, opt.cuts, opt.base_explore_rate, opt.endexplorerate, 
-              opt.adapt, opt.adapt_lambda, opt.usecuda)
+              opt.adapt, opt.adapt_lambda, opt.usecuda, opt.seedval)
 
 -- th Code/Simulations/DQN_Batch_Queries_Simulation.lua --n_samples 1 --lr 1e-6 --n_s 5 --k 3 --q_l 4 --a 1 --b 10 --gamma 0.3 --print --base_explore_rate 0.1 --endexplorerate 0.5 --fast --nepochs 400 --cuts 4 --memory_multiplier 3 --batch_size 25 --embDim 50
