@@ -478,20 +478,18 @@ function runSimulation(n, n_s, q, k, a, b, learning_rate, embDim, gamma, batch_s
                     local gradMaskLayer = maskLayer:backward({xin[4], xin[5]}, gradOutput[1])
                     model:backward({xin[1], xin[2], xin[3]}, {gradMaskLayer[1], gradOutput[2]})
                 else
+                    model:forget()
                     local predtp1 = model:forward({xin[1], xin[7], xin[8]})
-                    -- Call max here instead of mask layer
-                    local predQOnActionstp1 = maskLayer:forward({xin[4], xin[5]}) 
-                    local y_j = reward + (gamma * predQOnActionstp1)
-                    -- We want to keep the decision that was made...but we need to update xin4
-                    -- Need to call forward on xin[1], xin[2], xin[3]
-                    -- Call forget() function
-                    -- Call forward for tp1, then model forget, then call predt
-                    -- then should be good
-                    local predQOnActions = maskLayer:forward({xin[4], xin[5]})
+                    local predtp1max, _ = torch.max(predtp1, 2)
+                    model:forget()
+                    local predt = model:forward({xin[1], xin[2], xin[3]})
+                    local y_j = reward + (gamma * predtp1max) 
+                    local predQOnActions = maskLayer:forward({predt, xin[5]}) 
                     lossf = criterion:forward(predQOnActions, y_j )
                     local gradOutput = criterion:backward(predQOnActions, y_j)
-                    local gradMaskLayer = maskLayer:backward({xin[4], xin[5]}, gradOutput)
+                    local gradMaskLayer = maskLayer:backward({predt, xin[5]}, gradOutput)
                     model:backward({xin[1], xin[2], xin[3]}, gradMaskLayer[1])
+
                 end 
                 return lossf, gradParams
             end
