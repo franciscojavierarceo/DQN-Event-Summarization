@@ -375,7 +375,6 @@ function train(n, n_s, q, k, a, b, learning_rate, embDim, gamma, batch_size, fas
                 else 
                     local ignore = model:forward({xin[1], xin[2], xin[3]})
                     local predQOnActions = maskLayer:forward({xin[4], xin[5]}) 
-                    -- print(predQOnActions)
                     lossf = criterion:forward(predQOnActions, reward)
                     local gradOutput = criterion:backward(predQOnActions, reward)
                     local gradMaskLayer = maskLayer:backward({xin[4], xin[5]}, gradOutput)

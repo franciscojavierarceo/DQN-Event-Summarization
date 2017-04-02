@@ -20,6 +20,37 @@ function genNbyK(n, k, a, b)
     return out
 end
 
+    -- local lu = nn.LookupTableMaskZero(vocabSize, embeddingSize)
+
+    -- local sentenceEncoder = nn.Sequential()
+    --     :add(lu)
+    --     :add(nn.Sum(2, 3, true))
+    --     :add(nn.Linear(embeddingSize, embeddingSize))
+    --     :add(nn.Tanh())
+    -- local queryEncoder = nn.Sequential()
+    --     :add(lu:clone("weight", "gradWeight"))
+    --     :add(nn.Sum(2, 3, true))
+    --     :add(nn.Linear(embeddingSize, embeddingSize))
+    --     :add(nn.Tanh())
+    -- local summaryEncoder = nn.Sequential()
+    --     :add(lu:clone("weight", "gradWeight"))
+    --     :add(nn.Sum(2, 3, true))
+    --     :add(nn.Linear(embeddingSize, embeddingSize))
+    --     :add(nn.Tanh())
+
+    -- local pmodule = nn.ParallelTable()
+    --     :add(queryEncoder)
+    --     :add(sentenceEncoder)
+    --     :add(summaryEncoder)
+    -- local nnmodel = nn.Sequential()
+    --     :add(pmodule)
+    --     :add(nn.JoinTable(2))
+    --     :add(nn.Linear(embeddingSize * 3, embeddingSize))
+    --     :add(nn.Tanh())
+    --     :add(nn.Linear(embeddingSize, 2))
+
+    -- return nnmodel
+
 function buildModel(model, vocabSize, embeddingSize, metric, adapt, use_cuda)
     -- Small experiments seem to show that the Tanh activations performed better\
     --      than the ReLU for the bow model
@@ -552,4 +583,4 @@ runSimulation(opt.n_samples, opt.n_s, opt.q_l, opt.k, opt.a, opt.b, opt.lr,
               opt.memory_multiplier, opt.cuts, opt.base_explore_rate, opt.endexplorerate, 
               opt.adapt, opt.adapt_lambda, opt.usecuda, opt.seedval)
 
--- th Code/Simulations/DQN_Batch_Queries_Simulation.lua --n_samples 1 --lr 1e-6 --n_s 5 --k 3 --q_l 4 --a 1 --b 10 --gamma 0.3 --print --base_explore_rate 0.1 --endexplorerate 0.5 --fast --nepochs 400 --cuts 4 --memory_multiplier 3 --batch_size 25 --embDim 50
+-- th Code/Simulations/DQN_Batch_Queries_Simulation.lua --n_samples 100 --lr 1e-2 --n_s 10  --k 10 --q_l 4 --a 1 --b 1000 --gamma 0.4 --print --base_explore_rate 0.1 --endexplorerate 0.5 --fast --nepochs 200 --cuts 4 --memory_multiplier 3 --batch_size 25 --embDim 50 --seedval 100
