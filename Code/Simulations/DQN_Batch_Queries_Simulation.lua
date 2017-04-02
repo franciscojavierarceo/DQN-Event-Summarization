@@ -236,7 +236,7 @@ function buildTotalSummaryFast(predsummary, inputTotalSummary, usecuda)
     return tmpSummary
 end
 
-function runSimulation(n, n_s, q, k, a, b, learning_rate, embDim, gamma, batch_size, fast, nepochs, epsilon, print_perf, mem_multiplier, cuts, base_explore_rate, endexplorerate, adapt, adapt_lambda, usecuda, seedval)
+function runSimulation(n, n_s, q, k, a, b, learning_rate, embDim, gamma, batch_size, nepochs, epsilon, print_perf, mem_multiplier, cuts, base_explore_rate, endexplorerate, adapt, adapt_lambda, usecuda, seedval)
     -- torch.setnumthreads(16)
     torch.manualSeed(seedval)
     if usecuda then
@@ -551,7 +551,6 @@ function runSimulation(n, n_s, q, k, a, b, learning_rate, embDim, gamma, batch_s
 end
 
 cmd = torch.CmdLine()
-cmd:option('--fast', true, 'implement fast indexing')
 cmd:option('--n_samples', 100, 'Number of queries')
 -- n_samples = 100000 will reproduce the speed numbers
 cmd:option('--n_s', 5, 'Number of sentences')
@@ -579,7 +578,7 @@ local opt = cmd:parse(arg or {})       --- stores the commands in opt.variable (
 
 -- Running the script
 runSimulation(opt.n_samples, opt.n_s, opt.q_l, opt.k, opt.a, opt.b, opt.lr,
-              opt.embDim, opt.gamma, opt.batch_size, opt.fast, opt.nepochs, opt.epsilon, opt.print, 
+              opt.embDim, opt.gamma, opt.batch_size, opt.nepochs, opt.epsilon, opt.print, 
               opt.memory_multiplier, opt.cuts, opt.base_explore_rate, opt.endexplorerate, 
               opt.adapt, opt.adapt_lambda, opt.usecuda, opt.seedval)
 
