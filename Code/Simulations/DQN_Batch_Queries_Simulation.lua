@@ -20,36 +20,34 @@ function genNbyK(n, k, a, b)
     return out
 end
 
-    -- local lu = nn.LookupTableMaskZero(vocabSize, embeddingSize)
+-- local lu = nn.LookupTableMaskZero(vocabSize, embeddingSize)
+-- local sentenceEncoder = nn.Sequential()
+--     :add(lu)
+--     :add(nn.Sum(2, 3, true))
+--     :add(nn.Linear(embeddingSize, embeddingSize))
+--     :add(nn.Tanh())
+-- local queryEncoder = nn.Sequential()
+--     :add(lu:clone("weight", "gradWeight"))
+--     :add(nn.Sum(2, 3, true))
+--     :add(nn.Linear(embeddingSize, embeddingSize))
+--     :add(nn.Tanh())
+-- local summaryEncoder = nn.Sequential()
+--     :add(lu:clone("weight", "gradWeight"))
+--     :add(nn.Sum(2, 3, true))
+--     :add(nn.Linear(embeddingSize, embeddingSize))
+--     :add(nn.Tanh())
 
-    -- local sentenceEncoder = nn.Sequential()
-    --     :add(lu)
-    --     :add(nn.Sum(2, 3, true))
-    --     :add(nn.Linear(embeddingSize, embeddingSize))
-    --     :add(nn.Tanh())
-    -- local queryEncoder = nn.Sequential()
-    --     :add(lu:clone("weight", "gradWeight"))
-    --     :add(nn.Sum(2, 3, true))
-    --     :add(nn.Linear(embeddingSize, embeddingSize))
-    --     :add(nn.Tanh())
-    -- local summaryEncoder = nn.Sequential()
-    --     :add(lu:clone("weight", "gradWeight"))
-    --     :add(nn.Sum(2, 3, true))
-    --     :add(nn.Linear(embeddingSize, embeddingSize))
-    --     :add(nn.Tanh())
-
-    -- local pmodule = nn.ParallelTable()
-    --     :add(queryEncoder)
-    --     :add(sentenceEncoder)
-    --     :add(summaryEncoder)
-    -- local nnmodel = nn.Sequential()
-    --     :add(pmodule)
-    --     :add(nn.JoinTable(2))
-    --     :add(nn.Linear(embeddingSize * 3, embeddingSize))
-    --     :add(nn.Tanh())
-    --     :add(nn.Linear(embeddingSize, 2))
-
-    -- return nnmodel
+-- local pmodule = nn.ParallelTable()
+--     :add(queryEncoder)
+--     :add(sentenceEncoder)
+--     :add(summaryEncoder)
+-- local nnmodel = nn.Sequential()
+--     :add(pmodule)
+--     :add(nn.JoinTable(2))
+--     :add(nn.Linear(embeddingSize * 3, embeddingSize))
+--     :add(nn.Tanh())
+--     :add(nn.Linear(embeddingSize, 2))
+-- return nnmodel
 
 function buildModel(model, vocabSize, embeddingSize, metric, adapt, use_cuda)
     -- Small experiments seem to show that the Tanh activations performed better\
@@ -66,9 +64,9 @@ function buildModel(model, vocabSize, embeddingSize, metric, adapt, use_cuda)
         print(string.format("Running LSTM model to learn %s", metric))
         sentenceLookup = nn.Sequential()
                     :add(nn.LookupTableMaskZero(vocabSize, embeddingSize))
-                    -- :add(nn.SplitTable(2))
+                    :add(nn.SplitTable(2))
                     :add(nn.Sequencer(nn.LSTM(embeddingSize, embeddingSize)))
-                    -- :add(nn.SelectTable(-1))            -- selects last state of the LSTM
+                    :add(nn.SelectTable(-1))            -- selects last state of the LSTM
                     :add(nn.Linear(embeddingSize, embeddingSize))
                     :add(nn.ReLU())
     end
@@ -292,7 +290,7 @@ function runSimulation(n, n_s, q, k, a, b, learning_rate, embDim, gamma, batch_s
     end
 
     -- Building the model
-    model = buildModel('bow', b, embDim, 'f1', adapt, usecuda)
+    model = buildModel('lstm', b, embDim, 'f1', adapt, usecuda)
     params, gradParams = model:getParameters()
 
     if adapt then 
@@ -577,9 +575,9 @@ cmd:text()
 local opt = cmd:parse(arg or {})       --- stores the commands in opt.variable (e.g., opt.model)
 
 -- Running the script
-runSimulation(opt.n_samples, opt.n_s, opt.q_l, opt.k, opt.a, opt.b, opt.lr,
-              opt.embDim, opt.gamma, opt.batch_size, opt.nepochs, opt.epsilon, opt.print, 
-              opt.memory_multiplier, opt.cuts, opt.base_explore_rate, opt.endexplorerate, 
-              opt.adapt, opt.adapt_lambda, opt.usecuda, opt.seedval)
+-- runSimulation(opt.n_samples, opt.n_s, opt.q_l, opt.k, opt.a, opt.b, opt.lr,
+--               opt.embDim, opt.gamma, opt.batch_size, opt.nepochs, opt.epsilon, opt.print, 
+--               opt.memory_multiplier, opt.cuts, opt.base_explore_rate, opt.endexplorerate, 
+--               opt.adapt, opt.adapt_lambda, opt.usecuda, opt.seedval)
 
--- th Code/Simulations/DQN_Batch_Queries_Simulation.lua --n_samples 100 --lr 1e-2 --n_s 10  --k 10 --q_l 4 --a 1 --b 1000 --gamma 0.4 --print --base_explore_rate 0.1 --endexplorerate 0.5 --fast --nepochs 200 --cuts 4 --memory_multiplier 3 --batch_size 25 --embDim 50 --seedval 100
+-- th Code/Simulations/DQN_Batch_Queries_Simulation.lua --n_samples 100 --lr 1e-2 --n_s 10  --k 10 --q_l 4 --a 1 --b 1000 --gamma 0.4 --print --base_explore_rate 0.1 --endexplorerate 0.5 --nepochs 200 --cuts 4 --memory_multiplier 3 --batch_size 25 --embDim 50 --seedval 100
