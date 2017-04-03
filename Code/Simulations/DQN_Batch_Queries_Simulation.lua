@@ -56,11 +56,12 @@ function buildModel(model, vocabSize, embeddingSize, metric, adapt, use_cuda)
         print(string.format("Running bag-of-words model to learn %s", metric))
         sentenceLookup = nn.Sequential()
                     :add(nn.LookupTableMaskZero(vocabSize, embeddingSize))
-                    :add(nn.Sum(2, 3, true)) 
                     -- Not averaging blows up model so keep this true
+                    :add(nn.Sum(2, 3, true)) 
                     :add(nn.Tanh())
     else
     -- This needs to have a transpose in the model
+    -- lstms go 
         print(string.format("Running LSTM model to learn %s", metric))
         sentenceLookup = nn.Sequential()
                     :add(nn.LookupTableMaskZero(vocabSize, embeddingSize))
