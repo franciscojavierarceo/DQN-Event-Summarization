@@ -576,9 +576,9 @@ cmd:text()
 local opt = cmd:parse(arg or {})       --- stores the commands in opt.variable (e.g., opt.model)
 
 -- Running the script
--- runSimulation(opt.n_samples, opt.n_s, opt.q_l, opt.k, opt.a, opt.b, opt.lr,
---               opt.embDim, opt.gamma, opt.batch_size, opt.nepochs, opt.epsilon, opt.print, 
---               opt.memory_multiplier, opt.cuts, opt.base_explore_rate, opt.endexplorerate, 
---               opt.adapt, opt.adapt_lambda, opt.usecuda, opt.seedval)
+ runSimulation(opt.n_samples, opt.n_s, opt.q_l, opt.k, opt.a, opt.b, opt.lr,
+               opt.embDim, opt.gamma, opt.batch_size, opt.nepochs, opt.epsilon, opt.print, 
+               opt.memory_multiplier, opt.cuts, opt.base_explore_rate, opt.endexplorerate, 
+               opt.adapt, opt.adapt_lambda, opt.usecuda, opt.seedval)
 
 -- th Code/Simulations/DQN_Batch_Queries_Simulation.lua --n_samples 100 --lr 1e-2 --n_s 10  --k 10 --q_l 4 --a 1 --b 1000 --gamma 0.4 --print --base_explore_rate 0.1 --endexplorerate 0.5 --nepochs 200 --cuts 4 --memory_multiplier 3 --batch_size 25 --embDim 50 --seedval 100
