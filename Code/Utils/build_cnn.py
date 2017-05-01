@@ -62,3 +62,6 @@ odf = odf[['id','token', 'frequency']]
 
 # Exporting data
 odf.to_csv(os.path.join(inputdir, "cnn_total_corpus_smry.csv"), index=False)
+
+findf = df[['sentence','query']].copy()
+# findf['sentence'] = [ findf['sentence].str.split(" ")]
