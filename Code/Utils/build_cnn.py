@@ -12,6 +12,7 @@ import pandas as pd
 from gensim import corpora
 from gensim.parsing.preprocessing import STOPWORDS
 from collections import defaultdict
+from joblib import Parallel, delayed
 
 def returntoken(corpus, word, maxtokens):
     return corpus[word] if word in corpus else maxtokens + 1 
@@ -84,9 +85,13 @@ def tokenize_cnn(inputdir, inputfile, outputdir, maxtokens=10000):
     odf.to_csv(os.path.join(outputdir, "cnn_subset_corpus_smry.csv"), index=False)
 
     # Replacing the tokens here
+
+    streams = Parallel(n_jobs=-1)(
+        delayed(extract_data)(finalinputdir, row) for i, row in outdf.iterrows()
+    )
     findf = df[['query_id', 'sentence_idx', 'query', 'sentence', 'true_summary']].copy()
     findf['stokens'] = [ ' '.join([ str(returntoken(corpus.token2id, word, maxtokens)) for word in row ]) for row in findf['sentence'].str.split(" ")]
-    findf['tstokens'] = [ ' '.join([ str(returntoken(corpus.token2id, word, maxtokens)) for word in row ]) for row in findf['true_summary'].str.split(" ")]
+    findf['tstokens'] = [ ' '.join([ str(corpus.token2id.get(word, maxtokens + 1)) for word in row ]) for row in findf['true_summary'].str.split(" ")]
     findf['qtokens'] = [ ' '.join([ str(returntoken(corpus.token2id, word, maxtokens)) for word in row ]) for row in findf['query'].str.split(" ")]
     min_idx, max_idx = findf['sentence_idx'].min(), findf['sentence_idx'].max()
 
@@ -111,7 +116,7 @@ def main():
     if not maxtokens:
         maxtokens = 10000
 
-    tokenize_cnn(inputdir, inputfile, outputpath, maxtokens=maxtokens)
+    tokenize_cnn(inputdir, inputfile, outputdir, maxtokens=maxtokens)
 
 if __name__ == "__main__":
     main()
