@@ -118,3 +118,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+    # time python Code/Utils/build_cnn.py ./data2/1-output/ ./data2/2-output/ cnn_trainingstreams.csv 1000
