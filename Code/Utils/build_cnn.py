@@ -16,8 +16,8 @@ from collections import defaultdict
 def returntoken(corpus, word, maxtokens):
     return corpus[word] if word in corpus else maxtokens + 1 
 
-def tokenize_cnn(inputfile, outputpath, maxtokens=10000):
-    df = pd.read_csv(inputfile, nrows=1000)
+def tokenize_cnn(inputdir, inputfile, outputpath, maxtokens=10000):
+    df = pd.read_csv(os.path.join(inputdir, inputfile), nrows=1000)
     # Clean up summaries
     df['true_summary'] = df['true_summary'].str.replace('[^A-Za-z0-9]+', ' ').str.strip().fillna("")
     df['sentence'] = df['sentence'].str.replace('[^A-Za-z0-9]+', ' ').str.strip().fillna("")
@@ -65,7 +65,7 @@ def tokenize_cnn(inputfile, outputpath, maxtokens=10000):
     odf.reset_index(drop=True, inplace=True)
     
     # Exporting data    
-    odf.to_csv(os.path.join(inputdir, "cnn_total_corpus_smry.csv"), index=False)
+    odf.to_csv(os.path.join(outputpath, "cnn_total_corpus_smry.csv"), index=False)
 
     # Reducing the tokens here:
     corpus = dictionary.filter_extremes(keep_n = maxtokens)
@@ -81,7 +81,7 @@ def tokenize_cnn(inputfile, outputpath, maxtokens=10000):
     odf = odf[['id','token', 'frequency']]
     odf.sort_values(by='frequency', ascending=False, inplace=True)
     odf.reset_index(drop=True, inplace=True)
-    odf.to_csv(os.path.join(inputdir, "cnn_subset_corpus_smry.csv"), index=False)
+    odf.to_csv(os.path.join(outputpath, "cnn_subset_corpus_smry.csv"), index=False)
 
     # Replacing the tokens here
     findf = df[['query_id', 'sentence_idx', 'query', 'sentence', 'true_summary']].copy()
@@ -98,6 +98,10 @@ def tokenize_cnn(inputfile, outputpath, maxtokens=10000):
             index=False)
 
 def main():
-    inputfile = "/home/francisco/GitHub/DQN-Event-Summarization/data/1-output/cnn_trainingstreams.csv"
-    outputpath = "/home/francisco/GitHub/DQN-Event-Summarization/data/1-output/"
-    tokenize_cnn(inputfile, outputpath, maxtokens=10000)
+    inputdir = "/home/francisco/GitHub/DQN-Event-Summarization/data/1-output/"
+    inputfile = "cnn_trainingstreams.csv"
+    outputpath = "/home/francisco/GitHub/DQN-Event-Summarization/data/2-output/"
+    tokenize_cnn(inputdir, inputfile, outputpath, maxtokens=10000)
+
+if __name__ == "__main__":
+    main()
