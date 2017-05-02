@@ -17,7 +17,7 @@ def returntoken(corpus, word, maxtokens):
     return corpus[word] if word in corpus else maxtokens + 1 
 
 def tokenize_cnn(inputdir, inputfile, outputdir, maxtokens=10000):
-    df = pd.read_csv(os.path.join(inputdir, inputfile))
+    df = pd.read_csv(os.path.join(inputdir, inputfile), nrows=1000)
     # Clean up summaries
     df['true_summary'] = df['true_summary'].str.replace('[^A-Za-z0-9]+', ' ').str.strip().fillna("")
     df['sentence'] = df['sentence'].str.replace('[^A-Za-z0-9]+', ' ').str.strip().fillna("")
@@ -81,7 +81,7 @@ def tokenize_cnn(inputdir, inputfile, outputdir, maxtokens=10000):
     odf = odf[['id','token', 'frequency']]
     odf.sort_values(by='frequency', ascending=False, inplace=True)
     odf.reset_index(drop=True, inplace=True)
-    odf.to_csv(os.path.join(outputpath, "cnn_subset_corpus_smry.csv"), index=False)
+    odf.to_csv(os.path.join(outputdir, "cnn_subset_corpus_smry.csv"), index=False)
 
     # Replacing the tokens here
     findf = df[['query_id', 'sentence_idx', 'query', 'sentence', 'true_summary']].copy()
@@ -98,10 +98,20 @@ def tokenize_cnn(inputdir, inputfile, outputdir, maxtokens=10000):
             index=False)
 
 def main():
-    inputdir = "/home/francisco/GitHub/DQN-Event-Summarization/data/1-output/"
-    outputdir = "/home/francisco/GitHub/DQN-Event-Summarization/data/2-output/"
-    inputfile = "cnn_trainingstreams.csv"
-    tokenize_cnn(inputdir, inputfile, outputpath, maxtokens=10000)
+    inputdir = sys.argv[1]
+    outputdir = sys.argv[2]
+    inputfile = sys.argv[3]
+    maxtokens = sys.argv[4]
+
+    if not inputdir or not outputdir or not inputfile:
+        inputdir = "/home/francisco/GitHub/DQN-Event-Summarization/data/1-output/"
+        outputdir = "/home/francisco/GitHub/DQN-Event-Summarization/data/2-output/"
+        inputfile = "cnn_trainingstreams.csv"
+
+    if not maxtokens:
+        maxtokens = 10000
+
+    tokenize_cnn(inputdir, inputfile, outputpath, maxtokens=maxtokens)
 
 if __name__ == "__main__":
     main()
