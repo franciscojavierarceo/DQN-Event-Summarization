@@ -17,7 +17,7 @@ def returntoken(corpus, word, maxtokens):
     return corpus[word] if word in corpus else maxtokens + 1 
 
 def tokenize_cnn(inputdir, inputfile, outputpath, maxtokens=10000):
-    df = pd.read_csv(os.path.join(inputdir, inputfile), nrows=1000)
+    df = pd.read_csv(os.path.join(inputdir, inputfile))
     # Clean up summaries
     df['true_summary'] = df['true_summary'].str.replace('[^A-Za-z0-9]+', ' ').str.strip().fillna("")
     df['sentence'] = df['sentence'].str.replace('[^A-Za-z0-9]+', ' ').str.strip().fillna("")
