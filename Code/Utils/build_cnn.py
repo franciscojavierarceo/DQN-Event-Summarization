@@ -16,7 +16,7 @@ from collections import defaultdict
 def returntoken(corpus, word, maxtokens):
     return corpus[word] if word in corpus else maxtokens + 1 
 
-def tokenize_cnn(inputdir, inputfile, outputpath, maxtokens=10000):
+def tokenize_cnn(inputdir, inputfile, outputdir, maxtokens=10000):
     df = pd.read_csv(os.path.join(inputdir, inputfile))
     # Clean up summaries
     df['true_summary'] = df['true_summary'].str.replace('[^A-Za-z0-9]+', ' ').str.strip().fillna("")
@@ -43,10 +43,10 @@ def tokenize_cnn(inputdir, inputfile, outputpath, maxtokens=10000):
     dictionary.id2token = {v:k for k,v in dictionary.token2id.items()}
 
     print("Exporting word to index and dictionary to word indices")
-    output = open(os.path.join(outputpath,'LSTMDQN_Dic_token2id_cnn.pkl'), 'ab+')
+    output = open(os.path.join(outputdir,'LSTMDQN_Dic_token2id_cnn.pkl'), 'ab+')
     pickle.dump(dictionary.token2id, output)
     output.close()
-    output = open(os.path.join(outputpath,'LSTMDQN_Dic_id2token_cnn.pkl'), 'ab+')
+    output = open(os.path.join(outputdir,'LSTMDQN_Dic_id2token_cnn.pkl'), 'ab+')
     pickle.dump(dictionary.id2token, output)
     output.close()
 
@@ -65,7 +65,7 @@ def tokenize_cnn(inputdir, inputfile, outputpath, maxtokens=10000):
     odf.reset_index(drop=True, inplace=True)
     
     # Exporting data    
-    odf.to_csv(os.path.join(outputpath, "cnn_total_corpus_smry.csv"), index=False)
+    odf.to_csv(os.path.join(outputdir, "cnn_total_corpus_smry.csv"), index=False)
 
     # Reducing the tokens here:
     corpus = dictionary.filter_extremes(keep_n = maxtokens)
@@ -94,13 +94,13 @@ def tokenize_cnn(inputdir, inputfile, outputpath, maxtokens=10000):
     # Exporting all of the files
     for idx in range(min_idx, max_idx + 1):
         findf.ix[ findf['sentence_idx'] == idx, cols].to_csv( 
-                os.path.join(outputpath, 'cnn_data_sentence_%02d.csv' % idx.zfill(2)), 
+                os.path.join(outputdir, 'cnn_data_sentence_%02d.csv' % idx.zfill(2)), 
             index=False)
 
 def main():
     inputdir = "/home/francisco/GitHub/DQN-Event-Summarization/data/1-output/"
+    outputdir = "/home/francisco/GitHub/DQN-Event-Summarization/data/2-output/"
     inputfile = "cnn_trainingstreams.csv"
-    outputpath = "/home/francisco/GitHub/DQN-Event-Summarization/data/2-output/"
     tokenize_cnn(inputdir, inputfile, outputpath, maxtokens=10000)
 
 if __name__ == "__main__":
