@@ -67,12 +67,10 @@ def tokenize_cnn(inputdir, inputfile, outputdir, maxtokens=10000):
     odf.to_csv(os.path.join(outputdir, "cnn_total_corpus_smry.csv"), index=False)
 
     dictionary.save(os.path.join(outputdir, 'cnn_total_corpus.mm'))
-    # corpora.MmCorpus.save_corpus(os.path.join(outputdir, 'cnn_total_corpus.mm'), dictionary)
 
     # Reducing the tokens here:
     dictionary.filter_extremes(keep_n = maxtokens)
     dictionary.save(os.path.join(outputdir, 'cnn_subset_corpus.mm'))
-    # corpora.MmCorpus.save_corpus(os.path.join(outputdir, 'cnn_subset_corpus.mm'), dictionary)
 
     print("There are unique %i tokens in the original data. Only using the %i most frequent tokens." % (odf.shape[0], maxtokens) )
     print("\tThis represents %i%% of the full set of tokens" % (odf.ix[maxtokens, 'cumpercent'] * 100 ))
