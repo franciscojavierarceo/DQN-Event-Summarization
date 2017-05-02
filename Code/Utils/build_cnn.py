@@ -4,6 +4,7 @@ import sys
 import pickle
 import csv
 import gzip
+import dill
 import numpy as np
 from collections import Counter
 from itertools import chain
@@ -13,9 +14,6 @@ from gensim import corpora
 from gensim.parsing.preprocessing import STOPWORDS
 from collections import defaultdict
 from joblib import Parallel, delayed
-
-def returntoken(corpus, word, maxtokens):
-    return corpus[word] if word in corpus else maxtokens + 1 
 
 def tokenize_cnn(inputdir, inputfile, outputdir, maxtokens=10000):
     df = pd.read_csv(os.path.join(inputdir, inputfile), nrows=1000)
@@ -68,14 +66,19 @@ def tokenize_cnn(inputdir, inputfile, outputdir, maxtokens=10000):
     # Exporting data    
     odf.to_csv(os.path.join(outputdir, "cnn_total_corpus_smry.csv"), index=False)
 
+    dictionary.save(os.path.join(outputdir, 'cnn_total_corpus.mm'))
+    # corpora.MmCorpus.save_corpus(os.path.join(outputdir, 'cnn_total_corpus.mm'), dictionary)
+
     # Reducing the tokens here:
-    corpus = dictionary.filter_extremes(keep_n = maxtokens)
+    dictionary.filter_extremes(keep_n = maxtokens)
+    dictionary.save(os.path.join(outputdir, 'cnn_subset_corpus.mm'))
+    # corpora.MmCorpus.save_corpus(os.path.join(outputdir, 'cnn_subset_corpus.mm'), dictionary)
 
     print("There are unique %i tokens in the original data. Only using the %i most frequent tokens." % (odf.shape[0], maxtokens) )
     print("\tThis represents %i%% of the full set of tokens" % (odf.ix[maxtokens, 'cumpercent'] * 100 ))
 
-    odf0 = pd.DataFrame.from_dict(corpus.dfs, orient='index').reset_index()
-    odf1 = pd.DataFrame.from_dict(corpus.token2id, orient='index').reset_index()
+    odf0 = pd.DataFrame.from_dict(dictionary.dfs, orient='index').reset_index()
+    odf1 = pd.DataFrame.from_dict(dictionary.token2id, orient='index').reset_index()
     odf0.columns = ['id', 'frequency']
     odf1.columns = ['token', 'id']
     odf = pd.merge(left=odf0, right=odf1, on='id')
@@ -85,21 +88,18 @@ def tokenize_cnn(inputdir, inputfile, outputdir, maxtokens=10000):
     odf.to_csv(os.path.join(outputdir, "cnn_subset_corpus_smry.csv"), index=False)
 
     # Replacing the tokens here
-
-    streams = Parallel(n_jobs=-1)(
-        delayed(extract_data)(finalinputdir, row) for i, row in outdf.iterrows()
-    )
     findf = df[['query_id', 'sentence_idx', 'query', 'sentence', 'true_summary']].copy()
-    findf['stokens'] = [ ' '.join([ str(returntoken(corpus.token2id, word, maxtokens)) for word in row ]) for row in findf['sentence'].str.split(" ")]
-    findf['tstokens'] = [ ' '.join([ str(corpus.token2id.get(word, maxtokens + 1)) for word in row ]) for row in findf['true_summary'].str.split(" ")]
-    findf['qtokens'] = [ ' '.join([ str(returntoken(corpus.token2id, word, maxtokens)) for word in row ]) for row in findf['query'].str.split(" ")]
-    min_idx, max_idx = findf['sentence_idx'].min(), findf['sentence_idx'].max()
+    stokens = df.apply(lambda row: ' '.join([ str(dictionary.token2id.get(word, maxtokens + 1)) for word in row['sentence'].split(" ")]) , axis = 1)
+    tstokens = df.apply(lambda row: ' '.join([ str(dictionary.token2id.get(word, maxtokens + 1)) for word in row['true_summary'].split(" ")]) , axis = 1)
+    qtokens = df.apply(lambda row: ' '.join([ str(dictionary.token2id.get(word, maxtokens + 1)) for word in row['query'].split(" ")]) , axis = 1)
 
+    min_idx, max_idx = findf['sentence_idx'].min(), findf['sentence_idx'].max()
     cols = ['qtokens', 'stokens', 'tstokens']
+
     # Exporting all of the files
     for idx in range(min_idx, max_idx + 1):
         findf.ix[ findf['sentence_idx'] == idx, cols].to_csv( 
-                os.path.join(outputdir, 'cnn_data_sentence_%02d.csv' % idx.zfill(2)), 
+                os.path.join(outputdir, 'cnn_data_sentence_%02d.csv' % idx ), 
             index=False)
 
 def main():
@@ -116,7 +116,7 @@ def main():
     if not maxtokens:
         maxtokens = 10000
 
-    tokenize_cnn(inputdir, inputfile, outputdir, maxtokens=maxtokens)
+    tokenize_cnn(inputdir, inputfile, outputdir, maxtokens=int(maxtokens))
 
 if __name__ == "__main__":
     main()
