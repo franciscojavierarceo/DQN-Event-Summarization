@@ -16,7 +16,7 @@ from collections import defaultdict
 from joblib import Parallel, delayed
 
 def tokenize_cnn(inputdir, inputfile, outputdir, maxtokens=10000):
-    df = pd.read_csv(os.path.join(inputdir, inputfile))
+    df = pd.read_csv(os.path.join(inputdir, inputfile), nrows=1000)
     # Clean up summaries
     df['true_summary'] = df['true_summary'].str.replace('[^A-Za-z0-9]+', ' ').str.strip().fillna("")
     df['sentence'] = df['sentence'].str.replace('[^A-Za-z0-9]+', ' ').str.strip().fillna("")
@@ -87,9 +87,9 @@ def tokenize_cnn(inputdir, inputfile, outputdir, maxtokens=10000):
 
     # Replacing the tokens here
     findf = df[['query_id', 'sentence_idx', 'query', 'sentence', 'true_summary']].copy()
-    stokens = df.apply(lambda row: ' '.join([ str(dictionary.token2id.get(word, maxtokens + 1)) for word in row['sentence'].split(" ")]) , axis = 1)
-    tstokens = df.apply(lambda row: ' '.join([ str(dictionary.token2id.get(word, maxtokens + 1)) for word in row['true_summary'].split(" ")]) , axis = 1)
-    qtokens = df.apply(lambda row: ' '.join([ str(dictionary.token2id.get(word, maxtokens + 1)) for word in row['query'].split(" ")]) , axis = 1)
+    findf['stokens'] = df.apply(lambda row: ' '.join([ str(dictionary.token2id.get(word, maxtokens + 1)) for word in row['sentence'].split(" ")]) , axis = 1)
+    findf['tstokens'] = df.apply(lambda row: ' '.join([ str(dictionary.token2id.get(word, maxtokens + 1)) for word in row['true_summary'].split(" ")]) , axis = 1)
+    findf['qtokens'] = df.apply(lambda row: ' '.join([ str(dictionary.token2id.get(word, maxtokens + 1)) for word in row['query'].split(" ")]) , axis = 1)
 
     min_idx, max_idx = findf['sentence_idx'].min(), findf['sentence_idx'].max()
     cols = ['qtokens', 'stokens', 'tstokens']
