@@ -16,7 +16,7 @@ from collections import defaultdict
 from joblib import Parallel, delayed
 
 def tokenize_cnn(inputdir, inputfile, outputdir, maxtokens=10000):
-    df = pd.read_csv(os.path.join(inputdir, inputfile), nrows=1000)
+    df = pd.read_csv(os.path.join(inputdir, inputfile))
     # Clean up summaries
     df['true_summary'] = df['true_summary'].str.replace('[^A-Za-z0-9]+', ' ').str.strip().fillna("")
     df['sentence'] = df['sentence'].str.replace('[^A-Za-z0-9]+', ' ').str.strip().fillna("")
@@ -119,3 +119,4 @@ def main():
 if __name__ == "__main__":
     main()
     # time python Code/Utils/build_cnn.py ./data2/1-output/ ./data2/2-output/ cnn_trainingstreams.csv 1000
+    # time python Code/Utils/build_cnn.py ./data/1-output/ ./data/2-output/ cnn_trainingstreams.csv 20000
