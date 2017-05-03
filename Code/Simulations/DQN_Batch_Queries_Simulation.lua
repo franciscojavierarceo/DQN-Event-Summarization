@@ -1,10 +1,10 @@
 require 'os'
 require 'nn'
 require 'rnn'
-require 'cunn'
-require 'cunnx'
+--require 'cunn'
+--require 'cunnx'
 require 'optim'
-require 'cutorch'
+--require 'cutorch'
 require 'parallel'
 
 dl = require 'dataload'
@@ -291,7 +291,7 @@ function runSimulation(n, n_s, q, k, a, b, learning_rate, embDim, gamma, batch_s
     end
 
     -- Building the model
-    model = buildModel('lstm', b, embDim, 'f1', adapt, usecuda)
+    model = buildModel('bow', b, embDim, 'f1', adapt, usecuda)
     params, gradParams = model:getParameters()
 
     if adapt then 

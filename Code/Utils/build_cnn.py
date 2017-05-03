@@ -16,7 +16,7 @@ from collections import defaultdict
 from joblib import Parallel, delayed
 
 def tokenize_cnn(inputdir, inputfile, outputdir, maxtokens=10000):
-    df = pd.read_csv(os.path.join(inputdir, inputfile), nrows=1000)
+    df = pd.read_csv(os.path.join(inputdir, inputfile))
     # Clean up summaries
     df['true_summary'] = df['true_summary'].str.replace('[^A-Za-z0-9]+', ' ').str.strip().fillna("")
     df['sentence'] = df['sentence'].str.replace('[^A-Za-z0-9]+', ' ').str.strip().fillna("")
