@@ -1,6 +1,5 @@
 require 'csvigo'
 
-
 dofile("Code/utils.lua")
 dofile("Code/utilsNN.lua")
 
@@ -29,4 +28,8 @@ end
 
 print(maxq, maxs, maxts)
 q_x = torch.Tensor(padZeros(qtokens, maxq))
-print(q_x[{{1, 4}}])
+-- s_x = torch.Tensor(padZeros(stokens, maxq))
+-- ps_x = torch.Tensor(padZeros(tstokens, maxq))
+
+torch.save("query_tokens.dat", q_x)
+print("data saved to query_tokens.dat")
