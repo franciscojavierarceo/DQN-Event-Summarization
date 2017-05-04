@@ -1,7 +1,7 @@
 require 'csvigo'
 
 dofile("Code/utils.lua")
-dofile("Code/utilsNN.lua")
+-- dofile("Code/utilsNN.lua")
 
 
 function readCNN(input_path, inputfile, idx)
