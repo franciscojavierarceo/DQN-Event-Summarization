@@ -27,9 +27,9 @@ function readCNN(input_path, inputfile, idx)
     s_x = torch.Tensor(padZeros(stokens, maxs))
     ts_x = torch.Tensor(padZeros(tstokens, maxts))
 
-    qfile = string.format("query_tokens_sid_%i.dat", idx)
-    sfile = string.format("sentence_tokens_sid_%i.dat", idx)
-    tsfile = string.format("truesummary_tokens_sid_%i.dat", idx)
+    qfile = string.format("qtokens_sid_%i.dat", idx)
+    sfile = string.format("stokens_sid_%i.dat", idx)
+    tsfile = string.format("tstokens_sid_%i.dat", idx)
 
     torch.save(outputpath .. qfile, q_x)
     torch.save(outputpath .. sfile, s_x)
@@ -40,7 +40,6 @@ end
 input_path = '/home/francisco/GitHub/DQN-Event-Summarization/data/cnn_tokenized/'
 outputpath = "/home/francisco/GitHub/DQN-Event-Summarization/data/training/"
 
--- for i=1, 124 do 
---     readCNN(input_path, inputfile, i)
--- end
-readCNN(input_path, inputfile, 0)
+for i=1, 124 do 
+    readCNN(input_path, inputfile, i)
+end
