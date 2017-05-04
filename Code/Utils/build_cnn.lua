@@ -1,10 +1,8 @@
 require 'csvigo'
-require 'math' 
 
 
 dofile("Code/utils.lua")
 dofile("Code/utilsNN.lua")
-
 
 input_path = '/home/francisco/GitHub/DQN-Event-Summarization/data/cnn_tokenized/'
 inputfile ='cnn_data_sentence_00.csv'
