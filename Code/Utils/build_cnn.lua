@@ -29,3 +29,4 @@ end
 
 print(maxq, maxs, maxts)
 q_x = torch.Tensor(padZeros(qtokens, maxq))
+print(q_x[{{1, 4}}])
