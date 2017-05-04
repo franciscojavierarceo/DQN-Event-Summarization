@@ -106,7 +106,7 @@ end
 function buildCorpus(x, K)
     local out = {}
     for k,v in pairs(x) do
-        if k ~= nil do
+        if k ~= nil then
             out[k] = x
         else 
             out[k] = getFirstKElements(x[k], K)
