@@ -28,3 +28,4 @@ for i, row in pairs(mydata) do
 end
 
 print(maxq, maxs, maxts)
+q_x = torch.Tensor(padZeros(qtokens, maxq))
