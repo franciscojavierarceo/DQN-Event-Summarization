@@ -5,7 +5,7 @@ dofile("Code/utilsNN.lua")
 
 
 function readCNN(input_path, inputfile, idx)
-    inputfile = string.format('cnn_data_sentence_%02d.csv', idx)
+    inputfile = string.format('cnn_data_sentence_%03d.csv', idx)
 
     mydata =  csvigo.load({path = input_path .. inputfile .. '.csv', mode = "large", verbose = false})
     local qtokens, stokens, tstokens = {}, {}, {}
@@ -21,6 +21,7 @@ function readCNN(input_path, inputfile, idx)
             maxts = math.max(maxts, #tstokens[i-1])
         end
     end
+    print(string.format("data %i loaded and tokenized...", idx))
 
     q_x = torch.Tensor(padZeros(qtokens, maxq))
     s_x = torch.Tensor(padZeros(stokens, maxs))
@@ -33,9 +34,13 @@ function readCNN(input_path, inputfile, idx)
     torch.save(outputpath .. qfile, q_x)
     torch.save(outputpath .. sfile, s_x)
     torch.save(outputpath .. tsfile, ts_x)
+    print("...data exported to torch datafiles")
 end
 
 input_path = '/home/francisco/GitHub/DQN-Event-Summarization/data/cnn_tokenized/'
 outputpath = "/home/francisco/GitHub/DQN-Event-Summarization/data/training/"
 
+-- for i=1, 124 do 
+--     readCNN(input_path, inputfile, i)
+-- end
 readCNN(input_path, inputfile, 0)
