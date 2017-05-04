@@ -40,6 +40,6 @@ end
 input_path = '/home/francisco/GitHub/DQN-Event-Summarization/data/cnn_tokenized/'
 outputpath = "/home/francisco/GitHub/DQN-Event-Summarization/data/training/"
 
-for i=1, 124 do 
+for i=0, 124 do 
     readCNN(input_path, inputfile, i)
 end
