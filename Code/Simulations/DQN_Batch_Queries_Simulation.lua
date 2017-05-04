@@ -1,10 +1,10 @@
 require 'os'
 require 'nn'
 require 'rnn'
---require 'cunn'
---require 'cunnx'
+require 'cunn'
+require 'cunnx'
 require 'optim'
---require 'cutorch'
+require 'cutorch'
 require 'parallel'
 
 dl = require 'dataload'
