@@ -5,7 +5,7 @@ dofile("Code/utilsNN.lua")
 
 
 function readCNN(input_path, inputfile, idx)
-    inputfile = string.format('cnn_data_sentence_%03d', idx)
+    inputfile = string.format('cnn_data_sentence_%02d', idx)
 
     mydata =  csvigo.load({path = input_path .. inputfile .. '.csv', mode = "large", verbose = false})
     local qtokens, stokens, tstokens = {}, {}, {}
