@@ -85,6 +85,35 @@ function loadStopdata(inputfile)
     return stopwords
 end
 
+function getFirstKElements(x, K)
+    --- This function grabs the first K elements from a table
+    --- e.g., getFirstKElements({1,2,3,4,5}, 3) = {1, 2, 3}
+    local tmp = {}
+    if K == nil then 
+        return x
+    end
+    for k, v in pairs(x) do
+        if k <= K then
+            tmp[k] = v
+        end
+        if k > K then
+            return tmp
+        end
+    end
+    return tmp
+end
+
+function buildCorpus(x, K)
+    local out = {}
+    for k,v in pairs(x) do
+        if k ~= nil do
+            out[k] = x
+        else 
+            out[k] = getFirstKElements(x[k], K)
+    end
+    return out
+end
+
 function buildTermDocumentTable(x, K)
     --- This builds the data into tables after reading in from a csv
     --- If K == nil then getFirstKtokens() returns x
@@ -219,24 +248,6 @@ function x_or_pass(pred_action, xs)
     else
         return {}
     end
-end
-
-function getFirstKElements(x, K)
-    --- This function grabs the first K elements from a table
-    --- e.g., getFirstKElements({1,2,3,4,5}, 3) = {1, 2, 3}
-    local tmp = {}
-    if K == nil then 
-        return x
-    end
-    for k, v in pairs(x) do
-        if k <= K then
-            tmp[k] = v
-        end
-        if k > K then
-            return tmp
-        end
-    end
-    return tmp
 end
 
 function getLastKElements(x, K)
