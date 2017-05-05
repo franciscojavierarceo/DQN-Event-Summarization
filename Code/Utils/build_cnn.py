@@ -91,6 +91,9 @@ def tokenize_cnn(inputdir, inputfile, outputdir, maxtokens=10000):
     findf['tstokens'] = df.apply(lambda row: ' '.join([ str(dictionary.token2id.get(word, maxtokens + 1)) for word in row['true_summary'].split(" ")]) , axis = 1)
     findf['qtokens'] = df.apply(lambda row: ' '.join([ str(dictionary.token2id.get(word, maxtokens + 1)) for word in row['query'].split(" ")]) , axis = 1)
 
+    findf.to_csv(
+            os.path.join(outputdir, 'cnn_trainingstreams_tokenized.csv'),
+    index=False)
     min_idx, max_idx = findf['sentence_idx'].min(), findf['sentence_idx'].max()
     cols = ['qtokens', 'stokens', 'tstokens']
 
