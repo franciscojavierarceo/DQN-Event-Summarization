@@ -3,7 +3,6 @@ require 'csvigo'
 dofile("Code/utils.lua")
 -- dofile("Code/utilsNN.lua")
 
-
 function readCNN(input_path, inputfile, idx)
     inputfile = string.format('cnn_data_sentence_%02d', idx)
 
@@ -23,17 +22,13 @@ function readCNN(input_path, inputfile, idx)
     end
     print(string.format("data %i loaded and tokenized...", idx))
 
-    q_x = torch.Tensor(padZeros(qtokens, maxq))
-    s_x = torch.Tensor(padZeros(stokens, maxs))
-    ts_x = torch.Tensor(padZeros(tstokens, maxts))
+    local q_x = torch.Tensor(padZeros(qtokens, maxq))
+    local s_x = torch.Tensor(padZeros(stokens, maxs))
+    local ts_x = torch.Tensor(padZeros(tstokens, maxts))
 
-    qfile = string.format("qtokens_sid_%i.dat", idx)
-    sfile = string.format("stokens_sid_%i.dat", idx)
-    tsfile = string.format("tstokens_sid_%i.dat", idx)
-
-    torch.save(outputpath .. qfile, q_x)
-    torch.save(outputpath .. sfile, s_x)
-    torch.save(outputpath .. tsfile, ts_x)
+    torch.save(outputpath .. string.format("qtokens_sid_%i.dat", idx), q_x)
+    torch.save(outputpath .. string.format("stokens_sid_%i.dat", idx), s_x)
+    torch.save(outputpath .. string.format("tstokens_sid_%i.dat", idx), ts_x)
     print("...data exported to torch datafiles")
 end
 
