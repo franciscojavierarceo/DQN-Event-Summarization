@@ -267,6 +267,19 @@ function getLastKElements(x, K)
     return out
 end
 
+
+function loadCNN(path)
+    local queries, sentences, trueSummary  = {}, {}, {}
+    for i = 0, 124 do
+        queries[i + 1 ] = torch.load(path .. string.format("qtokens_sid_%i.dat", i))
+        sentences[i + 1] = torch.load(path .. string.format("stokens_sid_%i.dat", i))
+        trueSummary[i + 1] = torch.load(path .. string.format("tstokens_sid_%i.dat", i))
+    end
+
+    print("Data loaded")
+    return queries, sentences, trueSummary
+end
+
 function buildCurrentSummary(preds, xs, K)
     --- This is the main function used to build the current summary given our inputs
     --- Notice that this differs from buildPredSummary below
