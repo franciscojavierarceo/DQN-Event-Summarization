@@ -17,4 +17,4 @@ end
 outputpath = '/home/francisco/GitHub/DQN-Event-Summarization/data/training/'
 mydata = loadCNN(outputpath)
 
-print(#mydata[1], #sentences, #trueSummary)
+print(#mydata[1], #mydata[2], #mydata[3])
