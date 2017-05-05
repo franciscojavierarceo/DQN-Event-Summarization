@@ -1,8 +1,6 @@
 require 'csvigo'
 
 dofile("Code/utils.lua")
--- dofile("Code/utilsNN.lua")
-
 
 function readCNN(input_path, inputfile, idx)
     inputfile = string.format('cnn_data_sentence_%02d', idx)
