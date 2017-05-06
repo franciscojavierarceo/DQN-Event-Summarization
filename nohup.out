@@ -1,0 +1,25 @@
+Traceback (most recent call last):
+  File "Code/Utils/build_cnn.py", line 12, in <module>
+    import pandas as pd
+  File "/Users/franciscojavierarceo/anaconda2/lib/python2.7/site-packages/pandas/__init__.py", line 37, in <module>
+    import pandas.core.config_init
+  File "/Users/franciscojavierarceo/anaconda2/lib/python2.7/site-packages/pandas/core/config_init.py", line 18, in <module>
+    from pandas.formats.format import detect_console_encoding
+  File "/Users/franciscojavierarceo/anaconda2/lib/python2.7/site-packages/pandas/formats/format.py", line 27, in <module>
+    from pandas.core.index import Index, MultiIndex, _ensure_index
+  File "/Users/franciscojavierarceo/anaconda2/lib/python2.7/site-packages/pandas/core/index.py", line 2, in <module>
+    from pandas.indexes.api import *
+  File "/Users/franciscojavierarceo/anaconda2/lib/python2.7/site-packages/pandas/indexes/api.py", line 1, in <module>
+    from pandas.indexes.base import (Index, _new_Index,  # noqa
+  File "/Users/franciscojavierarceo/anaconda2/lib/python2.7/site-packages/pandas/indexes/base.py", line 51, in <module>
+    from pandas.core.ops import _comp_method_OBJECT_ARRAY
+  File "/Users/franciscojavierarceo/anaconda2/lib/python2.7/site-packages/pandas/core/ops.py", line 16, in <module>
+    import pandas.computation.expressions as expressions
+  File "/Users/franciscojavierarceo/anaconda2/lib/python2.7/site-packages/pandas/computation/__init__.py", line 8, in <module>
+    import numexpr as ne
+  File "/Users/franciscojavierarceo/anaconda2/lib/python2.7/site-packages/numexpr/__init__.py", line 40, in <module>
+    from numexpr.expressions import E
+  File "/Users/franciscojavierarceo/anaconda2/lib/python2.7/site-packages/numexpr/expressions.py", line 45, in <module>
+    from numexpr import interpreter
+KeyboardInterrupt
+        0.79 real         0.42 user         0.19 sys
