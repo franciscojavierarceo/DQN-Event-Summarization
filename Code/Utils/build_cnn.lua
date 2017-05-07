@@ -11,9 +11,9 @@ function readCNN(input_path, inputfile, idx)
 
     for i, row in pairs(mydata) do
         if i > 1 and row ~= nil then
-            qtokens[i-1] = row[4]:split(" ")
-            stokens[i-1] = row[5]:split(" ")
-            tstokens[i-1] = row[6]:split(" ")
+            qtokens[i-1] = row[3]:split(" ")
+            stokens[i-1] = row[4]:split(" ")
+            tstokens[i-1] = row[5]:split(" ")
             maxq = math.max(maxq, #qtokens[i-1])
             maxs = math.max(maxs, #stokens[i-1])
             maxts = math.max(maxts, #tstokens[i-1])
