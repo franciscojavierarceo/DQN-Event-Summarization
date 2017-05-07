@@ -128,7 +128,7 @@ def main():
     if not maxtokens:
         maxtokens = 10000
 
-    if not 'cnn_trainingstreams_tokenized' in os.listdir(outputdir):
+    if not 'cnn_trainingstreams_tokenized.csv' in os.listdir(outputdir):
         print("running tokenization...")
         tokenize_cnn(inputdir, inputfile, outputdir, maxtokens=int(maxtokens))
 
