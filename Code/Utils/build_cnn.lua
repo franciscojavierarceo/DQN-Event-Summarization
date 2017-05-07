@@ -28,11 +28,15 @@ function readCNN(input_path, inputfile, idx)
     torch.save(outputpath .. string.format("qtokens_sid_%i.dat", idx), q_x)
     torch.save(outputpath .. string.format("stokens_sid_%i.dat", idx), s_x)
     torch.save(outputpath .. string.format("tstokens_sid_%i.dat", idx), ts_x)
+
     print("...data exported to torch datafiles")
 end
 
-input_path = '/home/francisco/GitHub/DQN-Event-Summarization/data/cnn_tokenized/'
-outputpath = "/home/francisco/GitHub/DQN-Event-Summarization/data/training/"
+-- input_path = "/home/francisco/GitHub/DQN-Event-Summarization/data/cnn_tokenized/"
+-- outputpath = "/home/francisco/GitHub/DQN-Event-Summarization/data/training/"
+
+input_path = "/Users/franciscojavierarceo/GitHub/DeepNLPQLearning/data2/2-output/"
+outputpath = "/Users/franciscojavierarceo/GitHub/DeepNLPQLearning/data2/training/"
 
 for i=0, 124 do 
     readCNN(input_path, inputfile, i)

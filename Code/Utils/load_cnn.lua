@@ -14,7 +14,8 @@ function loadCNN(path)
     return queries, sentences, trueSummary
 end
 
-outputpath = '/home/francisco/GitHub/DQN-Event-Summarization/data/training/'
+-- outputpath = '/home/francisco/GitHub/DQN-Event-Summarization/data/training/'
+outputpath = "/Users/franciscojavierarceo/GitHub/DeepNLPQLearning/data2/training/"
 mydata = loadCNN(outputpath)
 
 print(#mydata[1], #mydata[2], #mydata[3])

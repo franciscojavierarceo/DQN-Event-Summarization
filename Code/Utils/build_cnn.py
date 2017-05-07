@@ -93,15 +93,25 @@ def tokenize_cnn(inputdir, inputfile, outputdir, maxtokens=10000):
 
     findf.to_csv(
             os.path.join(outputdir, 'cnn_trainingstreams_tokenized.csv'),
-    index=False)
-    min_idx, max_idx = findf['sentence_idx'].min(), findf['sentence_idx'].max()
-    cols = ['qtokens', 'stokens', 'tstokens']
+            index=False
+    )
 
+def export_tokens(outputdir):
+    findf = pd.read_csv(os.path.join(outputdir, 'cnn_trainingstreams_tokenized.csv'))
+    qdf = findf[['query_id', 'qtokens']].groupby(['query_id', 'qtokens']).size().reset_index().rename(columns={0:'n_sentences'})
+    qdf.drop(labels='n_sentences', axis=1, inplace=True)
+    cols = ['sentence_idx', 'query_id', 'qtokens', 'stokens', 'tstokens']
+    min_idx, max_idx = findf['sentence_idx'].min(), findf['sentence_idx'].max()
     # Exporting all of the files
     for idx in range(min_idx, max_idx + 1):
-        findf.ix[ findf['sentence_idx'] == idx, cols].to_csv( 
-                os.path.join(outputdir, 'cnn_data_sentence_%02d.csv' % idx ), 
-            index=False)
+        findf_ssidx = findf[findf['sentence_idx'] == idx].copy()
+        qdfout = qdf.merge(findf_ssidx[['sentence_idx', 'query_id', 'stokens','tstokens']], 
+            how='left', on=['query_id']
+            )
+        qdfout.to_csv(
+                os.path.join(outputdir, 'cnn_data_sentence_%02d.csv' % idx), 
+            index=False
+        )
 
 def main():
     inputdir = sys.argv[1]
@@ -117,7 +127,10 @@ def main():
     if not maxtokens:
         maxtokens = 10000
 
-    tokenize_cnn(inputdir, inputfile, outputdir, maxtokens=int(maxtokens))
+    if not 'cnn_trainingstreams_tokenized' in os.listdir(outputdir):
+        tokenize_cnn(inputdir, inputfile, outputdir, maxtokens=int(maxtokens))
+
+    export_tokens(outputdir)
 
 if __name__ == "__main__":
     main()
