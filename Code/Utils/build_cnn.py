@@ -109,7 +109,8 @@ def export_tokens(outputdir):
             how='left', on=['query_id']
             )
         qdfout[['qtokens', 'stokens', 'tstokens']] = qdfout[['qtokens', 'stokens', 'tstokens']].fillna('')
-        qdfout[cols].to_csv(
+        qdfout = qdfout[cols]
+        qdfout.to_csv(
                 os.path.join(outputdir, 'cnn_data_sentence_%02d.csv' % idx), 
             index=False
         )
