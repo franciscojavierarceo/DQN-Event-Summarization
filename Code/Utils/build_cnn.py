@@ -108,6 +108,7 @@ def export_tokens(outputdir):
         qdfout = qdf.merge(findf_ssidx[['sentence_idx', 'query_id', 'stokens','tstokens']], 
             how='left', on=['query_id']
             )
+        qdf[['qtokens', 'stokens', 'tstokens']] = qdf[['qtokens', 'stokens', 'tstokens']].fillna('')
         qdfout.to_csv(
                 os.path.join(outputdir, 'cnn_data_sentence_%02d.csv' % idx), 
             index=False
