@@ -9,13 +9,12 @@ function loadCNN(path)
     	sentences[i + 1] = torch.load(path .. string.format("stokens_sid_%i.dat", i))
     	trueSummary[i + 1] = torch.load(path .. string.format("tstokens_sid_%i.dat", i))
     end
-
     print("Data loaded")
     return queries, sentences, trueSummary
 end
 
 outputpath = '/home/francisco/GitHub/DQN-Event-Summarization/data/training/'
 -- outputpath = "/Users/franciscojavierarceo/GitHub/DeepNLPQLearning/data2/training/"
-mydata = loadCNN(outputpath)
+queries, sentences, trueSummaries = loadCNN(outputpath)
 
-print(#mydata[1], #mydata[2], #mydata[3])
+print(#queries[1], #sentences[1], #trueSumamries[1])
