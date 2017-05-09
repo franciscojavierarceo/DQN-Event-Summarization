@@ -15,6 +15,6 @@ end
 
 outputpath = '/home/francisco/GitHub/DQN-Event-Summarization/data/training/'
 -- outputpath = "/Users/franciscojavierarceo/GitHub/DeepNLPQLearning/data2/training/"
-queries, sentences, trueSummaries = loadCNN(outputpath)
+-- queries, sentences, trueSummaries = loadCNN(outputpath)
 
-print(#queries[1], #sentences[1], #trueSumamries[1])
+-- print(#queries[1], #sentences[1], #trueSumamries[1])
