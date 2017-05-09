@@ -2,7 +2,7 @@ require 'csvigo'
 
 dofile("Code/utils.lua")
 
-function readCNN(input_path, inputfile, idx)
+function buildCNN(input_path, inputfile, idx)
     inputfile = string.format('cnn_data_sentence_%02d', idx)
 
     mydata =  csvigo.load({path = input_path .. inputfile .. '.csv', mode = "large", verbose = false})
@@ -39,5 +39,5 @@ outputpath = "/home/francisco/GitHub/DQN-Event-Summarization/data/training/"
 -- outputpath = "/Users/franciscojavierarceo/GitHub/DeepNLPQLearning/data2/training/"
 
 for i=0, 124 do 
-    readCNN(input_path, inputfile, i)
+    buildCNN(input_path, inputfile, i)
 end
