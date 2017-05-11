@@ -22,7 +22,7 @@ LongTensor = torch.LongTensor
 ByteTensor = torch.ByteTensor
 print("...running on CPU")
 
-queries, sentences, trueSummaries = loadCNN(outputpath, 10000)
+queries, sentences, trueSummaries = loadCNN(outputpath, 2500)
 vocabSize = 20001
 embDim = 500
 
