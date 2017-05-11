@@ -16,7 +16,7 @@ dofile("Code/utilsNN.lua")
 
 outputpath = '/home/francisco/GitHub/DQN-Event-Summarization/data/training/'
 
-torch.setnumthreads(8)
+torch.setnumthreads(torch.getnumthreads())
 Tensor = torch.Tensor
 LongTensor = torch.LongTensor
 ByteTensor = torch.ByteTensor
