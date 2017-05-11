@@ -12,9 +12,9 @@ function loadCNN(path, n)
     print("Data loaded")
     if n ~= nil then 
 	for i=1, 125 do 
-		queries[i] = queries[i[{{1, n}}]
-		sentences[i] = sentences[{{1, n}}]
-		trueSummary[i] = trueSummary[{{1, n}}]
+		queries[i] = queries[i][{{1, n}}]
+		sentences[i] = sentences[i][{{1, n}}]
+		trueSummary[i] = trueSummary[i][{{1, n}}]
 	end
     end 
     return queries, sentences, trueSummary
