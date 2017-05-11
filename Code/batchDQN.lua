@@ -15,7 +15,7 @@ dofile("Code/Utils/load_cnn.lua")
 dofile("Code/utilsNN.lua")
 
 outputpath = '/home/francisco/GitHub/DQN-Event-Summarization/data/training/'
-queries, sentences, trueSummaries = loadCNN(outputpath)
+queries, sentences, trueSummaries = loadCNN(outputpath, 10000)
 vocabSize = 20001
 embDim = 500
 
@@ -27,6 +27,6 @@ totalPredsummary = LongTensor(n, n_s * k):fill(0)
 
 model = buildModel('bow', vocabSize, embDim, 'f1', false, false)
 
-print(#queries[1]), #sentences[1], #totalPredsummary)
+print(#queries[1], #sentences[1], #totalPredsummary)
 preds = model:forward(queries[1], sentences[1], totalPredsummary ) 
 print(preds:size())

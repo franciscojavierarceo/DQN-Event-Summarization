@@ -2,7 +2,7 @@ require 'csvigo'
 
 dofile("Code/utils.lua")
 
-function loadCNN(path)
+function loadCNN(path, n)
     local queries, sentences, trueSummary  = {}, {}, {}
     for i = 0, 124 do
     	queries[i + 1 ] = torch.load(path .. string.format("qtokens_sid_%i.dat", i))
@@ -10,6 +10,9 @@ function loadCNN(path)
     	trueSummary[i + 1] = torch.load(path .. string.format("tstokens_sid_%i.dat", i))
     end
     print("Data loaded")
+    if n ~= nil then 
+	return queries[{{1, n}}], sentences[{{1, n}}], trueSummary[{{1, n}}]
+    end 
     return queries, sentences, trueSummary
 end
 
