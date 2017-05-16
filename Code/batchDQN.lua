@@ -14,25 +14,21 @@ dl = require 'dataload'
 dofile("Code/Utils/load_cnn.lua")
 dofile("Code/utilsNNbatch.lua")
 
+-- Tensor = torch.Tensor
+-- LongTensor = torch.LongTensor
+-- ByteTensor = torch.ByteTensor
+-- print("...running on CPU")
+
 outputpath = '/home/francisco/GitHub/DQN-Event-Summarization/data/training/'
-
 torch.setnumthreads(torch.getnumthreads())
-Tensor = torch.Tensor
-LongTensor = torch.LongTensor
-ByteTensor = torch.ByteTensor
-print("...running on CPU")
-
 queries, sentences, trueSummaries = loadCNN(outputpath, 2500)
-vocabSize = 20001
-embDim = 500
+-- n = queries[1]:size(1)
+-- n_s = sentences[1]:size(2)
+-- k = 1
 
-n = queries[1]:size(1)
-n_s = sentences[1]:size(2)
-k = 1
+-- totalPredsummary = LongTensor(n, n_s * k):fill(0)
 
-totalPredsummary = LongTensor(n, n_s * k):fill(0)
-
-model = buildModel('bow', vocabSize, embDim, 'f1', false, false)
+-- model = buildModel('bow', vocabSize, embDim, 'f1', false, false)
 
 
 cmd = torch.CmdLine()
@@ -56,7 +52,9 @@ cmd:text()
 local opt = cmd:parse(arg or {})       --- stores the commands in opt.variable (e.g., opt.model)
 
 -- Running the script
-train(queries, sentences, trueSummaries, opt.lr, opt.vocab_size, 
-              opt.embDim, opt.gamma, opt.batch_size, opt.nepochs, opt.epsilon, opt.print, 
-              opt.memory_multiplier, opt.cuts, opt.base_explore_rate, opt.endexplorerate, 
-                opt.adapt, opt.adapt_lambda, opt.usecuda, opt.seedval)
+train(
+    queries, sentences, trueSummaries, opt.lr, opt.vocab_size, 
+    opt.embDim, opt.gamma, opt.batch_size, opt.nepochs, opt.epsilon, opt.print, 
+    opt.memory_multiplier, opt.cuts, opt.base_explore_rate, opt.endexplorerate, 
+    opt.adapt, opt.adapt_lambda, opt.usecuda, opt.seedval
+)

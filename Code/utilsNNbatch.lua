@@ -323,6 +323,7 @@ function train(queries, sentences, trueSummaries, learning_rate, vocab_size, emb
         criterion = criterion:cuda()
         model = model:cuda()
     end
+    print("data loaded")
 
     nClock = os.clock()
     for epoch=1, nepochs do
