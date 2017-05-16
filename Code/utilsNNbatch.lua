@@ -266,11 +266,7 @@ function train(queries, sentences, trueSummaries, learning_rate, vocab_size, emb
 
     qTokens = {}
     for i=1, n do
-        if trueSummaries[i] == nil then 
-            print(i)
-        else 
-            qTokens[i] = Tokenize(trueSummaries[i]:totable())
-        end
+        qTokens[i] = Tokenize(trueSummaries[1][i]:totable())
     end
 
     -- Building the model
