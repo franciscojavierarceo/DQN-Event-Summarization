@@ -266,7 +266,7 @@ function train(queries, sentences, trueSummaries, learning_rate, vocab_size, emb
 
     qTokens = {}
     for i=1, n do
-        if trueSummaries[i]:totable() == nil then 
+        if trueSummaries[i] == nil then 
             print(i)
         else 
             qTokens[i] = Tokenize(trueSummaries[i]:totable())
@@ -327,7 +327,7 @@ function train(queries, sentences, trueSummaries, learning_rate, vocab_size, emb
         criterion = criterion:cuda()
         model = model:cuda()
     end
-    print("data loaded")
+    print("training...")
 
     nClock = os.clock()
     for epoch=1, nepochs do
