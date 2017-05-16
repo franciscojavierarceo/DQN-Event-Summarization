@@ -258,6 +258,7 @@ function train(queries, sentences, trueSummaries, learning_rate, vocab_size, emb
 
     k = #trueSummaries
     n = queries[1]:size(1)
+    q = queries[1]:size(2)
     n_s = #queries
 
     optimParams = { learningRate = learning_rate }
