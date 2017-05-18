@@ -12,7 +12,7 @@ function loadCNN(path, n)
             if n < queries[i]:size(1) then 
                 queries[i + 1] = queries[i][{{1, n}}]
                 sentences[i + 1] = sentences[i][{{1, n}}]
-                trueSummary[i] = trueSummary[i][{{1, n}}]
+                trueSummary[i + 1] = trueSummary[i][{{1, n}}]
             end
         end
     end
