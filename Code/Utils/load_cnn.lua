@@ -8,15 +8,12 @@ function loadCNN(path, n)
     	queries[i + 1 ] = torch.load(path .. string.format("qtokens_sid_%i.dat", i))
     	sentences[i + 1] = torch.load(path .. string.format("stokens_sid_%i.dat", i))
     	trueSummary[i + 1] = torch.load(path .. string.format("tstokens_sid_%i.dat", i))
+        if n ~= nil then 
+            queries[i + 1] = queries[i][{{1, n}}]
+            sentences[i + 1] = sentences[i][{{1, n}}]
+            trueSummary[i] = trueSummary[i][{{1, n}}]
+        end
     end
-    print("Data loaded")
-    if n ~= nil then 
-	for i=1, 125 do 
-		queries[i] = queries[i][{{1, n}}]
-		sentences[i] = sentences[i][{{1, n}}]
-		trueSummary[i] = trueSummary[i][{{1, n}}]
-	end
-    end 
     return queries, sentences, trueSummary
 end
 
