@@ -1,11 +1,11 @@
 require 'os'
 require 'nn'
-require 'cunn'
-require 'cunnx'
+--require 'cunn'
+--require 'cunnx'
 require 'optim'
 
 --require 'cudnn'
-require 'cutorch'
+--require 'cutorch'
 require 'rnn'
 require 'csvigo'
 
