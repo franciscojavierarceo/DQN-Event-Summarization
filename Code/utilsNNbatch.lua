@@ -350,10 +350,12 @@ function train(queries, sentences, trueSummaries, learning_rate, vocab_size, emb
             totalPreds:fill(0)
             start_row = 1
             end_row = batch_size
-
-            for j=1, n, bs in batch_size do 
-                start_row = batch_size + 1
-                end_row = batch_size
+            c = 1 
+            for start_row=1, n, bs in batch_size do 
+                end_row = c * bs
+                if end_row > n then 
+                    end_row = n
+                end
                 totalPreds[{{start_row, end_row}}]:copy(
                     model:forward({
                         queries[i][{{start_row, end_row}}], 
@@ -361,6 +363,7 @@ function train(queries, sentences, trueSummaries, learning_rate, vocab_size, emb
                         totalPredsummary[{{start_row, end_row}}]
                     })
                 )
+                c = c + 1
             end
             totalPreds = 
 
