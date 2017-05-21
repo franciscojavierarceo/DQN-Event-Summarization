@@ -307,6 +307,7 @@ function train(queries, sentences, trueSummaries, learning_rate, vocab_size, emb
     qPredsMemory = Tensor(memsize, 2):fill(0)
     qValuesMemory = Tensor(memsize, 1):fill(0)
     rewardMemory = Tensor(memsize, 1):fill(0)
+    totalPreds = Tensor(n, 1):fill(0)
 
     if adapt then
         regPreds = {}
@@ -346,7 +347,22 @@ function train(queries, sentences, trueSummaries, learning_rate, vocab_size, emb
         end
 
         for i=1, n_s do
-            totalPreds = model:forward({queries[i], sentences[i], totalPredsummary})
+            totalPreds:fill(0)
+            start_row = 1
+            end_row = batch_size
+
+            for j=1, n, bs in batch_size do 
+                start_row = batch_size + 1
+                end_row = batch_size
+                totalPreds[{{start_row, end_row}}]:copy(
+                    model:forward({
+                        queries[i][{{start_row, end_row}}], 
+                        sentences[i][{{start_row, end_row}}], 
+                        totalPredsummary[{{start_row, end_row}}]
+                    })
+                )
+            end
+            totalPreds = 
 
             if adapt then 
                 qPreds[i]:copy(totalPreds[1])
