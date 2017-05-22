@@ -351,8 +351,8 @@ function train(queries, sentences, trueSummaries, learning_rate, vocab_size, emb
             start_row = 1
             end_row = batch_size
             c = 1 
-            for start_row=1, n, bs in batch_size do 
-                end_row = c * bs
+            for start_row=1, n, batch_size do 
+                end_row = c * batch_size
                 if end_row > n then 
                     end_row = n
                 end
