@@ -305,7 +305,7 @@ function train(queries, sentences, trueSummaries, learning_rate, vocab_size, emb
     qPredsMemory = Tensor(memsize, 2):fill(0)
     qValuesMemory = Tensor(memsize, 1):fill(0)
     rewardMemory = Tensor(memsize, 1):fill(0)
-    totalPreds = Tensor(n, 1):fill(0)
+    totalPreds = Tensor(n, 2):fill(0)
 
     if adapt then
         regPreds = {}
