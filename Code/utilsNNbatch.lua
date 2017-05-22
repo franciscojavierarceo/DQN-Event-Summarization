@@ -268,9 +268,6 @@ function train(queries, sentences, trueSummaries, learning_rate, vocab_size, emb
 
     qTokens = {}
     for i=1, n do
-        if i == 1 then 
-            print(Tokenize({trueSummaries[1][i]:totable()}, false)[1])
-        end
         qTokens[i] = Tokenize({trueSummaries[1][i]:totable()}, false)[1]
     end
 
@@ -285,6 +282,7 @@ function train(queries, sentences, trueSummaries, learning_rate, vocab_size, emb
         criterion = nn.MSECriterion()
     end 
 
+    print(string.format("Running model with %i queries and %i sentences", n, n_s))
     qValues = {}
     qActions = {}
     qPreds = {}
