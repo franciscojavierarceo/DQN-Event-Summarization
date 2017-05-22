@@ -366,7 +366,6 @@ function train(queries, sentences, trueSummaries, learning_rate, vocab_size, emb
                 )
                 c = c + 1
             end
-            totalPreds = 
 
             if adapt then 
                 qPreds[i]:copy(totalPreds[1])
