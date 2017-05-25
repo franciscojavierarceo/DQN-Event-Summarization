@@ -256,7 +256,7 @@ function train(queries, sentences, trueSummaries, learning_rate, vocab_size, emb
     local SKIP = 1
     local SELECT = 2
 
-    k = #trueSummaries
+    k = sentences[1]:size(2)
     n = queries[1]:size(1)
     q = queries[1]:size(2)
     n_s = #queries
