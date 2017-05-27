@@ -116,9 +116,9 @@ def export_tokens(outputdir):
             index=False
         )
 
-def export_tokens_ss(outputdir):
+def export_tokens_ss(inputdir, outputdir):
     cols = ['sentence_idx', 'query_id', 'qtokens', 'stokens', 'tstokens']
-    findf = pd.read_csv(os.path.join(outputdir, 'cnn_trainingstreams_tokenized.csv'))
+    findf = pd.read_csv(os.path.join(inputdir, 'cnn_trainingstreams_tokenized.csv'))
     # chose 67 because it represents 
     findf['slen'] = findf.apply(lambda row: len(row['stokens'].split(" ")), axis=1)
     sdf = pd.concat([findf['slen'].value_counts(), findf['slen'].value_counts(normalize=True)], axis=1).reset_index()
@@ -126,8 +126,8 @@ def export_tokens_ss(outputdir):
     sdf.sort_values(by='sent_len', inplace=True)
     sdf.reset_index(inplace=True, drop=True)
     sdf['cumpercent'] = sdf['percent'].cumsum()
-    xval = sdf2[sdf2['cumpercent'] <=0.99].shape[0]
-    findf.drop('slen', inplace=True) 
+    xval = sdf[sdf['cumpercent'] <=0.99].shape[0]
+    findf.drop('slen', inplace=True, axis =1) 
 
     findf['stokens'] = findf.apply(lambda row: ' '.join(row['stokens'].split(" ")[0:xval]) , axis=1)
 
@@ -152,6 +152,7 @@ def main():
     outputdir = sys.argv[2]
     inputfile = sys.argv[3]
     maxtokens = sys.argv[4]
+    outputdirss = sys.argv[5]
 
     if not inputdir or not outputdir or not inputfile:
         inputdir = "/home/francisco/GitHub/DQN-Event-Summarization/data/1-output/"
@@ -168,10 +169,10 @@ def main():
 
     print("exporting tokens...")
     export_tokens(outputdir)
-    export_tokens_ss(outputdirss)
+    export_tokens_ss(outputdir, outputdirss)
     print("...processing complete")
 
 if __name__ == "__main__":
     main()
     # time python Code/Utils/build_cnn.py ./data2/1-output/ ./data2/2-output/ cnn_trainingstreams.csv 1000
-    # time python Code/Utils/build_cnn.py ./data/1-output/ ./data/cnn_tokenized/ cnn_trainingstreams.csv 20000
+    # time python Code/Utils/build_cnn.py ./data/1-output/ ./data/cnn_tokenized/ cnn_trainingstreams.csv 20000 ./data/cnn_tokenized_ss/
