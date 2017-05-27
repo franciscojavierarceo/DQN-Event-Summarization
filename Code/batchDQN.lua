@@ -19,7 +19,7 @@ dofile("Code/utilsNNbatch.lua")
 -- ByteTensor = torch.ByteTensor
 -- print("...running on CPU")
 
-outputpath = '/home/francisco/GitHub/DQN-Event-Summarization/data/training/'
+outputpath = '/home/francisco/GitHub/DQN-Event-Summarization/data/training_ss/'
 torch.setnumthreads(torch.getnumthreads())
 queries, sentences, trueSummaries = loadCNN(outputpath, 5)
 print("...data loaded")
