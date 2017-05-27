@@ -3,7 +3,7 @@ require 'csvigo'
 dofile("Code/utils.lua")
 
 function buildCNN(input_path, inputfile, idx)
-    inputfile = string.format('cnn_data_sentence_%02d', idx)
+    inputfile = string.format('cnn_data_sentence_ss_%02d', idx)
 
     mydata =  csvigo.load({path = input_path .. inputfile .. '.csv', mode = "large", verbose = false})
     local qtokens, stokens, tstokens = {}, {}, {}
@@ -32,8 +32,8 @@ function buildCNN(input_path, inputfile, idx)
     print("...data exported to torch datafiles")
 end
 
-input_path = "/home/francisco/GitHub/DQN-Event-Summarization/data/cnn_tokenized/"
-outputpath = "/home/francisco/GitHub/DQN-Event-Summarization/data/training/"
+input_path = "/home/francisco/GitHub/DQN-Event-Summarization/data/cnn_tokenized_ss/"
+outputpath = "/home/francisco/GitHub/DQN-Event-Summarization/data/training_ss/"
 
 -- input_path = "/Users/franciscojavierarceo/GitHub/DeepNLPQLearning/data2/2-output/"
 -- outputpath = "/Users/franciscojavierarceo/GitHub/DeepNLPQLearning/data2/training/"
