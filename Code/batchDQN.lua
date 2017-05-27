@@ -21,7 +21,7 @@ dofile("Code/utilsNNbatch.lua")
 
 outputpath = '/home/francisco/GitHub/DQN-Event-Summarization/data/training/'
 torch.setnumthreads(torch.getnumthreads())
-queries, sentences, trueSummaries = loadCNN(outputpath, 500)
+queries, sentences, trueSummaries = loadCNN(outputpath, 5)
 print("...data loaded")
 -- n = queries[1]:size(1)
 -- n_s = sentences[1]:size(2)

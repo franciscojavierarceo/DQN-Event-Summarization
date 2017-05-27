@@ -50,12 +50,12 @@ def tokenize_cnn(inputdir, inputfile, outputdir, maxtokens=10000):
     output.close()
 
     odf0 = pd.DataFrame.from_dict(dictionary.dfs, orient='index').reset_index()
-    odf1 = pd.DataFrame.from_dict(dictionary.token2id, orient='index').reset_index()
+    ofindf = pd.DataFrame.from_dict(dictionary.token2id, orient='index').reset_index()
     odf0.columns = ['id', 'frequency']
-    odf1.columns = ['token', 'id']
+    ofindf.columns = ['token', 'id']
 
     # Merge by token id
-    odf = pd.merge(left=odf0, right=odf1, on='id')
+    odf = pd.merge(left=odf0, right=ofindf, on='id')
     odf = odf[['id','token', 'frequency']]
     odf.sort_values(by='frequency', ascending=False, inplace=True)
     odf['cumfreq'] = odf['frequency'].cumsum()
@@ -76,10 +76,10 @@ def tokenize_cnn(inputdir, inputfile, outputdir, maxtokens=10000):
     print("\tThis represents %i%% of the full set of tokens" % (odf.ix[maxtokens, 'cumpercent'] * 100 ))
 
     odf0 = pd.DataFrame.from_dict(dictionary.dfs, orient='index').reset_index()
-    odf1 = pd.DataFrame.from_dict(dictionary.token2id, orient='index').reset_index()
+    ofindf = pd.DataFrame.from_dict(dictionary.token2id, orient='index').reset_index()
     odf0.columns = ['id', 'frequency']
-    odf1.columns = ['token', 'id']
-    odf = pd.merge(left=odf0, right=odf1, on='id')
+    ofindf.columns = ['token', 'id']
+    odf = pd.merge(left=odf0, right=ofindf, on='id')
     odf = odf[['id','token', 'frequency']]
     odf.sort_values(by='frequency', ascending=False, inplace=True)
     odf.reset_index(drop=True, inplace=True)
@@ -95,6 +95,7 @@ def tokenize_cnn(inputdir, inputfile, outputdir, maxtokens=10000):
             os.path.join(outputdir, 'cnn_trainingstreams_tokenized.csv'),
             index=False
     )
+
 
 def export_tokens(outputdir):
     cols = ['sentence_idx', 'query_id', 'qtokens', 'stokens', 'tstokens']
@@ -115,6 +116,37 @@ def export_tokens(outputdir):
             index=False
         )
 
+def export_tokens_ss(outputdir):
+    cols = ['sentence_idx', 'query_id', 'qtokens', 'stokens', 'tstokens']
+    findf = pd.read_csv(os.path.join(outputdir, 'cnn_trainingstreams_tokenized.csv'))
+    # chose 67 because it represents 
+    findf['slen'] = findf.apply(lambda row: len(row['stokens'].split(" ")), axis=1)
+    sdf = pd.concat([findf['slen'].value_counts(), findf['slen'].value_counts(normalize=True)], axis=1).reset_index()
+    sdf.columns = ['sent_len', 'count', 'percent']
+    sdf.sort_values(by='sent_len', inplace=True)
+    sdf.reset_index(inplace=True, drop=True)
+    sdf['cumpercent'] = sdf['percent'].cumsum()
+    xval = sdf2[sdf2['cumpercent'] <=0.99].shape[0]
+    findf.drop('slen', inplace=True) 
+
+    findf['stokens'] = findf.apply(lambda row: ' '.join(row['stokens'].split(" ")[0:xval]) , axis=1)
+
+    qdf = findf[['query_id', 'qtokens']].groupby(['query_id', 'qtokens']).size().reset_index().rename(columns={0:'n_sentences'})
+    qdf.drop(labels='n_sentences', axis=1, inplace=True)
+    min_idx, max_idx = findf['sentence_idx'].min(), findf['sentence_idx'].max()
+    # Exporting all of the files
+    for idx in range(min_idx, max_idx + 1):
+        findf_ssidx = findf[findf['sentence_idx'] == idx].copy()
+        qdfout = qdf.merge(findf_ssidx[['sentence_idx', 'query_id', 'stokens','tstokens']], 
+            how='left', on=['query_id']
+            )
+        qdfout[['qtokens', 'stokens', 'tstokens']] = qdfout[['qtokens', 'stokens', 'tstokens']].fillna('')
+        qdfout = qdfout[cols]
+        qdfout.to_csv(
+                os.path.join(outputdir, 'cnn_data_sentence_ss_%02d.csv' % idx), 
+            index=False
+        )
+
 def main():
     inputdir = sys.argv[1]
     outputdir = sys.argv[2]
@@ -123,7 +155,8 @@ def main():
 
     if not inputdir or not outputdir or not inputfile:
         inputdir = "/home/francisco/GitHub/DQN-Event-Summarization/data/1-output/"
-        outputdir = "/home/francisco/GitHub/DQN-Event-Summarization/data/2-output/"
+        outputdir = "/home/francisco/GitHub/DQN-Event-Summarization/data/cnn_tokenized/"
+        outputdirss = "/home/francisco/GitHub/DQN-Event-Summarization/data/cnn_tokenized_ss/"
         inputfile = "cnn_trainingstreams.csv"
 
     if not maxtokens:
@@ -135,6 +168,7 @@ def main():
 
     print("exporting tokens...")
     export_tokens(outputdir)
+    export_tokens_ss(outputdirss)
     print("...processing complete")
 
 if __name__ == "__main__":
