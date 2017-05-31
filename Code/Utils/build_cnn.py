@@ -120,7 +120,7 @@ def export_tokens(outputdir):
         print(qdfout.head())
 
     qdfout.to_csv(
-            os.path.join(outputdir, 'cnn_data_sentence_%02d.csv' % idx), 
+            os.path.join(outputdir, 'cnn_data.csv'), 
         index=False
     )
 
@@ -145,16 +145,23 @@ def export_tokens_ss(inputdir, outputdir):
     # Exporting all of the files
     for idx in range(min_idx, max_idx + 1):
         findf_ssidx = findf[findf['sentence_idx'] == idx].copy()
-        qdfout = qdf.merge(findf_ssidx[['sentence_idx', 'query_id', 'stokens','tstokens']], 
-            how='left', on=['query_id']
-            )
-        qdfout[['qtokens', 'stokens', 'tstokens']] = qdfout[['qtokens', 'stokens', 'tstokens']].fillna('')
-        qdfout = qdfout[cols]
-        qdfout.to_csv(
-                os.path.join(outputdir, 'cnn_data_sentence_ss_%02d.csv' % idx), 
-            index=False
-        )
+        findf_ssidx.drop_duplicates(inplace=True)
+        if idx == 0 :
+            qdfout = qdfm.merge(findf_ssidx[['query_id', 'stokens']], 
+                how='left', on=['query_id']
+            ) 
+        else:
+            qdfout = qdfout.merge(findf_ssidx[['query_id', 'stokens']], 
+                how='left', on=['query_id']
+            ) 
+            
+        qdfout.columns = qdfout.columns[:(3 + idx) ].tolist() + ['stokens_%i' % idx]
+        print(qdfout.head())
 
+    qdfout.to_csv(
+            os.path.join(outputdir, 'cnn_data_ss.csv'), 
+        index=False
+    )
 def main():
     inputdir = sys.argv[1]
     outputdir = sys.argv[2]
