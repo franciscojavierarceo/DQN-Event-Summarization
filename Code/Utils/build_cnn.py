@@ -157,7 +157,7 @@ def export_tokens_ss(inputdir, outputdir):
         qdfout.columns = qdfout.columns[:(3 + idx) ].tolist() + ['stokens_%i' % idx]
 
     qdfout.to_csv(
-            os.path.join(outputdir, 'cnn_data.csv'), 
+            os.path.join(outputdir, 'cnn_data_ss.csv'), 
         index=False
     )
 
