@@ -112,6 +112,7 @@ def export_tokens(outputdir):
                 how='left', on=['query_id']
             ) 
         else:
+            print(idx, idx + 3)
             qdfout = qdfout.merge(findf_ssidx[['query_id', 'stokens']], 
                 how='left', on=['query_id']
             ) 
