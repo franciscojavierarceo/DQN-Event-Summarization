@@ -117,6 +117,7 @@ def export_tokens(outputdir):
                 how='left', on=['query_id']
             ) 
             
+        print(qdfout.columns)
         qdfout.columns = qdfout.columns[:(3 + idx) ].tolist() + ['stokens_%i' % idx]
         print(qdfout.head())
 
