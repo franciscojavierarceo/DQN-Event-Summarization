@@ -100,7 +100,7 @@ def tokenize_cnn(inputdir, inputfile, outputdir, maxtokens=10000):
 def export_tokens(outputdir):
     cols = ['sentence_idx', 'query_id', 'qtokens', 'stokens', 'tstokens']
     findf = pd.read_csv(os.path.join(outputdir, 'cnn_trainingstreams_tokenized.csv'))
-    qdf = findf[['query_id', 'qtokens']].groupby(['query_id', 'qtokens']).size().reset_index().rename(columns={0:'n_sentences'})
+    qdf = findf[['query_id', 'qtokens', 'tstokens']].groupby(['query_id', 'qtokens', 'tstokens']).size().reset_index().rename(columns={0:'n_sentences'})
     qdf.drop(labels='n_sentences', axis=1, inplace=True)
     min_idx, max_idx = findf['sentence_idx'].min(), findf['sentence_idx'].max()
     # Exporting all of the files
