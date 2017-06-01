@@ -107,7 +107,6 @@ def export_tokens(outputdir):
     for idx in range(min_idx, max_idx + 1):
         findf_ssidx = findf[findf['sentence_idx'] == idx].copy()
         findf_ssidx.drop_duplicates(inplace=True)
-        print(idx, idx + 3)
         if idx == 0 :
             qdfout = qdf.merge(findf_ssidx[['query_id', 'stokens']], 
                 how='left', on=['query_id']
@@ -117,9 +116,7 @@ def export_tokens(outputdir):
                 how='left', on=['query_id']
             ) 
             
-        print(qdfout.columns)
         qdfout.columns = qdfout.columns[:(3 + idx) ].tolist() + ['stokens_%i' % idx]
-        print(qdfout.head())
 
     qdfout.to_csv(
             os.path.join(outputdir, 'cnn_data.csv'), 
