@@ -1,0 +1,15 @@
+[TerminalIPythonApp] WARNING | Subcommand `ipython notebook` is deprecated and will be removed in future versions.
+[TerminalIPythonApp] WARNING | You likely want to use `jupyter notebook` in the future
+[I 20:51:34.862 NotebookApp] The port 8888 is already in use, trying another port.
+[I 20:51:34.866 NotebookApp] Serving notebooks from local directory: /home/francisco/GitHub/DQN-Event-Summarization
+[I 20:51:34.866 NotebookApp] 0 active kernels 
+[I 20:51:34.866 NotebookApp] The Jupyter Notebook is running at: http://localhost:8889/?token=b0ca86998a380c53671ddea91ecbd370f7ef934be56e3bff
+[I 20:51:34.866 NotebookApp] Use Control-C to stop this server and shut down all kernels (twice to skip confirmation).
+[W 20:51:34.866 NotebookApp] No web browser found: could not locate runnable browser.
+[C 20:51:34.867 NotebookApp] 
+    
+    Copy/paste this URL into your browser when you connect for the first time,
+    to login with a token:
+        http://localhost:8889/?token=b0ca86998a380c53671ddea91ecbd370f7ef934be56e3bff
+[I 20:51:35.412 NotebookApp] Interrupted...
+[I 20:51:35.413 NotebookApp] Shutting down kernels
