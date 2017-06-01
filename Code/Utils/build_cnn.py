@@ -108,7 +108,7 @@ def export_tokens(outputdir):
         findf_ssidx = findf[findf['sentence_idx'] == idx].copy()
         findf_ssidx.drop_duplicates(inplace=True)
         if idx == 0 :
-            qdfout = qdfm.merge(findf_ssidx[['query_id', 'stokens']], 
+            qdfout = qdf.merge(findf_ssidx[['query_id', 'stokens']], 
                 how='left', on=['query_id']
             ) 
         else:
