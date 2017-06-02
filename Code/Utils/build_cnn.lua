@@ -18,7 +18,17 @@ function buildCNN(input_path, inputfile, idx)
             pad_l[j] = math.max( pad_l[j],  #mydata[i][j]:split(" "))
         end
     end
+    sentences = {}
+    for j = 1, 125 do 
+        tmp = {}
+        for i = 2, #mydata do 
+            tmp[i] = mydata[i][j + 3]:split(" ")
+        end
+        -- # of sentence tokens
+        sentences[j] = torch.Tensor(padZeros({tmp}, pad_l[j + 3] ))
+    end
 
+    torch.Tensor(padZeros(qtokens))
     local qtokens, stokens, tstokens = {}, {}, {}
     local maxq, maxs, maxts = 0, 0, 0
 
