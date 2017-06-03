@@ -26,10 +26,10 @@ function buildCNN(input_path, inputfile)
             tmp[i - 1] = mydata[i][j + 3]:split(" ")
         end
 
-        if j = 2 then 
+        if j == 2 then 
             queries = torch.Tensor(padZeros({tmp}, pad_l[2] ))
         end
-        if j = 2 then 
+        if j == 2 then 
             trueSummary = torch.Tensor(padZeros({tmp}, pad_l[3] ))
         end
         if j > 3 then 
