@@ -7,7 +7,7 @@ function buildCNN(input_path, inputfile)
 
     mydata =  csvigo.load({path = input_path .. inputfile , mode = "large", verbose = false})
 
-    print(string.format("data %i loaded and tokenized...", idx))
+    print("data loaded and tokenized...")
     -- Initialize padding length
     pad_l = {}
     for i = 1, #mydata[1] do 
