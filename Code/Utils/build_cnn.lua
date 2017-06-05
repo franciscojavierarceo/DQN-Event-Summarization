@@ -2,8 +2,7 @@ require 'csvigo'
 
 dofile("Code/utils.lua")
 
-function buildCNN(input_path, inputfile)
-    inputfile = 'cnn_data_ss.csv'
+function buildCNN(input_path, inputfile, outputpath)
 
     mydata =  csvigo.load({path = input_path .. inputfile , mode = "large", verbose = false})
 
@@ -27,14 +26,14 @@ function buildCNN(input_path, inputfile)
         end
 
         if j == 2 then 
-            queries = torch.Tensor(padZeros({tmp}, pad_l[2] ))
+            queries = torch.Tensor(padZeros(tmp, pad_l[2] ))
         end
         if j == 2 then 
-            trueSummary = torch.Tensor(padZeros({tmp}, pad_l[3] ))
+            trueSummary = torch.Tensor(padZeros(tmp, pad_l[3] ))
         end
         if j > 3 then 
             -- # of sentence tokens
-            sentences[j - 3 ] = torch.Tensor(padZeros({tmp}, pad_l[j] ))
+            sentences[j - 3 ] = torch.Tensor(padZeros(tmp, pad_l[j] ))
         end
     end
 
@@ -46,12 +45,6 @@ end
 
 input_path = "/home/francisco/GitHub/DQN-Event-Summarization/data/cnn_tokenized_ss/"
 outputpath = "/home/francisco/GitHub/DQN-Event-Summarization/data/training_ss/"
+inputfile = 'cnn_data_ss.csv'
 
--- input_path = "/Users/franciscojavierarceo/GitHub/DeepNLPQLearning/data/cnn_tokenized/"
--- outputpath = "/Users/franciscojavierarceo/GitHub/DeepNLPQLearning/data/training/"
-
-buildCNN(input_path, inputfile)
-
--- for i=0, 124 do 
---     buildCNN(input_path, inputfile, i)
--- end
+buildCNN(input_path, inputfile, outputpath)
