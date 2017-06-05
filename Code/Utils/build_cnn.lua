@@ -23,7 +23,7 @@ function buildCNN(input_path, inputfile)
     for j = 1, 125 do 
         tmp = {}
         for i = 2, #mydata do 
-            tmp[i - 1] = mydata[i][j + 3]:split(" ")
+            tmp[i - 1] = mydata[i][j]:split(" ")
         end
 
         if j == 2 then 
