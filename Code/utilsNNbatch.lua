@@ -357,7 +357,7 @@ function train(queries, sentences, trueSummaries, learning_rate, vocab_size, emb
                 end
                 totalPreds[{{start_row, end_row}}]:copy(
                     model:forward({
-                        queries[i][{{start_row, end_row}}], 
+                        queries[{{start_row, end_row}}], 
                         sentences[i][{{start_row, end_row}}], 
                         totalPredsummary[{{start_row, end_row}}]
                     })
