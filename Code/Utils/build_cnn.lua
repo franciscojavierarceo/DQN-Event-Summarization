@@ -18,6 +18,7 @@ function buildCNN(input_path, inputfile, outputpath)
             pad_l[j] = math.max( pad_l[j],  #mydata[i][j]:split(" "))
         end
     end
+    print("beging sentence padding...")
     sentences = {}
     for j = 1, 125 do 
         print(string.format("processing column %i", j))
