@@ -20,6 +20,7 @@ function buildCNN(input_path, inputfile, outputpath)
     end
     sentences = {}
     for j = 1, 125 do 
+        print(string.format("processing column %i", j))
         tmp = {}
         for i = 2, #mydata do 
             tmp[i - 1] = mydata[i][j]:split(" ")
