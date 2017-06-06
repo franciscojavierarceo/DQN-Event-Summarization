@@ -21,7 +21,7 @@ function buildCNN(input_path, inputfile, outputpath)
     print("beging sentence padding...")
     sentences = {}
     for j = 1, 125 do 
-        print(string.format("processing column %i", j))
+        print(string.format("processing column %i with padding %i", j, pad_l[j]))
         tmp = {}
         for i = 2, #mydata do 
             tmp[i - 1] = mydata[i][j]:split(" ")
