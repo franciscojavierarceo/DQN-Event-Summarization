@@ -30,7 +30,7 @@ function buildCNN(input_path, inputfile, outputpath)
         if j == 2 then 
             queries = torch.Tensor(padZeros(tmp, pad_l[2] ))
         end
-        if j == 2 then 
+        if j == 3 then 
             trueSummary = torch.Tensor(padZeros(tmp, pad_l[3] ))
         end
         if j > 3 then 
