@@ -24,22 +24,11 @@ outputpath = '/home/francisco/GitHub/DQN-Event-Summarization/data/training_ss/'
 datafile = "cnn_data_ss.dat"
 
 data = torch.load(outputpath .. datafile)
+print("...data loaded")
 
 queries = data[1]
 trueSummaries = data[2]
 sentences= data[3]
-
--- queries, sentences, trueSummaries = loadCNN(outputpath, 500)
-print("...data loaded")
-n = queries:size(1)
-n_s = #sentences
-print(#sentences)
-k = 60
-
--- totalPredsummary = LongTensor(n, n_s * k):fill(0)
-
--- model = buildModel('bow', vocabSize, embDim, 'f1', false, false)
-
 
 cmd = torch.CmdLine()
 cmd:option('--vocab_size', 20001, 'Number of samples to iterate over')
