@@ -36,9 +36,9 @@ n_s = #sentences
 print(#sentences)
 k = 60
 
-totalPredsummary = LongTensor(n, n_s * k):fill(0)
+-- totalPredsummary = LongTensor(n, n_s * k):fill(0)
 
-model = buildModel('bow', vocabSize, embDim, 'f1', false, false)
+-- model = buildModel('bow', vocabSize, embDim, 'f1', false, false)
 
 
 cmd = torch.CmdLine()
