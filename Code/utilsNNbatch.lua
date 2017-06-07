@@ -257,8 +257,8 @@ function train(queries, sentences, trueSummaries, learning_rate, vocab_size, emb
     local SELECT = 2
 
     k = sentences[1]:size(2)
-    n = queries[1]:size(1)
-    q = queries[1]:size(2)
+    n = queries:size(1)
+    q = queries:size(2)
     n_s = #queries
 
     optimParams = { learningRate = learning_rate }
@@ -268,7 +268,7 @@ function train(queries, sentences, trueSummaries, learning_rate, vocab_size, emb
 
     qTokens = {}
     for i=1, n do
-        qTokens[i] = Tokenize({trueSummaries[1][i]:totable()}, false)[1]
+        qTokens[i] = Tokenize({trueSummaries[i]:totable()}, false)[1]
     end
 
     -- Building the model
