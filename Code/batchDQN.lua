@@ -14,10 +14,9 @@ dl = require 'dataload'
 dofile("Code/Utils/load_cnn.lua")
 dofile("Code/utilsNNbatch.lua")
 
--- Tensor = torch.Tensor
--- LongTensor = torch.LongTensor
--- ByteTensor = torch.ByteTensor
--- print("...running on CPU")
+Tensor = torch.Tensor
+LongTensor = torch.LongTensor
+ByteTensor = torch.ByteTensor
 
 torch.setnumthreads(torch.getnumthreads())
 
