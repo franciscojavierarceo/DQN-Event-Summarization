@@ -34,6 +34,7 @@ trueSummaries = data[3]
 print("...data loaded")
 n = queries:size(1)
 n_s = #sentences
+print(#sentences)
 k = 60
 
 totalPredsummary = LongTensor(n, n_s * k):fill(0)
