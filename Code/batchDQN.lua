@@ -32,9 +32,9 @@ trueSummaries = data[3]
 
 -- queries, sentences, trueSummaries = loadCNN(outputpath, 500)
 print("...data loaded")
-n = queries[1]:size(1)
+n = queries:size(1)
 n_s = sentences[1]:size(2)
-k = 1
+k = 60
 
 totalPredsummary = LongTensor(n, n_s * k):fill(0)
 
