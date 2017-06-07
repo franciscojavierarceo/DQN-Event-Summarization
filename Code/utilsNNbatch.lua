@@ -259,7 +259,7 @@ function train(queries, sentences, trueSummaries, learning_rate, vocab_size, emb
     k = sentences[1]:size(2)
     n = queries:size(1)
     q = queries:size(2)
-    n_s = #queries
+    n_s = #sentences
 
     optimParams = { learningRate = learning_rate }
     delta = cuts / nepochs
@@ -282,7 +282,8 @@ function train(queries, sentences, trueSummaries, learning_rate, vocab_size, emb
         criterion = nn.MSECriterion()
     end 
 
-    print(string.format("Running model with %i queries and %i sentences", n, n_s))
+    print(string.format("Running model with %i queries and %i sentences", n, n_s)) 
+
     qValues = {}
     qActions = {}
     qPreds = {}
