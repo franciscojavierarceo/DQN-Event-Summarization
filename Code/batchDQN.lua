@@ -27,8 +27,8 @@ datafile = "cnn_data_ss.dat"
 data = torch.load(outputpath .. datafile)
 
 queries = data[1]
-sentences = data[2]
-trueSummaries = data[3]
+trueSummaries = data[2]
+sentences= data[3]
 
 -- queries, sentences, trueSummaries = loadCNN(outputpath, 500)
 print("...data loaded")
