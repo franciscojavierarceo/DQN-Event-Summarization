@@ -268,7 +268,7 @@ function train(queries, sentences, trueSummaries, learning_rate, vocab_size, emb
 
     qTokens = {}
     for i=1, n do
-        qTokens[i] = Tokenize({trueSummaries[i]:totable()}, false)[1]
+        qTokens[i] = Tokenize({trueSummaries[i]:totable()}, false)
     end
 
     -- Building the model
@@ -296,7 +296,7 @@ function train(queries, sentences, trueSummaries, learning_rate, vocab_size, emb
 
     memfull = false
     curr_memsize = 0
-    memsize = n * n_s * mem_multiplier
+    memsize = torch.round(n * n_s * mem_multiplier)
     queryMemory = Tensor(memsize, q):fill(0)
     qActionMemory = Tensor(memsize, 2):fill(0)
     predSummaryMemory = Tensor(memsize, n_s * k):fill(0)
