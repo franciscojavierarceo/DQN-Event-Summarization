@@ -431,7 +431,7 @@ function train(queries, sentences, trueSummaries, learning_rate, vocab_size, emb
             end
 
             for j = 1, n do
-                recall, prec, f1 = rougeScores( Tokenize(totalPredsummary[j]:totable()),
+                recall, prec, f1 = rougeScores({Tokenize(totalPredsummary[j]:totable())},
                                                 qTokens[j]
                     )
                 rougue_scores[i][j]:fill(f1)
