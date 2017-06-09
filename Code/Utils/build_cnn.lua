@@ -19,6 +19,12 @@ function buildCNN(input_path, inputfile, outputpath)
         end
     end
     print("beging sentence padding...")
+
+    spadlen = 0 
+    for j= 4, 125 do 
+        spadlen = math.max(spadlen, pad_l[j])
+    end
+
     sentences = {}
     for j = 1, 125 do 
         print(string.format("processing column %i with padding %i", j, pad_l[j]))
@@ -35,7 +41,7 @@ function buildCNN(input_path, inputfile, outputpath)
         end
         if j > 3 then 
             -- # of sentence tokens
-            sentences[j - 3 ] = torch.Tensor(padZeros(tmp, pad_l[j] ))
+            sentences[j - 3 ] = torch.Tensor(padZeros(tmp, spadlen))
         end
     end
 
