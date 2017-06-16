@@ -334,8 +334,8 @@ end
 
 function Tokenize(inputdic, remove_stopwords)
     if type(inputdic) == "table" then 
-	return {0}
-    end 
+	return {}
+    end
     --- This function tokenizes the words into a unigram dictionary
     local out = {}
     --- these can be found in the total_corpus_summary.csv file
