@@ -1,10 +1,10 @@
 require 'os'
 require 'nn'
-require 'cunn'
-require 'cunnx'
+--require 'cunn'
+--require 'cunnx'
 require 'optim'
 
-require 'cudnn'
+--require 'cudnn'
 require 'rnn'
 require 'csvigo'
 
@@ -28,6 +28,12 @@ print("...data loaded")
 queries = data[1]
 trueSummaries = data[2]
 sentences= data[3]
+
+n = 10
+queries = queries[{{1, n}}]
+trueSummaries = trueSummaries[{{1, n}}]
+sentences = sentences[{{1, n}}]
+print(string.format("# of sentences = %i", #sentences))
 
 cmd = torch.CmdLine()
 cmd:option('--vocab_size', 20001, 'Number of samples to iterate over')
