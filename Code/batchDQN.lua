@@ -29,10 +29,18 @@ queries = data[1]
 trueSummaries = data[2]
 sentences= data[3]
 
-n = 10
+n = 1000
+
 queries = queries[{{1, n}}]
 trueSummaries = trueSummaries[{{1, n}}]
-sentences = sentences[{{1, n}}]
+
+tmp = {}
+for j=1,#sentences do 
+    tmp[j] = sentences[j][{{1, n}}]
+end
+
+sentences = tmp
+
 print(string.format("# of sentences = %i", #sentences))
 
 cmd = torch.CmdLine()
