@@ -41,7 +41,7 @@ function buildCNN(input_path, inputfile, outputpath)
         end
         if j > 3 then 
             -- # of sentence tokens
-            sentences[j - 3 ] = torch.Tensor(padZeros(tmp, spadlen))
+            sentences[j - 3] = torch.Tensor(padZeros(tmp, spadlen))
         end
     end
 

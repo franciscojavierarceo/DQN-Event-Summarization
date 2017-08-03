@@ -150,6 +150,8 @@ function rougeScores(genSummary, refSummary)
         if genCount == nil then 
             genCount = 0 
         end
+--	if type(refCount) == "table" then print(k, refCount) end 
+--	if type(genCount) == "table" then print(k, genCount) end
         intersection = intersection + math.min(refCount, genCount)
         refTotal = refTotal + refCount
         genTotal = genTotal + genCount
@@ -431,8 +433,10 @@ function train(queries, sentences, trueSummaries, learning_rate, vocab_size, emb
             end
 
             for j = 1, n do
-                recall, prec, f1 = rougeScores({Tokenize(totalPredsummary[j]:totable())},
-                                                qTokens[j]
+		print(qTokens[j], totalPredsummary[j])
+                recall, prec, f1 = rougeScores(
+					{Tokenize(totalPredsummary[j]:totable())},
+                                        {qTokens[j]}
                     )
                 rougue_scores[i][j]:fill(f1)
             end
