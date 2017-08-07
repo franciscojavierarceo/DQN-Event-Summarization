@@ -332,34 +332,34 @@ function buildFinalSummary(preds, xs, K)
     return out
 end
 
-function Tokenize(inputdic, remove_stopwords)
-    if type(inputdic) == "table" then 
-	return {}
-    end
-    --- This function tokenizes the words into a unigram dictionary
-    local out = {}
-    --- these can be found in the total_corpus_summary.csv file
-    local stopwordlist = {1, 3, 6, 23, 24, 28, 31, 54, 57, 62, 103}
-
-    for k, v in pairs(inputdic) do
-        for j, l in pairs(v) do
-            if out[l] == nil then
-                out[l] = 1
-                else 
-                out[l] = 1 + out[l]
-            end
-        end
-    end
-    if remove_stopwords then 
-        for k, stopword in pairs(stopwordlist) do
-            -- Removing stop words here
-            if out[stopword] ~= nil then
-                out[stopword] = nil
-            end
-        end
-    end
-    return out
-end
+-- function Tokenize(inputdic, remove_stopwords)
+--     if type(inputdic) == "table" then 
+-- 	return {}
+--     end
+--     --- This function tokenizes the words into a unigram dictionary
+--     local out = {}
+--     --- these can be found in the total_corpus_summary.csv file
+--     local stopwordlist = {1, 3, 6, 23, 24, 28, 31, 54, 57, 62, 103}
+-- 
+--     for k, v in pairs(inputdic) do
+--         for j, l in pairs(v) do
+--             if out[l] == nil then
+--                 out[l] = 1
+--                 else 
+--                 out[l] = 1 + out[l]
+--             end
+--         end
+--     end
+--     if remove_stopwords then 
+--         for k, stopword in pairs(stopwordlist) do
+--             -- Removing stop words here
+--             if out[stopword] ~= nil then
+--                 out[stopword] = nil
+--             end
+--         end
+--     end
+--     return out
+-- end
 
 ---- Recall
 function rougeRecall(pred_summary, ref_summaries)
