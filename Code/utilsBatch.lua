@@ -293,8 +293,10 @@ function train(n, n_s, q, k, a, b, learning_rate, embDim, gamma, batch_size, fas
                 buildTotalSummary(predsummary, totalPredsummary)
             end
             for j = 1, n do
-                recall, prec, f1 = rougeScores( qTokens[j],
-                                                Tokenize(totalPredsummary[j]:totable()))
+                recall, prec, f1 = rougeScores( 
+                                                Tokenize(totalPredsummary[j]:totable())
+						qTokens[j]
+					)
                 rewards[i][j]:fill(f1)
             end
             if i > 1 then

@@ -1,10 +1,10 @@
 require 'os'
 require 'nn'
 require 'rnn'
--- require 'cunn'
--- require 'cunnx'
+--require 'cunn'
+--require 'cunnx'
 require 'optim'
--- require 'cutorch'
+--require 'cutorch'
 require 'parallel'
 
 dl = require 'dataload'
@@ -270,7 +270,8 @@ function train(queries, sentences, trueSummaries, learning_rate, vocab_size, emb
 
     qTokens = {}
     for i=1, n do
-        qTokens[i] = Tokenize({trueSummaries[i]:totable()}, false)
+	qTokens[i] = Tokenize(unpackZeros(trueSummaries[i]:totable()))
+--        qTokens[i] = Tokenize({trueSummaries[i]:totable()}, false)
     end
 
     -- Building the model
@@ -433,10 +434,9 @@ function train(queries, sentences, trueSummaries, learning_rate, vocab_size, emb
             end
 
             for j = 1, n do
-		print(qTokens[j], totalPredsummary[j])
                 recall, prec, f1 = rougeScores(
-					{Tokenize(totalPredsummary[j]:totable())},
-                                        {qTokens[j]}
+					Tokenize(totalPredsummary[j]:totable()),
+					qTokens[j]
                     )
                 rougue_scores[i][j]:fill(f1)
             end
