@@ -50,7 +50,10 @@ def main():
 	def tensorSentence(sentencevar):
 		xs = torch.zeros(sentences.shape[0], len(corpus_dict))	
 		for i, row in enumerate(sentences[sentencevar]):
-			tokens = row.split(" ")
+			if type(row) == str:
+				tokens = row.split(" ")
+			else:
+				tokens = [0]
 			
 			if len(tokens) > 0:
 				xs[i, :] = make_bow_vector([int(s) for s in tokens], corpus_dict)
