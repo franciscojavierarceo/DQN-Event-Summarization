@@ -1,13 +1,15 @@
 import sys
+import pandas as pd
 sys.path.append('../src')
 import data_io, params, SIF_embedding
 import show_chunked
 
 # input
 wordfile = '/home/francisco/GitHub/SIF/data/glove.840B.300d.txt'   # word vector file, can be downloaded from GloVe website
-weightfile = '../auxiliary_data/enwiki_vocab_min200.txt' # each line is a word and its frequency
+weightfile = '/home/francisco/GitHub/SIF/auxiliary_data/enwiki_vocab_min200.txt' # each line is a word and its frequency
 weightpara = 1e-3 # the parameter in the SIF weighting scheme, usually in the range [3e-5, 3e-3]
-rmpc = 1 # number of principal components to remove in SIF weighting scheme
+rmpc = 0
+# rmpc = 1 # they usually set 1 ; number of principal components to remove in SIF weighting scheme
 
 # sentences = ['this is an example sentence', 'this is another sentence that is slightly longer']
 
@@ -34,6 +36,11 @@ params.rmpc = rmpc
 # get SIF embedding
 embeddings = SIF_embedding.SIF_embedding(We, x, w, params) # embedding[i,:] is the embedding for sentence i
 
-for sentence, embedding in zip(sentences, embeddings):
-    print(sentence, embedding.shape, embedding.mean())
+sdf = pd.DataFrame(sentences, columns=['sentence'])
+emb = pd.DataFrame(embeddings, columns=['emb_%i' % x for x in range(embeddings.shape[1])]).T
 
+sdf = pd.concat([sdf, emb], axis=1)
+print(sdf.shape)
+
+# for sentence, embedding in zip(sentences, embeddings):
+#    print(sentence, embedding.shape, embedding.mean())

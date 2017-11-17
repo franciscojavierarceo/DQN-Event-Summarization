@@ -12,6 +12,7 @@ def getsentences(file0):
     example_str = struct.unpack("%ds" % str_len, reader.read(str_len))[0]
     tmp = example_pb2.Example.FromString(example_str)
 
+    print(tmp)
     article  = str(tmp.features.feature['article'].bytes_list.value[0])
     abstract = str(tmp.features.feature['abstract'].bytes_list.value[0])
 
