@@ -37,10 +37,10 @@ params.rmpc = rmpc
 embeddings = SIF_embedding.SIF_embedding(We, x, w, params) # embedding[i,:] is the embedding for sentence i
 
 sdf = pd.DataFrame(sentences, columns=['sentence'])
-emb = pd.DataFrame(embeddings, columns=['emb_%i' % x for x in range(embeddings.shape[1])]).T
+emb = pd.DataFrame(embeddings, columns=['emb_%i' % x for x in range(embeddings.shape[1])])
 
 sdf = pd.concat([sdf, emb], axis=1)
-print(sdf.shape)
+print(sdf.head())
 
 # for sentence, embedding in zip(sentences, embeddings):
 #    print(sentence, embedding.shape, embedding.mean())
