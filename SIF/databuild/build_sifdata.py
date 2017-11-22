@@ -44,7 +44,7 @@ def load_embed(wordfile, weightfile, weightpara=1e-3, param=None, rmpc=0):
     # set parameters
     param.rmpc = rmpc
 
-    return Weights, word2weight, weight4ind
+    return Weights, words, word2weight, weight4ind
 
 def return_sif(sentences, words, weight2ind, param, Weights):
     # x is the array of word indices, m is the binary mask indicating whether there is a word in that location
@@ -56,7 +56,7 @@ def return_sif(sentences, words, weight2ind, param, Weights):
 
 
 def embed_sentences(wordfile, weightfile, weightpara, param, rmpc, file_list):
-    Weights, word2weight, weight2ind = load_embed(wordfile, weightfile, weightpara, param, rmpc)
+    Weights, words, word2weight, weight2ind = load_embed(wordfile, weightfile, weightpara, param, rmpc)
 
     print('embeddings loaded...')
     for file_i in file_list:
