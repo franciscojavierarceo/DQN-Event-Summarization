@@ -12,7 +12,7 @@ import data_io, params, SIF_embedding
 def return_bytes(reader_obj):
     len_bytes = reader_obj.read(8)
     str_len = struct.unpack('q', len_bytes)[0]
-    e_s = struct.unpack("%ds" % str_len, reader.read(str_len))
+    e_s = struct.unpack("%ds" % str_len, reader_obj.read(str_len))
     es = e_s[0]
     c = example_pb2.Example.FromString(es)
     article  = str(c.features.feature['article'].bytes_list.value[0])
