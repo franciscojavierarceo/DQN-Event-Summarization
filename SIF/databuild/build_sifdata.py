@@ -61,6 +61,7 @@ def embed_sentences(wordfile, weightfile, weightpara, param, rmpc, file_list):
     print('embeddings loaded...')
     for file_i in file_list:
         input_file = open(file_i, 'rb')
+        c = 0
         while input_file:
             clean_abstract, clean_article = return_bytes(input_file)
             print('article cleaned...')
@@ -75,9 +76,13 @@ def embed_sentences(wordfile, weightfile, weightpara, param, rmpc, file_list):
             emb = pd.DataFrame(embeddings, columns = embcols)
 
             sdf = pd.concat([sdf, emb], axis=1)
-            sdf = sdf[['summary', 'sentence', 'clean_sentence'] + sdf.columns[3:].tolist()].head()
-
-            print(sdf.head())
+            sdf = sdf[['summary', 'sentence', 'clean_sentence'] + sdf.columns[3:].tolist()]
+            newfile = file_i.replace(".bin", "")
+            sdf.to_csv("/home/francisco/GitHub/DQN-Event-Summarization/data/sif/%s_%i.csv" % (
+                     newfile, c
+                     )
+                )
+            print("Data exported to %s_%i.csv" % (newfile, c))
             break
         break
 
