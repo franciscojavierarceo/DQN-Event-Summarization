@@ -46,7 +46,7 @@ def load_embed(wordfile, weightfile, weightpara=1e-3, param=None, rmpc=0):
 
     return Weights, words, word2weight, weight4ind
 
-def return_sif(sentences, words, weight2ind, param, Weights):
+def return_sif(sentences, words, weight4ind, param, Weights):
     # x is the array of word indices, m is the binary mask indicating whether there is a word in that location
     x, m = data_io.sentences2idx(sentences, words)
     w = data_io.seq2weight(x, m, weight4ind) # get word weights
@@ -56,17 +56,19 @@ def return_sif(sentences, words, weight2ind, param, Weights):
 
 
 def embed_sentences(wordfile, weightfile, weightpara, param, rmpc, file_list):
-    Weights, words, word2weight, weight2ind = load_embed(wordfile, weightfile, weightpara, param, rmpc)
+    Weights, words, word2weight, weight4ind = load_embed(wordfile, weightfile, weightpara, param, rmpc)
 
     print('embeddings loaded...')
     for file_i in file_list:
         input_file = open(file_i, 'rb')
         while input_file:
             clean_abstract, clean_article = return_bytes(input_file)
+            clean_article = [' '.join([s for s in x if s.isalnum()]) for x in sdf['sentence'].str.split(" ")]
             print('article cleaned...')
-            embeddings = return_sif(clean_article, words, weight2ind, param, Weights)
+            embeddings = return_sif(clean_article, words, weight4ind, param, Weights)
 
             sdf = pd.DataFrame(clean_article, columns=['sentence'])
+            sdf['clean_sentence'] = [' '.join([s for s in x if s.isalnum()]) for x in sdf['sentence'].str.split(" ")]
             sdf['summary'] = clean_abstract
             sdf.ix[1:, 'summary'] = ''
 
@@ -74,7 +76,7 @@ def embed_sentences(wordfile, weightfile, weightpara, param, rmpc, file_list):
             emb = pd.DataFrame(embeddings, columns = embcols)
 
             sdf = pd.concat([sdf, emb], axis=1)
-            sdf = sdf[[sdf.columns[1], sdf.columns[0]] + sdf.columns[2:].tolist()]
+            sdf = sdf[['summary', 'sentence', 'clean_sentence'] + sdf.columns[3:].tolist()].head()
 
             print(sdf.head())
             break
