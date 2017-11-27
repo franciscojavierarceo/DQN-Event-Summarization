@@ -63,7 +63,6 @@ def embed_sentences(wordfile, weightfile, weightpara, param, rmpc, file_list):
         input_file = open(file_i, 'rb')
         while input_file:
             clean_abstract, clean_article = return_bytes(input_file)
-            clean_article = [' '.join([s for s in x if s.isalnum()]) for x in sdf['sentence'].str.split(" ")]
             print('article cleaned...')
             embeddings = return_sif(clean_article, words, weight4ind, param, Weights)
 
