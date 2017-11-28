@@ -55,12 +55,12 @@ def return_sif(sentences, words, weight4ind, param, Weights):
     return embeddings
 
 
-def embed_sentences(wordfile, weightfile, weightpara, param, rmpc, file_list):
+def embed_sentences(inputpath, wordfile, weightfile, weightpara, param, rmpc, file_list):
     Weights, words, word2weight, weight4ind = load_embed(wordfile, weightfile, weightpara, param, rmpc)
 
     print('embeddings loaded...')
     for file_i in file_list:
-        input_file = open(file_i, 'rb')
+        input_file = open(os.path.join(inputpath, file_i), 'rb')
         c = 0
         while input_file:
             try:
@@ -92,14 +92,15 @@ def embed_sentences(wordfile, weightfile, weightpara, param, rmpc, file_list):
 def main():
     myparams = params.params()
     mainpath = 'home/francisco/GitHub/SIF/'
+    datapath = '/home/francisco/GitHub/cnn-dailymail/finished_files/chunked/'
     wordf = os.path.join(mainpath, 'data/glove.840B.300d.txt')
     weightf = os.path.join(mainpath, 'auxiliary_data/enwiki_vocab_min200.txt')
     wp = 1e-3
     rp = 0
     # Example case
     # fl = ['/home/francisco/GitHub/cnn-dailymail/finished_files/chunked/train_000.bin']
-    fl = os.listdir('/home/francisco/GitHub/cnn-dailymail/finished_files/chunked/')
-    embed_sentences(wordf, weightf, wp, myparams, rp, fl)
+    fl = os.listdir(datapath)
+    embed_sentences(datapath, wordf, weightf, wp, myparams, rp, fl)
 
 if __name__ == "__main__":
     main()
