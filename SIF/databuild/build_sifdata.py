@@ -77,14 +77,13 @@ def embed_sentences(wordfile, weightfile, weightpara, param, rmpc, file_list):
 
             sdf = pd.concat([sdf, emb], axis=1)
             sdf = sdf[['summary', 'sentence', 'clean_sentence'] + sdf.columns[3:].tolist()]
-            newfile = file_i.replace(".bin", "")
+            newfile = file_i.replace(".bin", "").split("/")[-1]
             sdf.to_csv("/home/francisco/GitHub/DQN-Event-Summarization/data/sif/%s_%i.csv" % (
                      newfile, c
                      )
                 )
             print("Data exported to %s_%i.csv" % (newfile, c))
-            break
-        break
+            c+= 1
 
 def main():
     myparams = params.params()
