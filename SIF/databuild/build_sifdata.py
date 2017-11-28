@@ -85,7 +85,8 @@ def embed_sentences(wordfile, weightfile, weightpara, param, rmpc, file_list):
                      newfile, c
                      )
                 )
-            print("Data exported to %s_%i.csv" % (newfile, c))
+            if (c % 100) == 0:
+                 print("Data exported to %s_%i.csv" % (newfile, c))
             c+= 1
 
 def main():
@@ -95,8 +96,9 @@ def main():
     weightf = os.path.join(mainpath, 'auxiliary_data/enwiki_vocab_min200.txt')
     wp = 1e-3
     rp = 0
-    fl = ['/home/francisco/GitHub/cnn-dailymail/finished_files/chunked/train_000.bin']
-
+    # Example case
+    # fl = ['/home/francisco/GitHub/cnn-dailymail/finished_files/chunked/train_000.bin']
+    fl = os.listdir('/home/francisco/GitHub/cnn-dailymail/finished_files/chunked/')
     embed_sentences(wordf, weightf, wp, myparams, rp, fl)
 
 if __name__ == "__main__":
