@@ -28,3 +28,8 @@ The files in the **/Paper** folder are related to the TeX document to create the
 # License
 
 MIT
+
+## New version
+
+1. Run FinalProcessing.ipynb
+2. Pytorch DQN Summarization.ipynb
