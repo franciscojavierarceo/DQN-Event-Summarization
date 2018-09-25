@@ -15,6 +15,7 @@ def return_bytes(reader_obj):
     e_s = struct.unpack("%ds" % str_len, reader_obj.read(str_len))
     es = e_s[0]
     c = example_pb2.Example.FromString(es)
+    print(c.features.feature.keys())
     article  = str(c.features.feature['article'].bytes_list.value[0])
     abstract = str(c.features.feature['abstract'].bytes_list.value[0])
     ab = sent_tokenize(abstract)
@@ -67,7 +68,9 @@ def embed_sentences(inputpath, wordfile, weightfile, weightpara, param, rmpc, fi
                 clean_abstract, clean_article = return_bytes(input_file)
             except:
                 input_file = None
+
             print('article cleaned...')
+            break
             embeddings = return_sif(clean_article, words, weight4ind, param, Weights)
 
             sdf = pd.DataFrame(clean_article, columns=['sentence'])
@@ -81,7 +84,11 @@ def embed_sentences(inputpath, wordfile, weightfile, weightpara, param, rmpc, fi
             sdf = pd.concat([sdf, emb], axis=1)
             sdf = sdf[['summary', 'sentence', 'clean_sentence'] + sdf.columns[3:].tolist()]
             newfile = file_i.replace(".bin", "").split("/")[-1]
-            sdf.to_csv("/home/francisco/GitHub/DQN-Event-Summarization/data/sif/%s_%i.csv" % (
+            #sdf.to_csv("/home/francisco/GitHub/DQN-Event-Summarization/data/sif/%s_%i.csv" % (
+            #         newfile, c
+            #         )
+            #    )
+            sdf.to_csv("/home/francisco/GitHub/DQN-Event-Summarization/data/testsif/%s_%i.csv" % (
                      newfile, c
                      )
                 )
@@ -98,8 +105,8 @@ def main():
     wp = 1e-3
     rp = 0
     # Example case
-    # fl = ['/home/francisco/GitHub/cnn-dailymail/finished_files/chunked/train_000.bin']
-    fl = os.listdir(datapath)
+    fl = ['/home/francisco/GitHub/cnn-dailymail/finished_files/chunked/train_000.bin']
+    #fl = os.listdir(datapath)
     embed_sentences(datapath, wordf, weightf, wp, myparams, rp, fl)
 
 if __name__ == "__main__":
