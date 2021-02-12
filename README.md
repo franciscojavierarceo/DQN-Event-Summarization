@@ -6,8 +6,8 @@ Repo currently has 3 folders
     Paper
     Presentation
 
-This is the repo for our {Francisco Javier Arceo, Chris Kedzie} implementation 
-of our DQN-LSTM for Event Summarization. 
+This is the repository for our {Francisco Javier Arceo, Chris Kedzie} implementation 
+of our Deep Q-Network using a Long Short Term Memory (DQN-LSTM) for Event Summarization. 
 
 To run the code simply enter in the command line:
 
@@ -27,7 +27,7 @@ The files in the **/Paper** folder are related to the TeX document to create the
 
 MIT
 
-## New version
+## Notebooks
 
 1. Run FinalProcessing.ipynb
 2. Pytorch DQN Summarization.ipynb
