@@ -1,7 +1,5 @@
 # Deep Q-Learning for Event Summarization
 
-## THIS REPOSITORY IS A WORK IN PROGRESS
-
 Repo currently has 3 folders
 
     Code
