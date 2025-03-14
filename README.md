@@ -7,7 +7,14 @@ Repo currently has 3 folders
     Presentation
 
 This is the repository for our {Francisco Javier Arceo, Chris Kedzie} implementation 
-of our Deep Q-Network using a Long Short Term Memory (DQN-LSTM) for Event Summarization. 
+of our Deep Q-Network using a Long Short Term Memory (DQN-LSTM) for Event Summarization (2016).
+
+At a high-level, the algorithm works like so:
+
+<p align="center">
+    <img src="./Paper/dqn-lstm-architecture.png" width="80%" />
+</p>
+
 
 To run the code simply enter in the command line:
 
